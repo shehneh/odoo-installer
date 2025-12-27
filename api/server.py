@@ -36,7 +36,11 @@ CORS(app, supports_credentials=True)
 # Database paths
 BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = BASE_DIR / "data"
-DATA_DIR.mkdir(exist_ok=True)
+# Only create directory if filesystem is writable
+try:
+    DATA_DIR.mkdir(exist_ok=True)
+except OSError:
+    pass  # Read-only filesystem on cloud platforms
 
 USERS_FILE = DATA_DIR / "users.json"
 LICENSES_FILE = DATA_DIR / "licenses.json"
@@ -49,7 +53,11 @@ DOWNLOAD_CATALOG_FILE = BASE_DIR / "downloads.json"
 
 # Private downloadable artifacts (NOT meant for direct public hosting)
 DOWNLOAD_FILES_DIR = BASE_DIR / "private_downloads" / "installers"
-DOWNLOAD_FILES_DIR.mkdir(parents=True, exist_ok=True)
+# Only create directory if filesystem is writable (not on Liara/cloud)
+try:
+    DOWNLOAD_FILES_DIR.mkdir(parents=True, exist_ok=True)
+except OSError:
+    pass  # Read-only filesystem on cloud platforms
 
 # Signed, short-lived download tokens
 DOWNLOAD_TOKENS_FILE = DATA_DIR / "download_tokens.json"
@@ -146,12 +154,58 @@ def user_has_paid_license(user_id: str) -> bool:
 
 def save_json(filepath, data):
     """Save data to JSON file"""
-    with open(filepath, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2, default=str)
+    try:
+        # Ensure parent directory exists
+        filepath.parent.mkdir(parents=True, exist_ok=True)
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2, default=str)
+        return True
+    except OSError as e:
+        # Read-only filesystem (e.g., Liara without disk)
+        print(f"[WARNING] Cannot save to {filepath}: {e}")
+        return False
+
+
+class StorageError(Exception):
+    """Raised when storage is unavailable (read-only filesystem)"""
+    pass
+
+
+def save_json_or_raise(filepath, data):
+    """Save data to JSON file or raise StorageError if filesystem is read-only"""
+    if not save_json(filepath, data):
+        raise StorageError("فایل سیستم فقط‌خواندنی است. لطفاً دیسک فعال کنید.")
 
 def hash_password(password):
     """Hash password with SHA-256"""
     return hashlib.sha256(password.encode()).hexdigest()
+
+# ============================================
+# Default Admin User (created on first load)
+# ============================================
+def ensure_default_admin():
+    """Create default admin user if no users exist"""
+    users = load_json(USERS_FILE)
+    if not users:
+        admin_id = 'admin@odoomaster.ir'
+        users[admin_id] = {
+            'id': admin_id,
+            'name': 'مدیر سیستم',
+            'email': admin_id,
+            'phone': '09961979369',
+            'password': hash_password('Admin@123'),
+            'is_admin': True,
+            'is_verified': True,
+            'created_at': datetime.now().isoformat(),
+            'xp': 0
+        }
+        try:
+            save_json(USERS_FILE, users)
+        except OSError:
+            pass  # Read-only filesystem
+
+# Run on startup
+ensure_default_admin()
 
 def generate_license_key():
     """Generate a unique license key"""
@@ -282,7 +336,12 @@ def register():
     }
     
     users[data['email']] = user
-    save_json(USERS_FILE, users)
+    
+    # Try to save - handle read-only filesystem
+    try:
+        save_json_or_raise(USERS_FILE, users)
+    except StorageError as e:
+        return jsonify({'error': str(e)}), 503
     
     # Create welcome license (trial)
     licenses = load_json(LICENSES_FILE)
@@ -298,7 +357,11 @@ def register():
         'activations': 0
     }
     licenses[trial_license['key']] = trial_license
-    save_json(LICENSES_FILE, licenses)
+    
+    try:
+        save_json_or_raise(LICENSES_FILE, licenses)
+    except StorageError as e:
+        return jsonify({'error': str(e)}), 503
     
     return jsonify({
         'success': True,

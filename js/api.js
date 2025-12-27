@@ -64,6 +64,14 @@ const API = {
                 headers
             });
 
+            // Handle non-JSON responses (e.g., HTML error pages)
+            const contentType = response.headers.get('content-type') || '';
+            if (!contentType.includes('application/json')) {
+                const text = await response.text();
+                console.error('Non-JSON response:', text.substring(0, 200));
+                throw new Error('سرور پاسخ نامعتبر برگرداند. لطفاً دوباره تلاش کنید.');
+            }
+
             const data = await response.json();
 
             if (!response.ok) {
