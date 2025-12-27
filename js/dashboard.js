@@ -92,118 +92,187 @@ async function loadUserData() {
 }
 
 function renderUserLicenses(licenses) {
-    const licensesList = document.querySelector('.licenses-list');
+    const licensesList = document.getElementById('licensesListDashboard');
     if (!licensesList) return;
 
-    // Clear static content
+    // Get translations
+    const t = (key, fallback) => window.I18N ? I18N.t(key, fallback) : fallback;
+
+    // Clear content
     licensesList.innerHTML = '';
 
     if (!licenses || licenses.length === 0) {
         licensesList.innerHTML = `
-            <div class="empty-state" style="text-align: center; padding: 40px 20px;">
-                <i class="fas fa-key" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 16px; display: block;"></i>
-                <p style="color: var(--text-secondary); margin-bottom: 20px;">هنوز لایسنسی ندارید</p>
+            <div class="empty-state" style="text-align: center; padding: 50px 20px;">
+                <i class="fas fa-key" style="font-size: 4rem; color: var(--text-muted); margin-bottom: 20px; display: block; opacity: 0.5;"></i>
+                <h4 style="color: var(--text-secondary); margin-bottom: 12px;">${t('licenses.noLicenses', 'هنوز لایسنسی ندارید')}</h4>
+                <p style="color: var(--gray-light); margin-bottom: 24px; font-size: 0.9rem;">${t('licenses.buyPrompt', 'یک لایسنس بخرید و از امکانات کامل استفاده کنید')}</p>
                 <a href="payment.html" class="btn btn-primary btn-glow">
                     <i class="fas fa-shopping-cart"></i>
-                    خرید لایسنس
+                    ${t('licenses.buyLicense', 'خرید لایسنس')}
                 </a>
             </div>
         `;
         return;
     }
 
-    licenses.forEach(lic => {
+    // Sort by creation date (newest first)
+    const sortedLicenses = [...licenses].sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
+
+    sortedLicenses.forEach(lic => {
         const isActive = lic.status === 'active';
         const isTrial = (lic.plan || '').toLowerCase() === 'trial';
         const isExpired = lic.expires_at && new Date(lic.expires_at) < new Date();
         
         // Calculate days remaining
         let daysRemaining = '—';
+        let daysRemainingText = '';
         if (lic.expires_at) {
             const expDate = new Date(lic.expires_at);
             const now = new Date();
             const diffTime = expDate - now;
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             if (diffDays > 0) {
-                daysRemaining = `${diffDays} روز مانده`;
+                daysRemaining = diffDays;
+                daysRemainingText = `${t('licenses.daysRemaining', 'روز مانده').replace('{days}', diffDays)} (${diffDays})`;
             } else if (diffDays === 0) {
-                daysRemaining = 'امروز منقضی می‌شود';
+                daysRemainingText = t('licenses.expirestoday', 'امروز منقضی می‌شود');
             } else {
-                daysRemaining = 'منقضی شده';
+                daysRemainingText = t('licenses.expired', 'منقضی شده');
             }
         }
 
-        let statusClass = 'active';
-        let statusText = 'فعال';
+        let statusClass = 'color: var(--secondary)';
+        let statusText = t('licenses.active', 'فعال');
+        let statusBg = 'rgba(16, 185, 129, 0.15)';
         if (!isActive) {
-            statusClass = 'inactive';
-            statusText = 'غیرفعال';
+            statusClass = 'color: var(--accent)';
+            statusText = t('licenses.inactive', 'غیرفعال');
+            statusBg = 'rgba(239, 68, 68, 0.15)';
         } else if (isExpired) {
-            statusClass = 'expired';
-            statusText = 'منقضی';
+            statusClass = 'color: #f59e0b';
+            statusText = t('licenses.expired', 'منقضی');
+            statusBg = 'rgba(245, 158, 11, 0.15)';
         } else if (isTrial) {
-            statusClass = 'trial';
-            statusText = 'آزمایشی';
+            statusClass = 'color: #8b5cf6';
+            statusText = t('licenses.trial', 'آزمایشی');
+            statusBg = 'rgba(139, 92, 246, 0.15)';
         }
 
         const iconClass = isTrial ? 'seedling' : 'gem';
-        const iconStyle = isTrial ? 'starter' : 'pro';
+        const hardwareIds = lic.hardware_ids || [];
 
-        const item = document.createElement('div');
-        item.className = 'license-item';
-        item.innerHTML = `
-            <div class="license-info">
-                <div class="license-icon ${iconStyle}">
-                    <i class="fas fa-${iconClass}"></i>
+        const card = document.createElement('div');
+        card.className = 'license-card-full glass';
+        card.style.cssText = 'padding: 20px; border-radius: 16px; border: 1px solid var(--glass-border); margin-bottom: 12px; transition: all 0.3s ease;';
+
+        let hardwareHtml = '';
+        if (hardwareIds.length > 0) {
+            hardwareHtml = `
+                <div style="margin-top: 12px; padding: 10px; background: var(--dark); border-radius: 8px;">
+                    <div style="color: var(--gray-light); font-size: 0.85rem; margin-bottom: 6px;">
+                        <i class="fas fa-microchip"></i> ${t('licenses.activeDevices', 'دستگاه‌های فعال')} (${hardwareIds.length}/${lic.max_activations || 100}):
+                    </div>
+                    ${hardwareIds.map(h => `<code style="display: block; color: var(--secondary); font-size: 0.8rem; margin: 4px 0;">${h}</code>`).join('')}
                 </div>
-                <div class="license-details">
-                    <strong>${lic.plan_name || lic.plan || 'پلن'}</strong>
-                    <span style="font-family: monospace; font-size: 0.85rem;">${maskKey(lic.key)}</span>
+            `;
+        }
+
+        card.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+                <div style="flex: 1; min-width: 260px;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                        <div style="width: 42px; height: 42px; background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-${iconClass}" style="color: #000; font-size: 1.2rem;"></i>
+                        </div>
+                        <div>
+                            <span style="font-weight: 700; font-size: 1.1rem; color: var(--white); display: block;">${lic.plan_name || lic.plan || t('licenses.plan', 'پلن')}</span>
+                            <span style="padding: 2px 10px; border-radius: 20px; font-size: 0.75rem; background: ${statusBg}; ${statusClass}">${statusText}</span>
+                        </div>
+                    </div>
+                    <div style="display: grid; gap: 6px; font-size: 0.9rem;">
+                        <div style="color: var(--gray-light);">
+                            <i class="fas fa-key" style="width: 18px; color: var(--primary);"></i>
+                            ${t('licenses.key', 'کلید')}: <code style="color: var(--primary); font-family: monospace;">${lic.key}</code>
+                        </div>
+                        <div style="color: var(--gray-light);">
+                            <i class="fas fa-calendar" style="width: 18px; color: var(--secondary);"></i>
+                            ${t('licenses.issued', 'صدور')}: ${formatDateDashboard(lic.created_at)}
+                        </div>
+                        <div style="color: var(--gray-light);">
+                            <i class="fas fa-clock" style="width: 18px; color: ${isExpired ? 'var(--accent)' : 'var(--gray-light)'};"></i>
+                            ${t('licenses.expires', 'انقضا')}: ${formatDateDashboard(lic.expires_at)}
+                            ${daysRemaining !== '—' ? `<span style="margin-right: 8px; color: ${isExpired ? 'var(--accent)' : 'var(--secondary)'}; font-size: 0.85rem;">(${daysRemaining > 0 ? daysRemaining + ' ' + t('licenses.days', 'روز') : t('licenses.expired', 'منقضی')})</span>` : ''}
+                        </div>
+                    </div>
+                    ${hardwareHtml}
                 </div>
-            </div>
-            <div class="license-status">
-                <span class="status-badge ${statusClass}">${statusText}</span>
-                <span class="expiry">${daysRemaining}</span>
-            </div>
-            <div class="license-actions">
-                <button class="icon-btn copy-btn" title="کپی کلید" data-key="${lic.key}">
-                    <i class="fas fa-copy"></i>
-                </button>
-                <a href="licenses.html" class="icon-btn" title="مدیریت">
-                    <i class="fas fa-cog"></i>
-                </a>
+                <div style="display: flex; flex-direction: column; gap: 8px; min-width: 160px;">
+                    <button class="btn btn-primary download-license-btn" type="button" data-key="${lic.key}" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; width: 100%;">
+                        <i class="fas fa-download"></i> ${t('licenses.download', 'دانلود فایل لایسنس')}
+                    </button>
+                    <button class="btn btn-ghost copy-license-btn" type="button" data-key="${lic.key}" style="width: 100%;">
+                        <i class="fas fa-copy"></i> ${t('licenses.copyKey', 'کپی کلید')}
+                    </button>
+                    ${!isTrial && isActive && !isExpired ? `
+                        <a href="payment.html?renew=${lic.key}" class="btn btn-ghost" style="text-decoration: none; width: 100%; text-align: center;">
+                            <i class="fas fa-sync"></i> ${t('licenses.renew', 'تمدید')}
+                        </a>
+                    ` : ''}
+                </div>
             </div>
         `;
 
-        // Copy button handler
-        const copyBtn = item.querySelector('.copy-btn');
-        copyBtn?.addEventListener('click', async () => {
+        // Download button handler
+        const downloadBtn = card.querySelector('.download-license-btn');
+        downloadBtn?.addEventListener('click', async () => {
+            const existingHwid = (lic.hardware_ids && lic.hardware_ids.length > 0) ? lic.hardware_ids[0] : '';
+            const hwid = prompt(t('licenses.enterHwid', 'شناسه سخت‌افزاری (Hardware ID) را وارد کنید:'), existingHwid);
+            if (hwid === null) return;
+            
+            if (!hwid.trim()) {
+                showToastSafe(t('licenses.hwidRequired', 'شناسه سخت‌افزاری الزامی است'), 'error');
+                return;
+            }
+            
+            downloadBtn.disabled = true;
+            downloadBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${t('licenses.generating', 'در حال تولید...')}`;
+            
             try {
-                await navigator.clipboard.writeText(lic.key);
-                showToastSafe('کلید لایسنس کپی شد', 'success');
-            } catch {
-                showToastSafe('کپی انجام نشد', 'error');
+                await API.downloadLicenseFile(lic.key, hwid.trim());
+                showToastSafe(t('licenses.downloadSuccess', 'فایل لایسنس دانلود شد'), 'success');
+            } catch (e) {
+                showToastSafe(e?.message || t('licenses.downloadError', 'خطا در دانلود فایل لایسنس'), 'error');
+            } finally {
+                downloadBtn.disabled = false;
+                downloadBtn.innerHTML = `<i class="fas fa-download"></i> ${t('licenses.download', 'دانلود فایل لایسنس')}`;
             }
         });
 
-        licensesList.appendChild(item);
-    });
+        // Copy button handler
+        const copyBtn = card.querySelector('.copy-license-btn');
+        copyBtn?.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(lic.key);
+                showToastSafe(t('licenses.keyCopied', 'کلید لایسنس کپی شد'), 'success');
+            } catch {
+                showToastSafe(t('licenses.copyFailed', 'کپی انجام نشد'), 'error');
+            }
+        });
 
-    // Add "buy more" button if needed
-    const buyMoreBtn = document.createElement('div');
-    buyMoreBtn.style.cssText = 'text-align: center; margin-top: 16px;';
-    buyMoreBtn.innerHTML = `
-        <a href="payment.html" class="btn btn-outline" style="width: 100%;">
-            <i class="fas fa-plus"></i>
-            خرید لایسنس جدید
-        </a>
-    `;
-    licensesList.appendChild(buyMoreBtn);
+        licensesList.appendChild(card);
+    });
 }
 
-function maskKey(key) {
-    if (!key || key.length < 12) return key || '';
-    return key.slice(0, 5) + '-****-' + key.slice(-5);
+function formatDateDashboard(iso) {
+    if (!iso) return '—';
+    try {
+        const d = new Date(iso);
+        const locale = (window.I18N && I18N.currentLang === 'en') ? 'en-US' : 'fa-IR';
+        return d.toLocaleDateString(locale);
+    } catch {
+        return String(iso);
+    }
 }
 
 function updateStats(licenses, userData) {

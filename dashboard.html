@@ -309,58 +309,23 @@
                     </div>
                 </div>
 
-                <!-- Active Licenses -->
-                <div class="card glass licenses-card" id="licenses">
+                <!-- Active Licenses - Full Management Section -->
+                <div class="card glass licenses-card" id="licenses" style="grid-column: 1 / -1;">
                     <div class="card-header">
-                        <h3><i class="fas fa-key"></i> <span data-i18n="dashboard.activeLicensesTitle">لایسنس‌های فعال</span></h3>
-                        <a href="#licenses" class="card-link" data-i18n="dashboard.viewAll">مشاهده همه</a>
+                        <h3><i class="fas fa-key"></i> <span data-i18n="dashboard.activeLicensesTitle">مدیریت لایسنس‌ها</span></h3>
+                        <a href="payment.html" class="btn btn-primary btn-sm" style="font-size: 0.85rem;">
+                            <i class="fas fa-shopping-cart"></i> 
+                            <span data-i18n="licenses.buyLicense">خرید لایسنس</span>
+                        </a>
                     </div>
-                    <div class="licenses-list">
-                        <div class="license-item">
-                            <div class="license-info">
-                                <div class="license-icon pro">
-                                    <i class="fas fa-gem"></i>
-                                </div>
-                                <div class="license-details">
-                                    <strong>پلن حرفه‌ای</strong>
-                                    <span>XXXX-XXXX-XXXX-1234</span>
-                                </div>
-                            </div>
-                            <div class="license-status">
-                                <span class="status-badge active">فعال</span>
-                                <span class="expiry">۲۸ روز مانده</span>
-                            </div>
-                            <div class="license-actions">
-                                <button class="icon-btn" title="کپی کلید">
-                                    <i class="fas fa-copy"></i>
-                                </button>
-                                <button class="icon-btn" title="جزئیات">
-                                    <i class="fas fa-info-circle"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="license-item">
-                            <div class="license-info">
-                                <div class="license-icon starter">
-                                    <i class="fas fa-seedling"></i>
-                                </div>
-                                <div class="license-details">
-                                    <strong>پلن رایگان</strong>
-                                    <span>XXXX-XXXX-XXXX-5678</span>
-                                </div>
-                            </div>
-                            <div class="license-status">
-                                <span class="status-badge active">فعال</span>
-                                <span class="expiry">بدون انقضا</span>
-                            </div>
-                            <div class="license-actions">
-                                <button class="icon-btn" title="کپی کلید">
-                                    <i class="fas fa-copy"></i>
-                                </button>
-                                <button class="icon-btn" title="ارتقا">
-                                    <i class="fas fa-arrow-up"></i>
-                                </button>
-                            </div>
+                    <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.9rem;">
+                        <span data-i18n="licenses.note">برای دانلود فایل‌ها، باید لایسنس غیر Trial فعال داشته باشید.</span>
+                    </p>
+                    <div id="licensesListDashboard" style="display: grid; gap: 14px;">
+                        <!-- Licenses will be loaded dynamically -->
+                        <div style="text-align: center; padding: 30px; color: var(--gray-light);">
+                            <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 12px;"></i>
+                            <p data-i18n="dashboard.loading">در حال بارگذاری...</p>
                         </div>
                     </div>
                 </div>
