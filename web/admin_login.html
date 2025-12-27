@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔐 پنل مدیریت - ورود</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-container {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+      max-width: 420px;
+      width: 100%;
+      padding: 50px 40px;
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-30px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 35px;
+    }
+
+    .logo-icon {
+      font-size: 70px;
+      margin-bottom: 15px;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+    }
+
+    .logo h1 {
+      color: #1a1a2e;
+      font-size: 26px;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .logo p {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    .form-group label {
+      display: block;
+      color: #333;
+      font-weight: 600;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-wrapper .icon {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px;
+      opacity: 0.5;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 14px 50px 14px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 15px;
+      transition: all 0.3s;
+      background: #fafafa;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #0f3460;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(15, 52, 96, 0.1);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 10px;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(15, 52, 96, 0.4);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .message {
+      padding: 14px 18px;
+      border-radius: 10px;
+      margin-top: 20px;
+      font-size: 14px;
+      display: none;
+      animation: shake 0.5s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    .message.error {
+      background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+      color: white;
+      display: block;
+    }
+
+    .message.success {
+      background: linear-gradient(135deg, #51cf66, #40c057);
+      color: white;
+      display: block;
+    }
+
+    .spinner {
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .security-note {
+      margin-top: 30px;
+      padding: 15px;
+      background: #fff3cd;
+      border-radius: 10px;
+      font-size: 12px;
+      color: #856404;
+      border: 1px solid #ffc107;
+    }
+
+    .security-note strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .back-link {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .back-link a {
+      color: #0f3460;
+      text-decoration: none;
+      font-size: 13px;
+    }
+
+    .back-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="logo">
+      <div class="logo-icon">🛡️</div>
+      <h1>پنل مدیریت</h1>
+      <p>Odoo Installer License Manager</p>
+    </div>
+
+    <form id="login-form">
+      <div class="form-group">
+        <label for="username">👤 نام کاربری</label>
+        <div class="input-wrapper">
+          <span class="icon">👤</span>
+          <input 
+            type="text" 
+            id="username" 
+            name="username" 
+            placeholder="نام کاربری را وارد کنید"
+            autocomplete="username"
+            required
+          >
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">🔒 رمز عبور</label>
+        <div class="input-wrapper">
+          <span class="icon">🔒</span>
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            placeholder="رمز عبور را وارد کنید"
+            autocomplete="current-password"
+            required
+          >
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" id="login-btn">
+        <span id="btn-text">🔓 ورود به پنل</span>
+        <div class="spinner" id="spinner"></div>
+      </button>
+    </form>
+
+    <div class="message" id="message"></div>
+
+    <div class="security-note">
+      <strong>🔐 توجه امنیتی:</strong>
+      این پنل فقط برای مدیر سیستم است. تلاش‌های ناموفق ثبت می‌شوند.
+    </div>
+
+    <div class="back-link">
+      <a href="index.html">← بازگشت به صفحه اصلی</a>
+    </div>
+  </div>
+
+  <script>
+    // Check if already logged in
+    const token = sessionStorage.getItem('admin_token');
+    if (token) {
+      // Verify token
+      fetch('/api/admin/verify', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      }).then(r => r.json()).then(data => {
+        if (data.valid) {
+          window.location.href = 'admin_dashboard.html';
+        } else {
+          sessionStorage.removeItem('admin_token');
+        }
+      });
+    }
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      
+      if (!username || !password) {
+        showMessage('error', 'لطفاً نام کاربری و رمز عبور را وارد کنید');
+        return;
+      }
+
+      const btn = document.getElementById('login-btn');
+      const btnText = document.getElementById('btn-text');
+      const spinner = document.getElementById('spinner');
+      
+      btn.disabled = true;
+      btnText.textContent = 'در حال ورود...';
+      spinner.style.display = 'block';
+      
+      try {
+        const response = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          sessionStorage.setItem('admin_token', data.token);
+          showMessage('success', '✓ ورود موفق! در حال انتقال...');
+          setTimeout(() => {
+            window.location.href = 'admin_dashboard.html';
+          }, 1000);
+        } else {
+          showMessage('error', '✗ ' + (data.message || 'نام کاربری یا رمز عبور اشتباه است'));
+          btn.disabled = false;
+          btnText.textContent = '🔓 ورود به پنل';
+          spinner.style.display = 'none';
+        }
+      } catch (error) {
+        showMessage('error', 'خطا در ارتباط با سرور: ' + error.message);
+        btn.disabled = false;
+        btnText.textContent = '🔓 ورود به پنل';
+        spinner.style.display = 'none';
+      }
+    });
+
+    function showMessage(type, text) {
+      const message = document.getElementById('message');
+      message.className = `message ${type}`;
+      message.textContent = text;
+      message.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

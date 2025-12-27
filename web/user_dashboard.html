@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>پنل کاربری</title>
+  <link rel="stylesheet" href="/style.css?v=3">
+  <style>
+    .wrap { max-width: 980px; margin: 0 auto; padding: 24px; }
+    .top { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
+    .card { background:#fff; border:1px solid #e5e7eb; border-radius:16px; padding:18px; }
+    .muted { color:#6b7280; font-size: 13px; }
+    .grid { display:grid; grid-template-columns: 1fr; gap:16px; }
+    table { width:100%; border-collapse: collapse; }
+    th, td { padding: 10px 8px; border-bottom: 1px solid #eef2f7; text-align: right; }
+    th { color:#374151; font-weight:700; background:#fafafa; }
+    .pill { display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px; }
+    .pill.ok { background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; }
+    .pill.gray { background:#f3f4f6; color:#374151; border:1px solid #e5e7eb; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1 style="margin:0; font-size: 20px;">پنل کاربری</h1>
+        <div class="muted" id="user-sub">در حال بارگذاری...</div>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a class="btn btn-secondary" href="/index.html">🏠 صفحه اصلی</a>
+        <a class="btn btn-secondary" href="/purchase.html">🛒 خرید</a>
+        <button class="btn btn-danger" id="btn-logout">خروج</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h2 style="margin:0 0 12px 0; font-size: 16px;">خریدهای من</h2>
+        <div class="muted" style="margin-bottom:10px;">خریدها بر اساس پرداخت‌های موفق ثبت می‌شوند.</div>
+        <div style="overflow:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>تاریخ</th>
+                <th>پلن</th>
+                <th>مبلغ</th>
+                <th>Hardware ID</th>
+                <th>Ref</th>
+                <th>کلید</th>
+              </tr>
+            </thead>
+            <tbody id="purchases-body">
+              <tr><td colspan="6" class="muted">در حال بارگذاری...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = '';
+    const TOKEN_KEY = 'user_token';
+
+    // If token is provided in URL fragment (e.g. Google OAuth), store it then clean the URL
+    try {
+      if (window.location.hash && window.location.hash.includes('token=')) {
+        const hash = window.location.hash.replace(/^#/, '');
+        const params = new URLSearchParams(hash);
+        const t = params.get('token');
+        if (t) {
+          localStorage.setItem(TOKEN_KEY, t);
+          history.replaceState(null, document.title, window.location.pathname);
+        }
+      }
+    } catch (e) {}
+
+    function formatNumber(num) {
+      try { return Number(num || 0).toLocaleString('fa-IR'); } catch { return String(num || 0); }
+    }
+
+    function maskKey(key) {
+      if (!key) return '-';
+      if (key.length <= 10) return key;
+      return key.slice(0, 6) + '...' + key.slice(-4);
+    }
+
+    async function loadMe() {
+      const token = localStorage.getItem(TOKEN_KEY);
+      if (!token) {
+        window.location.href = '/user_login.html';
+        return null;
+      }
+      const res = await fetch(`${API_BASE}/api/user/me`, { headers: { 'Authorization': `Bearer ${token}` } });
+      const data = await res.json();
+      if (!data.success) {
+        localStorage.removeItem(TOKEN_KEY);
+        window.location.href = '/user_login.html';
+        return null;
+      }
+      const u = data.user;
+      const label = u.name || u.email || u.mobile || u.id;
+      document.getElementById('user-sub').textContent = `خوش آمدید: ${label}`;
+      return token;
+    }
+
+    async function loadPurchases(token) {
+      const body = document.getElementById('purchases-body');
+      const res = await fetch(`${API_BASE}/api/user/purchases`, { headers: { 'Authorization': `Bearer ${token}` } });
+      const data = await res.json();
+      const list = (data && data.purchases) ? data.purchases : [];
+      if (!list.length) {
+        body.innerHTML = '<tr><td colspan="6" class="muted">هنوز خریدی ثبت نشده است</td></tr>';
+        return;
+      }
+      body.innerHTML = list.map(p => {
+        const dt = p.sold_at ? new Date(p.sold_at) : null;
+        const dateText = dt && !isNaN(dt.getTime()) ? dt.toLocaleString('fa-IR') : (p.sold_at || '-');
+        return `
+          <tr>
+            <td>${dateText}</td>
+            <td><span class="pill gray">${p.plan_id || '-'}</span></td>
+            <td>${formatNumber(p.amount)} تومان</td>
+            <td style="font-family: monospace; font-size: 12px;">${p.hardware_id || '-'}</td>
+            <td>${p.ref_id || '-'}</td>
+            <td title="${(p.license_key || '')}">${maskKey(p.license_key || '')}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    document.getElementById('btn-logout').addEventListener('click', () => {
+      localStorage.removeItem(TOKEN_KEY);
+      window.location.href = '/user_login.html';
+    });
+
+    (async () => {
+      try {
+        const token = await loadMe();
+        if (token) await loadPurchases(token);
+      } catch (e) {
+        localStorage.removeItem(TOKEN_KEY);
+        window.location.href = '/user_login.html';
+      }
+    })();
+  </script>
+</body>
+</html>

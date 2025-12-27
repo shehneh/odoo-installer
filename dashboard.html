@@ -24,6 +24,9 @@
             document.body.classList.add('light-theme');
         }
     </script>
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
@@ -385,19 +388,58 @@
                         <h3><i class="fas fa-download"></i> <span data-i18n="dashboard.downloadInstaller">دانلود نصاب</span></h3>
                     </div>
                     <div class="download-content">
+                        <!-- Step by Step Guide -->
+                        <div class="download-steps">
+                            <h4 style="color: var(--primary); margin-bottom: 16px; font-size: 1rem;">
+                                <i class="fas fa-route"></i> مراحل نصب و فعال‌سازی
+                            </h4>
+                            <div class="step-list" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                                <div class="step-item" style="display: flex; align-items: flex-start; gap: 12px; padding: 12px; background: rgba(56, 189, 248, 0.1); border-radius: 10px; border-right: 3px solid var(--primary);">
+                                    <div class="step-number" style="width: 28px; height: 28px; background: var(--primary); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">۱</div>
+                                    <div class="step-content">
+                                        <strong style="color: var(--white);">نصاب را دانلود و Unblock کنید</strong>
+                                        <p style="color: var(--gray-light); font-size: 0.85rem; margin: 4px 0 0 0;">
+                                            روی فایل ZIP راست‌کلیک → Properties → تیک <b>Unblock</b> → OK → سپس Extract کنید.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="step-item" style="display: flex; align-items: flex-start; gap: 12px; padding: 12px; background: rgba(56, 189, 248, 0.05); border-radius: 10px; border-right: 3px solid var(--gray);">
+                                    <div class="step-number" style="width: 28px; height: 28px; background: var(--gray); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">۲</div>
+                                    <div class="step-content">
+                                        <strong style="color: var(--white);">نصاب را اجرا کنید</strong>
+                                        <p style="color: var(--gray-light); font-size: 0.85rem; margin: 4px 0 0 0;">فایل <code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">start_ui_online.bat</code> را اجرا کنید. شناسه رایانه نمایش داده می‌شود.</p>
+                                    </div>
+                                </div>
+                                <div class="step-item" style="display: flex; align-items: flex-start; gap: 12px; padding: 12px; background: rgba(56, 189, 248, 0.05); border-radius: 10px; border-right: 3px solid var(--gray);">
+                                    <div class="step-number" style="width: 28px; height: 28px; background: var(--gray); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">۳</div>
+                                    <div class="step-content">
+                                        <strong style="color: var(--white);">شناسه رایانه را کپی و لایسنس بخرید</strong>
+                                        <p style="color: var(--gray-light); font-size: 0.85rem; margin: 4px 0 0 0;">از بخش «خرید لایسنس» با شناسه رایانه، فایل لایسنس (.oml) دریافت کنید.</p>
+                                    </div>
+                                </div>
+                                <div class="step-item" style="display: flex; align-items: flex-start; gap: 12px; padding: 12px; background: rgba(56, 189, 248, 0.05); border-radius: 10px; border-right: 3px solid var(--gray);">
+                                    <div class="step-number" style="width: 28px; height: 28px; background: var(--gray); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">۴</div>
+                                    <div class="step-content">
+                                        <strong style="color: var(--white);">Odoo را نصب کنید!</strong>
+                                        <p style="color: var(--gray-light); font-size: 0.85rem; margin: 4px 0 0 0;">فایل لایسنس را کنار نصاب بگذارید و نصب را شروع کنید.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="download-info">
                             <div class="download-icon">
                                 <i class="fas fa-cube"></i>
                             </div>
                             <div class="download-details">
                                 <strong>OdooMaster Installer v2.0</strong>
-                                <span>Windows 64-bit • 520 MB</span>
+                                <span>Windows 64-bit • ~130 KB (نسخه آنلاین)</span>
                             </div>
                         </div>
                         <div class="download-meta">
-                            <div class="meta-item">
-                                <i class="fas fa-calendar"></i>
-                                <span data-i18n="dashboard.lastUpdate">آخرین بروزرسانی:</span> 2025/01/05
+                            <div class="meta-item" style="color: var(--success);">
+                                <i class="fas fa-check-circle"></i>
+                                <span>دانلود رایگان - بدون نیاز به لایسنس</span>
                             </div>
                             <div class="meta-item">
                                 <i class="fas fa-code-branch"></i>
@@ -406,7 +448,7 @@
                         </div>
                         <button class="btn btn-primary btn-block btn-glow download-btn" id="downloadBtn">
                             <i class="fas fa-download"></i>
-                            <span data-i18n="dashboard.downloadInstaller">دانلود نصاب</span>
+                            <span>دانلود رایگان نصاب</span>
                         </button>
                         <div class="download-progress" id="downloadProgress">
                             <div class="progress-bar">

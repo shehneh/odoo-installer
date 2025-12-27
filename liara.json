@@ -3,5 +3,12 @@
   "flask": {
     "pythonVersion": "3.11",
     "appModule": "api.server:app"
-  }
+  },
+  "disks": [
+    {
+      "name": "odoo-data",
+      "mountTo": "/var/lib/odoo"
+    }
+  ],
+  "network": "my-network"
 }

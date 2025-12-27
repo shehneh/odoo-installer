@@ -1,0 +1,6 @@
+{
+  "odoo_path": "D:\\business\\odoo\\odoo 19",
+  "postgres_password": "odoo",
+  "odoo_port": 8019,
+  "postgres_port": 5432
+}

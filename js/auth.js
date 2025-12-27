@@ -71,10 +71,12 @@ function initPasswordToggle() {
 
     toggleBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            const input = btn.closest('.input-wrapper').querySelector('input');
+            // Support both .input-wrapper and .input-wrap class names
+            const wrapper = btn.closest('.input-wrapper') || btn.closest('.input-wrap');
+            const input = wrapper ? wrapper.querySelector('input') : btn.previousElementSibling;
             const icon = btn.querySelector('i');
 
-            if (input.type === 'password') {
+            if (input && input.type === 'password') {
                 input.type = 'text';
                 icon.classList.remove('fa-eye');
                 icon.classList.add('fa-eye-slash');

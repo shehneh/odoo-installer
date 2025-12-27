@@ -26,8 +26,23 @@ try:
 except ImportError:
     CRYPTO_AVAILABLE = False
 
-# License private key path (SERVER-SIDE ONLY, never ship to clients)
-LICENSE_PRIVATE_KEY_FILE = Path(__file__).parent.parent.parent / 'license_private_key.pem'
+# License private key - load from environment variable or file
+LICENSE_PRIVATE_KEY_PEM = os.environ.get('LICENSE_PRIVATE_KEY')
+LICENSE_PRIVATE_KEY_FILE = None
+
+if not LICENSE_PRIVATE_KEY_PEM:
+    # Try multiple possible file locations
+    _possible_key_paths = [
+        Path(__file__).parent.parent / 'license_private_key.pem',  # project root
+        Path(__file__).parent / 'license_private_key.pem',  # api folder
+        Path('/var/lib/odoo/license_private_key.pem'),  # Liara disk
+    ]
+    for _kp in _possible_key_paths:
+        if _kp.exists():
+            LICENSE_PRIVATE_KEY_FILE = _kp
+            break
+    if LICENSE_PRIVATE_KEY_FILE is None:
+        LICENSE_PRIVATE_KEY_FILE = _possible_key_paths[0]  # fallback for error messages
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(32)
@@ -35,10 +50,20 @@ CORS(app, supports_credentials=True)
 
 # Database paths
 BASE_DIR = Path(__file__).parent.parent
-DATA_DIR = BASE_DIR / "data"
+
+# Use persistent disk on Liara, fallback to local data/ for development
+LIARA_DISK_PATH = Path("/var/lib/odoo/data")
+LOCAL_DATA_PATH = BASE_DIR / "data"
+
+# Check if running on Liara (disk mounted)
+if Path("/var/lib/odoo").exists():
+    DATA_DIR = LIARA_DISK_PATH
+else:
+    DATA_DIR = LOCAL_DATA_PATH
+
 # Only create directory if filesystem is writable
 try:
-    DATA_DIR.mkdir(exist_ok=True)
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
 except OSError:
     pass  # Read-only filesystem on cloud platforms
 
@@ -186,8 +211,10 @@ def hash_password(password):
 def ensure_default_admin():
     """Create default admin user if no users exist"""
     users = load_json(USERS_FILE)
-    if not users:
-        admin_id = 'admin@odoomaster.ir'
+    admin_id = 'admin@odoomaster.ir'
+    
+    # Always ensure admin exists
+    if admin_id not in users:
         users[admin_id] = {
             'id': admin_id,
             'name': 'مدیر سیستم',
@@ -197,15 +224,41 @@ def ensure_default_admin():
             'is_admin': True,
             'is_verified': True,
             'created_at': datetime.now().isoformat(),
-            'xp': 0
+            'xp': 0,
+            'level': 999
         }
         try:
             save_json(USERS_FILE, users)
-        except OSError:
-            pass  # Read-only filesystem
+            print(f"[INFO] Admin user created: {admin_id}")
+        except OSError as e:
+            print(f"[ERROR] Could not save admin user: {e}")
 
 # Run on startup
 ensure_default_admin()
+
+# Temporary endpoint to reset admin (remove after first use!)
+@app.route('/api/reset-admin', methods=['GET'])
+def reset_admin():
+    """Reset admin user - TEMPORARY ENDPOINT"""
+    users = load_json(USERS_FILE)
+    admin_id = 'admin@odoomaster.ir'
+    users[admin_id] = {
+        'id': admin_id,
+        'name': 'مدیر سیستم',
+        'email': admin_id,
+        'phone': '09961979369',
+        'password': hash_password('Admin@123'),
+        'is_admin': True,
+        'is_verified': True,
+        'created_at': datetime.now().isoformat(),
+        'xp': 0,
+        'level': 999
+    }
+    try:
+        save_json(USERS_FILE, users)
+        return jsonify({'success': True, 'message': 'Admin reset successfully', 'email': admin_id, 'password': 'Admin@123'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 def generate_license_key():
     """Generate a unique license key"""
@@ -420,8 +473,8 @@ def login():
             'id': user['id'],
             'name': user['name'],
             'email': user['email'],
-            'xp': user['xp'],
-            'level': user['level'],
+            'xp': user.get('xp', 0),
+            'level': user.get('level', 1),
             'is_admin': bool(user.get('is_admin'))
         },
         'token': token
@@ -1259,10 +1312,19 @@ def _sign_license_v2(payload: dict) -> dict | None:
     """
     if not CRYPTO_AVAILABLE:
         return None
-    if not LICENSE_PRIVATE_KEY_FILE.exists():
+    
+    # Try to load private key from env var first, then from file
+    private_key_pem = None
+    if LICENSE_PRIVATE_KEY_PEM:
+        private_key_pem = LICENSE_PRIVATE_KEY_PEM.encode('utf-8')
+    elif LICENSE_PRIVATE_KEY_FILE and LICENSE_PRIVATE_KEY_FILE.exists():
+        private_key_pem = LICENSE_PRIVATE_KEY_FILE.read_bytes()
+    
+    if not private_key_pem:
         return None
+    
     try:
-        private_key = load_pem_private_key(LICENSE_PRIVATE_KEY_FILE.read_bytes(), password=None)
+        private_key = load_pem_private_key(private_key_pem, password=None)
         message = _canonical_json_bytes(payload)
         sig = private_key.sign(
             message,

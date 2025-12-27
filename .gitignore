@@ -1,35 +1,65 @@
-# Python
+# --- Large installer artifacts (do not commit) ---
+/dist/
+/release/
+*.7z
+*.zip
+
+# BUT keep installer ZIPs for website downloads
+!private_downloads/installers/*.zip
+!downloads/installers/*.zip
+
+# Keep small, source-like things if needed
+!offline/requirements.txt
+!offline/requirements*.txt
+
+# --- Offline bundles / binaries ---
+/offline/
+/offline_packages/
+/soft/VSCode/
+/soft/WinRAR.7.13.x64/
+/soft/**/node_modules/
+
+# --- Odoo source code (large, not part of installer project) ---
+odoo19_odoo
+OpenUpgrade*/
+odoo/
+
+# --- Build outputs ---
+/build/
+/Download*/
+
+# --- Test/temp files ---
+*.log
+fetch_setup.log
+nuitka-crash-report.xml
+
+# --- Private keys (NEVER commit) ---
+license_private_key.pem
+.user_auth_secret
+
+# --- Local data files ---
+.database.json
+.license_v2.json
+.plans.json
+.sales_log.json
+.users.json
+
+# --- Python ---
 __pycache__/
 *.py[cod]
-*$py.class
-*.so
-.Python
+*.pyd
+*.pyo
+*.egg-info/
 .venv/
 venv/
-ENV/
 
-# Data files (keep structure, ignore content)
-data/*.json
-!data/.gitkeep
+# --- Node / web ---
+node_modules/
 
-# Private files
-private_downloads/
-*.pem
-*.key
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS
+# --- OS / editor ---
 .DS_Store
 Thumbs.db
+.vscode/
 
-# Logs
-*.log
-
-# Local development
-.env
-.env.local
+# --- Logs / temp ---
+*.tmp

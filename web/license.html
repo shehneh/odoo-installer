@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔐 فعال‌سازی لایسنس - Odoo Installer</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .license-container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 500px;
+      width: 100%;
+      padding: 40px;
+      animation: slideIn 0.5s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .logo-icon {
+      font-size: 64px;
+      margin-bottom: 10px;
+    }
+
+    .logo h1 {
+      color: #333;
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+
+    .logo p {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .hardware-info {
+      background: #f5f5f5;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+
+    .hardware-info h3 {
+      color: #555;
+      font-size: 14px;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .hardware-id {
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      color: #333;
+      background: white;
+      padding: 10px;
+      border-radius: 5px;
+      word-break: break-all;
+      border: 1px solid #ddd;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      color: #333;
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+      font-family: 'Courier New', monospace;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .form-group input::placeholder {
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .message {
+      padding: 12px 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+      font-size: 14px;
+      display: none;
+      animation: fadeIn 0.3s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+      display: block;
+    }
+
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      display: block;
+    }
+
+    .message.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+      display: block;
+    }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      animation: spin 1s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .help-text {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #e0e0e0;
+      font-size: 13px;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    .help-text strong {
+      color: #333;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .bypass-link {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 12px;
+    }
+
+    .bypass-link a {
+      color: #667eea;
+      text-decoration: none;
+    }
+
+    .bypass-link a:hover {
+      text-decoration: underline;
+    }
+
+    .admin-link {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(255,255,255,0.35);
+      border: 1px solid rgba(255,255,255,0.6);
+      padding: 10px 20px;
+      border-radius: 8px;
+      color: white;
+      text-decoration: none;
+      font-size: 13px;
+      transition: all 0.3s;
+      backdrop-filter: blur(10px);
+    }
+
+    .admin-link:hover {
+      background: rgba(255,255,255,0.25);
+      transform: translateY(-2px);
+    }
+
+    .admin-link span {
+      margin-left: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="license-container">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom: 18px;">
+      <a href="index.html" style="text-decoration:none;color:#667eea;font-weight:600;">🏠 صفحه اصلی</a>
+      <a href="#" id="purchase-link" onclick="goToPurchase()" style="text-decoration:none;color:#667eea;font-weight:600;">🛒 خرید / تمدید</a>
+      <a href="user_login.html" id="user-account-link" style="text-decoration:none;color:#667eea;font-weight:600;">👤 حساب کاربری</a>
+    </div>
+    
+    <!-- User status bar -->
+    <div id="user-status-bar" style="display:none; background:#e8f4fd; border-radius:8px; padding:10px 14px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+      <span style="color:#1a73e8; font-weight:500;">👤 <span id="logged-user-name">کاربر</span></span>
+      <button onclick="logoutUser()" style="background:#dc3545; color:white; border:none; border-radius:5px; padding:6px 14px; cursor:pointer; font-size:13px;">🚪 خروج از حساب</button>
+    </div>
+
+    <div class="logo">
+      <div class="logo-icon">🔐</div>
+      <h1>فعال‌سازی لایسنس</h1>
+      <p>Odoo Offline Installer</p>
+    </div>
+
+    <div class="hardware-info">
+      <h3>🖥️ شناسه سخت‌افزاری دستگاه:</h3>
+      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <div class="hardware-id" id="hardware-id">در حال بارگذاری...</div>
+        <button type="button" id="copy-hwid-btn" style="background: #667eea; color: white; border: none; border-radius: 8px; padding: 8px 16px; cursor: pointer; font-size: 13px; transition: all 0.3s;">📋 کپی</button>
+      </div>
+      <div style="color: #999; font-size: 12px; margin-top: 8px;">این شناسه را هنگام دانلود فایل لایسنس وارد کنید</div>
+    </div>
+
+    <!-- License Status Panel (auto-detected) -->
+    <div id="license-status-panel" style="display: none; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 16px; padding: 24px; margin-bottom: 20px; color: white; text-align: center;">
+      <div style="font-size: 48px; margin-bottom: 12px;">✅</div>
+      <h3 style="margin: 0 0 8px 0; font-size: 18px;">فایل لایسنس پیدا شد!</h3>
+      <div id="license-status-info" style="opacity: 0.9; font-size: 14px; margin-bottom: 16px;"></div>
+      <button type="button" id="enter-installer-btn" class="btn" style="background: white; color: #059669; font-weight: 700; padding: 14px 32px; border-radius: 12px; border: none; cursor: pointer; font-size: 15px;">
+        🚀 ورود به نصاب
+      </button>
+    </div>
+
+    <!-- License Invalid Panel -->
+    <div id="license-invalid-panel" style="display: none; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border-radius: 16px; padding: 24px; margin-bottom: 20px; color: white; text-align: center;">
+      <div style="font-size: 48px; margin-bottom: 12px;">⚠️</div>
+      <h3 style="margin: 0 0 8px 0; font-size: 18px;">لایسنس نامعتبر</h3>
+      <div id="license-invalid-info" style="opacity: 0.9; font-size: 14px;"></div>
+    </div>
+
+    <!-- Manual Upload Section (collapsible) -->
+    <details id="manual-upload-section" style="margin-bottom: 20px;">
+      <summary style="cursor: pointer; color: #667eea; font-weight: 600; padding: 12px; background: rgba(102, 126, 234, 0.1); border-radius: 12px; list-style: none; display: flex; align-items: center; gap: 8px;">
+        <span>📁</span>
+        <span>آپلود فایل لایسنس جدید...</span>
+      </summary>
+      <div style="padding-top: 16px;">
+        <form id="license-form">
+          <div class="form-group">
+            <div style="border: 2px dashed #667eea; border-radius: 12px; padding: 20px; text-align: center; background: rgba(102, 126, 234, 0.05); cursor: pointer; transition: all 0.3s;" id="drop-zone">
+              <input 
+                type="file" 
+                id="license-file" 
+                name="license-file" 
+                accept=".oml,.json,.lic"
+                style="display: none;"
+              >
+              <div style="font-size: 36px; margin-bottom: 10px;">📁</div>
+              <div style="color: #667eea; font-weight: 600;">فایل license.oml را اینجا بکشید و رها کنید</div>
+              <div style="color: #999; font-size: 13px; margin-top: 8px;">یا کلیک کنید تا انتخاب کنید</div>
+              <div id="selected-file" style="margin-top: 12px; color: #10b981; font-weight: 600; display: none;"></div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="activate-btn">
+            <span id="btn-text">✓ فعال‌سازی</span>
+            <div class="spinner" id="spinner"></div>
+          </button>
+        </form>
+      </div>
+    </details>
+
+    <div class="message" id="message"></div>
+
+    <div class="help-text">
+      <strong>📌 راهنما:</strong>
+      • فایل license.oml را در پوشه نصاب کپی کنید تا خودکار شناسایی شود<br>
+      • یا از بخش آپلود بالا فایل را انتخاب کنید<br>
+      • اگر لایسنس ندارید، از منوی بالا «خرید» را انتخاب کنید
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = '';
+    // For development use localhost, for production change to: 'https://odoomaster.ir'
+    const ONLINE_WEBSITE = 'http://localhost:5001';
+    let hardwareId = '';
+
+    // Go to online purchase page with hardware ID
+    function goToPurchase() {
+      const hwid = hardwareId || document.getElementById('hardware-id').textContent;
+      if (hwid && hwid !== 'در حال بارگذاری...' && hwid !== 'خطا در دریافت شناسه') {
+        window.open(`${ONLINE_WEBSITE}/payment.html?hwid=${encodeURIComponent(hwid)}`, '_blank');
+      } else {
+        window.open(`${ONLINE_WEBSITE}/payment.html`, '_blank');
+      }
+    }
+
+    // Load hardware ID and check license status
+    async function loadHardwareId() {
+      try {
+        const response = await fetch(`${API_BASE}/api/license/status`);
+        const data = await response.json();
+        hardwareId = data.hardware_id;
+        document.getElementById('hardware-id').textContent = hardwareId;
+
+        const statusPanel = document.getElementById('license-status-panel');
+        const invalidPanel = document.getElementById('license-invalid-panel');
+        const uploadSection = document.getElementById('manual-upload-section');
+
+        if (data.licensed && data.is_valid) {
+          // License found and valid - show green panel
+          statusPanel.style.display = 'block';
+          invalidPanel.style.display = 'none';
+          uploadSection.removeAttribute('open');
+          
+          let info = `پلن: ${data.plan || '-'} | باقی‌مانده: ${data.days_remaining || '?'} روز`;
+          if (data.issued_to) info += `<br>صادرشده برای: ${data.issued_to}`;
+          document.getElementById('license-status-info').innerHTML = info;
+          
+          // Enter installer button
+          document.getElementById('enter-installer-btn').onclick = () => {
+            window.location.href = 'index.html';
+          };
+        } else if (data.message && !data.message.includes('یافت نشد')) {
+          // License found but invalid (expired, wrong hardware, etc.)
+          statusPanel.style.display = 'none';
+          invalidPanel.style.display = 'block';
+          uploadSection.setAttribute('open', '');
+          document.getElementById('license-invalid-info').textContent = data.message;
+        } else {
+          // No license found - show upload section open
+          statusPanel.style.display = 'none';
+          invalidPanel.style.display = 'none';
+          uploadSection.setAttribute('open', '');
+        }
+      } catch (error) {
+        document.getElementById('hardware-id').textContent = 'خطا در دریافت شناسه';
+        showMessage('error', 'خطا در اتصال به سرور');
+      }
+    }
+
+    // Check user login status and update UI
+    async function checkUserStatus() {
+      const userToken = localStorage.getItem('user_token');
+      const statusBar = document.getElementById('user-status-bar');
+      const accountLink = document.getElementById('user-account-link');
+      
+      if (userToken) {
+        try {
+          const resp = await fetch('/api/user/me', {
+            headers: { 'Authorization': 'Bearer ' + userToken }
+          });
+          if (resp.ok) {
+            const userData = await resp.json();
+            document.getElementById('logged-user-name').textContent = userData.name || userData.email || 'کاربر';
+            statusBar.style.display = 'flex';
+            accountLink.textContent = '👤 پنل کاربری';
+            accountLink.href = 'user_dashboard.html';
+          } else {
+            // Token invalid
+            localStorage.removeItem('user_token');
+            statusBar.style.display = 'none';
+          }
+        } catch (e) {
+          statusBar.style.display = 'none';
+        }
+      } else {
+        statusBar.style.display = 'none';
+      }
+    }
+    
+    function logoutUser() {
+      localStorage.removeItem('user_token');
+      showMessage('info', 'از حساب کاربری خارج شدید');
+      setTimeout(() => location.reload(), 800);
+    }
+
+    // File upload handling
+    let selectedLicenseContent = null;
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('license-file');
+    const selectedFileEl = document.getElementById('selected-file');
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.style.borderColor = '#10b981';
+      dropZone.style.background = 'rgba(16, 185, 129, 0.1)';
+    });
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.style.borderColor = '#667eea';
+      dropZone.style.background = 'rgba(102, 126, 234, 0.05)';
+    });
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.style.borderColor = '#667eea';
+      dropZone.style.background = 'rgba(102, 126, 234, 0.05)';
+      const file = e.dataTransfer.files[0];
+      if (file) handleFile(file);
+    });
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files[0]) handleFile(fileInput.files[0]);
+    });
+
+    function handleFile(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        selectedLicenseContent = e.target.result;
+        selectedFileEl.textContent = `✅ ${file.name} انتخاب شد`;
+        selectedFileEl.style.display = 'block';
+      };
+      reader.onerror = () => showMessage('error', 'خطا در خواندن فایل');
+      reader.readAsText(file);
+    }
+
+    // Activate license
+    document.getElementById('license-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (!selectedLicenseContent) {
+        showMessage('error', 'لطفاً فایل لایسنس را انتخاب کنید');
+        return;
+      }
+
+      const btn = document.getElementById('activate-btn');
+      const btnText = document.getElementById('btn-text');
+      const spinner = document.getElementById('spinner');
+      
+      // Show loading
+      btn.disabled = true;
+      btnText.textContent = 'در حال فعال‌سازی...';
+      spinner.style.display = 'block';
+      
+      try {
+        // Build headers - include user token if logged in
+        const headers = { 'Content-Type': 'application/json' };
+        const userToken = localStorage.getItem('user_token');
+        if (userToken) {
+          headers['Authorization'] = 'Bearer ' + userToken;
+        }
+        
+        // Send the license file content as the key (server will parse JSON)
+        const response = await fetch(`${API_BASE}/api/license/activate`, {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify({ license_key: selectedLicenseContent })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          showMessage('success', `✓ ${data.message}`);
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 1500);
+        } else {
+          showMessage('error', `✗ ${data.message}`);
+          btn.disabled = false;
+          btnText.textContent = '✓ فعال‌سازی';
+          spinner.style.display = 'none';
+        }
+      } catch (error) {
+        showMessage('error', 'خطا در ارتباط با سرور: ' + error.message);
+        btn.disabled = false;
+        btnText.textContent = '✓ فعال‌سازی';
+        spinner.style.display = 'none';
+      }
+    });
+
+    function showMessage(type, text) {
+      const message = document.getElementById('message');
+      message.className = `message ${type}`;
+      message.textContent = text;
+      message.style.display = 'block';
+    }
+
+    // Initialize
+    loadHardwareId();
+    checkUserStatus();
+    
+    // Copy hardware ID button
+    document.getElementById('copy-hwid-btn').addEventListener('click', async () => {
+      const hwid = document.getElementById('hardware-id').textContent;
+      if (!hwid || hwid.includes('بارگذاری') || hwid.includes('خطا')) {
+        showMessage('error', 'شناسه سخت‌افزاری هنوز بارگذاری نشده');
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(hwid);
+        const btn = document.getElementById('copy-hwid-btn');
+        btn.textContent = '✓ کپی شد';
+        btn.style.background = '#10b981';
+        setTimeout(() => {
+          btn.textContent = '📋 کپی';
+          btn.style.background = '#667eea';
+        }, 2000);
+      } catch (e) {
+        showMessage('error', 'کپی انجام نشد');
+      }
+    });
+  </script>
+</body>
+</html>

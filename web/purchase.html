@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خرید لایسنس - OdooMaster</title>
+    <link rel="stylesheet" href="style.css?v=3">
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .purchase-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .purchase-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .purchase-header h1 {
+            font-size: 2rem;
+            color: #6366f1;
+            margin-bottom: 0.5rem;
+        }
+        
+        .purchase-header p {
+            color: #64748b;
+        }
+        
+        .hardware-info {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .hardware-info .label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+        
+        .hardware-info .hwid {
+            font-family: monospace;
+            font-size: 1.2rem;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .plan-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .plan-card:hover {
+            border-color: #6366f1;
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(99, 102, 241, 0.15);
+        }
+        
+        .plan-card.selected {
+            border-color: #6366f1;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+        }
+        
+        .plan-card.selected::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #10b981;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+        
+        .plan-card.popular {
+            border-color: #f59e0b;
+        }
+        
+        .plan-card.popular::before {
+            content: 'پرفروش';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #f59e0b;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        .plan-duration {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+        
+        .plan-price {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #6366f1;
+            margin-bottom: 0.25rem;
+        }
+        
+        .plan-price span {
+            font-size: 0.9rem;
+            color: #64748b;
+            font-weight: normal;
+        }
+        
+        .plan-features {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-top: 1rem;
+            text-align: right;
+            list-style: none;
+            padding: 0;
+        }
+        
+        .plan-features li {
+            padding: 0.25rem 0;
+        }
+        
+        .plan-features li::before {
+            content: '✓';
+            color: #10b981;
+            margin-left: 0.5rem;
+        }
+        
+        .customer-info {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .customer-info h3 {
+            margin-bottom: 1rem;
+            color: #1e293b;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-group input {
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        .checkout-summary {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .checkout-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .checkout-row:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #6366f1;
+        }
+        
+        .pay-button {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: #1e293b;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        
+        .pay-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+        }
+        
+        .pay-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .pay-button img {
+            height: 24px;
+        }
+        
+        .secure-note {
+            text-align: center;
+            margin-top: 1rem;
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+        
+        .secure-note i {
+            color: #10b981;
+            margin-left: 0.5rem;
+        }
+        
+        /* Success/Error states */
+        .result-container {
+            display: none;
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+        
+        .result-container.show {
+            display: block;
+        }
+        
+        .result-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        
+        .result-icon.success {
+            color: #10b981;
+        }
+        
+        .result-icon.error {
+            color: #ef4444;
+        }
+        
+        .license-display {
+            background: #f0fdf4;
+            border: 2px solid #10b981;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .license-display label {
+            display: block;
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+        
+        .license-key-box {
+            background: white;
+            border: 1px solid #d1fae5;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+            word-break: break-all;
+            position: relative;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 50%;
+            left: 10px;
+            transform: translateY(-50%);
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-family: inherit;
+        }
+        
+        .copy-btn:hover {
+            background: #4f46e5;
+        }
+        
+        @media (max-width: 768px) {
+            .plans-grid {
+                grid-template-columns: 1fr;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="purchase-container">
+        <!-- Navigation -->
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom: 1rem;">
+            <a href="license.html" class="back-btn" style="display: inline-flex; align-items: center; gap: 0.5rem; color: #6366f1; text-decoration: none; font-size: 0.95rem;">
+                <i class="fas fa-arrow-right"></i> بازگشت به صفحه لایسنس
+            </a>
+            <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+                <a href="user_login.html" class="back-btn" style="display: inline-flex; align-items: center; gap: 0.5rem; color: #6366f1; text-decoration: none; font-size: 0.95rem;">
+                    <i class="fas fa-user"></i> حساب کاربری
+                </a>
+                <a href="index.html" class="back-btn" style="display: inline-flex; align-items: center; gap: 0.5rem; color: #6366f1; text-decoration: none; font-size: 0.95rem;">
+                    <i class="fas fa-house"></i> صفحه اصلی
+                </a>
+            </div>
+        </div>
+
+        <!-- Purchase Form -->
+        <div id="purchaseForm">
+            <div class="purchase-header">
+                <h1><i class="fas fa-shopping-cart"></i> خرید لایسنس OdooMaster</h1>
+                <p>لایسنس مورد نظر خود را انتخاب کرده و به راحتی خریداری کنید</p>
+            </div>
+            
+            <div class="hardware-info">
+                <div class="label"><i class="fas fa-microchip"></i> شناسه سخت‌افزاری دستگاه شما:</div>
+                <div class="hwid" id="hardwareId">در حال بارگذاری...</div>
+            </div>
+            
+            <h3><i class="fas fa-tags"></i> انتخاب پلن:</h3>
+            <div class="plans-grid" id="plans-container">
+                <!-- Plans will be loaded dynamically from server -->
+                <div class="loading-plans" style="grid-column: 1/-1; text-align:center; padding:40px; color:#666;">
+                    <i class="fas fa-spinner fa-spin" style="font-size:32px;"></i>
+                    <p style="margin-top:15px;">در حال بارگذاری پلن‌ها...</p>
+                </div>
+            </div>
+            
+            <div class="customer-info">
+                <h3><i class="fas fa-user"></i> اطلاعات خریدار (اختیاری):</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>نام و نام خانوادگی</label>
+                        <input type="text" id="customerName" placeholder="مثال: علی احمدی">
+                    </div>
+                    <div class="form-group">
+                        <label>ایمیل</label>
+                        <input type="email" id="customerEmail" placeholder="example@email.com">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>شماره موبایل</label>
+                        <input type="tel" id="customerPhone" placeholder="09123456789">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="checkout-summary" id="checkoutSummary" style="display: none;">
+                <div class="checkout-row">
+                    <span>پلن انتخابی:</span>
+                    <span id="selectedPlanName">-</span>
+                </div>
+                <div class="checkout-row">
+                    <span>مبلغ:</span>
+                    <span id="selectedPlanPrice">-</span>
+                </div>
+            </div>
+            
+            <button class="pay-button" id="payButton" disabled>
+                <i class="fas fa-lock"></i>
+                <span>ابتدا پلن را انتخاب کنید</span>
+            </button>
+            
+            <div class="secure-note">
+                <i class="fas fa-shield-alt"></i>
+                پرداخت امن با درگاه زرین‌پال
+            </div>
+        </div>
+        
+        <!-- Success Result -->
+        <div class="result-container" id="successResult">
+            <div class="result-icon success">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2>پرداخت موفق!</h2>
+            <p>لایسنس شما با موفقیت صادر شد.</p>
+            
+            <!-- Download License File Button (v2) -->
+            <div id="downloadLicenseSection" style="display: none; margin: 1.5rem 0;">
+                <button class="pay-button" id="downloadLicenseBtn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                    <i class="fas fa-download"></i>
+                    دانلود فایل لایسنس (.oml)
+                </button>
+                <p style="color: #10b981; margin-top: 0.5rem; font-size: 0.9rem;">
+                    <i class="fas fa-shield-alt"></i> لایسنس امضاشده با امنیت بالا
+                </p>
+            </div>
+            
+            <div class="license-display" id="legacyLicenseDisplay">
+                <label>کلید لایسنس شما:</label>
+                <div class="license-key-box">
+                    <span id="generatedLicenseKey"></span>
+                    <button class="copy-btn" onclick="copyLicense()">
+                        <i class="fas fa-copy"></i> کپی
+                    </button>
+                </div>
+            </div>
+            
+            <div style="background: #fef3c7; border-radius: 8px; padding: 1rem; margin: 1rem 0; text-align: right;">
+                <strong><i class="fas fa-info-circle"></i> راهنما:</strong>
+                <p style="margin: 0.5rem 0 0 0;" id="activationHint">فایل لایسنس را دانلود کرده و در پوشه نصب‌کننده قرار دهید، یا کلید را کپی کرده و در صفحه فعال‌سازی وارد کنید.</p>
+            </div>
+            
+            <button class="pay-button" onclick="window.location.href='license.html'" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white;">
+                <i class="fas fa-key"></i>
+                رفتن به صفحه فعال‌سازی
+            </button>
+        </div>
+        
+        <!-- Error Result -->
+        <div class="result-container" id="errorResult">
+            <div class="result-icon error">
+                <i class="fas fa-times-circle"></i>
+            </div>
+            <h2>پرداخت ناموفق</h2>
+            <p id="errorMessage">مشکلی در پرداخت رخ داد.</p>
+            
+            <button class="pay-button" onclick="window.location.href='purchase.html'" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white;">
+                <i class="fas fa-redo"></i>
+                تلاش مجدد
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        let selectedPlan = null;
+        let hardwareId = '';
+        let plansData = []; // Plans loaded from server
+        const USER_TOKEN_KEY = 'user_token';
+        
+        // Default fallback plans if server is unavailable
+        const FALLBACK_PLANS = [
+            { id: 'starter', name: 'پلن پایه', hours: 720, hours_display: '۳۰ روز', price: 290000, price_display: '۲۹۰,۰۰۰ تومان', features: ['پشتیبانی از یک دستگاه', 'آپدیت رایگان'], is_popular: false },
+            { id: 'professional', name: 'پلن حرفه‌ای', hours: 4320, hours_display: '۶ ماه', price: 790000, price_display: '۷۹۰,۰۰۰ تومان', features: ['پشتیبانی از یک دستگاه', 'آپدیت رایگان', 'پشتیبانی تلفنی'], is_popular: true },
+            { id: 'unlimited', name: 'پلن نامحدود', hours: -1, hours_display: 'نامحدود', price: 1990000, price_display: '۱,۹۹۰,۰۰۰ تومان', features: ['پشتیبانی از یک دستگاه', 'آپدیت مادام‌العمر', 'پشتیبانی VIP'], is_popular: false }
+        ];
+
+        // Load plans from server
+        async function loadPlans() {
+            try {
+                const res = await fetch('/api/plans');
+                const data = await res.json();
+                if (data.success && data.plans && data.plans.length > 0) {
+                    plansData = data.plans;
+                } else {
+                    plansData = FALLBACK_PLANS;
+                }
+            } catch (e) {
+                console.error('Failed to load plans:', e);
+                plansData = FALLBACK_PLANS;
+            }
+            renderPlans();
+        }
+
+        // Render plans to DOM
+        function renderPlans() {
+            const container = document.getElementById('plans-container');
+            if (!plansData || plansData.length === 0) {
+                container.innerHTML = '<p style="text-align:center;color:#999;">پلنی تعریف نشده است.</p>';
+                return;
+            }
+            
+            container.innerHTML = plansData.map(plan => `
+                <div class="plan-card ${plan.is_popular ? 'popular' : ''}" 
+                     data-plan="${plan.id}" 
+                     data-hours="${plan.hours}" 
+                     data-price="${plan.price}">
+                    <div class="plan-duration">${plan.hours_display || plan.name}</div>
+                    <div class="plan-price">${plan.price_display || plan.price.toLocaleString('fa-IR')} <span>تومان</span></div>
+                    <ul class="plan-features">
+                        ${(plan.features || []).map(f => `<li>${f}</li>`).join('')}
+                    </ul>
+                </div>
+            `).join('');
+            
+            // Re-attach click handlers
+            attachPlanClickHandlers();
+        }
+
+        // Attach click handlers to plan cards
+        function attachPlanClickHandlers() {
+            document.querySelectorAll('.plan-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    
+                    selectedPlan = {
+                        id: card.dataset.plan,
+                        hours: parseInt(card.dataset.hours),
+                        price: parseInt(card.dataset.price),
+                        name: card.querySelector('.plan-duration').textContent
+                    };
+                    
+                    document.getElementById('checkoutSummary').style.display = 'block';
+                    document.getElementById('selectedPlanName').textContent = selectedPlan.name;
+                    document.getElementById('selectedPlanPrice').textContent = selectedPlan.price.toLocaleString('fa-IR') + ' تومان';
+                    
+                    const payBtn = document.getElementById('payButton');
+                    payBtn.disabled = false;
+                    payBtn.innerHTML = `
+                        <img src="https://cdn.zarinpal.com/badges/trustLogo/1.svg" alt="ZarinPal">
+                        <span>پرداخت ${selectedPlan.price.toLocaleString('fa-IR')} تومان</span>
+                    `;
+                });
+            });
+        }
+        
+        // Get hardware ID on load
+        async function loadHardwareId() {
+            try {
+                const res = await fetch('/api/license/status');
+                const data = await res.json();
+                hardwareId = data.hardware_id || '';
+                document.getElementById('hardwareId').textContent = hardwareId || 'نامشخص';
+            } catch (e) {
+                document.getElementById('hardwareId').textContent = 'خطا در دریافت';
+            }
+        }
+
+        async function tryPrefillUser() {
+            const token = localStorage.getItem(USER_TOKEN_KEY);
+            if (!token) return;
+            try {
+                const res = await fetch('/api/user/me', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (!data.success || !data.user) return;
+                const u = data.user;
+                if (u.name && document.getElementById('customerName')) document.getElementById('customerName').value = u.name;
+                if (u.email && document.getElementById('customerEmail')) document.getElementById('customerEmail').value = u.email;
+                if (u.mobile && document.getElementById('customerPhone')) document.getElementById('customerPhone').value = u.mobile;
+            } catch (e) {
+                // ignore
+            }
+        }
+        
+        // Check URL for payment callback
+        function checkPaymentCallback() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const status = urlParams.get('status');
+            const authority = urlParams.get('Authority');
+            
+            if (status && authority) {
+                // This is a callback from ZarinPal
+                verifyPayment(authority, status);
+            }
+        }
+        
+        async function verifyPayment(authority, status) {
+            if (status !== 'OK') {
+                showError('پرداخت توسط کاربر لغو شد.');
+                return;
+            }
+
+            const token = localStorage.getItem(USER_TOKEN_KEY);
+            if (!token) {
+                // Keep callback params so after login we can verify again
+                localStorage.setItem('after_login_redirect', window.location.pathname + window.location.search);
+                showError('برای تکمیل و تأیید پرداخت، ابتدا وارد حساب کاربری شوید.');
+                setTimeout(() => { window.location.href = '/user_login.html'; }, 900);
+                return;
+            }
+            
+            try {
+                const res = await fetch('/api/payment/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ authority })
+                });
+                
+                const data = await res.json();
+                
+                if (data.success && data.license_key) {
+                    showSuccess(data.license_key, data.license_bundle);
+                } else {
+                    showError(data.error || 'خطا در تأیید پرداخت');
+                }
+            } catch (e) {
+                showError('خطا در ارتباط با سرور');
+            }
+        }
+        
+        let currentLicenseBundle = null; // Store v2 license bundle for download
+        
+        function showSuccess(licenseKey, licenseBundle = null) {
+            document.getElementById('purchaseForm').style.display = 'none';
+            document.getElementById('errorResult').style.display = 'none';
+            document.getElementById('successResult').classList.add('show');
+            document.getElementById('generatedLicenseKey').textContent = licenseKey;
+            
+            // Store license bundle for download
+            currentLicenseBundle = licenseBundle;
+            
+            const downloadSection = document.getElementById('downloadLicenseSection');
+            const legacyDisplay = document.getElementById('legacyLicenseDisplay');
+            const hint = document.getElementById('activationHint');
+            
+            if (licenseBundle && licenseBundle.v === 2) {
+                // V2 signed license - show download button prominently
+                downloadSection.style.display = 'block';
+                legacyDisplay.style.display = 'none'; // Hide key box for v2
+                hint.textContent = 'فایل لایسنس را دانلود کرده و در پوشه نصب‌کننده قرار دهید.';
+            } else {
+                // Legacy license - show key
+                downloadSection.style.display = 'none';
+                legacyDisplay.style.display = 'block';
+                hint.textContent = 'این کلید را در صفحه فعال‌سازی وارد کنید تا نصب‌کننده فعال شود.';
+            }
+        }
+        
+        function downloadLicenseFile() {
+            if (!currentLicenseBundle) {
+                alert('فایل لایسنس در دسترس نیست.');
+                return;
+            }
+            
+            // Create license file content (JSON bundle)
+            const fileContent = JSON.stringify(currentLicenseBundle, null, 2);
+            const blob = new Blob([fileContent], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            // Create download link
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `license_${currentLicenseBundle.license_id || 'odoo'}.oml`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // Attach download button handler after DOM ready
+        document.addEventListener('DOMContentLoaded', function() {
+            const downloadBtn = document.getElementById('downloadLicenseBtn');
+            if (downloadBtn) {
+                downloadBtn.addEventListener('click', downloadLicenseFile);
+            }
+        });
+        
+        function showError(message) {
+            document.getElementById('purchaseForm').style.display = 'none';
+            document.getElementById('successResult').style.display = 'none';
+            document.getElementById('errorResult').classList.add('show');
+            document.getElementById('errorMessage').textContent = message;
+        }
+        
+        function copyLicense() {
+            const key = document.getElementById('generatedLicenseKey').textContent;
+            navigator.clipboard.writeText(key).then(() => {
+                alert('کلید لایسنس کپی شد!');
+            });
+        }
+        
+        // Pay button click
+        document.getElementById('payButton').addEventListener('click', async () => {
+            if (!selectedPlan) return;
+            if (!hardwareId) {
+                alert('شناسه سخت‌افزاری دریافت نشده. صفحه را رفرش کنید.');
+                return;
+            }
+
+            const token = localStorage.getItem(USER_TOKEN_KEY);
+            if (!token) {
+                localStorage.setItem('after_login_redirect', '/purchase.html');
+                alert('برای خرید لازم است ابتدا وارد حساب کاربری شوید.');
+                window.location.href = '/user_login.html';
+                return;
+            }
+            
+            const payBtn = document.getElementById('payButton');
+            payBtn.disabled = true;
+            payBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال پردازش...';
+            
+            try {
+                const res = await fetch('/api/payment/request', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        hardware_id: hardwareId,
+                        plan_id: selectedPlan.id,
+                        validity_hours: selectedPlan.hours,
+                        amount: selectedPlan.price,
+                        customer_name: document.getElementById('customerName').value,
+                        customer_email: document.getElementById('customerEmail').value,
+                        customer_phone: document.getElementById('customerPhone').value
+                    })
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    if (data.fake_mode && data.license_key) {
+                        // Fake payment mode - show license directly with v2 bundle
+                        showSuccess(data.license_key, data.license_bundle);
+                    } else if (data.payment_url) {
+                        // Real payment - redirect to ZarinPal
+                        window.location.href = data.payment_url;
+                    } else {
+                        alert('خطای نامشخص');
+                        payBtn.disabled = false;
+                    }
+                } else {
+                    alert(data.error || 'خطا در ایجاد درخواست پرداخت');
+                    payBtn.disabled = false;
+                    payBtn.innerHTML = `
+                        <img src="https://cdn.zarinpal.com/badges/trustLogo/1.svg" alt="ZarinPal">
+                        <span>پرداخت ${selectedPlan.price.toLocaleString('fa-IR')} تومان</span>
+                    `;
+                }
+            } catch (e) {
+                alert('خطا در ارتباط با سرور');
+                payBtn.disabled = false;
+            }
+        });
+        
+        // Init
+        loadHardwareId();
+        tryPrefillUser();
+        loadPlans();
+        checkPaymentCallback();
+    </script>
+</body>
+</html>

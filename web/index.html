@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>نصب کننده آفلاین Odoo 19</title>
+  <link rel="stylesheet" href="/style.css?v=2">
+  <style>
+    /* License Status Bar */
+    .license-status-bar {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    .license-status-bar.expired {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+    .license-status-bar.warning {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    }
+    .license-status-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .license-status-left .icon {
+      font-size: 1.5rem;
+    }
+    .license-status-left .text {
+      display: flex;
+      flex-direction: column;
+    }
+    .license-status-left .label {
+      font-size: 0.85rem;
+      opacity: 0.9;
+    }
+    .license-status-left .value {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    .license-status-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .license-timer {
+      background: rgba(255,255,255,0.2);
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 1rem;
+    }
+    .license-action-btn {
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+    .license-action-btn:hover {
+      background: rgba(255,255,255,0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- License Status Bar -->
+    <div class="license-status-bar" id="license-status-bar" style="display: none;">
+      <div class="license-status-left">
+        <span class="icon" id="license-icon">✅</span>
+        <div class="text">
+          <span class="label" id="license-label">وضعیت لایسنس</span>
+          <span class="value" id="license-value">فعال</span>
+        </div>
+      </div>
+      <div class="license-status-right">
+        <span class="license-timer" id="license-timer">--:--:--</span>
+        <button class="license-action-btn" id="license-extend-btn" onclick="window.location.href='purchase.html'">تمدید</button>
+      </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+          <circle cx="24" cy="24" r="22" fill="#714B67"/>
+          <path d="M24 12c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm0 18c-3.314 0-6-2.686-6-6s2.686-6 6-6 6 2.686 6 6-2.686 6-6 6z" fill="white"/>
+        </svg>
+        <div>
+          <h1>نصب کننده Odoo 19</h1>
+          <span class="subtitle">نسخه آفلاین ویندوز</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn-icon" id="btn-account" title="حساب کاربری" onclick="window.location.href='user_login.html'">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </button>
+        <button class="btn-icon" id="btn-license" title="مدیریت/فعالسازی لایسنس" onclick="window.location.href='license.html'">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 10h-8a2 2 0 0 0-2 2v8"/>
+            <path d="M7 10V7a5 5 0 0 1 10 0v3"/>
+            <rect x="3" y="10" width="18" height="12" rx="2"/>
+          </svg>
+        </button>
+        <button class="btn-icon" id="btn-settings" title="تنظیمات">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+        <button class="btn-icon btn-exit" id="btn-exit" title="خروج از برنامه" onclick="exitApp()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        </button>
+        <div class="status-indicator" id="connection-status">
+          <span class="dot connected"></span>
+          <span>متصل</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Progress Section -->
+    <section class="main-progress" id="main-progress">
+      <div class="progress-header">
+        <h2 id="progress-title">آماده نصب</h2>
+        <span class="progress-percent" id="progress-percent">0%</span>
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="main-progress-bar" style="width: 0%"></div>
+      </div>
+      <p class="progress-status" id="progress-status">برای شروع نصب روی دکمه "نصب کامل" کلیک کنید</p>
+    </section>
+
+    <!-- Quick Actions -->
+    <section class="quick-actions">
+      <button class="btn btn-primary btn-large" id="btn-full-install">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        نصب کامل (توصیه شده)
+      </button>
+      <button class="btn btn-success" id="btn-start-odoo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+        اجرای Odoo
+      </button>
+      <button class="btn btn-secondary" id="btn-restart-odoo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+        ری‌استارت
+      </button>
+    </section>
+
+    <!-- Dependencies Grid -->
+    <section class="deps-section">
+      <h2>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        پیش‌نیازها و وضعیت نصب
+      </h2>
+      <div class="deps-grid" id="deps-grid">
+        <!-- Deps will be rendered here -->
+      </div>
+    </section>
+
+    <!-- Software Tools Section -->
+    <section class="deps-section">
+      <h2>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+          <line x1="8" y1="21" x2="16" y2="21"/>
+          <line x1="12" y1="17" x2="12" y2="21"/>
+        </svg>
+        ابزارهای توسعه‌دهنده
+      </h2>
+      <div class="deps-grid" id="soft-tools-grid">
+        <!-- Software tools will be rendered here -->
+      </div>
+    </section>
+
+    <!-- Package Compatibility Section -->
+    <section class="compatibility-section" id="compatibility-section">
+      <div class="compatibility-header">
+        <h2>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+            <line x1="12" y1="22.08" x2="12" y2="12"/>
+          </svg>
+          سازگاری پکیج‌های آفلاین
+        </h2>
+        <button class="btn btn-sm btn-outline" id="btn-check-compatibility">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"/>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+          </svg>
+          بررسی مجدد
+        </button>
+      </div>
+      
+      <!-- Compatibility Summary -->
+      <div class="compatibility-summary" id="compatibility-summary">
+        <div class="summary-badge loading" id="compat-badge">
+          <span class="badge-icon">⏳</span>
+          <span class="badge-text">در حال بررسی...</span>
+        </div>
+        <div class="summary-stats" id="compat-stats">
+          <span class="stat-item compatible">
+            <span class="stat-icon">✓</span>
+            <span class="stat-count" id="compat-count">-</span>
+            <span class="stat-label">سازگار</span>
+          </span>
+          <span class="stat-item warning">
+            <span class="stat-icon">⚠</span>
+            <span class="stat-count" id="incompat-count">-</span>
+            <span class="stat-label">ناسازگار</span>
+          </span>
+          <span class="stat-item error">
+            <span class="stat-icon">✗</span>
+            <span class="stat-count" id="missing-count">-</span>
+            <span class="stat-label">مفقود</span>
+          </span>
+        </div>
+      </div>
+      
+      <!-- Package Details (Collapsible) -->
+      <div class="compatibility-details">
+        <button class="collapse-toggle" id="toggle-compat-details">
+          <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+          جزئیات پکیج‌ها
+        </button>
+        <div class="package-list" id="package-list" style="display: none;">
+          <!-- Package items will be rendered here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Advanced Controls -->
+    <section class="advanced-section">
+      <button class="collapse-toggle" id="toggle-advanced">
+        <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+        تنظیمات پیشرفته
+      </button>
+      <div class="advanced-content" id="advanced-content" style="display: none;">
+        <div class="btn-group">
+          <button class="btn btn-outline" id="btn-run-fetch">دانلود وابستگی‌ها</button>
+          <button class="btn btn-outline" id="btn-run-fetch-auto">دانلود + نصب خودکار</button>
+          <button class="btn btn-outline" id="btn-run-check">بررسی وضعیت</button>
+          <button class="btn btn-outline" id="btn-create-role">ساخت کاربر دیتابیس</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Odoo Status -->
+    <section class="odoo-status" id="odoo-status">
+      <h2>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+        وضعیت Odoo
+      </h2>
+      
+      <!-- Odoo Info Panel -->
+      <div class="odoo-info-panel" id="odoo-info-panel">
+        <div class="info-row">
+          <span class="info-label">📁 مسیر پوشه:</span>
+          <span class="info-value" id="odoo-root-path">در حال بررسی...</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">📄 فایل کانفیگ:</span>
+          <span class="info-value" id="odoo-config-path">در حال بررسی...</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">🌐 پورت HTTP:</span>
+          <span class="info-value odoo-port-value" id="odoo-http-port">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">📌 نسخه:</span>
+          <span class="info-value" id="odoo-version">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">✅ آماده اجرا:</span>
+          <span class="info-value" id="odoo-ready-status">در حال بررسی...</span>
+        </div>
+      </div>
+      
+      <div class="port-status">
+        <div class="port-item" id="port-primary">
+          <span class="port-dot"></span>
+          <span id="port-primary-label">پورت اصلی</span>
+          <a href="#" target="_blank" class="port-link" id="port-primary-link">باز کردن</a>
+        </div>
+        <div class="port-item" id="port-8069">
+          <span class="port-dot"></span>
+          <span>پورت 8069 (پیش‌فرض)</span>
+          <a href="http://localhost:8069" target="_blank" class="port-link">باز کردن</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Log Viewer -->
+    <section class="log-section">
+      <div class="log-header">
+        <h2>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+          گزارش عملیات
+        </h2>
+        <button class="btn btn-sm btn-outline" id="btn-clear-log">پاک کردن</button>
+      </div>
+      <pre class="log-content" id="logtail">در حال بارگذاری...</pre>
+    </section>
+
+    <!-- Legacy status for compatibility -->
+    <div id="status" style="display:none">
+      <pre id="status-json"></pre>
+    </div>
+    <div id="deps" style="display:none"></div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Odoo 19 Offline Installer v2.0</p>
+    </footer>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modal-overlay" style="display: none;">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modal-title">در حال نصب...</h3>
+        <button class="modal-close" id="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="install-steps" id="install-steps"></div>
+        <div class="modal-progress">
+          <div class="progress-bar-container">
+            <div class="progress-bar" id="modal-progress-bar" style="width: 0%"></div>
+          </div>
+          <p id="modal-status">آماده شروع...</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="modal-cancel">بستن</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js?v=2"></script>
+  <script>
+    // ===== USER LOGOUT (BACK TO LOGIN) =====
+    async function exitApp() {
+      if (!confirm('آیا می‌خواهید از حساب کاربری خارج شوید؟')) return;
+
+      try {
+        // Remove local license so the app shows the login screen
+        await fetch('/api/license/deactivate', { method: 'POST' });
+      } catch (e) {
+        // ignore
+      }
+
+      try {
+        sessionStorage.clear();
+        localStorage.clear();
+      } catch (e) {}
+
+      window.location.href = 'license.html';
+    }
+
+    // ===== LICENSE STATUS CHECKER =====
+    let licenseCheckInterval = null;
+    let licenseExpiryTime = null;
+    let timerInterval = null;
+    
+    async function checkLicenseStatus() {
+      try {
+        const res = await fetch('/api/license/status');
+        const data = await res.json();
+
+        const isValid = (typeof data.is_valid === 'boolean') ? data.is_valid : !!data.licensed;
+        
+        const bar = document.getElementById('license-status-bar');
+        const icon = document.getElementById('license-icon');
+        const label = document.getElementById('license-label');
+        const value = document.getElementById('license-value');
+        const timer = document.getElementById('license-timer');
+        const extendBtn = document.getElementById('license-extend-btn');
+        
+        if (!isValid) {
+          // License invalid or expired
+          bar.style.display = 'flex';
+          bar.className = 'license-status-bar expired';
+          icon.textContent = '❌';
+          label.textContent = 'لایسنس';
+          value.textContent = 'غیرفعال یا منقضی شده';
+          timer.textContent = 'منقضی';
+          extendBtn.textContent = 'خرید لایسنس';
+          
+          // Clear timer
+          if (timerInterval) clearInterval(timerInterval);
+          
+          // Redirect to license page after 3 seconds
+          setTimeout(() => {
+            window.location.href = 'license.html';
+          }, 3000);
+          return;
+        }
+        
+        // License is valid
+        bar.style.display = 'flex';
+        
+        if (data.is_lifetime) {
+          bar.className = 'license-status-bar';
+          icon.textContent = '👑';
+          label.textContent = 'لایسنس مادام‌العمر';
+          value.textContent = 'بدون محدودیت زمانی';
+          timer.textContent = '∞';
+          extendBtn.style.display = 'none';
+          if (timerInterval) clearInterval(timerInterval);
+        } else {
+          // Parse expiry time
+          const expiryStr = data.expiry_date;
+          if (expiryStr) {
+            licenseExpiryTime = new Date(expiryStr.replace(' ', 'T'));
+            updateTimer();
+            
+            // Start timer update every second
+            if (!timerInterval) {
+              timerInterval = setInterval(updateTimer, 1000);
+            }
+          }
+        }
+      } catch (e) {
+        console.error('License check error:', e);
+      }
+    }
+    
+    function updateTimer() {
+      if (!licenseExpiryTime) return;
+      
+      const bar = document.getElementById('license-status-bar');
+      const icon = document.getElementById('license-icon');
+      const label = document.getElementById('license-label');
+      const value = document.getElementById('license-value');
+      const timer = document.getElementById('license-timer');
+      const extendBtn = document.getElementById('license-extend-btn');
+      
+      const now = new Date();
+      const diff = licenseExpiryTime - now;
+      
+      if (diff <= 0) {
+        // Expired!
+        bar.className = 'license-status-bar expired';
+        icon.textContent = '❌';
+        label.textContent = 'لایسنس';
+        value.textContent = 'منقضی شده';
+        timer.textContent = '00:00:00';
+        extendBtn.textContent = 'تمدید لایسنس';
+        
+        if (timerInterval) clearInterval(timerInterval);
+        
+        // Redirect after 3 seconds
+        setTimeout(() => {
+          window.location.href = 'license.html';
+        }, 3000);
+        return;
+      }
+      
+      // Calculate remaining time
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const secs = Math.floor((diff % (1000 * 60)) / 1000);
+      
+      // Warning if less than 24 hours
+      if (diff < 24 * 60 * 60 * 1000) {
+        bar.className = 'license-status-bar warning';
+        icon.textContent = '⚠️';
+        label.textContent = 'لایسنس در حال انقضا';
+        value.textContent = 'کمتر از ۲۴ ساعت باقی مانده';
+      } else {
+        bar.className = 'license-status-bar';
+        icon.textContent = '✅';
+        label.textContent = 'لایسنس فعال';
+        value.textContent = days > 0 ? `${days} روز باقی مانده` : 'فعال';
+      }
+      
+      // Format timer
+      if (days > 0) {
+        timer.textContent = `${days}d ${String(hours).padStart(2,'0')}:${String(mins).padStart(2,'0')}`;
+      } else {
+        timer.textContent = `${String(hours).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+      }
+    }
+    
+    // Check license on page load
+    checkLicenseStatus();
+    
+    // Check every 5 seconds for more responsive validation
+    licenseCheckInterval = setInterval(checkLicenseStatus, 5000);
+  </script>
+</body>
+</html>
