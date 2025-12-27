@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ورود | OdooMaster</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script>if(localStorage.getItem('theme')==='light')document.documentElement.className='light-theme';</script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        :root {
+            --primary: #00d4aa;
+            --primary-glow: rgba(0,212,170,0.4);
+            --bg: #06060a;
+            --card-bg: rgba(16,16,24,0.9);
+            --border: rgba(255,255,255,0.06);
+            --text: #ffffff;
+            --text-muted: #888899;
+        }
+        
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            overflow: hidden;
+        }
+        
+        /* === Animated BG === */
+        .bg-glow {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .bg-glow::before, .bg-glow::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.6;
+            animation: pulse 8s ease-in-out infinite alternate;
+        }
+        .bg-glow::before {
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, var(--primary-glow), transparent 70%);
+            top: -150px; right: -100px;
+        }
+        .bg-glow::after {
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(99,102,241,0.3), transparent 70%);
+            bottom: -100px; left: -100px;
+            animation-delay: -4s;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(1.15); opacity: 0.7; }
+        }
+        
+        /* === Container === */
+        .auth-wrapper {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 420px;
+        }
+        
+        .auth-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 44px 36px;
+            box-shadow: 0 40px 80px -20px rgba(0,0,0,0.6);
+        }
+        
+        /* === Logo === */
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            text-decoration: none;
+            margin-bottom: 28px;
+        }
+        .logo-icon {
+            width: 44px; height: 44px;
+            background: linear-gradient(135deg, var(--primary), #6366f1);
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            font-size: 22px;
+            color: #fff;
+            box-shadow: 0 6px 20px var(--primary-glow);
+        }
+        .logo-text {
+            font-size: 1.6rem;
+            font-weight: 300;
+            color: var(--text);
+        }
+        .logo-text strong { font-weight: 800; }
+        
+        /* === Header === */
+        .auth-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .auth-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+        .auth-header p {
+            font-size: 0.92rem;
+            color: var(--text-muted);
+        }
+        
+        /* === Form === */
+        .form-group { margin-bottom: 18px; }
+        .form-label {
+            display: block;
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            margin-bottom: 7px;
+        }
+        .input-wrap {
+            position: relative;
+        }
+        .form-input {
+            width: 100%;
+            padding: 13px 16px 13px 44px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
+            color: var(--text);
+            outline: none;
+            transition: border 0.25s, box-shadow 0.25s;
+        }
+        .form-input::placeholder { color: rgba(255,255,255,0.25); }
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(0,212,170,0.12);
+        }
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1rem;
+            transition: color 0.25s;
+        }
+        .form-input:focus ~ .input-icon { color: var(--primary); }
+        
+        .toggle-pass {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .toggle-pass:hover { color: var(--primary); }
+        
+        /* === Options === */
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.88rem;
+            margin-bottom: 26px;
+        }
+        .remember {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+        .remember input {
+            width: 16px; height: 16px;
+            accent-color: var(--primary);
+        }
+        .forgot {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .forgot:hover { opacity: 0.8; }
+        
+        /* === Button === */
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary), #00b894);
+            border: none;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1.02rem;
+            font-weight: 600;
+            color: #050505;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 8px 28px var(--primary-glow);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 36px var(--primary-glow);
+        }
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-primary .spinner {
+            display: none;
+            width: 18px; height: 18px;
+            border: 2px solid rgba(0,0,0,0.2);
+            border-top-color: #050505;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        .btn-primary.loading .spinner { display: block; }
+        .btn-primary.loading .btn-text { display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* === Divider === */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin: 26px 0;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+        
+        /* === Social === */
+        .btn-social {
+            width: 100%;
+            padding: 13px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: var(--text);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: background 0.25s, border 0.25s;
+        }
+        .btn-social:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(255,255,255,0.12);
+        }
+        
+        /* === Footer === */
+        .auth-footer {
+            text-align: center;
+            margin-top: 26px;
+            font-size: 0.92rem;
+            color: var(--text-muted);
+        }
+        .auth-footer a {
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .auth-footer a:hover { text-decoration: underline; }
+        
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            text-decoration: none;
+        }
+        .back-link:hover { color: var(--text); }
+        .back-link i { margin-left: 6px; }
+        
+        /* === Toast === */
+        #toastContainer {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        /* === Light Theme === */
+        .light-theme {
+            --bg: #f0f4f8;
+            --card-bg: rgba(255,255,255,0.95);
+            --border: rgba(0,0,0,0.08);
+            --text: #1a1a2e;
+            --text-muted: #64748b;
+            --primary-glow: rgba(0,212,170,0.25);
+        }
+        .light-theme .bg-glow::before,
+        .light-theme .bg-glow::after {
+            opacity: 0.3;
+        }
+        .light-theme .auth-card {
+            box-shadow: 0 20px 60px -15px rgba(0,0,0,0.15);
+        }
+        .light-theme .form-input {
+            background: rgba(0,0,0,0.03);
+        }
+        .light-theme .form-input::placeholder {
+            color: rgba(0,0,0,0.35);
+        }
+        .light-theme .btn-social {
+            background: rgba(0,0,0,0.03);
+        }
+        .light-theme .btn-social:hover {
+            background: rgba(0,0,0,0.06);
+        }
+        
+        /* LTR Support */
+        body.ltr { direction: ltr; text-align: left; }
+        body.ltr .form-input { padding: 13px 44px 13px 16px; text-align: left; }
+        body.ltr .input-icon { left: auto; right: 14px; }
+        body.ltr .toggle-pass { right: auto; left: 14px; }
+        body.ltr .back-link i { margin-left: 0; margin-right: 6px; }
+        body.ltr { font-family: 'Inter', 'Segoe UI', sans-serif; }
+        body.rtl { font-family: 'Vazirmatn', 'Segoe UI', sans-serif; }
+        
+        /* Language Switcher */
+        .lang-switcher {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            z-index: 100;
+        }
+        .lang-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .lang-btn:hover { background: var(--primary); color: #050505; border-color: var(--primary); }
+        .lang-flag { font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+    <div class="bg-glow"></div>
+    
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <a href="index.html" class="logo">
+                <div class="logo-icon"><i class="fas fa-cube"></i></div>
+                <span class="logo-text">Odoo<strong>Master</strong></span>
+            </a>
+            
+            <div class="auth-header">
+                <h1 data-i18n="login.welcome">خوش برگشتید!</h1>
+                <p data-i18n="login.subtitle">وارد حساب کاربری خود شوید</p>
+            </div>
+            
+            <form id="loginForm" autocomplete="on">
+                <div class="form-group">
+                    <label class="form-label" data-i18n="login.email">ایمیل یا موبایل</label>
+                    <div class="input-wrap">
+                        <input type="text" id="email" name="email" class="form-input" placeholder="example@email.com" required autocomplete="username" data-i18n-placeholder="login.email.placeholder">
+                        <i class="fas fa-envelope input-icon"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" data-i18n="login.password">رمز عبور</label>
+                    <div class="input-wrap">
+                        <input type="password" id="password" name="password" class="form-input" placeholder="••••••••" required autocomplete="current-password">
+                        <i class="fas fa-lock input-icon"></i>
+                        <button type="button" class="toggle-pass password-toggle"><i class="fas fa-eye"></i></button>
+                    </div>
+                </div>
+                <div class="form-options">
+                    <label class="remember"><input type="checkbox" name="remember"> <span data-i18n="login.remember">مرا به خاطر بسپار</span></label>
+                    <a href="#" class="forgot" data-i18n="login.forgot">فراموشی رمز؟</a>
+                </div>
+                <button type="submit" class="btn-primary">
+                    <span class="btn-text" data-i18n="login.submit">ورود</span>
+                    <span class="spinner"></span>
+                </button>
+            </form>
+            
+            <div class="divider" data-i18n="login.or">یا</div>
+            
+            <button type="button" class="btn-social"><i class="fab fa-google"></i> <span data-i18n="login.google">ورود با گوگل</span></button>
+            
+            <div class="auth-footer">
+                <span data-i18n="login.noAccount">حساب ندارید؟</span> <a href="register.html" data-i18n="login.register">ثبت‌نام کنید</a>
+            </div>
+        </div>
+        <a href="index.html" class="back-link"><i class="fas fa-arrow-right"></i> <span data-i18n="common.back">بازگشت</span></a>
+    </div>
+    
+    <div id="toastContainer"></div>
+    <script src="js/i18n.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>

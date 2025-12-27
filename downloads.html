@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دانلود | OdooMaster</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/components.css">
+    <style>
+        .downloads-page {
+            padding-top: 100px;
+            min-height: 100vh;
+        }
+
+        .version-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 48px;
+            flex-wrap: wrap;
+        }
+
+        .version-tab {
+            padding: 12px 28px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-full);
+            color: var(--gray-light);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .version-tab:hover {
+            background: var(--dark-medium);
+            color: var(--white);
+        }
+
+        .version-tab.active {
+            background: var(--gradient-primary);
+            border-color: transparent;
+            color: var(--white);
+        }
+
+        .version-tab .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            background: var(--secondary);
+            border-radius: var(--radius-full);
+            font-size: 0.7rem;
+            margin-right: 8px;
+        }
+
+        .download-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+            margin-bottom: 60px;
+        }
+
+        .download-card {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            transition: var(--transition);
+        }
+
+        .download-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .download-card.featured {
+            border-color: var(--primary);
+            position: relative;
+        }
+
+        .download-card.featured::before {
+            content: 'پیشنهادی';
+            position: absolute;
+            top: -12px;
+            right: 24px;
+            padding: 6px 16px;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-full);
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .download-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .download-icon {
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-lg);
+            font-size: 1.8rem;
+        }
+
+        .download-info h3 {
+            font-size: 1.3rem;
+            margin-bottom: 4px;
+        }
+
+        .download-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 0.9rem;
+            color: var(--gray-light);
+        }
+
+        .download-meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .download-desc {
+            color: var(--gray-light);
+            margin-bottom: 20px;
+            line-height: 1.7;
+        }
+
+        .download-features {
+            list-style: none;
+            margin-bottom: 24px;
+        }
+
+        .download-features li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            color: var(--gray-light);
+        }
+
+        .download-features li i {
+            color: var(--secondary);
+            width: 20px;
+        }
+
+        .download-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .download-actions .btn {
+            flex: 1;
+        }
+
+        /* Requirements Section */
+        .requirements-section {
+            margin-top: 80px;
+        }
+
+        .requirements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .requirement-card {
+            padding: 24px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+        }
+
+        .requirement-card h4 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .requirement-card h4 i {
+            color: var(--primary-light);
+        }
+
+        .requirement-card ul {
+            list-style: none;
+        }
+
+        .requirement-card li {
+            padding: 6px 0;
+            color: var(--gray-light);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .requirement-card li::before {
+            content: '•';
+            color: var(--secondary);
+        }
+
+        /* Installation Steps */
+        .install-steps {
+            margin-top: 80px;
+        }
+
+        .steps-container {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .step-item {
+            display: flex;
+            gap: 24px;
+            padding: 24px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+        }
+
+        .step-number {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            font-size: 1.3rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .step-content h4 {
+            margin-bottom: 8px;
+        }
+
+        .step-content p {
+            color: var(--gray-light);
+        }
+
+        @media (max-width: 768px) {
+            .download-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .download-actions {
+                flex-direction: column;
+            }
+
+            .step-item {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .step-number {
+                margin: 0 auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Particle Background -->
+    <div id="particles-js"></div>
+    
+    <!-- Navigation -->
+    <nav class="navbar glass">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-cube"></i>
+                </div>
+                <span>Odoo<strong>Master</strong></span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html#features" class="nav-link">ویژگی‌ها</a></li>
+                <li><a href="index.html#pricing" class="nav-link">قیمت‌گذاری</a></li>
+                <li><a href="downloads.html" class="nav-link active">دانلود</a></li>
+                <li><a href="docs.html" class="nav-link">مستندات</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="theme-toggle" id="themeToggle" title="تغییر تم">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <a href="login.html" class="btn btn-ghost">
+                    <i class="fas fa-sign-in-alt"></i>
+                    ورود
+                </a>
+                <a href="register.html" class="btn btn-primary">
+                    <i class="fas fa-rocket"></i>
+                    شروع رایگان
+                </a>
+            </div>
+            <button class="mobile-menu-btn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Downloads Page -->
+    <main class="downloads-page">
+        <div class="container">
+            <!-- Header -->
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-download"></i> دانلود</span>
+                <h1 class="section-title">دانلود OdooMaster</h1>
+                <p class="section-desc">نسخه مناسب خود را انتخاب و دانلود کنید</p>
+            </div>
+
+            <!-- Version Tabs -->
+            <div class="version-tabs"></div>
+
+            <!-- Download Cards -->
+            <div class="download-cards" id="downloadCards">
+            </div>
+
+            <!-- System Requirements -->
+            <section class="requirements-section">
+                <div class="section-header">
+                    <h2 class="section-title">پیش‌نیازهای سیستم</h2>
+                </div>
+                
+                <div class="requirements-grid">
+                    <div class="requirement-card">
+                        <h4><i class="fas fa-microchip"></i> حداقل</h4>
+                        <ul>
+                            <li>پردازنده: 2 هسته</li>
+                            <li>رم: 4 گیگابایت</li>
+                            <li>فضا: 10 گیگابایت</li>
+                            <li>ویندوز 10 (64-bit)</li>
+                        </ul>
+                    </div>
+                    <div class="requirement-card">
+                        <h4><i class="fas fa-rocket"></i> پیشنهادی</h4>
+                        <ul>
+                            <li>پردازنده: 4 هسته</li>
+                            <li>رم: 8 گیگابایت</li>
+                            <li>فضا: 20 گیگابایت SSD</li>
+                            <li>ویندوز 11 (64-bit)</li>
+                        </ul>
+                    </div>
+                    <div class="requirement-card">
+                        <h4><i class="fas fa-server"></i> سرور</h4>
+                        <ul>
+                            <li>پردازنده: 8 هسته</li>
+                            <li>رم: 16+ گیگابایت</li>
+                            <li>فضا: 50+ گیگابایت SSD</li>
+                            <li>Windows Server 2019+</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Installation Steps -->
+            <section class="install-steps section">
+                <div class="section-header">
+                    <h2 class="section-title">مراحل نصب</h2>
+                    <p class="section-desc">نصب در ۳ مرحله ساده</p>
+                </div>
+
+                <div class="steps-container">
+                    <div class="step-item">
+                        <div class="step-number">۱</div>
+                        <div class="step-content">
+                            <h4>دانلود نصاب</h4>
+                            <p>نسخه مناسب سیستم خود را از بالا دانلود کنید. پیشنهاد ما نسخه کامل آفلاین است.</p>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">۲</div>
+                        <div class="step-content">
+                            <h4>اجرای نصاب</h4>
+                            <p>فایل دانلود شده را اجرا کنید. اگر پیام امنیتی ویندوز ظاهر شد، روی "More info" و سپس "Run anyway" کلیک کنید.</p>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">۳</div>
+                        <div class="step-content">
+                            <h4>نصب یک‌کلیکه</h4>
+                            <p>در رابط گرافیکی نصاب، تنظیمات مورد نظر را انتخاب کرده و روی "نصب" کلیک کنید. بقیه کارها خودکار انجام می‌شود!</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <a href="index.html" class="logo">
+                        <div class="logo-icon">
+                            <i class="fas fa-cube"></i>
+                        </div>
+                        <span>Odoo<strong>Master</strong></span>
+                    </a>
+                    <p>نصاب هوشمند Odoo</p>
+                </div>
+                <div class="footer-links">
+                    <a href="downloads.html">دانلود</a>
+                    <a href="docs.html">مستندات</a>
+                    <a href="support.html">پشتیبانی</a>
+                    <a href="about.html">درباره ما</a>
+                </div>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-telegram"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© ۱۴۰۴ OdooMaster. تمامی حقوق محفوظ است.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/particles.min.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/downloads.js"></script>
+</body>
+</html>

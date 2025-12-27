@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مستندات | OdooMaster</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/components.css">
+    <style>
+        .docs-page {
+            padding-top: 100px;
+            min-height: 100vh;
+        }
+
+        .docs-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        /* Sidebar */
+        .docs-sidebar {
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+
+        .sidebar-menu {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: 24px;
+        }
+
+        .sidebar-section {
+            margin-bottom: 24px;
+        }
+
+        .sidebar-section h4 {
+            color: var(--gray-light);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            padding-right: 12px;
+        }
+
+        .sidebar-links {
+            list-style: none;
+        }
+
+        .sidebar-links a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            color: var(--gray-light);
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+        }
+
+        .sidebar-links a:hover {
+            background: var(--dark-medium);
+            color: var(--white);
+        }
+
+        .sidebar-links a.active {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .sidebar-links a i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .docs-content {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: 40px;
+        }
+
+        .docs-content h1 {
+            font-size: 2.2rem;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .docs-content h2 {
+            font-size: 1.5rem;
+            margin-top: 40px;
+            margin-bottom: 16px;
+            color: var(--primary-light);
+        }
+
+        .docs-content h3 {
+            font-size: 1.2rem;
+            margin-top: 24px;
+            margin-bottom: 12px;
+        }
+
+        .docs-content p {
+            color: var(--gray-light);
+            line-height: 1.8;
+            margin-bottom: 16px;
+        }
+
+        .docs-content ul, .docs-content ol {
+            color: var(--gray-light);
+            margin-bottom: 20px;
+            padding-right: 24px;
+        }
+
+        .docs-content li {
+            margin-bottom: 8px;
+            line-height: 1.7;
+        }
+
+        /* Code Block */
+        .code-block {
+            background: var(--dark);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'Consolas', monospace;
+            font-size: 0.9rem;
+            color: var(--gray-light);
+            direction: ltr;
+            text-align: left;
+        }
+
+        .code-copy {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 6px 12px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            color: var(--gray-light);
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: var(--transition);
+        }
+
+        .code-copy:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Alert Boxes */
+        .alert {
+            padding: 16px 20px;
+            border-radius: var(--radius-lg);
+            margin: 20px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .alert i {
+            font-size: 1.2rem;
+            margin-top: 2px;
+        }
+
+        .alert-info {
+            background: rgba(102, 126, 234, 0.15);
+            border: 1px solid var(--primary);
+        }
+
+        .alert-info i {
+            color: var(--primary-light);
+        }
+
+        .alert-warning {
+            background: rgba(241, 196, 15, 0.15);
+            border: 1px solid #f1c40f;
+        }
+
+        .alert-warning i {
+            color: #f1c40f;
+        }
+
+        .alert-success {
+            background: rgba(78, 205, 196, 0.15);
+            border: 1px solid var(--secondary);
+        }
+
+        .alert-success i {
+            color: var(--secondary);
+        }
+
+        /* Steps */
+        .doc-steps {
+            counter-reset: step;
+        }
+
+        .doc-step {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 24px;
+            padding: 20px;
+            background: var(--dark-light);
+            border-radius: var(--radius-lg);
+        }
+
+        .doc-step::before {
+            counter-increment: step;
+            content: counter(step);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .doc-step-content h4 {
+            margin-bottom: 8px;
+        }
+
+        .doc-step-content p {
+            margin-bottom: 0;
+        }
+
+        /* Table of Contents */
+        .toc {
+            background: var(--dark-light);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .toc h4 {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toc ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .toc li {
+            margin-bottom: 6px;
+        }
+
+        .toc a {
+            color: var(--primary-light);
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .docs-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .docs-sidebar {
+                position: relative;
+                top: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .docs-content {
+                padding: 24px;
+            }
+
+            .docs-content h1 {
+                font-size: 1.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Particle Background -->
+    <div id="particles-js"></div>
+    
+    <!-- Navigation -->
+    <nav class="navbar glass">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-cube"></i>
+                </div>
+                <span>Odoo<strong>Master</strong></span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html#features" class="nav-link">ویژگی‌ها</a></li>
+                <li><a href="index.html#pricing" class="nav-link">قیمت‌گذاری</a></li>
+                <li><a href="downloads.html" class="nav-link">دانلود</a></li>
+                <li><a href="docs.html" class="nav-link active">مستندات</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="theme-toggle" id="themeToggle" title="تغییر تم">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <a href="login.html" class="btn btn-ghost">
+                    <i class="fas fa-sign-in-alt"></i>
+                    ورود
+                </a>
+                <a href="register.html" class="btn btn-primary">
+                    <i class="fas fa-rocket"></i>
+                    شروع رایگان
+                </a>
+            </div>
+            <button class="mobile-menu-btn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Docs Page -->
+    <main class="docs-page">
+        <div class="container">
+            <div class="docs-layout">
+                <!-- Sidebar -->
+                <aside class="docs-sidebar">
+                    <div class="sidebar-menu">
+                        <div class="sidebar-section">
+                            <h4>شروع کار</h4>
+                            <ul class="sidebar-links">
+                                <li><a href="#intro" class="active"><i class="fas fa-home"></i> معرفی</a></li>
+                                <li><a href="#install"><i class="fas fa-download"></i> نصب</a></li>
+                                <li><a href="#license"><i class="fas fa-key"></i> فعال‌سازی لایسنس</a></li>
+                            </ul>
+                        </div>
+                        <div class="sidebar-section">
+                            <h4>پیکربندی</h4>
+                            <ul class="sidebar-links">
+                                <li><a href="#config"><i class="fas fa-cog"></i> تنظیمات پایه</a></li>
+                                <li><a href="#database"><i class="fas fa-database"></i> دیتابیس</a></li>
+                                <li><a href="#performance"><i class="fas fa-tachometer-alt"></i> بهینه‌سازی</a></li>
+                            </ul>
+                        </div>
+                        <div class="sidebar-section">
+                            <h4>راهنماها</h4>
+                            <ul class="sidebar-links">
+                                <li><a href="#persian"><i class="fas fa-language"></i> فارسی‌سازی</a></li>
+                                <li><a href="#backup"><i class="fas fa-save"></i> پشتیبان‌گیری</a></li>
+                                <li><a href="#update"><i class="fas fa-sync"></i> به‌روزرسانی</a></li>
+                            </ul>
+                        </div>
+                        <div class="sidebar-section">
+                            <h4>عیب‌یابی</h4>
+                            <ul class="sidebar-links">
+                                <li><a href="#errors"><i class="fas fa-bug"></i> خطاهای رایج</a></li>
+                                <li><a href="#faq"><i class="fas fa-question-circle"></i> سوالات متداول</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Content -->
+                <div class="docs-content">
+                    <h1 id="intro">معرفی OdooMaster</h1>
+                    
+                    <p>OdooMaster یک نصاب هوشمند و کامل برای راه‌اندازی Odoo در ویندوز است. این ابزار تمام مراحل پیچیده نصب را به یک فرآیند ساده و خودکار تبدیل می‌کند.</p>
+
+                    <div class="toc">
+                        <h4><i class="fas fa-list"></i> فهرست مطالب</h4>
+                        <ul>
+                            <li><a href="#install">نصب OdooMaster</a></li>
+                            <li><a href="#license">فعال‌سازی لایسنس</a></li>
+                            <li><a href="#config">تنظیمات پایه</a></li>
+                        </ul>
+                    </div>
+
+                    <h2 id="install">نصب OdooMaster</h2>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <div>قبل از شروع نصب، مطمئن شوید که پیش‌نیازهای سیستم را دارید. برای اطلاعات بیشتر <a href="downloads.html">صفحه دانلود</a> را ببینید.</div>
+                    </div>
+
+                    <div class="doc-steps">
+                        <div class="doc-step">
+                            <div class="doc-step-content">
+                                <h4>دانلود نصاب</h4>
+                                <p>از صفحه دانلود، نسخه مناسب سیستم خود را دانلود کنید. برای نصب آفلاین، نسخه کامل را انتخاب کنید.</p>
+                            </div>
+                        </div>
+                        <div class="doc-step">
+                            <div class="doc-step-content">
+                                <h4>اجرای نصاب</h4>
+                                <p>فایل دانلود شده را با کلیک راست و "Run as Administrator" اجرا کنید تا دسترسی‌های لازم را داشته باشد.</p>
+                            </div>
+                        </div>
+                        <div class="doc-step">
+                            <div class="doc-step-content">
+                                <h4>انتخاب کامپوننت‌ها</h4>
+                                <p>در رابط نصاب، کامپوننت‌های مورد نظر را انتخاب کنید: Python، PostgreSQL، Git و Odoo.</p>
+                            </div>
+                        </div>
+                        <div class="doc-step">
+                            <div class="doc-step-content">
+                                <h4>شروع نصب</h4>
+                                <p>روی دکمه "نصب" کلیک کنید و منتظر بمانید. پیشرفت نصب به صورت زنده نمایش داده می‌شود.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h2 id="license">فعال‌سازی لایسنس</h2>
+
+                    <p>پس از نصب، برای استفاده از امکانات کامل باید لایسنس خود را فعال کنید.</p>
+
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div>هر لایسنس فقط روی یک سیستم قابل فعال‌سازی است. اگر نیاز به انتقال دارید، ابتدا از پنل کاربری غیرفعال کنید.</div>
+                    </div>
+
+                    <h3>مراحل فعال‌سازی</h3>
+
+                    <ol>
+                        <li>وارد نرم‌افزار OdooMaster شوید</li>
+                        <li>از منوی "لایسنس"، گزینه "فعال‌سازی" را انتخاب کنید</li>
+                        <li>کد لایسنس ۲۵ کاراکتری خود را وارد کنید</li>
+                        <li>روی "فعال‌سازی" کلیک کنید</li>
+                    </ol>
+
+                    <div class="code-block">
+                        <button class="code-copy"><i class="fas fa-copy"></i> کپی</button>
+                        <pre>XXXXX-XXXXX-XXXXX-XXXXX-XXXXX</pre>
+                    </div>
+
+                    <h2 id="config">تنظیمات پایه</h2>
+
+                    <p>پس از نصب، فایل پیکربندی Odoo در مسیر زیر قرار دارد:</p>
+
+                    <div class="code-block">
+                        <button class="code-copy"><i class="fas fa-copy"></i> کپی</button>
+                        <pre>C:\OdooMaster\odoo19\odoo.conf</pre>
+                    </div>
+
+                    <h3>تنظیمات مهم</h3>
+
+                    <div class="code-block">
+                        <button class="code-copy"><i class="fas fa-copy"></i> کپی</button>
+                        <pre>[options]
+; پورت HTTP
+http_port = 8069
+
+; تنظیمات دیتابیس
+db_host = localhost
+db_port = 5432
+db_user = odoo
+db_password = your_password
+
+; مسیر افزونه‌ها
+addons_path = C:\OdooMaster\odoo19\addons
+
+; لاگ
+logfile = C:\OdooMaster\logs\odoo.log
+log_level = info
+
+; Workers (برای Production)
+workers = 4</pre>
+                    </div>
+
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i>
+                        <div>پس از تغییر تنظیمات، سرویس Odoo را ریستارت کنید تا تغییرات اعمال شوند.</div>
+                    </div>
+
+                    <h2 id="database">مدیریت دیتابیس</h2>
+
+                    <p>PostgreSQL توسط OdooMaster به صورت خودکار نصب و پیکربندی می‌شود. برای مدیریت دیتابیس‌ها:</p>
+
+                    <h3>ایجاد دیتابیس جدید</h3>
+                    <ol>
+                        <li>مرورگر را باز کنید و به <code>http://localhost:8069</code> بروید</li>
+                        <li>روی "Manage Databases" کلیک کنید</li>
+                        <li>گزینه "Create" را انتخاب کنید</li>
+                        <li>نام دیتابیس و رمز عبور مدیر را وارد کنید</li>
+                    </ol>
+
+                    <h2 id="persian">فارسی‌سازی کامل</h2>
+
+                    <p>برای فارسی‌سازی کامل Odoo، مراحل زیر را دنبال کنید:</p>
+
+                    <ol>
+                        <li>وارد Odoo شوید و به <strong>Settings</strong> بروید</li>
+                        <li>در قسمت <strong>Languages</strong>، روی "Add a Language" کلیک کنید</li>
+                        <li>زبان <strong>Persian (IR) / فارسی</strong> را انتخاب کنید</li>
+                        <li>صفحه را رفرش کنید</li>
+                    </ol>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-lightbulb"></i>
+                        <div>برای تجربه بهتر، افزونه‌های فارسی OdooMaster را نصب کنید که شامل تقویم شمسی و گزارشات فارسی است.</div>
+                    </div>
+
+                    <h2 id="faq">سوالات متداول</h2>
+
+                    <h3>چگونه Odoo را ریستارت کنم؟</h3>
+                    <p>در OdooMaster روی دکمه "Restart" کلیک کنید، یا از Services ویندوز سرویس "OdooMaster" را ریستارت کنید.</p>
+
+                    <h3>پورت پیش‌فرض چیست؟</h3>
+                    <p>پورت پیش‌فرض HTTP عدد <strong>8069</strong> است. می‌توانید آن را در فایل تنظیمات تغییر دهید.</p>
+
+                    <h3>چگونه به نسخه جدید به‌روزرسانی کنم؟</h3>
+                    <p>از بخش "به‌روزرسانی" در نرم‌افزار یا دانلود نسخه جدید از سایت استفاده کنید. دیتابیس‌ها حفظ می‌شوند.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <a href="index.html" class="logo">
+                        <div class="logo-icon">
+                            <i class="fas fa-cube"></i>
+                        </div>
+                        <span>Odoo<strong>Master</strong></span>
+                    </a>
+                    <p>نصاب هوشمند Odoo</p>
+                </div>
+                <div class="footer-links">
+                    <a href="downloads.html">دانلود</a>
+                    <a href="docs.html">مستندات</a>
+                    <a href="support.html">پشتیبانی</a>
+                    <a href="about.html">درباره ما</a>
+                </div>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-telegram"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© ۱۴۰۴ OdooMaster. تمامی حقوق محفوظ است.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/particles.min.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        // Sidebar navigation
+        document.querySelectorAll('.sidebar-links a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                document.querySelectorAll('.sidebar-links a').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+            });
+        });
+
+        // Code copy functionality
+        document.querySelectorAll('.code-copy').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const code = btn.nextElementSibling.textContent;
+                navigator.clipboard.writeText(code).then(() => {
+                    btn.innerHTML = '<i class="fas fa-check"></i> کپی شد!';
+                    setTimeout(() => {
+                        btn.innerHTML = '<i class="fas fa-copy"></i> کپی';
+                    }, 2000);
+                });
+            });
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+{
+  "generated_at": "2025-12-26",
+  "platform": "windows",
+  "versions": [
+    {
+      "odoo_major": 19,
+      "badge": "جدید",
+      "items": [
+        {
+          "id": "odoo19-full-offline",
+          "title": "نسخه کامل آفلاین",
+          "description": "پکیج کامل Release شامل offline.7z و soft.7z + UI نصب. مناسب نصب بدون اینترنت.",
+          "featured": true,
+          "version": "1.0.0",
+          "file_type": "zip",
+          "size_hint": "~800MB تا 1GB",
+          "requires_login": true,
+          "requires_purchase": true,
+          "file_name": "odoo19-full-offline.zip",
+          "download_url": "",
+          "sha256": "",
+          "features": [
+            "Python + PostgreSQL + Git + NodeJS + wheels (آفلاین)",
+            "UI محلی نصب (web)",
+            "Extract خودکار offline.7z و soft.7z",
+            "مناسب مشتری و نصب سریع"
+          ]
+        },
+        {
+          "id": "odoo19-lite-online",
+          "title": "نسخه سبک آنلاین",
+          "description": "پکیج سبک نصاب محلی (برای زمانی که اینترنت دارید). دانلود/نصب وابستگی‌ها در زمان اجرا. بعد از دانلود، Extract کنید و start_ui_online.bat را اجرا کنید. فایل لایسنس (.oml) را کنار نصاب بگذارید تا خودکار فعال شود.",
+          "featured": false,
+          "version": "1.0.0",
+          "file_type": "zip",
+          "size_hint": "~130KB",
+          "requires_login": true,
+          "requires_purchase": true,
+          "file_name": "odoo19-lite-online.zip",
+          "download_url": "",
+          "sha256": "37b2e4abad509491e82a0d47902a4830b213b5ee4fae68cb4d694e07f0f802ae",
+          "features": [
+            "حجم کم (~130KB)",
+            "دانلود هوشمند وابستگی‌ها",
+            "اجرای UI محلی روی http://127.0.0.1:5000",
+            "پشتیبانی از فایل لایسنس امضاشده (v2)"
+          ]
+        },
+        {
+          "id": "addons-fa",
+          "title": "افزونه‌های فارسی",
+          "description": "پکیج افزونه‌های فارسی‌سازی/بومی‌سازی (اختیاری)",
+          "featured": false,
+          "version": "2.0",
+          "file_type": "zip",
+          "size_hint": "~50MB",
+          "requires_login": false,
+          "requires_purchase": false,
+          "file_name": "",
+          "download_url": "",
+          "sha256": "",
+          "features": [
+            "زبان فارسی",
+            "تقویم شمسی",
+            "گزارش‌ها و فونت‌ها"
+          ]
+        }
+      ]
+    },
+    {
+      "odoo_major": 18,
+      "items": []
+    },
+    {
+      "odoo_major": 17,
+      "items": []
+    },
+    {
+      "odoo_major": 16,
+      "items": []
+    }
+  ]
+}

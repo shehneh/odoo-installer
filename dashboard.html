@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پنل کاربری | OdooMaster</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/components.css">
+    <script>
+        // Apply theme immediately (dashboard styles + main.css variables rely on body.light-theme)
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.add('light-theme');
+        }
+    </script>
+</head>
+<body class="dashboard-page">
+    <script>
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-theme');
+        }
+    </script>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-cube"></i>
+                </div>
+                <span class="logo-text">Odoo<strong>Master</strong></span>
+            </a>
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <span class="nav-section-title" data-i18n="dashboard.mainMenu">منو اصلی</span>
+                <a href="dashboard.html" class="nav-item active">
+                    <i class="fas fa-home"></i>
+                    <span data-i18n="dashboard.dashboard">داشبورد</span>
+                </a>
+                <a href="#licenses" class="nav-item">
+                    <i class="fas fa-key"></i>
+                    <span data-i18n="nav.licenses">لایسنس‌ها</span>
+                    <span class="nav-badge">۲</span>
+                </a>
+                <a href="#downloads" class="nav-item">
+                    <i class="fas fa-download"></i>
+                    <span data-i18n="nav.downloads">دانلودها</span>
+                </a>
+                <a href="#" class="nav-item disabled-link" aria-disabled="true" tabindex="-1" title="به‌زودی فعال می‌شود">
+                    <i class="fas fa-headset"></i>
+                    <span data-i18n="nav.support">پشتیبانی</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <span class="nav-section-title" data-i18n="dashboard.financial">مالی</span>
+                <a href="#" class="nav-item disabled-link" aria-disabled="true" tabindex="-1" title="به‌زودی فعال می‌شود">
+                    <i class="fas fa-file-invoice"></i>
+                    <span data-i18n="dashboard.invoices">فاکتورها</span>
+                </a>
+                <a href="#" class="nav-item disabled-link" aria-disabled="true" tabindex="-1" title="به‌زودی فعال می‌شود">
+                    <i class="fas fa-wallet"></i>
+                    <span data-i18n="dashboard.wallet">کیف پول</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <span class="nav-section-title" data-i18n="dashboard.account">حساب کاربری</span>
+                <a href="#" class="nav-item disabled-link" aria-disabled="true" tabindex="-1" title="به‌زودی فعال می‌شود">
+                    <i class="fas fa-user"></i>
+                    <span data-i18n="dashboard.profile">پروفایل</span>
+                </a>
+                <a href="#" class="nav-item disabled-link" aria-disabled="true" tabindex="-1" title="به‌زودی فعال می‌شود">
+                    <i class="fas fa-cog"></i>
+                    <span data-i18n="dashboard.settings">تنظیمات</span>
+                </a>
+            </div>
+
+            <!-- Admin Section (Visible only for admins) -->
+            <div class="nav-section" id="adminNavSection" style="display: none;">
+                <span class="nav-section-title" data-i18n="dashboard.management">مدیریت</span>
+                <a href="#admin" class="nav-item admin-link" id="adminNavLink">
+                    <i class="fas fa-shield-alt"></i>
+                    <span data-i18n="dashboard.adminPanel">پنل مدیریت</span>
+                </a>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-card">
+                <div class="user-avatar">
+                    <img src="https://ui-avatars.com/api/?name=کاربر+تست&background=714B67&color=fff" alt="User">
+                    <span class="status-dot online"></span>
+                </div>
+                <div class="user-info">
+                    <strong>کاربر تست</strong>
+                    <span>پلن حرفه‌ای</span>
+                </div>
+                <button class="logout-btn" title="خروج">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Bar -->
+        <header class="topbar">
+            <div class="topbar-right">
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" data-i18n-placeholder="dashboard.search" placeholder="Search...">
+                </div>
+            </div>
+            <div class="topbar-left">
+                <div class="lang-switcher-topbar" id="langSwitcherTopbar">
+                    <!-- Language switcher will be inserted here by JS -->
+                </div>
+                <button class="topbar-btn" id="notifBtn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notif-badge">3</span>
+                </button>
+                <button class="topbar-btn" id="themeBtn" title="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-content">
+            <!-- Welcome Banner -->
+            <div class="welcome-banner glass">
+                <div class="welcome-content">
+                    <h1><span data-i18n="dashboard.hello">سلام،</span> <span class="gradient-text" id="userName">کاربر عزیز</span> 👋</h1>
+                    <p data-i18n="dashboard.welcomeText">Welcome! Use your dashboard to manage licenses and download the installer.</p>
+                </div>
+                <div class="welcome-illustration">
+                    <div class="illustration-circle"></div>
+                    <i class="fas fa-rocket"></i>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card glass">
+                    <div class="stat-icon blue">
+                        <i class="fas fa-key"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value">۲</span>
+                        <span class="stat-label" data-i18n="dashboard.activeLicenses">لایسنس فعال</span>
+                    </div>
+                    <div class="stat-trend up">
+                        <i class="fas fa-arrow-up"></i>
+                        +۱
+                    </div>
+                </div>
+                <div class="stat-card glass">
+                    <div class="stat-icon green">
+                        <i class="fas fa-download"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value">۵</span>
+                        <span class="stat-label" data-i18n="dashboard.downloads">دانلود</span>
+                    </div>
+                    <div class="stat-trend up">
+                        <i class="fas fa-arrow-up"></i>
+                        +۲
+                    </div>
+                </div>
+                <div class="stat-card glass">
+                    <div class="stat-icon orange">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value">۲۸</span>
+                        <span class="stat-label" data-i18n="dashboard.daysRemaining">روز باقیمانده</span>
+                    </div>
+                </div>
+                <div class="stat-card glass">
+                    <div class="stat-icon purple">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value">۱</span>
+                        <span class="stat-label" data-i18n="dashboard.openTickets">تیکت باز</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Grid -->
+            <div class="dashboard-grid">
+                <!-- System Check & Install Section (NEW) -->
+                <div class="card glass system-check-card" style="grid-column: 1 / -1;">
+                    <div class="card-header">
+                        <h3><i class="fas fa-stethoscope"></i> <span data-i18n="dashboard.systemCheck">تست سیستم و نصب نیازمندی‌ها</span></h3>
+                        <span class="section-badge" id="systemStatus" data-i18n="dashboard.readyToTest">آماده تست</span>
+                    </div>
+                    <p style="color: var(--text-secondary); margin-bottom: 20px;" data-i18n="dashboard.systemCheckDesc">
+                        قبل از نصب Odoo، سیستم شما بررسی می‌شود و نیازمندی‌های ناموجود از منابع رسمی دانلود و نصب می‌شوند.
+                    </p>
+                    <div class="system-check-grid" id="systemCheckGrid">
+                        <div class="check-item" data-check="os">
+                            <div class="check-icon"><i class="fas fa-desktop"></i></div>
+                            <div class="check-info">
+                                <h4>سیستم عامل</h4>
+                                <p>Windows 10/11 64-bit</p>
+                            </div>
+                            <span class="check-status">در انتظار...</span>
+                        </div>
+                        <div class="check-item" data-check="python">
+                            <div class="check-icon"><i class="fab fa-python"></i></div>
+                            <div class="check-info">
+                                <h4>Python 3.11</h4>
+                                <p>دانلود از python.org</p>
+                            </div>
+                            <span class="check-status">در انتظار...</span>
+                        </div>
+                        <div class="check-item" data-check="postgresql">
+                            <div class="check-icon"><i class="fas fa-database"></i></div>
+                            <div class="check-info">
+                                <h4>PostgreSQL 16</h4>
+                                <p>دانلود از postgresql.org</p>
+                            </div>
+                            <span class="check-status">در انتظار...</span>
+                        </div>
+                        <div class="check-item" data-check="git">
+                            <div class="check-icon"><i class="fab fa-git-alt"></i></div>
+                            <div class="check-info">
+                                <h4>Git</h4>
+                                <p>دانلود از git-scm.com</p>
+                            </div>
+                            <span class="check-status">در انتظار...</span>
+                        </div>
+                        <div class="check-item" data-check="nodejs">
+                            <div class="check-icon"><i class="fab fa-node-js"></i></div>
+                            <div class="check-info">
+                                <h4>Node.js LTS</h4>
+                                <p>دانلود از nodejs.org</p>
+                            </div>
+                            <span class="check-status">در انتظار...</span>
+                        </div>
+                        <div class="check-item" data-check="vcredist">
+                            <div class="check-icon"><i class="fas fa-cogs"></i></div>
+                            <div class="check-info">
+                                <h4>VC++ Redistributable</h4>
+                                <p>دانلود از microsoft.com</p>
+                            </div>
+                            <span class="check-status">در انتظار...</span>
+                        </div>
+                    </div>
+                    <div class="action-buttons" style="margin-top: 24px; display: flex; gap: 12px; justify-content: center;">
+                        <button class="btn btn-primary btn-glow" id="startSystemCheck">
+                            <i class="fas fa-search"></i>
+                            <span data-i18n="dashboard.startSystemCheck">شروع بررسی سیستم</span>
+                        </button>
+                        <button class="btn btn-outline" id="installMissing" style="display: none;">
+                            <i class="fas fa-download"></i>
+                            <span data-i18n="dashboard.installMissing">نصب نیازمندی‌ها</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card glass quick-actions">
+                    <div class="card-header">
+                        <h3><i class="fas fa-bolt"></i> <span data-i18n="dashboard.quickAccess">دسترسی سریع</span></h3>
+                    </div>
+                    <div class="actions-grid">
+                        <a href="#downloads" class="action-btn">
+                            <div class="action-icon blue">
+                                <i class="fas fa-download"></i>
+                            </div>
+                            <span data-i18n="dashboard.downloadInstaller">دانلود نصاب</span>
+                        </a>
+                        <a href="#licenses" class="action-btn">
+                            <div class="action-icon green">
+                                <i class="fas fa-plus"></i>
+                            </div>
+                            <span data-i18n="dashboard.buyLicense">خرید لایسنس</span>
+                        </a>
+                        <a href="#" class="action-btn disabled-link" aria-disabled="true" tabindex="-1" title="به‌زودی فعال می‌شود">
+                            <div class="action-icon orange">
+                                <i class="fas fa-comment-dots"></i>
+                            </div>
+                            <span data-i18n="dashboard.sendTicket">ارسال تیکت</span>
+                        </a>
+                        <a href="#" class="action-btn">
+                            <div class="action-icon purple">
+                                <i class="fas fa-book"></i>
+                            </div>
+                            <span data-i18n="dashboard.documentation">مستندات</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Active Licenses -->
+                <div class="card glass licenses-card" id="licenses">
+                    <div class="card-header">
+                        <h3><i class="fas fa-key"></i> <span data-i18n="dashboard.activeLicensesTitle">لایسنس‌های فعال</span></h3>
+                        <a href="#licenses" class="card-link" data-i18n="dashboard.viewAll">مشاهده همه</a>
+                    </div>
+                    <div class="licenses-list">
+                        <div class="license-item">
+                            <div class="license-info">
+                                <div class="license-icon pro">
+                                    <i class="fas fa-gem"></i>
+                                </div>
+                                <div class="license-details">
+                                    <strong>پلن حرفه‌ای</strong>
+                                    <span>XXXX-XXXX-XXXX-1234</span>
+                                </div>
+                            </div>
+                            <div class="license-status">
+                                <span class="status-badge active">فعال</span>
+                                <span class="expiry">۲۸ روز مانده</span>
+                            </div>
+                            <div class="license-actions">
+                                <button class="icon-btn" title="کپی کلید">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button class="icon-btn" title="جزئیات">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="license-item">
+                            <div class="license-info">
+                                <div class="license-icon starter">
+                                    <i class="fas fa-seedling"></i>
+                                </div>
+                                <div class="license-details">
+                                    <strong>پلن رایگان</strong>
+                                    <span>XXXX-XXXX-XXXX-5678</span>
+                                </div>
+                            </div>
+                            <div class="license-status">
+                                <span class="status-badge active">فعال</span>
+                                <span class="expiry">بدون انقضا</span>
+                            </div>
+                            <div class="license-actions">
+                                <button class="icon-btn" title="کپی کلید">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button class="icon-btn" title="ارتقا">
+                                    <i class="fas fa-arrow-up"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Panel (Embedded) -->
+                <div class="card glass" id="admin" style="display: none; padding: 0; overflow: hidden;">
+                    <div class="card-header" style="padding: 18px 18px 0 18px; margin-bottom: 12px;">
+                        <h3><i class="fas fa-shield-alt"></i> پنل مدیریت</h3>
+                        <a href="#" class="card-link" id="closeAdminPanel">بستن</a>
+                    </div>
+                    <div style="padding: 0 18px 18px 18px;">
+                        <iframe
+                            id="adminPanelFrame"
+                            title="Admin Panel"
+                            src="admin.html"
+                            style="width: 100%; height: 75vh; border: 0; border-radius: 14px; background: transparent;"
+                            loading="lazy"
+                        ></iframe>
+                    </div>
+                </div>
+
+                <!-- Download Section -->
+                <div class="card glass download-card" id="downloads">
+                    <div class="card-header">
+                        <h3><i class="fas fa-download"></i> <span data-i18n="dashboard.downloadInstaller">دانلود نصاب</span></h3>
+                    </div>
+                    <div class="download-content">
+                        <div class="download-info">
+                            <div class="download-icon">
+                                <i class="fas fa-cube"></i>
+                            </div>
+                            <div class="download-details">
+                                <strong>OdooMaster Installer v2.0</strong>
+                                <span>Windows 64-bit • 520 MB</span>
+                            </div>
+                        </div>
+                        <div class="download-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-calendar"></i>
+                                <span data-i18n="dashboard.lastUpdate">آخرین بروزرسانی:</span> 2025/01/05
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-code-branch"></i>
+                                Odoo 19 Community
+                            </div>
+                        </div>
+                        <button class="btn btn-primary btn-block btn-glow download-btn" id="downloadBtn">
+                            <i class="fas fa-download"></i>
+                            <span data-i18n="dashboard.downloadInstaller">دانلود نصاب</span>
+                        </button>
+                        <div class="download-progress" id="downloadProgress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 0%"></div>
+                            </div>
+                            <span class="progress-text" data-i18n="dashboard.preparing">در حال آماده‌سازی...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="card glass activity-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-history"></i> <span data-i18n="dashboard.recentActivity">فعالیت‌های اخیر</span></h3>
+                    </div>
+                    <div class="activity-list">
+                        <div class="activity-item">
+                            <div class="activity-icon green">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="activity-content">
+                                <strong>لایسنس فعال شد</strong>
+                                <span>پلن حرفه‌ای با موفقیت فعال شد</span>
+                            </div>
+                            <span class="activity-time">۲ ساعت پیش</span>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon blue">
+                                <i class="fas fa-download"></i>
+                            </div>
+                            <div class="activity-content">
+                                <strong>دانلود نصاب</strong>
+                                <span>نسخه ۲.۰ دانلود شد</span>
+                            </div>
+                            <span class="activity-time">دیروز</span>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon orange">
+                                <i class="fas fa-credit-card"></i>
+                            </div>
+                            <div class="activity-content">
+                                <strong>پرداخت موفق</strong>
+                                <span>۴۹۰,۰۰۰ تومان</span>
+                            </div>
+                            <span class="activity-time">۳ روز پیش</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gamification Section -->
+            <div class="gamification-section">
+                <div class="card glass achievements-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-trophy"></i> <span data-i18n="dashboard.achievements">دستاوردها</span></h3>
+                        <span class="achievement-count">3/12</span>
+                    </div>
+                    <div class="achievements-grid">
+                        <div class="achievement unlocked">
+                            <div class="achievement-icon">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <span data-i18n="dashboard.firstStep">اولین قدم</span>
+                        </div>
+                        <div class="achievement unlocked">
+                            <div class="achievement-icon">
+                                <i class="fas fa-download"></i>
+                            </div>
+                            <span data-i18n="dashboard.firstDownload">اولین دانلود</span>
+                        </div>
+                        <div class="achievement unlocked">
+                            <div class="achievement-icon">
+                                <i class="fas fa-key"></i>
+                            </div>
+                            <span data-i18n="dashboard.licenseHolder">لایسنس‌دار</span>
+                        </div>
+                        <div class="achievement locked">
+                            <div class="achievement-icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span>VIP</span>
+                        </div>
+                        <div class="achievement locked">
+                            <div class="achievement-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <span data-i18n="dashboard.referrer">معرف</span>
+                        </div>
+                        <div class="achievement locked">
+                            <div class="achievement-icon">
+                                <i class="fas fa-crown"></i>
+                            </div>
+                            <span data-i18n="dashboard.legendary">افسانه‌ای</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card glass level-card">
+                    <div class="level-header">
+                        <div class="level-badge">
+                            <i class="fas fa-medal"></i>
+                            <span><span data-i18n="dashboard.level">سطح</span> 3</span>
+                        </div>
+                        <div class="xp-info">
+                            <strong>750 XP</strong>
+                            <span><span data-i18n="dashboard.toNextLevel">تا سطح بعدی:</span> 250 XP</span>
+                        </div>
+                    </div>
+                    <div class="level-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 75%"></div>
+                        </div>
+                    </div>
+                    <div class="level-rewards">
+                        <span data-i18n="dashboard.nextLevelReward">پاداش سطح بعدی:</span>
+                        <div class="reward-preview">
+                            <i class="fas fa-gift"></i>
+                            <span data-i18n="dashboard.discount10">10% تخفیف خرید بعدی</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Notification Panel -->
+    <div class="notification-panel" id="notifPanel">
+        <div class="notif-header">
+            <h4 data-i18n="dashboard.notifications">اعلان‌ها</h4>
+            <button class="mark-read" data-i18n="dashboard.markAllRead">همه خوانده شد</button>
+        </div>
+        <div class="notif-list">
+            <div class="notif-item unread">
+                <div class="notif-icon green">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="notif-content">
+                    <strong>نصب موفق!</strong>
+                    <p>Odoo با موفقیت نصب شد</p>
+                    <span class="notif-time">۵ دقیقه پیش</span>
+                </div>
+            </div>
+            <div class="notif-item unread">
+                <div class="notif-icon blue">
+                    <i class="fas fa-gift"></i>
+                </div>
+                <div class="notif-content">
+                    <strong>هدیه ویژه!</strong>
+                    <p>۷ روز اشتراک رایگان فعال شد</p>
+                    <span class="notif-time">۱ ساعت پیش</span>
+                </div>
+            </div>
+            <div class="notif-item">
+                <div class="notif-icon orange">
+                    <i class="fas fa-sync"></i>
+                </div>
+                <div class="notif-content">
+                    <strong>بروزرسانی جدید</strong>
+                    <p>نسخه ۲.۱ منتشر شد</p>
+                    <span class="notif-time">دیروز</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/i18n.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/installer.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script>
+        // Load real user data from API
+        (async function loadDashboardData() {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                // Not logged in - redirect to login
+                window.location.href = 'login.html?redirect=dashboard.html';
+                return;
+            }
+
+            try {
+                const res = await API.getMe();
+                if (!res || !res.user) {
+                    localStorage.removeItem('authToken');
+                    window.location.href = 'login.html?redirect=dashboard.html';
+                    return;
+                }
+
+                const user = res.user;
+                const licenses = res.licenses || [];
+                const stats = res.stats || {};
+
+                // Update user name in welcome banner
+                const welcomeTitle = document.querySelector('.welcome-content h1');
+                if (welcomeTitle) {
+                    welcomeTitle.innerHTML = `سلام، <span class="gradient-text">${user.name || 'کاربر'}</span> 👋`;
+                }
+
+                // Update sidebar user card
+                const userCard = document.querySelector('.user-card');
+                if (userCard) {
+                    const avatar = userCard.querySelector('.user-avatar img');
+                    const nameEl = userCard.querySelector('.user-info strong');
+                    const planEl = userCard.querySelector('.user-info span');
+                    
+                    if (avatar) avatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=714B67&color=fff`;
+                    if (nameEl) nameEl.textContent = user.name || 'کاربر';
+                    
+                    // Find active plan
+                    const activeLicense = licenses.find(l => l.status === 'active');
+                    if (planEl) planEl.textContent = activeLicense ? (activeLicense.plan || 'پلن رایگان') : 'بدون پلن';
+                }
+
+                // Update stats cards
+                const statCards = document.querySelectorAll('.stat-card');
+                if (statCards.length >= 4) {
+                    // Active licenses
+                    const licenseValue = statCards[0].querySelector('.stat-value');
+                    if (licenseValue) licenseValue.textContent = toPersianNum(stats.active_licenses || 0);
+
+                    // Downloads
+                    const downloadValue = statCards[1].querySelector('.stat-value');
+                    if (downloadValue) downloadValue.textContent = toPersianNum(stats.total_downloads || 0);
+
+                    // Days remaining (find soonest expiring license)
+                    const daysValue = statCards[2].querySelector('.stat-value');
+                    if (daysValue) {
+                        const activeLicenses = licenses.filter(l => l.status === 'active' && l.expires_at);
+                        let minDays = null;
+                        activeLicenses.forEach(l => {
+                            const exp = new Date(l.expires_at);
+                            const now = new Date();
+                            const days = Math.ceil((exp - now) / (1000 * 60 * 60 * 24));
+                            if (days > 0 && (minDays === null || days < minDays)) minDays = days;
+                        });
+                        daysValue.textContent = minDays !== null ? toPersianNum(minDays) : '—';
+                    }
+
+                    // Open tickets (placeholder - would need tickets API)
+                    const ticketValue = statCards[3].querySelector('.stat-value');
+                    if (ticketValue) ticketValue.textContent = toPersianNum(0);
+                }
+
+                // Update licenses list
+                const licensesList = document.querySelector('.licenses-list');
+                if (licensesList && licenses.length > 0) {
+                    licensesList.innerHTML = licenses.slice(0, 3).map(lic => {
+                        const isPro = (lic.plan || '').toLowerCase().includes('pro') || (lic.plan || '').includes('حرفه');
+                        const iconClass = isPro ? 'pro' : 'starter';
+                        const icon = isPro ? 'fa-gem' : 'fa-seedling';
+                        const planName = lic.plan || 'پلن رایگان';
+                        const keyDisplay = lic.key ? lic.key.substring(0, 4) + '-XXXX-XXXX-' + lic.key.slice(-4) : '—';
+                        
+                        let expiryText = 'بدون انقضا';
+                        if (lic.expires_at) {
+                            const exp = new Date(lic.expires_at);
+                            const now = new Date();
+                            const days = Math.ceil((exp - now) / (1000 * 60 * 60 * 24));
+                            expiryText = days > 0 ? toPersianNum(days) + ' روز مانده' : 'منقضی شده';
+                        }
+
+                        return `
+                            <div class="license-item">
+                                <div class="license-info">
+                                    <div class="license-icon ${iconClass}">
+                                        <i class="fas ${icon}"></i>
+                                    </div>
+                                    <div class="license-details">
+                                        <strong>${planName}</strong>
+                                        <span>${keyDisplay}</span>
+                                    </div>
+                                </div>
+                                <div class="license-status">
+                                    <span class="status-badge ${lic.status === 'active' ? 'active' : 'expired'}">${lic.status === 'active' ? 'فعال' : 'غیرفعال'}</span>
+                                    <span class="expiry">${expiryText}</span>
+                                </div>
+                                <div class="license-actions">
+                                    <button class="icon-btn" title="کپی کلید" onclick="navigator.clipboard.writeText('${lic.key || ''}')">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                    <button class="icon-btn" title="جزئیات">
+                                        <i class="fas fa-info-circle"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else if (licensesList) {
+                    licensesList.innerHTML = '<p style="text-align:center; color: var(--text-secondary); padding: 20px;">هیچ لایسنسی ندارید. <a href="payment.html">خرید کنید</a></p>';
+                }
+
+                // Update sidebar license badge
+                const licenseBadge = document.querySelector('.nav-item[href="#licenses"] .nav-badge') || document.querySelector('.nav-item[href="licenses.html"] .nav-badge');
+                if (licenseBadge) licenseBadge.textContent = toPersianNum(stats.active_licenses || 0);
+
+                // Update XP/Level card
+                const levelBadge = document.querySelector('.level-badge span');
+                if (levelBadge) levelBadge.textContent = 'سطح ' + toPersianNum(user.level || 1);
+
+                const xpInfo = document.querySelector('.xp-info strong');
+                if (xpInfo) xpInfo.textContent = toPersianNum(user.xp || 0) + ' XP';
+
+            } catch (err) {
+                console.error('Failed to load dashboard data:', err);
+            }
+        })();
+
+        function toPersianNum(num) {
+            const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+            return String(num).replace(/\d/g, d => persianDigits[d]);
+        }
+
+        // System Check Integration
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkBtn = document.getElementById('startSystemCheck');
+            const installBtn = document.getElementById('installMissing');
+            const statusBadge = document.getElementById('systemStatus');
+            
+            if (checkBtn) {
+                checkBtn.addEventListener('click', async function() {
+                    checkBtn.disabled = true;
+                    checkBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال بررسی...';
+                    statusBadge.textContent = 'در حال بررسی...';
+                    statusBadge.style.background = 'var(--primary)';
+                    statusBadge.style.color = 'white';
+                    
+                    // Run system check
+                    await OnlineInstaller.checkSystem();
+                    
+                    // Update UI based on results
+                    const results = OnlineInstaller.state.checkResults;
+                    const grid = document.getElementById('systemCheckGrid');
+                    
+                    for (const [name, result] of Object.entries(results)) {
+                        const item = grid.querySelector(`[data-check="${name}"]`);
+                        if (item) {
+                            item.classList.remove('checking', 'success', 'warning', 'error');
+                            item.classList.add(result.status);
+                            item.querySelector('.check-status').textContent = 
+                                result.installed ? result.version : (result.message || 'نصب نشده');
+                        }
+                    }
+                    
+                    // Show install button if needed
+                    if (OnlineInstaller.state.installQueue.length > 0) {
+                        installBtn.style.display = 'inline-flex';
+                        statusBadge.textContent = `${OnlineInstaller.state.installQueue.length} مورد نیاز به نصب`;
+                        statusBadge.style.background = '#ff5f57';
+                    } else {
+                        statusBadge.textContent = 'آماده نصب Odoo ✓';
+                        statusBadge.style.background = '#28ca42';
+                    }
+                    
+                    checkBtn.disabled = false;
+                    checkBtn.innerHTML = '<i class="fas fa-redo"></i> بررسی مجدد';
+                });
+            }
+            
+            if (installBtn) {
+                installBtn.addEventListener('click', function() {
+                    // Show download links for missing items
+                    const queue = OnlineInstaller.state.installQueue;
+                    let message = 'لینک‌های دانلود رسمی:\\n\\n';
+                    
+                    queue.forEach(item => {
+                        message += `${item.name} (${item.size}):\\n${item.url}\\n\\n`;
+                    });
+                    
+                    message += 'پس از نصب، دکمه "بررسی مجدد" را بزنید.';
+                    
+                    // Open first download
+                    if (queue.length > 0) {
+                        window.open(queue[0].url, '_blank');
+                    }
+                    
+                    alert(message);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
