@@ -624,8 +624,9 @@ def activate_license():
     if license_data['status'] != 'active':
         return jsonify({'error': 'این لایسنس فعال نیست'}), 400
     
-    # Check expiration
-    if datetime.fromisoformat(license_data['expires_at']) < datetime.now():
+    # Check expiration (expires_at can be null for unlimited licenses)
+    exp = license_data.get('expires_at')
+    if exp and datetime.fromisoformat(exp) < datetime.now():
         license_data['status'] = 'expired'
         save_json(LICENSES_FILE, licenses)
         return jsonify({'error': 'این لایسنس منقضی شده است'}), 400
@@ -674,8 +675,9 @@ def verify_license():
     if license_data['status'] != 'active':
         return jsonify({'valid': False, 'error': 'لایسنس فعال نیست'}), 400
     
-    # Check expiration
-    if datetime.fromisoformat(license_data['expires_at']) < datetime.now():
+    # Check expiration (expires_at can be null for unlimited licenses)
+    exp = license_data.get('expires_at')
+    if exp and datetime.fromisoformat(exp) < datetime.now():
         return jsonify({'valid': False, 'error': 'لایسنس منقضی شده'}), 400
     
     # Check hardware if provided
@@ -977,6 +979,8 @@ def get_default_plans():
             'features_en': ['Install on 1 system', 'Email support', '6 months updates', 'Odoo 19 version'],
             'max_activations': 1,
             'support_level': 'email',
+            'duration_unit': 'days',
+            'duration_value': 180,
             'duration_days': 180,
             'popular': False,
             'active': True,
@@ -992,6 +996,8 @@ def get_default_plans():
             'features_en': ['Install on 3 systems', 'Phone support', '1 year updates', 'All Odoo versions', 'Persian add-ons'],
             'max_activations': 3,
             'support_level': 'phone',
+            'duration_unit': 'days',
+            'duration_value': 365,
             'duration_days': 365,
             'popular': True,
             'active': True,
@@ -1007,12 +1013,49 @@ def get_default_plans():
             'features_en': ['Unlimited installs', '24/7 support', 'Lifetime updates', 'All Odoo versions', 'Persian add-ons', 'Custom training', 'Setup & installation'],
             'max_activations': 999,
             'support_level': 'priority',
+            'duration_unit': 'days',
+            'duration_value': 730,
             'duration_days': 730,
             'popular': False,
             'active': True,
             'sort_order': 3
         }
     }
+
+
+def _plan_duration_delta(plan: dict) -> timedelta | None:
+    """Return timedelta for plan duration.
+
+    Supports:
+      - duration_unit: 'hours'|'days'
+      - duration_value: int
+    Backward compatible with duration_days.
+    Returns None for unlimited duration.
+    """
+    if not plan:
+        return None
+
+    unit = (plan.get('duration_unit') or '').strip().lower()
+    value = plan.get('duration_value', None)
+
+    # Backward compat
+    if not unit:
+        unit = 'days'
+    if value is None:
+        value = plan.get('duration_days', None)
+
+    try:
+        value_int = int(value)
+    except Exception:
+        value_int = 0
+
+    if value_int <= 0:
+        return None
+
+    if unit == 'hours':
+        return timedelta(hours=value_int)
+    # default to days
+    return timedelta(days=value_int)
 
 def load_plans():
     """Load plans from JSON file or return defaults"""
@@ -1072,6 +1115,11 @@ def admin_create_plan():
         return jsonify({'error': 'این شناسه قبلاً استفاده شده است'}), 400
     
     # Build new plan
+    duration_unit = (data.get('duration_unit') or '').strip().lower() or 'days'
+    duration_value = data.get('duration_value', None)
+    if duration_value is None:
+        duration_value = data.get('duration_days', 30)
+
     new_plan = {
         'id': plan_id,
         'name': data.get('name', ''),
@@ -1082,7 +1130,9 @@ def admin_create_plan():
         'features_en': data.get('features_en', []),
         'max_activations': int(data.get('max_activations', 1)),
         'support_level': data.get('support_level', 'email'),
-        'duration_days': int(data.get('duration_days', 30)),
+        'duration_unit': duration_unit if duration_unit in ('hours', 'days') else 'days',
+        'duration_value': int(duration_value),
+        'duration_days': int(data.get('duration_days', duration_value)),
         'popular': bool(data.get('popular', False)),
         'active': bool(data.get('active', True)),
         'sort_order': int(data.get('sort_order', len(plans) + 1))
@@ -1125,8 +1175,19 @@ def admin_update_plan(plan_id):
         plan['max_activations'] = int(data['max_activations'])
     if 'support_level' in data:
         plan['support_level'] = data['support_level']
+    if 'duration_unit' in data:
+        unit = (data.get('duration_unit') or '').strip().lower()
+        if unit in ('hours', 'days'):
+            plan['duration_unit'] = unit
+    if 'duration_value' in data:
+        plan['duration_value'] = int(data['duration_value'])
     if 'duration_days' in data:
+        # Backward-compatible input
         plan['duration_days'] = int(data['duration_days'])
+        if 'duration_value' not in plan:
+            plan['duration_value'] = int(data['duration_days'])
+        if 'duration_unit' not in plan:
+            plan['duration_unit'] = 'days'
     if 'popular' in data:
         plan['popular'] = bool(data['popular'])
     if 'active' in data:
@@ -1246,8 +1307,8 @@ def purchase_plan():
     while key in licenses:
         key = generate_license_key()
 
-    duration_days = int(plan.get('duration_days') or 365)
-    expires_at = (now + timedelta(days=duration_days)).isoformat()
+    delta = _plan_duration_delta(plan)
+    expires_at = (now + delta).isoformat() if delta else None
 
     paid_license = {
         'key': key,
@@ -1272,19 +1333,17 @@ def purchase_plan():
     save_json(LICENSES_FILE, licenses)
     
     # Generate signed license file immediately
-    license_file_bundle = None
-    if CRYPTO_AVAILABLE and LICENSE_PRIVATE_KEY_FILE.exists():
-        payload = {
-            'v': 2,
-            'license_id': key,
-            'plan': plan.get('id'),
-            'issued_to': paid_license['user_email'],
-            'hardware_id': hardware_id,
-            'expires_at': expires_at,
-            'issued_at': datetime.utcnow().replace(microsecond=0).isoformat() + 'Z',
-            'nonce': secrets.token_hex(8),
-        }
-        license_file_bundle = _sign_license_v2(payload)
+    payload = {
+        'v': 2,
+        'license_id': key,
+        'plan': plan.get('id'),
+        'issued_to': paid_license['user_email'],
+        'hardware_id': hardware_id,
+        'expires_at': expires_at,
+        'issued_at': datetime.utcnow().replace(microsecond=0).isoformat() + 'Z',
+        'nonce': secrets.token_hex(8),
+    }
+    license_file_bundle = _sign_license_v2(payload)
 
     return jsonify({
         'success': True,

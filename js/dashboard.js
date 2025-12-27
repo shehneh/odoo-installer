@@ -466,7 +466,7 @@ function initSidebar() {
 
     const updateActiveFromLocation = () => {
         const hash = window.location.hash;
-        if (hash === '#licenses' || hash === '#downloads') {
+        if (hash === '#licenses' || hash === '#downloads' || hash === '#admin') {
             setActiveLink(hash);
             scrollToHashTarget(hash);
             return;
@@ -477,7 +477,7 @@ function initSidebar() {
     };
 
     // Intercept in-dashboard navigation
-    const internalTargets = new Set(['#licenses', '#downloads']);
+    const internalTargets = new Set(['#licenses', '#downloads', '#admin']);
     document.addEventListener('click', (e) => {
         const a = e.target?.closest?.('a');
         if (!a) return;
@@ -489,11 +489,112 @@ function initSidebar() {
         setActiveLink(href);
         // Update URL hash without adding lots of history entries
         history.replaceState(null, '', href);
+        if (href === '#admin') {
+            // Ensure admin section is visible (if user is admin)
+            if (typeof window.openAdminPanel === 'function') {
+                window.openAdminPanel();
+            }
+        }
         scrollToHashTarget(href);
     });
 
     window.addEventListener('hashchange', updateActiveFromLocation);
     updateActiveFromLocation();
+}
+
+/* ============================================
+   Admin Access + Embedded Admin Panel
+   (Fixes missing function that broke dashboard init)
+   ============================================ */
+
+function checkAdminAccess() {
+    const adminNavSection = document.getElementById('adminNavSection');
+    const adminNavLink = document.getElementById('adminNavLink');
+    const adminCard = document.getElementById('admin');
+    const closeBtn = document.getElementById('closeAdminPanel');
+    const frame = document.getElementById('adminPanelFrame');
+
+    const hideAdmin = () => {
+        if (adminNavSection) adminNavSection.style.display = 'none';
+        if (adminCard) adminCard.style.display = 'none';
+    };
+
+    const showAdminNav = () => {
+        if (adminNavSection) adminNavSection.style.display = '';
+    };
+
+    const ensureFrameSrc = () => {
+        if (!frame) return;
+        const srcAttr = frame.getAttribute('src');
+        if (!srcAttr) frame.setAttribute('src', 'admin.html');
+    };
+
+    const openAdmin = () => {
+        if (!adminCard) return;
+        adminCard.style.display = 'block';
+        ensureFrameSrc();
+
+        // If admin.html redirects inside iframe (not logged in), provide a quick escape hatch
+        if (!adminCard.querySelector('.admin-fallback')) {
+            const tip = document.createElement('div');
+            tip.className = 'admin-fallback';
+            tip.style.cssText = 'padding: 0 18px 14px 18px; color: var(--gray-light); font-size: 0.85rem;';
+            tip.innerHTML = 'اگر پنل داخل صفحه لود نشد، <a href="admin.html" target="_blank" rel="noopener" style="color: var(--secondary); text-decoration: none;">این‌جا</a> را در تب جدید باز کنید.';
+            adminCard.insertBefore(tip, adminCard.children[1] || null);
+        }
+    };
+
+    const closeAdmin = (e) => {
+        if (e) e.preventDefault();
+        if (adminCard) adminCard.style.display = 'none';
+        if (window.location.hash === '#admin') {
+            try { history.replaceState(null, '', '#'); } catch (_) {}
+        }
+    };
+
+    // Expose for initSidebar click handler
+    window.openAdminPanel = openAdmin;
+
+    closeBtn?.addEventListener('click', closeAdmin);
+
+    // Clicking the admin link should open the embedded panel (if permitted)
+    adminNavLink?.addEventListener('click', (e) => {
+        e.preventDefault();
+        try { history.replaceState(null, '', '#admin'); } catch (_) {}
+        openAdmin();
+        adminCard?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    // Default: hidden
+    hideAdmin();
+
+    // If API isn't ready yet, don't crash
+    if (!window.API || typeof API.isLoggedIn !== 'function') {
+        return;
+    }
+
+    if (!API.isLoggedIn()) {
+        return;
+    }
+
+    // Verify admin via /me
+    API.getMe()
+        .then((res) => {
+            const isAdmin = !!res?.user?.is_admin;
+            if (!isAdmin) {
+                hideAdmin();
+                return;
+            }
+
+            showAdminNav();
+            // If user navigated directly with #admin, open it.
+            if (window.location.hash === '#admin') {
+                openAdmin();
+            }
+        })
+        .catch(() => {
+            hideAdmin();
+        });
 }
 
 /* ============================================

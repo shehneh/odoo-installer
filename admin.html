@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🛡️ پنل مدیریت لایسنس - OdooMaster</title>
   <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/liara-theme.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script>
     // Keep admin panel theme in sync with the rest of the website (works inside iframe)
@@ -862,7 +863,7 @@
     }
   </style>
 </head>
-<body>
+<body class="liara-theme">
   <!-- Header -->
   <header class="header">
     <div class="header-brand">
@@ -1128,9 +1129,14 @@
           
           <div class="form-row">
             <div class="form-group">
-              <label><i class="fas fa-clock"></i> مدت اعتبار (روز)</label>
-              <input type="number" id="plan-duration" value="30" min="1" required>
-              <small>1 ساعت = 0.04 روز | 1 هفته = 7 روز | 1 ماه = 30 روز</small>
+              <label><i class="fas fa-clock"></i> مدت اعتبار</label>
+              <div style="display: flex; gap: 10px;">
+                <input type="number" id="plan-duration-value" value="30" min="1" required style="flex: 1;">
+                <select id="plan-duration-unit" style="width: 120px;">
+                  <option value="hours">ساعت</option>
+                  <option value="days" selected>روز</option>
+                </select>
+              </div>
             </div>
             <div class="form-group">
               <label><i class="fas fa-desktop"></i> حداکثر نصب</label>
@@ -1553,7 +1559,8 @@
         'priority': '24/7'
       };
       
-      const durationLabel = getDurationLabel(plan.duration_days);
+      const durationInfo = getDurationInfo(plan);
+      const durationLabel = getDurationLabel(plan);
       
       return `
         <div class="plan-card ${plan.popular ? 'popular' : ''} ${!plan.active ? 'inactive' : ''}">
@@ -1573,8 +1580,8 @@
           
           <div class="plan-details">
             <div class="plan-detail">
-              <div class="value">${plan.duration_days}</div>
-              <div class="label">روز اعتبار</div>
+              <div class="value">${durationInfo.valueLabel}</div>
+              <div class="label">${durationInfo.unitLabel}</div>
             </div>
             <div class="plan-detail">
               <div class="value">${plan.max_activations === 999 ? '∞' : plan.max_activations}</div>
@@ -1607,8 +1614,34 @@
       `;
     }
 
-    function getDurationLabel(days) {
-      if (days < 1) return `${Math.round(days * 24)} ساعته`;
+    function getDurationInfo(plan) {
+      const unit = (plan && plan.duration_unit) ? String(plan.duration_unit) : 'days';
+      const rawValue = (plan && plan.duration_value != null) ? plan.duration_value : plan?.duration_days;
+      const value = Number(rawValue);
+
+      if (!Number.isFinite(value)) {
+        return { unit, value, unitLabel: 'اعتبار', valueLabel: '-' };
+      }
+      if (value <= 0) {
+        return { unit, value, unitLabel: 'اعتبار', valueLabel: '∞' };
+      }
+
+      if (unit === 'hours') {
+        return { unit, value, unitLabel: 'ساعت اعتبار', valueLabel: String(Math.trunc(value)) };
+      }
+
+      return { unit: 'days', value, unitLabel: 'روز اعتبار', valueLabel: String(Math.trunc(value)) };
+    }
+
+    function getDurationLabel(plan) {
+      const info = getDurationInfo(plan);
+      if (info.value <= 0) return 'نامحدود';
+
+      if (info.unit === 'hours') {
+        return `${Math.trunc(info.value)} ساعته`;
+      }
+
+      const days = Math.trunc(info.value);
       if (days === 1) return '۱ روزه';
       if (days === 7) return 'هفتگی';
       if (days === 30) return 'ماهانه';
@@ -1626,6 +1659,8 @@
       document.getElementById('plan-form').reset();
       document.getElementById('plan-id').disabled = false;
       document.getElementById('plan-active').checked = true;
+      document.getElementById('plan-duration-unit').value = 'days';
+      document.getElementById('plan-duration-value').value = 30;
       document.getElementById('plan-modal').style.display = 'flex';
     }
 
@@ -1648,7 +1683,8 @@
         document.getElementById('plan-name-en').value = plan.name_en || '';
         document.getElementById('plan-price').value = plan.price || 0;
         document.getElementById('plan-price-yearly').value = plan.price_yearly || 0;
-        document.getElementById('plan-duration').value = plan.duration_days || 30;
+        document.getElementById('plan-duration-unit').value = plan.duration_unit || 'days';
+        document.getElementById('plan-duration-value').value = (plan.duration_value != null ? plan.duration_value : (plan.duration_days || 30));
         document.getElementById('plan-activations').value = plan.max_activations || 1;
         document.getElementById('plan-support').value = plan.support_level || 'email';
         document.getElementById('plan-popular').checked = plan.popular || false;
@@ -1677,7 +1713,8 @@
         name_en: document.getElementById('plan-name-en').value.trim(),
         price: parseInt(document.getElementById('plan-price').value) || 0,
         price_yearly: parseInt(document.getElementById('plan-price-yearly').value) || 0,
-        duration_days: parseInt(document.getElementById('plan-duration').value) || 30,
+        duration_unit: document.getElementById('plan-duration-unit').value || 'days',
+        duration_value: parseFloat(document.getElementById('plan-duration-value').value) || 30,
         max_activations: parseInt(document.getElementById('plan-activations').value) || 1,
         support_level: document.getElementById('plan-support').value,
         popular: document.getElementById('plan-popular').checked,

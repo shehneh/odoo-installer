@@ -321,7 +321,8 @@
 
 /* In-dashboard anchor navigation */
 .dashboard-page #licenses,
-.dashboard-page #downloads {
+.dashboard-page #downloads,
+.dashboard-page #admin {
     scroll-margin-top: 110px;
 }
 

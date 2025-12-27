@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/liara-theme.css">
     <link rel="stylesheet" href="css/animations.css">
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/components.css">
@@ -18,7 +19,7 @@
         }
     </script>
 </head>
-<body class="dashboard-page">
+<body class="dashboard-page liara-theme">
     <script>
         if (localStorage.getItem('theme') === 'light') {
             document.body.classList.add('light-theme');
@@ -51,39 +52,15 @@
                 <a href="#licenses" class="nav-item">
                     <i class="fas fa-key"></i>
                     <span data-i18n="nav.licenses">لایسنس‌ها</span>
-                    <span class="nav-badge">۲</span>
+                    <span class="nav-badge" id="licensesBadge">۰</span>
                 </a>
                 <a href="#downloads" class="nav-item">
                     <i class="fas fa-download"></i>
-                    <span data-i18n="nav.downloads">دانلودها</span>
+                    <span data-i18n="nav.downloads">دانلود نصاب</span>
                 </a>
-                <a href="#" class="nav-item disabled-link" aria-disabled="true" tabindex="-1" title="به‌زودی فعال می‌شود">
-                    <i class="fas fa-headset"></i>
-                    <span data-i18n="nav.support">پشتیبانی</span>
-                </a>
-            </div>
-
-            <div class="nav-section">
-                <span class="nav-section-title" data-i18n="dashboard.financial">مالی</span>
-                <a href="#" class="nav-item disabled-link" aria-disabled="true" tabindex="-1" title="به‌زودی فعال می‌شود">
-                    <i class="fas fa-file-invoice"></i>
-                    <span data-i18n="dashboard.invoices">فاکتورها</span>
-                </a>
-                <a href="#" class="nav-item disabled-link" aria-disabled="true" tabindex="-1" title="به‌زودی فعال می‌شود">
-                    <i class="fas fa-wallet"></i>
-                    <span data-i18n="dashboard.wallet">کیف پول</span>
-                </a>
-            </div>
-
-            <div class="nav-section">
-                <span class="nav-section-title" data-i18n="dashboard.account">حساب کاربری</span>
-                <a href="#" class="nav-item disabled-link" aria-disabled="true" tabindex="-1" title="به‌زودی فعال می‌شود">
-                    <i class="fas fa-user"></i>
-                    <span data-i18n="dashboard.profile">پروفایل</span>
-                </a>
-                <a href="#" class="nav-item disabled-link" aria-disabled="true" tabindex="-1" title="به‌زودی فعال می‌شود">
-                    <i class="fas fa-cog"></i>
-                    <span data-i18n="dashboard.settings">تنظیمات</span>
+                <a href="payment.html" class="nav-item">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span data-i18n="nav.buyLicense">خرید لایسنس</span>
                 </a>
             </div>
 
@@ -162,12 +139,8 @@
                         <i class="fas fa-key"></i>
                     </div>
                     <div class="stat-info">
-                        <span class="stat-value">۲</span>
+                        <span class="stat-value" id="statActiveLicenses">-</span>
                         <span class="stat-label" data-i18n="dashboard.activeLicenses">لایسنس فعال</span>
-                    </div>
-                    <div class="stat-trend up">
-                        <i class="fas fa-arrow-up"></i>
-                        +۱
                     </div>
                 </div>
                 <div class="stat-card glass">
@@ -175,12 +148,8 @@
                         <i class="fas fa-download"></i>
                     </div>
                     <div class="stat-info">
-                        <span class="stat-value">۵</span>
+                        <span class="stat-value" id="statDownloads">-</span>
                         <span class="stat-label" data-i18n="dashboard.downloads">دانلود</span>
-                    </div>
-                    <div class="stat-trend up">
-                        <i class="fas fa-arrow-up"></i>
-                        +۲
                     </div>
                 </div>
                 <div class="stat-card glass">
@@ -188,7 +157,7 @@
                         <i class="fas fa-clock"></i>
                     </div>
                     <div class="stat-info">
-                        <span class="stat-value">۲۸</span>
+                        <span class="stat-value" id="statDaysRemaining">-</span>
                         <span class="stat-label" data-i18n="dashboard.daysRemaining">روز باقیمانده</span>
                     </div>
                 </div>
@@ -197,7 +166,7 @@
                         <i class="fas fa-headset"></i>
                     </div>
                     <div class="stat-info">
-                        <span class="stat-value">۱</span>
+                        <span class="stat-value" id="statTickets">۰</span>
                         <span class="stat-label" data-i18n="dashboard.openTickets">تیکت باز</span>
                     </div>
                 </div>
@@ -205,7 +174,7 @@
 
             <!-- Main Grid -->
             <div class="dashboard-grid">
-                <!-- System Check & Install Section (NEW) -->
+                <!-- System Check & Install Section -->
                 <div class="card glass system-check-card" style="grid-column: 1 / -1;">
                     <div class="card-header">
                         <h3><i class="fas fa-stethoscope"></i> <span data-i18n="dashboard.systemCheck">تست سیستم و نصب نیازمندی‌ها</span></h3>
@@ -312,7 +281,7 @@
                 <!-- Active Licenses - Full Management Section -->
                 <div class="card glass licenses-card" id="licenses" style="grid-column: 1 / -1;">
                     <div class="card-header">
-                        <h3><i class="fas fa-key"></i> <span data-i18n="dashboard.activeLicensesTitle">مدیریت لایسنس‌ها</span></h3>
+                        <h3><i class="fas fa-key"></i> <span data-i18n="dashboard.activeLicensesTitle">لایسنس‌های من</span></h3>
                         <a href="payment.html" class="btn btn-primary btn-sm" style="font-size: 0.85rem;">
                             <i class="fas fa-shopping-cart"></i> 
                             <span data-i18n="licenses.buyLicense">خرید لایسنس</span>
@@ -585,147 +554,6 @@
     <script src="js/installer.js"></script>
     <script src="js/dashboard.js"></script>
     <script>
-        // Load real user data from API
-        (async function loadDashboardData() {
-            const token = localStorage.getItem('authToken');
-            if (!token) {
-                // Not logged in - redirect to login
-                window.location.href = 'login.html?redirect=dashboard.html';
-                return;
-            }
-
-            try {
-                const res = await API.getMe();
-                if (!res || !res.user) {
-                    localStorage.removeItem('authToken');
-                    window.location.href = 'login.html?redirect=dashboard.html';
-                    return;
-                }
-
-                const user = res.user;
-                const licenses = res.licenses || [];
-                const stats = res.stats || {};
-
-                // Update user name in welcome banner
-                const welcomeTitle = document.querySelector('.welcome-content h1');
-                if (welcomeTitle) {
-                    welcomeTitle.innerHTML = `سلام، <span class="gradient-text">${user.name || 'کاربر'}</span> 👋`;
-                }
-
-                // Update sidebar user card
-                const userCard = document.querySelector('.user-card');
-                if (userCard) {
-                    const avatar = userCard.querySelector('.user-avatar img');
-                    const nameEl = userCard.querySelector('.user-info strong');
-                    const planEl = userCard.querySelector('.user-info span');
-                    
-                    if (avatar) avatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=714B67&color=fff`;
-                    if (nameEl) nameEl.textContent = user.name || 'کاربر';
-                    
-                    // Find active plan
-                    const activeLicense = licenses.find(l => l.status === 'active');
-                    if (planEl) planEl.textContent = activeLicense ? (activeLicense.plan || 'پلن رایگان') : 'بدون پلن';
-                }
-
-                // Update stats cards
-                const statCards = document.querySelectorAll('.stat-card');
-                if (statCards.length >= 4) {
-                    // Active licenses
-                    const licenseValue = statCards[0].querySelector('.stat-value');
-                    if (licenseValue) licenseValue.textContent = toPersianNum(stats.active_licenses || 0);
-
-                    // Downloads
-                    const downloadValue = statCards[1].querySelector('.stat-value');
-                    if (downloadValue) downloadValue.textContent = toPersianNum(stats.total_downloads || 0);
-
-                    // Days remaining (find soonest expiring license)
-                    const daysValue = statCards[2].querySelector('.stat-value');
-                    if (daysValue) {
-                        const activeLicenses = licenses.filter(l => l.status === 'active' && l.expires_at);
-                        let minDays = null;
-                        activeLicenses.forEach(l => {
-                            const exp = new Date(l.expires_at);
-                            const now = new Date();
-                            const days = Math.ceil((exp - now) / (1000 * 60 * 60 * 24));
-                            if (days > 0 && (minDays === null || days < minDays)) minDays = days;
-                        });
-                        daysValue.textContent = minDays !== null ? toPersianNum(minDays) : '—';
-                    }
-
-                    // Open tickets (placeholder - would need tickets API)
-                    const ticketValue = statCards[3].querySelector('.stat-value');
-                    if (ticketValue) ticketValue.textContent = toPersianNum(0);
-                }
-
-                // Update licenses list
-                const licensesList = document.querySelector('.licenses-list');
-                if (licensesList && licenses.length > 0) {
-                    licensesList.innerHTML = licenses.slice(0, 3).map(lic => {
-                        const isPro = (lic.plan || '').toLowerCase().includes('pro') || (lic.plan || '').includes('حرفه');
-                        const iconClass = isPro ? 'pro' : 'starter';
-                        const icon = isPro ? 'fa-gem' : 'fa-seedling';
-                        const planName = lic.plan || 'پلن رایگان';
-                        const keyDisplay = lic.key ? lic.key.substring(0, 4) + '-XXXX-XXXX-' + lic.key.slice(-4) : '—';
-                        
-                        let expiryText = 'بدون انقضا';
-                        if (lic.expires_at) {
-                            const exp = new Date(lic.expires_at);
-                            const now = new Date();
-                            const days = Math.ceil((exp - now) / (1000 * 60 * 60 * 24));
-                            expiryText = days > 0 ? toPersianNum(days) + ' روز مانده' : 'منقضی شده';
-                        }
-
-                        return `
-                            <div class="license-item">
-                                <div class="license-info">
-                                    <div class="license-icon ${iconClass}">
-                                        <i class="fas ${icon}"></i>
-                                    </div>
-                                    <div class="license-details">
-                                        <strong>${planName}</strong>
-                                        <span>${keyDisplay}</span>
-                                    </div>
-                                </div>
-                                <div class="license-status">
-                                    <span class="status-badge ${lic.status === 'active' ? 'active' : 'expired'}">${lic.status === 'active' ? 'فعال' : 'غیرفعال'}</span>
-                                    <span class="expiry">${expiryText}</span>
-                                </div>
-                                <div class="license-actions">
-                                    <button class="icon-btn" title="کپی کلید" onclick="navigator.clipboard.writeText('${lic.key || ''}')">
-                                        <i class="fas fa-copy"></i>
-                                    </button>
-                                    <button class="icon-btn" title="جزئیات">
-                                        <i class="fas fa-info-circle"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                    }).join('');
-                } else if (licensesList) {
-                    licensesList.innerHTML = '<p style="text-align:center; color: var(--text-secondary); padding: 20px;">هیچ لایسنسی ندارید. <a href="payment.html">خرید کنید</a></p>';
-                }
-
-                // Update sidebar license badge
-                const licenseBadge = document.querySelector('.nav-item[href="#licenses"] .nav-badge') || document.querySelector('.nav-item[href="licenses.html"] .nav-badge');
-                if (licenseBadge) licenseBadge.textContent = toPersianNum(stats.active_licenses || 0);
-
-                // Update XP/Level card
-                const levelBadge = document.querySelector('.level-badge span');
-                if (levelBadge) levelBadge.textContent = 'سطح ' + toPersianNum(user.level || 1);
-
-                const xpInfo = document.querySelector('.xp-info strong');
-                if (xpInfo) xpInfo.textContent = toPersianNum(user.xp || 0) + ' XP';
-
-            } catch (err) {
-                console.error('Failed to load dashboard data:', err);
-            }
-        })();
-
-        function toPersianNum(num) {
-            const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
-            return String(num).replace(/\d/g, d => persianDigits[d]);
-        }
-
         // System Check Integration
         document.addEventListener('DOMContentLoaded', function() {
             const checkBtn = document.getElementById('startSystemCheck');

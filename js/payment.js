@@ -224,14 +224,7 @@ function renderPlans(plans) {
         card.dataset.planId = p.id;
 
         const price = Number(p.price || 0);
-        const durationDays = Number(p.duration_days || 365);
-        let durationText = 'نامحدود';
-        if (durationDays <= 1) durationText = 'یک ساعته';
-        else if (durationDays <= 7) durationText = 'یک هفته ای';
-        else if (durationDays <= 30) durationText = 'یک ماهه';
-        else if (durationDays <= 90) durationText = 'سه ماهه';
-        else if (durationDays <= 180) durationText = 'شش ماهه';
-        else if (durationDays <= 365) durationText = 'یکساله';
+        const durationText = getPlanDurationText(p);
 
         const features = p.features || [];
         let featuresHtml = '';
@@ -249,6 +242,56 @@ function renderPlans(plans) {
         card.addEventListener('click', () => selectPlan(p, card));
         container.appendChild(card);
     });
+}
+
+function getPlanDurationInfo(plan) {
+    const unit = (plan && plan.duration_unit) ? String(plan.duration_unit) : null;
+    const rawValue = (plan && plan.duration_value != null)
+        ? plan.duration_value
+        : (plan ? plan.duration_days : null);
+    const value = Number(rawValue);
+
+    if (!Number.isFinite(value)) {
+        return { unit: unit || 'days', value: null };
+    }
+
+    // Unlimited license: duration_value <= 0 (new model) OR legacy huge days
+    if (value <= 0) {
+        return { unit: unit || 'days', value: 0 };
+    }
+
+    // If unit is missing, assume legacy days
+    if (!unit) {
+        return { unit: 'days', value };
+    }
+
+    if (unit === 'hours' || unit === 'days') {
+        return { unit, value };
+    }
+
+    // Unknown unit: fall back to days
+    return { unit: 'days', value };
+}
+
+function getPlanDurationText(plan) {
+    const info = getPlanDurationInfo(plan);
+    if (info.value === 0) return 'نامحدود';
+    if (info.value == null) return '—';
+
+    if (info.unit === 'hours') {
+        const h = Math.trunc(info.value);
+        if (h === 1) return 'یک ساعته';
+        return `${h} ساعته`;
+    }
+
+    const days = Math.trunc(info.value);
+    if (days <= 1) return '۱ روزه';
+    if (days <= 7) return 'یک هفته ای';
+    if (days <= 30) return 'یک ماهه';
+    if (days <= 90) return 'سه ماهه';
+    if (days <= 180) return 'شش ماهه';
+    if (days <= 365) return 'یکساله';
+    return `${days} روزه`;
 }
 
 function selectPlan(plan, cardElement) {

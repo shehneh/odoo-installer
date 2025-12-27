@@ -15,9 +15,14 @@
 # --- Offline bundles / binaries ---
 /offline/
 /offline_packages/
+/soft/
 /soft/VSCode/
 /soft/WinRAR.7.13.x64/
 /soft/**/node_modules/
+
+# --- Local runtime data / cached downloads (not for deploy) ---
+/data/
+/downloads/
 
 # --- Odoo source code (large, not part of installer project) ---
 odoo19_odoo

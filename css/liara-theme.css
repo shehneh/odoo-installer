@@ -1,0 +1,1060 @@
+/* ============================================
+   OdooMaster - Liara-Inspired Modern Theme
+   Clean, Dark, Professional Design
+   ============================================ */
+
+/* ===== CSS Variables - Liara Color Scheme ===== */
+:root {
+    /* Primary Colors - Teal/Cyan inspired by Liara */
+    --liara-primary: #00D1B2;
+    --liara-primary-light: #00E5C4;
+    --liara-primary-dark: #00B59A;
+    --liara-accent: #714B67;
+    --liara-accent-light: #8F6B84;
+    
+    /* Dark Theme Colors */
+    --liara-bg: #0B0F14;
+    --liara-bg-secondary: #111820;
+    --liara-bg-card: #151C25;
+    --liara-bg-card-hover: #1A232E;
+    --liara-bg-elevated: #1D2733;
+    
+    /* Text Colors */
+    --liara-text: #FFFFFF;
+    --liara-text-secondary: #A0AEC0;
+    --liara-text-muted: #5A6A7E;
+    
+    /* Border & Glass */
+    --liara-border: rgba(255, 255, 255, 0.08);
+    --liara-border-light: rgba(255, 255, 255, 0.12);
+    --liara-glass-bg: rgba(255, 255, 255, 0.03);
+    --liara-glass-border: rgba(255, 255, 255, 0.06);
+    
+    /* Status Colors */
+    --liara-success: #10B981;
+    --liara-warning: #F59E0B;
+    --liara-danger: #EF4444;
+    --liara-info: #3B82F6;
+    
+    /* Gradients */
+    --liara-gradient-primary: linear-gradient(135deg, #00D1B2 0%, #00A09D 100%);
+    --liara-gradient-accent: linear-gradient(135deg, #714B67 0%, #00A09D 100%);
+    --liara-gradient-card: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+    --liara-gradient-glow: radial-gradient(ellipse at center, rgba(0, 209, 178, 0.15) 0%, transparent 70%);
+    
+    /* Shadows */
+    --liara-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --liara-shadow-md: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --liara-shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
+    --liara-shadow-glow: 0 0 40px rgba(0, 209, 178, 0.2);
+    
+    /* Spacing */
+    --liara-radius-sm: 8px;
+    --liara-radius-md: 12px;
+    --liara-radius-lg: 16px;
+    --liara-radius-xl: 24px;
+    
+    /* Transitions */
+    --liara-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --liara-transition-fast: all 0.15s ease;
+}
+
+/* ===== Base Reset ===== */
+.liara-theme {
+    min-height: 100vh;
+}
+
+/* Remap existing design tokens to Liara-like palette (dark mode only)
+   This keeps the current HTML/CSS structure while changing the feel.
+*/
+.liara-theme:not(.light-theme) {
+    --primary: var(--liara-primary);
+    --primary-light: var(--liara-primary-light);
+    --primary-dark: var(--liara-primary-dark);
+
+    --secondary: var(--liara-accent);
+    --secondary-light: var(--liara-accent-light);
+
+    --dark: var(--liara-bg);
+    --dark-light: var(--liara-bg-secondary);
+    --dark-medium: var(--liara-bg-card);
+
+    --gray-dark: var(--liara-text-muted);
+    --gray: var(--liara-text-muted);
+    --gray-light: var(--liara-text-secondary);
+    --white: var(--liara-text);
+
+    --glass-bg: var(--liara-glass-bg);
+    --glass-border: var(--liara-glass-border);
+
+    --gradient-primary: var(--liara-gradient-primary);
+    --gradient-secondary: var(--liara-gradient-accent);
+    --gradient-dark: linear-gradient(135deg, var(--liara-bg-secondary) 0%, var(--liara-bg-card) 100%);
+
+    --shadow-sm: var(--liara-shadow-sm);
+    --shadow-md: var(--liara-shadow-md);
+    --shadow-lg: var(--liara-shadow-lg);
+    --shadow-glow: var(--liara-shadow-glow);
+}
+
+.liara-theme:not(.light-theme) {
+    background: var(--liara-bg) !important;
+    color: var(--liara-text) !important;
+}
+
+.liara-theme::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50vh;
+    background: var(--liara-gradient-glow);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ===== Modern Cards ===== */
+.liara-card {
+    background: var(--liara-bg-card);
+    border: 1px solid var(--liara-border);
+    border-radius: var(--liara-radius-lg);
+    padding: 24px;
+    position: relative;
+    transition: var(--liara-transition);
+    overflow: hidden;
+}
+
+.liara-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0, 209, 178, 0.3), transparent);
+    opacity: 0;
+    transition: var(--liara-transition);
+}
+
+.liara-card:hover {
+    border-color: var(--liara-border-light);
+    background: var(--liara-bg-card-hover);
+    transform: translateY(-2px);
+}
+
+.liara-card:hover::before {
+    opacity: 1;
+}
+
+/* ===== Glass Cards ===== */
+.liara-glass {
+    background: var(--liara-glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--liara-glass-border);
+    border-radius: var(--liara-radius-lg);
+}
+
+/* ===== Sidebar Modern ===== */
+.liara-sidebar {
+    background: var(--liara-bg-secondary);
+    border-left: 1px solid var(--liara-border);
+    width: 280px;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 100;
+    transition: var(--liara-transition);
+}
+
+.liara-sidebar-header {
+    padding: 24px;
+    border-bottom: 1px solid var(--liara-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.liara-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: var(--liara-text);
+}
+
+.liara-logo-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--liara-gradient-primary);
+    border-radius: var(--liara-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: #000;
+}
+
+.liara-logo-text {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--liara-text);
+}
+
+.liara-logo-text strong {
+    color: var(--liara-primary);
+}
+
+/* Nav Items */
+.liara-nav {
+    flex: 1;
+    padding: 20px 16px;
+    overflow-y: auto;
+}
+
+.liara-nav-section {
+    margin-bottom: 24px;
+}
+
+.liara-nav-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--liara-text-muted);
+    padding: 0 12px;
+    margin-bottom: 12px;
+}
+
+.liara-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: var(--liara-text-secondary);
+    text-decoration: none;
+    border-radius: var(--liara-radius-md);
+    transition: var(--liara-transition-fast);
+    margin-bottom: 4px;
+    position: relative;
+}
+
+.liara-nav-item:hover {
+    background: rgba(0, 209, 178, 0.08);
+    color: var(--liara-text);
+}
+
+.liara-nav-item.active {
+    background: var(--liara-gradient-primary);
+    color: #000;
+    font-weight: 600;
+}
+
+.liara-nav-item.active::before {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 60%;
+    background: var(--liara-primary);
+    border-radius: 3px 0 0 3px;
+}
+
+.liara-nav-item i {
+    width: 20px;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+.liara-nav-badge {
+    margin-inline-start: auto;
+    padding: 2px 8px;
+    background: var(--liara-danger);
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: white;
+}
+
+/* ===== Main Content ===== */
+.liara-main {
+    margin-right: 280px;
+    min-height: 100vh;
+    background: var(--liara-bg);
+    position: relative;
+    z-index: 1;
+}
+
+/* ===== Topbar ===== */
+.liara-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 32px;
+    background: rgba(11, 15, 20, 0.8);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--liara-border);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.liara-search {
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+}
+
+.liara-search input {
+    width: 100%;
+    padding: 12px 16px 12px 44px;
+    background: var(--liara-bg-card);
+    border: 1px solid var(--liara-border);
+    border-radius: var(--liara-radius-xl);
+    color: var(--liara-text);
+    font-size: 0.9rem;
+    transition: var(--liara-transition);
+}
+
+.liara-search input::placeholder {
+    color: var(--liara-text-muted);
+}
+
+.liara-search input:focus {
+    outline: none;
+    border-color: var(--liara-primary);
+    box-shadow: 0 0 0 3px rgba(0, 209, 178, 0.1);
+}
+
+.liara-search i {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--liara-text-muted);
+}
+
+.liara-topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.liara-topbar-btn {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--liara-bg-card);
+    border: 1px solid var(--liara-border);
+    border-radius: var(--liara-radius-md);
+    color: var(--liara-text-secondary);
+    cursor: pointer;
+    transition: var(--liara-transition-fast);
+    position: relative;
+}
+
+.liara-topbar-btn:hover {
+    background: var(--liara-bg-elevated);
+    color: var(--liara-primary);
+    border-color: var(--liara-primary);
+}
+
+.liara-topbar-btn .badge {
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    background: var(--liara-danger);
+    border-radius: 999px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ===== Dashboard Content ===== */
+.liara-content {
+    padding: 32px;
+}
+
+/* ===== Welcome Banner ===== */
+.liara-welcome {
+    background: var(--liara-bg-card);
+    border: 1px solid var(--liara-border);
+    border-radius: var(--liara-radius-xl);
+    padding: 32px;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+}
+
+.liara-welcome::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(0, 209, 178, 0.08) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+.liara-welcome h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    position: relative;
+}
+
+.liara-welcome h1 .highlight {
+    color: var(--liara-primary);
+}
+
+.liara-welcome p {
+    color: var(--liara-text-secondary);
+    font-size: 1rem;
+    position: relative;
+}
+
+/* ===== Stats Grid ===== */
+.liara-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+.liara-stat-card {
+    background: var(--liara-bg-card);
+    border: 1px solid var(--liara-border);
+    border-radius: var(--liara-radius-lg);
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: var(--liara-transition);
+}
+
+.liara-stat-card:hover {
+    border-color: var(--liara-border-light);
+    transform: translateY(-2px);
+}
+
+.liara-stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--liara-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.liara-stat-icon.primary {
+    background: rgba(0, 209, 178, 0.15);
+    color: var(--liara-primary);
+}
+
+.liara-stat-icon.accent {
+    background: rgba(113, 75, 103, 0.15);
+    color: var(--liara-accent-light);
+}
+
+.liara-stat-icon.warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--liara-warning);
+}
+
+.liara-stat-icon.info {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--liara-info);
+}
+
+.liara-stat-info .value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--liara-text);
+    display: block;
+    line-height: 1.2;
+}
+
+.liara-stat-info .label {
+    font-size: 0.85rem;
+    color: var(--liara-text-muted);
+}
+
+/* ===== Section Grid ===== */
+.liara-section-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 24px;
+}
+
+@media (max-width: 1200px) {
+    .liara-section-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===== Section Cards ===== */
+.liara-section {
+    background: var(--liara-bg-card);
+    border: 1px solid var(--liara-border);
+    border-radius: var(--liara-radius-lg);
+    overflow: hidden;
+}
+
+.liara-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--liara-border);
+}
+
+.liara-section-header h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--liara-text);
+}
+
+.liara-section-header h3 i {
+    color: var(--liara-primary);
+}
+
+.liara-section-body {
+    padding: 24px;
+}
+
+/* ===== Buttons ===== */
+.liara-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: none;
+    border-radius: var(--liara-radius-md);
+    cursor: pointer;
+    transition: var(--liara-transition);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.liara-btn-primary {
+    background: var(--liara-gradient-primary);
+    color: #000;
+}
+
+.liara-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--liara-shadow-glow);
+}
+
+.liara-btn-secondary {
+    background: var(--liara-bg-elevated);
+    color: var(--liara-text);
+    border: 1px solid var(--liara-border);
+}
+
+.liara-btn-secondary:hover {
+    border-color: var(--liara-primary);
+    color: var(--liara-primary);
+}
+
+.liara-btn-outline {
+    background: transparent;
+    color: var(--liara-primary);
+    border: 1px solid var(--liara-primary);
+}
+
+.liara-btn-outline:hover {
+    background: var(--liara-primary);
+    color: #000;
+}
+
+.liara-btn-sm {
+    padding: 8px 16px;
+    font-size: 0.8rem;
+}
+
+.liara-btn-block {
+    width: 100%;
+}
+
+/* ===== Quick Actions ===== */
+.liara-quick-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.liara-quick-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 20px 16px;
+    background: var(--liara-bg-elevated);
+    border: 1px solid var(--liara-border);
+    border-radius: var(--liara-radius-md);
+    text-decoration: none;
+    color: var(--liara-text-secondary);
+    transition: var(--liara-transition);
+}
+
+.liara-quick-action:hover {
+    border-color: var(--liara-primary);
+    color: var(--liara-primary);
+    transform: translateY(-2px);
+}
+
+.liara-quick-action .icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--liara-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.liara-quick-action .icon.blue {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--liara-info);
+}
+
+.liara-quick-action .icon.green {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--liara-success);
+}
+
+.liara-quick-action .icon.orange {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--liara-warning);
+}
+
+.liara-quick-action .icon.purple {
+    background: rgba(139, 92, 246, 0.15);
+    color: #8B5CF6;
+}
+
+.liara-quick-action span {
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* ===== License Cards ===== */
+.liara-license-card {
+    background: var(--liara-bg-elevated);
+    border: 1px solid var(--liara-border);
+    border-radius: var(--liara-radius-md);
+    padding: 20px;
+    margin-bottom: 12px;
+    transition: var(--liara-transition);
+}
+
+.liara-license-card:hover {
+    border-color: var(--liara-border-light);
+}
+
+.liara-license-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.liara-license-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.liara-license-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--liara-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.liara-license-icon.starter {
+    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+    color: white;
+}
+
+.liara-license-icon.pro {
+    background: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);
+    color: white;
+}
+
+.liara-license-icon.trial {
+    background: rgba(156, 163, 175, 0.2);
+    color: var(--liara-text-muted);
+}
+
+.liara-license-details h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--liara-text);
+    margin-bottom: 2px;
+}
+
+.liara-license-details span {
+    font-size: 0.8rem;
+    color: var(--liara-text-muted);
+}
+
+.liara-license-status {
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.liara-license-status.active {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--liara-success);
+}
+
+.liara-license-status.expired {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--liara-danger);
+}
+
+.liara-license-status.trial {
+    background: rgba(139, 92, 246, 0.15);
+    color: #8B5CF6;
+}
+
+.liara-license-meta {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--liara-border);
+}
+
+.liara-license-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--liara-text-secondary);
+}
+
+.liara-license-meta-item i {
+    color: var(--liara-primary);
+    width: 16px;
+}
+
+.liara-license-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+/* ===== Steps Guide ===== */
+.liara-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.liara-step {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    background: var(--liara-bg-elevated);
+    border: 1px solid var(--liara-border);
+    border-radius: var(--liara-radius-md);
+    transition: var(--liara-transition);
+}
+
+.liara-step:hover {
+    border-color: var(--liara-primary);
+}
+
+.liara-step.active {
+    border-color: var(--liara-primary);
+    background: rgba(0, 209, 178, 0.05);
+}
+
+.liara-step-number {
+    width: 32px;
+    height: 32px;
+    background: var(--liara-gradient-primary);
+    color: #000;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.liara-step.completed .liara-step-number {
+    background: var(--liara-success);
+}
+
+.liara-step.pending .liara-step-number {
+    background: var(--liara-bg-card);
+    border: 2px solid var(--liara-border);
+    color: var(--liara-text-muted);
+}
+
+.liara-step-content h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--liara-text);
+    margin-bottom: 4px;
+}
+
+.liara-step-content p {
+    font-size: 0.85rem;
+    color: var(--liara-text-secondary);
+    line-height: 1.5;
+}
+
+/* ===== Activity Feed ===== */
+.liara-activity-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.liara-activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--liara-border);
+}
+
+.liara-activity-item:last-child {
+    border-bottom: none;
+}
+
+.liara-activity-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--liara-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.liara-activity-icon.green {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--liara-success);
+}
+
+.liara-activity-icon.blue {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--liara-info);
+}
+
+.liara-activity-icon.orange {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--liara-warning);
+}
+
+.liara-activity-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.liara-activity-content strong {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--liara-text);
+    margin-bottom: 2px;
+}
+
+.liara-activity-content span {
+    font-size: 0.85rem;
+    color: var(--liara-text-secondary);
+}
+
+.liara-activity-time {
+    font-size: 0.75rem;
+    color: var(--liara-text-muted);
+    white-space: nowrap;
+}
+
+/* ===== Download Section ===== */
+.liara-download-box {
+    background: var(--liara-bg-elevated);
+    border: 1px solid var(--liara-border);
+    border-radius: var(--liara-radius-lg);
+    padding: 24px;
+    text-align: center;
+}
+
+.liara-download-icon {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 16px;
+    background: var(--liara-gradient-primary);
+    border-radius: var(--liara-radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: #000;
+}
+
+.liara-download-box h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--liara-text);
+    margin-bottom: 4px;
+}
+
+.liara-download-box .version {
+    font-size: 0.85rem;
+    color: var(--liara-text-muted);
+    margin-bottom: 16px;
+}
+
+.liara-download-meta {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.liara-download-meta span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--liara-text-secondary);
+}
+
+.liara-download-meta span i {
+    color: var(--liara-success);
+}
+
+/* ===== Achievements ===== */
+.liara-achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.liara-achievement {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 12px;
+    background: var(--liara-bg-elevated);
+    border: 1px solid var(--liara-border);
+    border-radius: var(--liara-radius-md);
+    text-align: center;
+    transition: var(--liara-transition);
+}
+
+.liara-achievement.locked {
+    opacity: 0.4;
+}
+
+.liara-achievement.unlocked {
+    border-color: var(--liara-primary);
+}
+
+.liara-achievement-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+}
+
+.liara-achievement.unlocked .liara-achievement-icon {
+    background: var(--liara-gradient-primary);
+    color: #000;
+}
+
+.liara-achievement.locked .liara-achievement-icon {
+    background: var(--liara-bg-card);
+    color: var(--liara-text-muted);
+}
+
+.liara-achievement span {
+    font-size: 0.75rem;
+    color: var(--liara-text-secondary);
+}
+
+/* ===== Progress Bar ===== */
+.liara-progress {
+    height: 8px;
+    background: var(--liara-bg-card);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.liara-progress-fill {
+    height: 100%;
+    background: var(--liara-gradient-primary);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 1024px) {
+    .liara-sidebar {
+        transform: translateX(100%);
+    }
+    
+    .liara-sidebar.active {
+        transform: translateX(0);
+    }
+    
+    .liara-main {
+        margin-right: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .liara-content {
+        padding: 20px;
+    }
+    
+    .liara-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .liara-quick-actions {
+        grid-template-columns: 1fr;
+    }
+    
+    .liara-achievements-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
