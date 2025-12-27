@@ -1,7 +1,9 @@
 {
   "platform": "flask",
   "flask": {
-    "pythonVersion": "3.11",
-    "appDirectory": "api"
+    "pythonVersion": "3.11"
+  },
+  "build": {
+    "command": "pip install -r requirements.txt"
   }
 }
