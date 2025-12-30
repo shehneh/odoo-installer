@@ -1,5 +1,5 @@
 {
   "platform": "flask",
   "port": 5001,
-  "app": "odoo-api"
+  "app": "odoomaster"
 }
