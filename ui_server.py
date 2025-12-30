@@ -1636,27 +1636,90 @@ def run_exe_elevated(exe_path: Path, arguments: Optional[str] = None, wait: bool
     return p.pid
 
 
-def run_powershell_elevated_file(ps1_path: Path, ps_args: Optional[list[str]] = None, wait: bool = False) -> int:
-    """Start a PowerShell script elevated (UAC prompt) with visible window. Returns PID."""
+# Installation result tracking - Use BASE directory (not TEMP) so Admin processes can access it
+INSTALL_RESULT_FILE = BASE / 'install_result.json'
+
+def write_install_result(step_id: str, success: bool, message: str, error: str = ''):
+    """Write installation result to a file for JavaScript to poll."""
+    result = {
+        'step_id': step_id,
+        'success': success,
+        'message': message,
+        'error': error,
+        'timestamp': datetime.now().isoformat()
+    }
+    # No need to mkdir - BASE always exists
+    with open(INSTALL_RESULT_FILE, 'w', encoding='utf-8') as f:
+        json.dump(result, f, ensure_ascii=False, indent=2)
+
+def read_install_result() -> dict:
+    """Read installation result from file."""
+    try:
+        if INSTALL_RESULT_FILE.exists():
+            # Read as bytes and strip BOM if present (PowerShell adds BOM with Out-File)
+            raw = INSTALL_RESULT_FILE.read_bytes()
+            # Remove UTF-8 BOM if present
+            if raw.startswith(b'\xef\xbb\xbf'):
+                raw = raw[3:]
+            content = raw.decode('utf-8').strip()
+            if content:
+                return json.loads(content)
+    except Exception as e:
+        print(f"[DEBUG] read_install_result error: {e}")
+        pass
+    return {}
+
+def clear_install_result():
+    """Clear the install result file."""
+    try:
+        if INSTALL_RESULT_FILE.exists():
+            INSTALL_RESULT_FILE.unlink()
+    except Exception:
+        pass
+
+
+def run_powershell_elevated_file(ps1_path: Path, ps_args: Optional[list[str]] = None, wait: bool = False, hidden: bool = False) -> int:
+    """Start a PowerShell script elevated (UAC prompt). Returns PID.
+    
+    Args:
+        ps1_path: Path to the .ps1 script
+        ps_args: Additional arguments to pass to the script
+        wait: If True, wait for the script to finish
+        hidden: If True, run with hidden window (for background operation)
+    """
     ps_args = ps_args or []
     script = str(ps1_path)
-    arg_list = [
-        '-NoProfile',
-        '-NoExit',  # Keep window open so user can see output
-        '-ExecutionPolicy', 'Bypass',
-        '-File', script,
-        *ps_args,
-    ]
+    
+    if hidden:
+        # Run hidden - good for background tasks
+        arg_list = [
+            '-NoProfile',
+            '-WindowStyle', 'Hidden',
+            '-ExecutionPolicy', 'Bypass',
+            '-File', script,
+            *ps_args,
+        ]
+    else:
+        # Run with visible window
+        arg_list = [
+            '-NoProfile',
+            '-ExecutionPolicy', 'Bypass',
+            '-File', script,
+            *ps_args,
+        ]
+    
     arg_expr = '@(' + ','.join(ps_sq(a) for a in arg_list) + ')'
-    cmd = f"Start-Process -FilePath 'powershell.exe' -Verb RunAs" + (" -Wait" if wait else "") + f" -ArgumentList {arg_expr}"
+    window_style = " -WindowStyle Hidden" if hidden else ""
+    cmd = f"Start-Process -FilePath 'powershell.exe' -Verb RunAs{window_style}" + (" -Wait" if wait else "") + f" -ArgumentList {arg_expr}"
     p = subprocess.Popen(['powershell.exe', '-NoProfile', '-Command', cmd], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     return p.pid
 
 
-def run_powershell_elevated_file_sync(ps1_path: Path, ps_args: Optional[list[str]] = None) -> int:
+def run_powershell_elevated_file_sync(ps1_path: Path, ps_args: Optional[list[str]] = None, hidden: bool = True) -> int:
     """Run a PowerShell script elevated and wait for it to finish.
 
     Returns the exit code of the non-elevated wrapper PowerShell process.
+    By default runs hidden for background operation.
     """
     ps_args = ps_args or []
     script = str(ps1_path)
@@ -1667,7 +1730,8 @@ def run_powershell_elevated_file_sync(ps1_path: Path, ps_args: Optional[list[str
         *ps_args,
     ]
     arg_expr = '@(' + ','.join(ps_sq(a) for a in arg_list) + ')'
-    cmd = f"Start-Process -FilePath 'powershell.exe' -Verb RunAs -Wait -ArgumentList {arg_expr}"
+    window_style = " -WindowStyle Hidden" if hidden else ""
+    cmd = f"Start-Process -FilePath 'powershell.exe' -Verb RunAs -Wait{window_style} -ArgumentList {arg_expr}"
     r = subprocess.run(['powershell.exe', '-NoProfile', '-Command', cmd], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     return r.returncode
 
@@ -1677,7 +1741,16 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
         self.send_header('Pragma', 'no-cache')
         self.send_header('Expires', '0')
+        # CORS headers for Hybrid mode (online website connecting to local server)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
         return super().end_headers()
+
+    def do_OPTIONS(self):
+        """Handle CORS preflight requests for Hybrid mode"""
+        self.send_response(200)
+        self.end_headers()
 
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
@@ -1880,6 +1953,36 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(resp, default=str).encode('utf-8'))
             return
         
+        # API to get installation logs for monitoring
+        if parsed.path == '/api/logs':
+            self.send_response(200)
+            self.send_header('Content-Type','application/json; charset=utf-8')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            
+            # Get last N lines from log file
+            lines_param = query_params.get('lines', ['50'])
+            try:
+                num_lines = int(lines_param[0])
+            except:
+                num_lines = 50
+            
+            log_content = []
+            if LOG.exists():
+                try:
+                    with open(LOG, 'r', encoding='utf-8', errors='ignore') as f:
+                        all_lines = f.readlines()
+                        log_content = all_lines[-num_lines:] if len(all_lines) > num_lines else all_lines
+                except:
+                    pass
+            
+            self.wfile.write(json.dumps({
+                'success': True,
+                'lines': [line.strip() for line in log_content],
+                'total_lines': len(log_content)
+            }).encode('utf-8'))
+            return
+        
         if parsed.path == '/api/settings':
             self.send_response(200)
             self.send_header('Content-Type','application/json; charset=utf-8')
@@ -1946,8 +2049,31 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Content-Type','application/json; charset=utf-8')
             self.end_headers()
             resp = get_status()
-            # Return just the deps status for quick polling
-            self.wfile.write(json.dumps({'deps': resp['deps']}, default=str).encode('utf-8'))
+            # Also include last install result for error detection
+            install_result = read_install_result()
+            # Return deps status plus install result for quick polling
+            self.wfile.write(json.dumps({
+                'deps': resp['deps'],
+                'install_result': install_result
+            }, default=str).encode('utf-8'))
+            return
+        
+        if parsed.path == '/api/install_result':
+            # Get the last installation result
+            self.send_response(200)
+            self.send_header('Content-Type','application/json; charset=utf-8')
+            self.end_headers()
+            result = read_install_result()
+            self.wfile.write(json.dumps(result, default=str).encode('utf-8'))
+            return
+        
+        if parsed.path == '/api/clear_install_result':
+            # Clear the installation result file
+            self.send_response(200)
+            self.send_header('Content-Type','application/json; charset=utf-8')
+            self.end_headers()
+            clear_install_result()
+            self.wfile.write(json.dumps({'cleared': True}).encode('utf-8'))
             return
         
         if parsed.path == '/api/odoo_info':
@@ -2371,6 +2497,115 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 self.send_header('Content-Type','application/json; charset=utf-8')
                 self.end_headers()
                 self.wfile.write(json.dumps({'error': str(e)}).encode('utf-8'))
+            return
+        
+        if parsed.path == '/api/install_odoo':
+            # Install Odoo from GitHub
+            self.send_response(200)
+            self.send_header('Content-Type','application/json; charset=utf-8')
+            self.end_headers()
+            
+            try:
+                body = self.rfile.read(content_length)
+                data = json.loads(body.decode('utf-8'))
+                odoo_path = data.get('odoo_path', '').strip()
+                
+                if not odoo_path:
+                    self.wfile.write(json.dumps({
+                        'success': False,
+                        'error': 'مسیر نصب مشخص نشده است'
+                    }).encode('utf-8'))
+                    return
+                
+                # Start installation in background thread
+                def install_worker():
+                    try:
+                        log_message(f"شروع نصب Odoo در مسیر: {odoo_path}")
+                        
+                        # Create directory if not exists
+                        target_dir = Path(odoo_path)
+                        target_dir.mkdir(parents=True, exist_ok=True)
+                        
+                        # Download Odoo from Google Drive (Custom Version)
+                        file_id = "1Hvbbasxs3qe0jxRwQpHZh2295o2qxNsq"
+                        log_message(f"دانلود Odoo از Google Drive (نسخه سفارشی)...")
+                        
+                        import urllib.request
+                        import zipfile
+                        import requests
+                        
+                        # Download with confirmation token handling
+                        zip_path = target_dir.parent / "odoo19_download.zip"
+                        log_message("در حال دانلود... (این کار چند دقیقه طول می‌کشد)")
+                        
+                        # Google Drive direct download
+                        url = f"https://drive.google.com/uc?export=download&id={file_id}"
+                        session = requests.Session()
+                        response = session.get(url, stream=True)
+                        
+                        # Check for confirmation token
+                        for key, value in response.cookies.items():
+                            if key.startswith('download_warning'):
+                                url = f"https://drive.google.com/uc?export=download&id={file_id}&confirm={value}"
+                                response = session.get(url, stream=True)
+                                break
+                        
+                        # Download with progress
+                        total_size = int(response.headers.get('content-length', 0))
+                        with open(zip_path, 'wb') as f:
+                            downloaded = 0
+                            for chunk in response.iter_content(chunk_size=8192):
+                                if chunk:
+                                    f.write(chunk)
+                                    downloaded += len(chunk)
+                                    if total_size > 0:
+                                        percent = int(downloaded * 100 / total_size)
+                                        if percent % 10 == 0:  # Log every 10%
+                                            log_message(f"دانلود: {percent}%")
+                        
+                        log_message("✅ دانلود کامل شد!")
+                        
+                        # Extract
+                        log_message("در حال استخراج فایل‌ها...")
+                        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                            zip_ref.extractall(target_dir.parent)
+                        
+                        # Rename extracted folder
+                        extracted_folder = target_dir.parent / "odoo-19.0"
+                        if extracted_folder.exists():
+                            import shutil
+                            if target_dir.exists():
+                                shutil.rmtree(target_dir)
+                            extracted_folder.rename(target_dir)
+                        
+                        # Cleanup
+                        if zip_path.exists():
+                            zip_path.unlink()
+                        
+                        log_message(f"✅ نصب Odoo با موفقیت انجام شد در: {odoo_path}")
+                        
+                        # Update config
+                        settings = load_settings()
+                        settings['odoo_path'] = str(odoo_path)
+                        save_settings(settings)
+                        log_message("تنظیمات به‌روزرسانی شد")
+                        
+                    except Exception as e:
+                        log_message(f"❌ خطا در نصب Odoo: {str(e)}")
+                
+                thread = threading.Thread(target=install_worker, daemon=True)
+                thread.start()
+                
+                self.wfile.write(json.dumps({
+                    'success': True,
+                    'message': 'نصب Odoo آغاز شد. لاگ‌ها را مشاهده کنید.'
+                }).encode('utf-8'))
+                
+            except Exception as e:
+                self.wfile.write(json.dumps({
+                    'success': False,
+                    'error': str(e)
+                }).encode('utf-8'))
             return
         
         if parsed.path == '/api/license/activate':
@@ -3916,12 +4151,80 @@ Write-Host "You can close this window now." -ForegroundColor Yellow
             if not req.exists():
                 return {'error': 'offline/requirements.txt not found (needed to install wheels)'}
 
+            # Create a script that installs pip wheels and writes result to file
+            result_file = str(INSTALL_RESULT_FILE).replace('\\', '\\\\')
+            script = f'''
+$Host.UI.RawUI.WindowTitle = "Installing Python Packages..."
+Write-Host "============================================" -ForegroundColor Cyan
+Write-Host "   Installing Python Packages (wheels)     " -ForegroundColor Cyan
+Write-Host "============================================" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "Pip: {str(pip_exe)}" -ForegroundColor Gray
+Write-Host "Wheels: {str(wheel_dir)}" -ForegroundColor Gray
+Write-Host "Requirements: {str(req)}" -ForegroundColor Gray
+Write-Host ""
+
+try {{
+    $output = & {ps_sq(str(pip_exe))} install --no-index --find-links {ps_sq(str(wheel_dir))} -r {ps_sq(str(req))} 2>&1
+    $output | ForEach-Object {{ Write-Host $_ }}
+    
+    if ($LASTEXITCODE -eq 0) {{
+        Write-Host ""
+        Write-Host "============================================" -ForegroundColor Green
+        Write-Host "   Packages installed successfully!        " -ForegroundColor Green
+        Write-Host "============================================" -ForegroundColor Green
+        
+        # Write success result
+        $result = @{{
+            step_id = "pip_wheels"
+            success = $true
+            message = "Packages installed successfully"
+            error = ""
+            timestamp = (Get-Date).ToString("o")
+        }} | ConvertTo-Json
+        $result | Out-File -FilePath "{result_file}" -Encoding UTF8
+    }} else {{
+        Write-Host ""
+        Write-Host "============================================" -ForegroundColor Red
+        Write-Host "   Installation FAILED!                    " -ForegroundColor Red
+        Write-Host "============================================" -ForegroundColor Red
+        
+        # Write failure result
+        $result = @{{
+            step_id = "pip_wheels"
+            success = $false
+            message = "Installation failed with exit code $LASTEXITCODE"
+            error = ($output | Out-String)
+            timestamp = (Get-Date).ToString("o")
+        }} | ConvertTo-Json
+        $result | Out-File -FilePath "{result_file}" -Encoding UTF8
+    }}
+}} catch {{
+    Write-Host ""
+    Write-Host "ERROR: $_" -ForegroundColor Red
+    
+    # Write error result
+    $result = @{{
+        step_id = "pip_wheels"
+        success = $false
+        message = "Exception occurred"
+        error = $_.Exception.Message
+        timestamp = (Get-Date).ToString("o")
+    }} | ConvertTo-Json
+    $result | Out-File -FilePath "{result_file}" -Encoding UTF8
+}}
+
+Write-Host ""
+Write-Host "Press any key to close this window..." -ForegroundColor Yellow
+$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+'''
             tmp = TEMP_DIR / 'install_pip_wheels_tmp.ps1'
             tmp.parent.mkdir(parents=True, exist_ok=True)
-            tmp.write_text(
-                f"& {ps_sq(str(pip_exe))} install --no-index --find-links {ps_sq(str(wheel_dir))} -r {ps_sq(str(req))}\n",
-                encoding='utf-8'
-            )
+            tmp.write_text(script, encoding='utf-8')
+            
+            # Clear previous result
+            clear_install_result()
+            
             pid = run_powershell_elevated_file(tmp, wait=False)
             return {'pid': pid}
         if cmd in ('create_pg_role','install_pg_role'):

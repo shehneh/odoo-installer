@@ -5,7 +5,7 @@ a = Analysis(
     ['ui_server.py'],
     pathex=[],
     binaries=[],
-    datas=[('license_manager.py', '.'), ('admin_config.py', '.'), ('database_manager.py', '.'), ('payment_config.py', '.')],
+    datas=[],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

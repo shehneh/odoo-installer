@@ -12,7 +12,7 @@ Usage:
     Server will run on: http://localhost:5001
 """
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template, send_from_directory
 from flask_cors import CORS
 from datetime import datetime, timedelta
 import json
@@ -23,7 +23,7 @@ import random
 import string
 from pathlib import Path
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)  # Enable CORS for all routes
 
 # Data storage (در محیط واقعی از Database استفاده کنید)
@@ -478,6 +478,66 @@ def index():
         },
         'docs': 'See DASHBOARD_README.md for full API documentation'
     })
+
+
+# ===============================
+# HTML Pages Routes
+# ===============================
+
+@app.route('/')
+def index():
+    """صفحه اصلی"""
+    return render_template('index.html')
+
+@app.route('/dashboard')
+def dashboard():
+    """داشبورد کاربر"""
+    return render_template('dashboard.html')
+
+@app.route('/demo')
+def demo():
+    """صفحه دمو"""
+    return render_template('demo.html')
+
+@app.route('/login')
+def login():
+    """صفحه ورود"""
+    return render_template('login.html')
+
+@app.route('/register')
+def register():
+    """صفحه ثبت‌نام"""
+    return render_template('register.html')
+
+@app.route('/support')
+def support():
+    """صفحه پشتیبانی"""
+    return render_template('support.html')
+
+@app.route('/downloads')
+def downloads():
+    """صفحه دانلودها"""
+    return render_template('downloads.html')
+
+@app.route('/docs')
+def docs():
+    """صفحه مستندات"""
+    return render_template('docs.html')
+
+@app.route('/licenses')
+def licenses():
+    """صفحه لایسنس‌ها"""
+    return render_template('licenses.html')
+
+@app.route('/payment')
+def payment():
+    """صفحه پرداخت"""
+    return render_template('payment.html')
+
+@app.route('/admin')
+def admin():
+    """صفحه ادمین"""
+    return render_template('admin.html')
 
 
 if __name__ == '__main__':

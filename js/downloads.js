@@ -241,6 +241,17 @@
                 // If direct URL is provided (public), use it.
                 if (hasDirectUrl && !item.requires_login && !item.requires_purchase) {
                     window.open(String(item.download_url), '_blank', 'noopener');
+                    
+                    // Show "Go to Online Installer" button after download
+                    btn.innerHTML = '<i class="fas fa-check"></i> شروع شد';
+                    const actionsDiv = btn.closest('.download-actions');
+                    if (actionsDiv && !actionsDiv.querySelector('.btn-installer')) {
+                        const installerBtn = document.createElement('a');
+                        installerBtn.href = 'install.html';
+                        installerBtn.className = 'btn btn-secondary btn-installer';
+                        installerBtn.innerHTML = '<i class="fas fa-rocket"></i> رفتن به نصاب آنلاین';
+                        actionsDiv.appendChild(installerBtn);
+                    }
                     return;
                 }
 
@@ -260,6 +271,16 @@
                         }
                         btn.innerHTML = '<i class="fas fa-check"></i> شروع شد';
                         window.open(url, '_blank', 'noopener');
+                        
+                        // Show "Go to Online Installer" button after download
+                        const actionsDiv = btn.closest('.download-actions');
+                        if (actionsDiv && !actionsDiv.querySelector('.btn-installer')) {
+                            const installerBtn = document.createElement('a');
+                            installerBtn.href = 'install.html';
+                            installerBtn.className = 'btn btn-secondary btn-installer';
+                            installerBtn.innerHTML = '<i class="fas fa-rocket"></i> رفتن به نصاب آنلاین';
+                            actionsDiv.appendChild(installerBtn);
+                        }
                     } catch (e) {
                         // Common cases: 401 needs login, 403 needs purchase, 404 not ready
                         if (e && e.status === 401) {

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خرید لایسنس | OdooMaster</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/components.css">
+    <style>
+        .plan-card {
+            padding: 24px;
+            border-radius: 20px;
+            border: 2px solid var(--glass-border);
+            background: var(--glass-bg);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        .plan-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+        }
+        .plan-card.selected {
+            border-color: var(--secondary);
+            background: rgba(16, 185, 129, 0.1);
+        }
+        .plan-card.popular {
+            position: relative;
+        }
+        .plan-card.popular::before {
+            content: 'پرفروش';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+        .plan-name {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--white);
+            margin-bottom: 8px;
+        }
+        .plan-price {
+            font-size: 1.8rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .plan-duration {
+            color: var(--gray-light);
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+        .plan-features {
+            margin-top: 16px;
+            text-align: right;
+        }
+        .plan-features li {
+            color: var(--gray-light);
+            padding: 6px 0;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .plan-features li i {
+            color: var(--secondary);
+        }
+        .hardware-box {
+            background: var(--dark-lighter);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .hardware-box label {
+            color: var(--gray-light);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .hardware-id {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 1.1rem;
+            color: var(--secondary);
+            background: var(--dark);
+            padding: 12px 20px;
+            border-radius: 8px;
+            display: inline-block;
+            letter-spacing: 1px;
+        }
+        .customer-info {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 24px;
+        }
+        .customer-info h3 {
+            color: var(--white);
+            font-size: 1rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .form-group label {
+            color: var(--gray-light);
+            font-size: 0.85rem;
+        }
+        .form-group input {
+            background: var(--dark);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 12px 14px;
+            color: var(--white);
+            font-size: 0.95rem;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .summary-box {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 24px;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+        .summary-label {
+            color: var(--gray-light);
+        }
+        .summary-value {
+            color: var(--white);
+            font-weight: 700;
+        }
+        .summary-value.price {
+            color: var(--secondary);
+            font-size: 1.2rem;
+        }
+        .pay-btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 1.1rem;
+            margin-top: 24px;
+        }
+        .pay-btn i {
+            margin-left: 8px;
+        }
+        .secure-badge {
+            text-align: center;
+            margin-top: 12px;
+            color: var(--secondary);
+            font-size: 0.85rem;
+        }
+        .secure-badge i {
+            margin-left: 6px;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--gray-light);
+            text-decoration: none;
+            margin-bottom: 24px;
+            transition: color 0.2s;
+        }
+        .back-link:hover {
+            color: var(--white);
+        }
+        .error-alert {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            color: #ef4444;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .success-alert {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            color: var(--secondary);
+            margin-bottom: 20px;
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .plans-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="particles-js"></div>
+
+    <nav class="navbar glass">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon"><i class="fas fa-cube"></i></div>
+                <span>Odoo<strong>Master</strong></span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link"><i class="fas fa-home"></i> <span data-i18n="nav.home">صفحه اصلی</span></a></li>
+                <li><a href="dashboard.html" class="nav-link"><i class="fas fa-user"></i> <span data-i18n="nav.dashboard">حساب کاربری</span></a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="theme-toggle" id="themeToggle" title="تغییر تم" data-i18n-title="theme.toggle"><i class="fas fa-moon"></i></button>
+                <a href="licenses.html" class="btn btn-ghost"><i class="fas fa-arrow-right"></i> <span data-i18n="payment.backToLicense">بازگشت به صفحه لایسنس</span></a>
+            </div>
+        </div>
+    </nav>
+
+    <main style="padding-top: 110px; min-height: 100vh; padding-bottom: 60px;">
+        <div class="container" style="max-width: 900px;">
+            
+            <div class="section-header" style="text-align: center;">
+                <h1 class="section-title"><i class="fas fa-shopping-cart"></i> <span data-i18n="payment.title">خرید لایسنس OdooMaster</span></h1>
+                <p class="section-desc" data-i18n="payment.desc">لایسنس مورد نظر خود را انتخاب کرده و به راحتی خریداری کنید</p>
+            </div>
+
+            <div id="errorAlert" class="error-alert">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="errorMessage"></span>
+            </div>
+
+            <div id="successAlert" class="success-alert">
+                <i class="fas fa-check-circle"></i>
+                <span id="successMessage"></span>
+            </div>
+
+            <!-- Hardware ID Display -->
+            <div class="glass hardware-box">
+                <label><i class="fas fa-microchip"></i> <span data-i18n="payment.hwid.label">شناسه سخت‌افزاری دستگاه شما:</span></label>
+                <div class="hardware-id" id="hardwareId" data-i18n="payment.hwid.loading" style="display: none;">در حال دریافت...</div>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <input type="text" id="hardwareIdInput" class="form-input" placeholder="شناسه سخت‌افزاری را وارد کنید" data-i18n-placeholder="payment.hwid.placeholder" style="flex: 1; min-width: 200px; font-family: monospace; letter-spacing: 1px;">
+                    <button type="button" id="validateHwidBtn" class="btn btn-ghost" style="white-space: nowrap;">
+                        <i class="fas fa-check-circle"></i> <span data-i18n="payment.hwid.validate">تایید</span>
+                    </button>
+                </div>
+                <small style="color: var(--gray-light); margin-top: 8px; display: block;" data-i18n="payment.hwid.help">شناسه سخت‌افزاری را از نصاب OdooMaster کپی کنید یا دستی وارد نمایید.</small>
+            </div>
+
+            <!-- Plan Selection -->
+            <div class="glass" style="padding: 24px; border-radius: var(--radius-xl);">
+                <h3 style="color: var(--white); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-check-circle" style="color: var(--secondary);"></i> <span data-i18n="payment.selectPlan">انتخاب پلن:</span>
+                </h3>
+                
+                <div id="plansGrid" class="plans-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                    <!-- Plans will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Customer Info (Optional) -->
+            <div class="customer-info">
+                <h3><i class="fas fa-user"></i> <span data-i18n="payment.customerInfo">اطلاعات خریدار (اختیاری):</span></h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label data-i18n="payment.name">نام و نام خانوادگی</label>
+                        <input type="text" id="customerName" placeholder="مثال: علی احمدی" data-i18n-placeholder="payment.name.placeholder">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="payment.email">ایمیل</label>
+                        <input type="email" id="customerEmail" placeholder="example@email.com">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="payment.phone">شماره موبایل</label>
+                    <input type="tel" id="customerPhone" placeholder="09123456789">
+                </div>
+            </div>
+
+            <!-- Summary -->
+            <div class="summary-box">
+                <div class="summary-row">
+                    <span class="summary-label" data-i18n="payment.selectedPlan">پلن انتخابی:</span>
+                    <span class="summary-value" id="summaryPlan" data-i18n="payment.notSelected">انتخاب نشده</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label" data-i18n="payment.amount">مبلغ:</span>
+                    <span class="summary-value price" id="summaryPrice">۰ تومان</span>
+                </div>
+            </div>
+
+            <!-- Pay Button -->
+            <button id="payBtn" class="btn btn-primary btn-glow pay-btn" disabled>
+                <i class="fas fa-lock"></i>
+                <span id="payBtnText" data-i18n="payment.pay">پرداخت</span>
+            </button>
+
+            <div class="secure-badge">
+                <i class="fas fa-shield-alt"></i>
+                <span data-i18n="payment.secureBadge">پرداخت امن با درگاه زرین‌پال</span>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="js/particles.min.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/payment.js"></script>
+</body>
+</html>

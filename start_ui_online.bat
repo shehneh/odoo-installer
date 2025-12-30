@@ -115,7 +115,13 @@ if %ERRORLEVEL% NEQ 0 (
     "%PY%" -m pip --disable-pip-version-check --no-input install cryptography
 )
 
-"%PY%" "%~dp0ui_server.py"
+rem Check if app subfolder exists (for lite-online package structure)
+if exist "%~dp0app\ui_server.py" (
+    echo [*] Running from lite-online package...
+    "%PY%" "%~dp0app\ui_server.py"
+) else (
+    "%PY%" "%~dp0ui_server.py"
+)
 
 echo.
 echo [!] UI server exited.

@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نصاب آنلاین - OdooMaster</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Vazirmatn', 'Segoe UI', Tahoma, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+      color: #fff;
+    }
+    
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 30px;
+    }
+    .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .logo svg { width: 48px; height: 48px; }
+    .logo h1 { font-size: 24px; color: #fff; }
+    .logo span { color: #714B67; }
+    
+    .nav-links { display: flex; gap: 20px; }
+    .nav-links a {
+      color: #aaa;
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.3s;
+    }
+    .nav-links a:hover { color: #fff; }
+    
+    /* Connection Status */
+    .connection-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .connection-box.connected { background: rgba(76, 175, 80, 0.15); border: 1px solid rgba(76, 175, 80, 0.3); color: #4CAF50; }
+    .connection-box.disconnected { background: rgba(244, 67, 54, 0.15); border: 1px solid rgba(244, 67, 54, 0.3); color: #F44336; }
+    .connection-box.checking { background: rgba(255, 193, 7, 0.15); border: 1px solid rgba(255, 193, 7, 0.3); color: #FFC107; }
+    .status-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    .status-dot.pulse { animation: pulse 2s infinite; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+    
+    /* Agent Required Card */
+    .agent-card {
+      background: linear-gradient(135deg, #2d2d44 0%, #1e1e30 100%);
+      border-radius: 20px;
+      padding: 50px;
+      text-align: center;
+      margin: 40px 0;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .agent-card .icon {
+      width: 100px; height: 100px;
+      background: linear-gradient(135deg, #714B67 0%, #9c6b8f 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 30px;
+      font-size: 48px;
+    }
+    .agent-card h2 { font-size: 28px; margin-bottom: 16px; }
+    .agent-card p { color: #aaa; margin-bottom: 30px; font-size: 16px; line-height: 1.8; max-width: 600px; margin-left: auto; margin-right: auto; }
+    
+    .steps {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin: 40px 0;
+      flex-wrap: wrap;
+    }
+    .step {
+      text-align: center;
+      max-width: 200px;
+    }
+    .step-num {
+      width: 50px; height: 50px;
+      background: rgba(113, 75, 103, 0.3);
+      border: 2px solid #714B67;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 15px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #714B67;
+    }
+    .step h4 { font-size: 16px; margin-bottom: 8px; }
+    .step p { font-size: 13px; color: #888; }
+    
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: linear-gradient(135deg, #714B67 0%, #9c6b8f 100%);
+      color: #fff;
+      padding: 18px 40px;
+      border-radius: 14px;
+      text-decoration: none;
+      font-size: 18px;
+      font-weight: 600;
+      transition: all 0.3s;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-download:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 40px rgba(113, 75, 103, 0.5);
+    }
+    
+    .retry-link {
+      display: block;
+      margin-top: 25px;
+      color: #714B67;
+      text-decoration: underline;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .retry-link:hover { color: #9c6b8f; }
+    
+    /* Dashboard Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 30px;
+    }
+    @media (max-width: 900px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+    }
+    
+    .card {
+      background: linear-gradient(135deg, #2d2d44 0%, #1e1e30 100%);
+      border-radius: 16px;
+      padding: 28px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .card.full-width { grid-column: 1 / -1; }
+    .card h3 {
+      font-size: 18px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #fff;
+    }
+    .card h3 i { color: #714B67; }
+    
+    /* Dependency List */
+    .dep-list { list-style: none; }
+    .dep-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .dep-item:last-child { border-bottom: none; }
+    .dep-name { display: flex; align-items: center; gap: 12px; font-size: 15px; }
+    .dep-name i { width: 24px; text-align: center; color: #888; }
+    .dep-status {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .dep-status.ok { background: rgba(76, 175, 80, 0.15); color: #4CAF50; }
+    .dep-status.missing { background: rgba(244, 67, 54, 0.15); color: #F44336; }
+    
+    /* Progress Section */
+    .progress-container { margin-bottom: 24px; }
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+    .progress-bar {
+      height: 12px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #714B67, #4CAF50);
+      border-radius: 6px;
+      transition: width 0.5s ease;
+    }
+    
+    /* Actions */
+    .actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 14px 28px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: inherit;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #714B67 0%, #9c6b8f 100%);
+      color: #fff;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(113, 75, 103, 0.4); }
+    .btn-success { background: linear-gradient(135deg, #43A047, #66BB6A); color: #fff; }
+    .btn-secondary {
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.15); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+    
+    /* Info Items */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 600px) {
+      .info-grid { grid-template-columns: 1fr; }
+    }
+    .info-item {
+      background: rgba(255,255,255,0.03);
+      padding: 16px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    .info-item .label { font-size: 12px; color: #888; margin-bottom: 6px; }
+    .info-item .value { font-size: 16px; font-weight: 600; }
+    
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 40px 0;
+      color: #555;
+      font-size: 14px;
+      margin-top: 60px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .footer a { color: #714B67; text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+    
+    /* Toast */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .toast {
+      background: #333;
+      color: #fff;
+      padding: 14px 28px;
+      border-radius: 10px;
+      animation: slideIn 0.3s ease;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .toast.success { background: linear-gradient(135deg, #43A047, #66BB6A); }
+    .toast.error { background: linear-gradient(135deg, #E53935, #EF5350); }
+    .toast.warning { background: linear-gradient(135deg, #FB8C00, #FFA726); }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Spinner */
+    .spinner {
+      width: 20px; height: 20px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="toast-container" id="toast-container"></div>
+  
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <a href="index.html" class="logo">
+        <svg viewBox="0 0 48 48" fill="none">
+          <circle cx="24" cy="24" r="22" fill="#714B67"/>
+          <path d="M24 12c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm0 18c-3.314 0-6-2.686-6-6s2.686-6 6-6 6 2.686 6 6-2.686 6-6 6z" fill="white"/>
+        </svg>
+        <h1>Odoo<span>Master</span></h1>
+      </a>
+      
+      <nav class="nav-links">
+        <a href="index.html"><i class="fas fa-home"></i> خانه</a>
+        <a href="downloads.html"><i class="fas fa-download"></i> دانلود</a>
+        <a href="docs.html"><i class="fas fa-book"></i> مستندات</a>
+        <a href="support.html"><i class="fas fa-headset"></i> پشتیبانی</a>
+      </nav>
+      
+      <div class="connection-box checking" id="connection-box">
+        <span class="status-dot pulse"></span>
+        <span id="status-text">در حال بررسی...</span>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+      <!-- Agent Required Section (shown when not connected) -->
+      <section class="agent-card" id="agent-section" style="display: none;">
+        <div class="icon"><i class="fas fa-plug"></i></div>
+        <h2>اتصال به سرور محلی</h2>
+        <p>
+          برای نصب و مدیریت Odoo روی سیستم شما، نیاز به اجرای نصاب محلی است.
+          نصاب را دانلود کرده و فایل <strong>start_ui_online.bat</strong> را اجرا کنید.
+        </p>
+        
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">۱</div>
+            <h4>دانلود نصاب</h4>
+            <p>فایل «نسخه سبک آنلاین» را دانلود کنید</p>
+          </div>
+          <div class="step">
+            <div class="step-num">۲</div>
+            <h4>استخراج فایل</h4>
+            <p>فایل ZIP را در محل دلخواه Extract کنید</p>
+          </div>
+          <div class="step">
+            <div class="step-num">۳</div>
+            <h4>اجرای نصاب</h4>
+            <p>فایل start_ui_online.bat را اجرا کنید</p>
+          </div>
+        </div>
+        
+        <a href="downloads.html?highlight=odoo19-lite-online#odoo19-lite-online" class="btn-download">
+          <i class="fas fa-download"></i>
+          دانلود «نسخه سبک آنلاین» (~8MB)
+        </a>
+        
+        <div class="download-note" style="margin-top: 16px; padding: 12px 20px; background: rgba(113, 75, 103, 0.15); border-radius: 10px; font-size: 13px; color: #aaa;">
+          <i class="fas fa-info-circle" style="color: #714B67;"></i>
+          در صفحه دانلود، روی کارت <strong style="color: #fff;">«نسخه سبک آنلاین»</strong> کلیک کنید
+        </div>
+        
+        <span class="retry-link" onclick="checkConnection()">
+          <i class="fas fa-sync-alt"></i> بررسی مجدد اتصال
+        </span>
+      </section>
+
+      <!-- Dashboard Section (shown when connected) -->
+      <section id="dashboard-section" style="display: none;">
+        <!-- Progress Card -->
+        <div class="card full-width">
+          <h3><i class="fas fa-tasks"></i> وضعیت نصب</h3>
+          
+          <div class="progress-container">
+            <div class="progress-header">
+              <span id="progress-label">در حال بررسی...</span>
+              <span id="progress-percent">0%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+            </div>
+          </div>
+          
+          <div class="actions">
+            <button class="btn btn-primary" id="btn-full-install" onclick="runFullInstall()">
+              <i class="fas fa-rocket"></i> نصب کامل پیش‌نیازها
+            </button>
+            <button class="btn btn-success" id="btn-start-odoo" onclick="startOdoo()">
+              <i class="fas fa-play"></i> اجرای Odoo
+            </button>
+            <button class="btn btn-secondary" onclick="refreshStatus()">
+              <i class="fas fa-sync-alt"></i> بروزرسانی
+            </button>
+            <button class="btn btn-secondary" onclick="openLocalUI()">
+              <i class="fas fa-external-link-alt"></i> باز کردن نصاب محلی
+            </button>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <!-- Dependencies Card -->
+          <div class="card">
+            <h3><i class="fas fa-box"></i> پیش‌نیازها</h3>
+            <ul class="dep-list" id="dep-list">
+              <li class="dep-item">
+                <span class="dep-name"><i class="fas fa-spinner fa-spin"></i> در حال بارگذاری...</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Odoo Info Card -->
+          <div class="card">
+            <h3><i class="fas fa-info-circle"></i> اطلاعات Odoo</h3>
+            <div class="info-grid" id="odoo-info">
+              <div class="info-item">
+                <div class="label">نسخه</div>
+                <div class="value" id="odoo-version">--</div>
+              </div>
+              <div class="info-item">
+                <div class="label">پورت</div>
+                <div class="value" id="odoo-port">--</div>
+              </div>
+              <div class="info-item">
+                <div class="label">وضعیت</div>
+                <div class="value" id="odoo-status">--</div>
+              </div>
+            </div>
+            <div style="margin-top: 20px;">
+              <div class="info-item" style="text-align: right;">
+                <div class="label">مسیر نصب</div>
+                <div class="value" id="odoo-path" style="font-size: 13px; direction: ltr; word-break: break-all;">--</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>
+        <strong>OdooMaster</strong> © 2025 | 
+        <a href="index.html">صفحه اصلی</a> · 
+        <a href="downloads.html">دانلود</a> · 
+        <a href="support.html">پشتیبانی</a>
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    const LOCAL_SERVER = 'http://127.0.0.1:5000';
+    let isConnected = false;
+    let refreshInterval = null;
+
+    // ============ TOAST ============
+    function showToast(message, type = 'info', duration = 4000) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      
+      const icons = { success: 'check-circle', error: 'times-circle', warning: 'exclamation-triangle', info: 'info-circle' };
+      toast.innerHTML = `<i class="fas fa-${icons[type] || icons.info}"></i> ${message}`;
+      
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, duration);
+    }
+
+    // ============ CONNECTION CHECK ============
+    async function checkConnection() {
+      const box = document.getElementById('connection-box');
+      const text = document.getElementById('status-text');
+      const agentSection = document.getElementById('agent-section');
+      const dashboardSection = document.getElementById('dashboard-section');
+
+      box.className = 'connection-box checking';
+      box.querySelector('.status-dot').classList.add('pulse');
+      text.textContent = 'در حال بررسی...';
+
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 3000);
+        
+        const response = await fetch(`${LOCAL_SERVER}/api/status`, {
+          signal: controller.signal
+        });
+        clearTimeout(timeout);
+
+        if (response.ok) {
+          const data = await response.json();
+          isConnected = true;
+          
+          box.className = 'connection-box connected';
+          box.querySelector('.status-dot').classList.remove('pulse');
+          text.textContent = 'متصل به سرور محلی';
+          
+          agentSection.style.display = 'none';
+          dashboardSection.style.display = 'block';
+          
+          updateDashboard(data);
+          fetchOdooInfo();
+          
+          // Auto-refresh every 5 seconds
+          if (!refreshInterval) {
+            refreshInterval = setInterval(refreshStatus, 5000);
+          }
+          return true;
+        }
+      } catch (e) {
+        console.log('Connection failed:', e.message);
+      }
+
+      // Not connected
+      isConnected = false;
+      box.className = 'connection-box disconnected';
+      box.querySelector('.status-dot').classList.remove('pulse');
+      text.textContent = 'عدم اتصال';
+      
+      agentSection.style.display = 'block';
+      dashboardSection.style.display = 'none';
+      
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+        refreshInterval = null;
+      }
+      return false;
+    }
+
+    // ============ REFRESH STATUS ============
+    async function refreshStatus() {
+      if (!isConnected) {
+        await checkConnection();
+        return;
+      }
+
+      try {
+        const response = await fetch(`${LOCAL_SERVER}/api/status`);
+        if (response.ok) {
+          const data = await response.json();
+          updateDashboard(data);
+        }
+      } catch (e) {
+        isConnected = false;
+        checkConnection();
+      }
+    }
+
+    // ============ UPDATE DASHBOARD ============
+    function updateDashboard(data) {
+      // Dependencies
+      const depList = document.getElementById('dep-list');
+      if (data.deps && data.deps.length > 0) {
+        const iconMap = {
+          python: 'fab fa-python',
+          postgres: 'fas fa-database',
+          postgresql: 'fas fa-database',
+          git: 'fab fa-git-alt',
+          nodejs: 'fab fa-node-js',
+          wkhtmltopdf: 'fas fa-file-pdf',
+          vc_redist: 'fab fa-windows',
+          pip_wheels: 'fas fa-cubes',
+          pg_role: 'fas fa-user-cog'
+        };
+        
+        depList.innerHTML = data.deps.map(dep => {
+          const icon = iconMap[dep.id] || 'fas fa-box';
+          return `
+            <li class="dep-item">
+              <span class="dep-name">
+                <i class="${icon}"></i>
+                <span>${dep.name}</span>
+              </span>
+              <span class="dep-status ${dep.ok ? 'ok' : 'missing'}">
+                ${dep.ok ? '<i class="fas fa-check"></i> نصب شده' : '<i class="fas fa-times"></i> نیاز به نصب'}
+              </span>
+            </li>
+          `;
+        }).join('');
+
+        // Progress
+        const installed = data.deps.filter(d => d.ok).length;
+        const total = data.deps.length;
+        const percent = Math.round((installed / total) * 100);
+        
+        document.getElementById('progress-fill').style.width = `${percent}%`;
+        document.getElementById('progress-percent').textContent = `${percent}%`;
+        document.getElementById('progress-label').textContent = 
+          percent === 100 ? '✓ همه پیش‌نیازها نصب شده‌اند' : `${installed} از ${total} پیش‌نیاز نصب شده`;
+        
+        // Update buttons
+        document.getElementById('btn-full-install').disabled = percent === 100;
+      }
+    }
+
+    // ============ FETCH ODOO INFO ============
+    async function fetchOdooInfo() {
+      if (!isConnected) return;
+      
+      try {
+        const response = await fetch(`${LOCAL_SERVER}/api/odoo_info`);
+        if (response.ok) {
+          const data = await response.json();
+          document.getElementById('odoo-version').textContent = data.version || 'نامشخص';
+          document.getElementById('odoo-port').textContent = data.http_port || '8069';
+          document.getElementById('odoo-path').textContent = data.path || 'تنظیم نشده';
+          
+          // Check if Odoo is running
+          if (data.running) {
+            document.getElementById('odoo-status').innerHTML = '<span style="color: #4CAF50;">در حال اجرا</span>';
+          } else {
+            document.getElementById('odoo-status').innerHTML = '<span style="color: #888;">متوقف</span>';
+          }
+        }
+      } catch (e) {
+        console.error('Error fetching Odoo info:', e);
+      }
+    }
+
+    // ============ ACTIONS ============
+    async function runFullInstall() {
+      if (!isConnected) {
+        showToast('ابتدا نصاب محلی را اجرا کنید', 'error');
+        return;
+      }
+
+      showToast('برای نصب، صفحه نصاب محلی باز می‌شود...', 'info');
+      setTimeout(() => {
+        window.open(`${LOCAL_SERVER}/`, '_blank');
+      }, 500);
+    }
+
+    async function startOdoo() {
+      if (!isConnected) {
+        showToast('ابتدا نصاب محلی را اجرا کنید', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('btn-start-odoo');
+      const originalHTML = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> در حال اجرا...';
+
+      try {
+        const response = await fetch(`${LOCAL_SERVER}/api/start_odoo`);
+        const data = await response.json();
+        
+        if (data.error) {
+          showToast('خطا: ' + data.error, 'error', 6000);
+        } else {
+          const port = data.http_port || 8069;
+          showToast(`Odoo در حال اجرا روی پورت ${port}...`, 'success');
+          setTimeout(() => {
+            window.open(`http://localhost:${port}`, '_blank');
+          }, 3000);
+        }
+      } catch (e) {
+        showToast('خطا در اتصال: ' + e.message, 'error');
+      }
+
+      btn.disabled = false;
+      btn.innerHTML = originalHTML;
+    }
+
+    function openLocalUI() {
+      window.open(`${LOCAL_SERVER}/`, '_blank');
+    }
+
+    // ============ INIT ============
+    document.addEventListener('DOMContentLoaded', async () => {
+      await checkConnection();
+    });
+  </script>
+</body>
+</html>

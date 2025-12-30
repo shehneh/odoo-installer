@@ -68,6 +68,8 @@ def main() -> int:
 
     include_paths = [
         "ui_server.py",
+        # Note: ui_server.exe excluded from lite-online to keep size small (~130KB vs 12MB)
+        # Users will use Python directly via start_ui_online.bat
         "license_manager.py",
         "database_manager.py",
         "user_manager.py",
@@ -118,6 +120,23 @@ def main() -> int:
 
     # deterministic-ish ordering
     files_to_add.sort(key=lambda t: t[1])
+
+    # Special handling: 
+    # 1. ui_server.exe should be in app/, not release/
+    # 2. All files except start_ui_online.bat go inside 'app/' subfolder
+    final_files: list[tuple[Path, str]] = []
+    for src, rel in files_to_add:
+        # Fix release/ path for exe
+        if rel.startswith("release/"):
+            rel = rel.replace("release/", "")
+        
+        # start_ui_online.bat stays at root, everything else goes in app/
+        if rel == "start_ui_online.bat":
+            final_files.append((src, rel))
+        else:
+            final_files.append((src, f"app/{rel}"))
+    
+    files_to_add = final_files
 
     # write zip
     if out.exists():

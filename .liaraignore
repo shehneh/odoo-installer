@@ -1,0 +1,73 @@
+# Liara deployment ignore file
+# Only include files needed for the web interface
+
+# Offline installers and packages
+offline/
+offline_packages/
+soft/
+dist/
+build/
+release/
+
+# Odoo source
+odoo19_odoo/
+odoo/
+OpenUpgrade*/
+
+# Large downloads
+Download*/
+downloads/
+
+# Keep installer files
+!private_downloads/
+!private_downloads/installers/
+!private_downloads/installers/*.zip
+
+# Local data files
+.database.json
+.license_v2.json
+.plans.json
+.sales_log.json
+.users.json
+.user_auth_secret
+license_private_key.pem
+
+# Logs and temp
+*.log
+fetch_setup.log
+nuitka-crash-report.xml
+*.tmp
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyd
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# Node
+node_modules/
+
+# OS/Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.git/
+
+# Large zip files (except installers)
+*.7z
+# Keep installer zips
+!private_downloads/installers/*.zip
+
+# But ignore large Odoo source
+private_downloads/odoo19-source.zip
+
+# Large website zip files in root
+website_*.zip
+OdooInstaller-*.zip
+
+# Website subdirectories (deploy separately if needed)
+website/
+website_clean/

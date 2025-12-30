@@ -1,20 +1,26 @@
 /**
  * OdooMaster Online Installer
  * نصاب آنلاین - دانلود از منابع رسمی با Fallback به سرور خودمان
+ * با پشتیبانی از API محلی برای چک‌های واقعی سیستم
  */
 
 const OnlineInstaller = {
     // تنظیمات پایه
     config: {
         // آدرس پایه سرور خودمان برای fallback
-        // وقتی فایل‌ها رو روی هاست گذاشتی، این رو تغییر بده
         selfHostedBaseUrl: '/downloads/installers',
+        
+        // آدرس API محلی (ui_server.py)
+        localApiUrl: '',  // خالی = همان origin
         
         // آیا اول از سایت رسمی دانلود بشه یا از سرور خودمان؟
         preferOfficial: true,
         
         // تایم‌اوت برای چک کردن در دسترس بودن لینک (میلی‌ثانیه)
-        linkCheckTimeout: 5000
+        linkCheckTimeout: 5000,
+        
+        // آیا از API محلی استفاده شود؟
+        useLocalApi: true
     },
 
     // لینک‌های دانلود - هم رسمی و هم fallback
@@ -92,35 +98,191 @@ const OnlineInstaller = {
     },
 
     /**
-     * بررسی سیستم (شبیه‌سازی در مرورگر)
-     * در نسخه واقعی، این کار توسط یک برنامه محلی انجام می‌شود
+     * بررسی سیستم - از API محلی یا شبیه‌سازی
      */
     async checkSystem() {
         this.emit('check:start');
         
+        // اگر API محلی فعال است و در دسترس است
+        if (this.config.useLocalApi) {
+            try {
+                const result = await this.checkSystemViaApi();
+                if (result.success) {
+                    return result;
+                }
+            } catch (error) {
+                console.warn('Local API not available, falling back to simulation:', error);
+            }
+        }
+        
+        // Fallback به شبیه‌سازی
         const checks = ['os', 'python', 'postgresql', 'git', 'nodejs', 'vcredist'];
         
         for (const check of checks) {
             this.emit('check:item:start', { name: check });
             
-            // شبیه‌سازی تاخیر بررسی
             await this.delay(600 + Math.random() * 400);
             
-            // در مرورگر، نمی‌توانیم واقعاً چک کنیم
-            // این اطلاعات باید از یک برنامه محلی (مثل Electron یا API محلی) بیاید
             const result = await this.simulateCheck(check);
             
             this.state.checkResults[check] = result;
             this.emit('check:item:complete', { name: check, result });
         }
         
-        // ساخت لیست نیازمندی‌ها برای نصب
         this.buildInstallQueue();
         
         this.emit('check:complete', {
             results: this.state.checkResults,
             installQueue: this.state.installQueue
         });
+    },
+
+    /**
+     * بررسی سیستم از طریق API محلی
+     */
+    async checkSystemViaApi() {
+        const apiUrl = this.config.localApiUrl || '';
+        
+        try {
+            const response = await fetch(`${apiUrl}/api/system_check`);
+            if (!response.ok) throw new Error('API response not ok');
+            
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.error || 'API check failed');
+            }
+            
+            // تبدیل نتایج API به فرمت استاندارد
+            this.state.checkResults = {};
+            
+            for (const check of data.checks) {
+                this.emit('check:item:start', { name: check.id });
+                
+                await this.delay(100); // انیمیشن کوتاه
+                
+                const result = {
+                    id: check.id,
+                    name: check.name,
+                    installed: check.status === 'success',
+                    version: check.details || null,
+                    status: check.status,
+                    message: check.status === 'success' ? check.details : check.solution,
+                    solution: check.solution,
+                    official_url: check.official_url,
+                    install_cmd: check.install_cmd,
+                    auto_fix: check.auto_fix,
+                    offline_ready: check.offline_ready,
+                    description: check.description
+                };
+                
+                this.state.checkResults[check.id] = result;
+                this.emit('check:item:complete', { name: check.id, result });
+            }
+            
+            // ساخت صف نصب از نتایج API
+            this.buildInstallQueueFromApi(data.checks);
+            
+            this.emit('check:complete', {
+                results: this.state.checkResults,
+                installQueue: this.state.installQueue,
+                systemInfo: data.system_info,
+                overallStatus: data.overall_status,
+                allOk: data.all_ok
+            });
+            
+            return {
+                success: true,
+                data: data
+            };
+            
+        } catch (error) {
+            console.error('API check failed:', error);
+            throw error;
+        }
+    },
+
+    /**
+     * ساخت صف نصب از نتایج API
+     */
+    buildInstallQueueFromApi(checks) {
+        this.state.installQueue = [];
+        
+        for (const check of checks) {
+            if (check.status !== 'success') {
+                const source = this.sources[check.id] || {};
+                
+                this.state.installQueue.push({
+                    id: check.id,
+                    name: check.name || source.name || check.id,
+                    version: source.version || '',
+                    official_url: check.official_url || source.official_url,
+                    fallback_file: source.fallback_file,
+                    size: source.size || '',
+                    official: source.official || '',
+                    url: check.official_url || source.official_url || this.getFallbackUrl(check.id),
+                    fallback_url: this.getFallbackUrl(check.id),
+                    install_cmd: check.install_cmd,
+                    auto_fix: check.auto_fix,
+                    offline_ready: check.offline_ready,
+                    solution: check.solution,
+                    action: check.status === 'warning' ? 'update' : 'install'
+                });
+            }
+        }
+    },
+
+    /**
+     * نصب خودکار یک کامپوننت از طریق API محلی
+     */
+    async autoFixComponent(componentId) {
+        const apiUrl = this.config.localApiUrl || '';
+        
+        this.emit('autofix:start', { component: componentId });
+        
+        try {
+            const response = await fetch(`${apiUrl}/api/auto_fix?component=${componentId}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                this.emit('autofix:success', { component: componentId, data });
+            } else {
+                this.emit('autofix:error', { component: componentId, error: data.error });
+            }
+            
+            return data;
+            
+        } catch (error) {
+            this.emit('autofix:error', { component: componentId, error: error.message });
+            throw error;
+        }
+    },
+
+    /**
+     * نصب همه موارد ناقص
+     */
+    async autoFixAll() {
+        this.emit('autofix:all:start');
+        
+        const results = [];
+        
+        for (const item of this.state.installQueue) {
+            if (item.auto_fix && item.install_cmd) {
+                try {
+                    const result = await this.autoFixComponent(item.id);
+                    results.push({ id: item.id, ...result });
+                    
+                    // کمی صبر بین نصب‌ها
+                    await this.delay(1000);
+                    
+                } catch (error) {
+                    results.push({ id: item.id, success: false, error: error.message });
+                }
+            }
+        }
+        
+        this.emit('autofix:all:complete', { results });
+        return results;
     },
 
     async simulateCheck(name) {

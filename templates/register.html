@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ثبت‌نام | OdooMaster</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script>if(localStorage.getItem('theme')==='light')document.documentElement.className='light-theme';</script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        :root {
+            --primary: #00d4aa;
+            --primary-glow: rgba(0,212,170,0.4);
+            --bg: #06060a;
+            --card-bg: rgba(16,16,24,0.9);
+            --border: rgba(255,255,255,0.06);
+            --text: #ffffff;
+            --text-muted: #888899;
+            --danger: #ff6b6b;
+            --success: #00d4aa;
+        }
+        
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            overflow-x: hidden;
+        }
+        
+        /* === Animated BG === */
+        .bg-glow {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .bg-glow::before, .bg-glow::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.6;
+            animation: pulse 8s ease-in-out infinite alternate;
+        }
+        .bg-glow::before {
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(99,102,241,0.35), transparent 70%);
+            top: -150px; left: -100px;
+        }
+        .bg-glow::after {
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, var(--primary-glow), transparent 70%);
+            bottom: -100px; right: -100px;
+            animation-delay: -4s;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(1.15); opacity: 0.7; }
+        }
+        
+        /* === Container === */
+        .auth-wrapper {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 440px;
+        }
+        
+        .auth-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 40px 36px;
+            box-shadow: 0 40px 80px -20px rgba(0,0,0,0.6);
+        }
+        
+        /* === Logo === */
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            text-decoration: none;
+            margin-bottom: 24px;
+        }
+        .logo-icon {
+            width: 44px; height: 44px;
+            background: linear-gradient(135deg, var(--primary), #6366f1);
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            font-size: 22px;
+            color: #fff;
+            box-shadow: 0 6px 20px var(--primary-glow);
+        }
+        .logo-text {
+            font-size: 1.6rem;
+            font-weight: 300;
+            color: var(--text);
+        }
+        .logo-text strong { font-weight: 800; }
+        
+        /* === Header === */
+        .auth-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .auth-header h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+        .auth-header p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        
+        /* === Form === */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        .form-group { margin-bottom: 16px; }
+        .form-label {
+            display: block;
+            font-size: 0.86rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+        .input-wrap {
+            position: relative;
+        }
+        .form-input {
+            width: 100%;
+            padding: 12px 14px 12px 42px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            font-family: inherit;
+            font-size: 0.98rem;
+            color: var(--text);
+            outline: none;
+            transition: border 0.25s, box-shadow 0.25s;
+        }
+        .form-input::placeholder { color: rgba(255,255,255,0.25); }
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(0,212,170,0.12);
+        }
+        .input-icon {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            transition: color 0.25s;
+        }
+        .form-input:focus ~ .input-icon { color: var(--primary); }
+        
+        .toggle-pass {
+            position: absolute;
+            right: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+        .toggle-pass:hover { color: var(--primary); }
+        
+        /* === Password Strength === */
+        .strength-bar {
+            height: 4px;
+            border-radius: 2px;
+            background: var(--border);
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        .strength-fill {
+            height: 100%;
+            width: 0;
+            border-radius: 2px;
+            transition: width 0.3s, background 0.3s;
+        }
+        .strength-fill.weak { width: 25%; background: var(--danger); }
+        .strength-fill.fair { width: 50%; background: #f59e0b; }
+        .strength-fill.good { width: 75%; background: #3b82f6; }
+        .strength-fill.strong { width: 100%; background: var(--success); }
+        
+        /* === Button === */
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            margin-top: 8px;
+            background: linear-gradient(135deg, var(--primary), #00b894);
+            border: none;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1.02rem;
+            font-weight: 600;
+            color: #050505;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 8px 28px var(--primary-glow);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 36px var(--primary-glow);
+        }
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-primary .spinner {
+            display: none;
+            width: 18px; height: 18px;
+            border: 2px solid rgba(0,0,0,0.2);
+            border-top-color: #050505;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        .btn-primary.loading .spinner { display: block; }
+        .btn-primary.loading .btn-text { display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* === Divider === */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin: 22px 0;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+        
+        /* === Social === */
+        .btn-social {
+            width: 100%;
+            padding: 13px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: var(--text);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: background 0.25s, border 0.25s;
+        }
+        .btn-social:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(255,255,255,0.12);
+        }
+        
+        /* === Footer === */
+        .auth-footer {
+            text-align: center;
+            margin-top: 22px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        .auth-footer a {
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .auth-footer a:hover { text-decoration: underline; }
+        
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 18px;
+            color: var(--text-muted);
+            font-size: 0.86rem;
+            text-decoration: none;
+        }
+        .back-link:hover { color: var(--text); }
+        .back-link i { margin-left: 6px; }
+        
+        /* === Terms === */
+        .terms {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 16px;
+            line-height: 1.6;
+        }
+        .terms a { color: var(--primary); text-decoration: none; }
+        .terms a:hover { text-decoration: underline; }
+        
+        /* === Toast === */
+        #toastContainer {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        @media (max-width: 480px) {
+            .form-row { grid-template-columns: 1fr; }
+            .auth-card { padding: 32px 22px; }
+        }
+        
+        /* === Light Theme === */
+        .light-theme {
+            --bg: #f0f4f8;
+            --card-bg: rgba(255,255,255,0.95);
+            --border: rgba(0,0,0,0.08);
+            --text: #1a1a2e;
+            --text-muted: #64748b;
+            --primary-glow: rgba(0,212,170,0.25);
+        }
+        .light-theme .bg-glow::before,
+        .light-theme .bg-glow::after {
+            opacity: 0.3;
+        }
+        .light-theme .auth-card {
+            box-shadow: 0 20px 60px -15px rgba(0,0,0,0.15);
+        }
+        .light-theme .form-input {
+            background: rgba(0,0,0,0.03);
+        }
+        .light-theme .form-input::placeholder {
+            color: rgba(0,0,0,0.35);
+        }
+        .light-theme .btn-social {
+            background: rgba(0,0,0,0.03);
+        }
+        .light-theme .btn-social:hover {
+            background: rgba(0,0,0,0.06);
+        }
+        
+        /* LTR Support */
+        body.ltr { direction: ltr; text-align: left; font-family: 'Inter', 'Segoe UI', sans-serif; }
+        body.rtl { font-family: 'Vazirmatn', 'Segoe UI', sans-serif; }
+        body.ltr .form-input { padding: 13px 44px 13px 16px; text-align: left; }
+        body.ltr .input-icon { left: auto; right: 14px; }
+        body.ltr .toggle-pass { right: auto; left: 14px; }
+        body.ltr .back-link i { margin-left: 0; margin-right: 6px; }
+    </style>
+</head>
+<body>
+    <div class="bg-glow"></div>
+    
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <a href="index.html" class="logo">
+                <div class="logo-icon"><i class="fas fa-cube"></i></div>
+                <span class="logo-text">Odoo<strong>Master</strong></span>
+            </a>
+            
+            <div class="auth-header">
+                <h1 data-i18n="register.title">ایجاد حساب کاربری</h1>
+                <p data-i18n="register.subtitle">ثبت‌نام رایگان و در کمتر از ۱ دقیقه!</p>
+            </div>
+            
+            <form id="registerForm" autocomplete="on">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="register.firstName">نام</label>
+                        <div class="input-wrap">
+                            <input type="text" id="firstName" name="firstName" class="form-input" placeholder="محمد" required data-i18n-placeholder="register.firstName.placeholder">
+                            <i class="fas fa-user input-icon"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="register.lastName">نام خانوادگی</label>
+                        <div class="input-wrap">
+                            <input type="text" id="lastName" name="lastName" class="form-input" placeholder="احمدی" required data-i18n-placeholder="register.lastName.placeholder">
+                            <i class="fas fa-user input-icon"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" data-i18n="register.phone">شماره موبایل</label>
+                    <div class="input-wrap">
+                        <input type="tel" id="mobile" name="phone" class="form-input" placeholder="09123456789" required dir="ltr" style="text-align:left;">
+                        <i class="fas fa-mobile-alt input-icon"></i>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" data-i18n="register.email">ایمیل</label>
+                    <div class="input-wrap">
+                        <input type="email" id="regEmail" name="email" class="form-input" placeholder="example@email.com" required>
+                        <i class="fas fa-envelope input-icon"></i>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" data-i18n="register.password">رمز عبور</label>
+                    <div class="input-wrap">
+                        <input type="password" id="regPassword" name="password" class="form-input" placeholder="حداقل ۸ کاراکتر" required autocomplete="new-password" data-i18n-placeholder="register.password.placeholder">
+                        <i class="fas fa-lock input-icon"></i>
+                        <button type="button" class="toggle-pass password-toggle"><i class="fas fa-eye"></i></button>
+                    </div>
+                    <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+                </div>
+                
+                <button type="submit" class="btn-primary" id="registerBtn">
+                    <span class="btn-text" data-i18n="register.submit">ثبت‌نام</span>
+                    <span class="spinner"></span>
+                </button>
+            </form>
+            
+            <div class="terms">
+                <span data-i18n="register.terms">با ثبت‌نام،</span> <a href="#" data-i18n="register.termsLink">قوانین و مقررات</a> <span data-i18n="register.termsEnd">را می‌پذیرید.</span>
+            </div>
+            
+            <div class="divider" data-i18n="login.or">یا</div>
+            
+            <button type="button" class="btn-social"><i class="fab fa-google"></i> <span data-i18n="register.google">ثبت‌نام با گوگل</span></button>
+            
+            <div class="auth-footer">
+                <span data-i18n="register.hasAccount">قبلاً ثبت‌نام کرده‌اید؟</span> <a href="login.html" data-i18n="register.login">وارد شوید</a>
+            </div>
+        </div>
+        <a href="index.html" class="back-link"><i class="fas fa-arrow-right"></i> <span data-i18n="common.back">بازگشت</span></a>
+    </div>
+    
+    <div id="toastContainer"></div>
+    <script src="js/i18n.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        // Simple password strength indicator
+        const passInput = document.getElementById('regPassword');
+        const strengthFill = document.getElementById('strengthFill');
+        passInput?.addEventListener('input', () => {
+            const val = passInput.value;
+            strengthFill.className = 'strength-fill';
+            if (!val) return;
+            let score = 0;
+            if (val.length >= 8) score++;
+            if (/[a-z]/.test(val) && /[A-Z]/.test(val)) score++;
+            if (/\d/.test(val)) score++;
+            if (/[^a-zA-Z0-9]/.test(val)) score++;
+            if (score <= 1) strengthFill.classList.add('weak');
+            else if (score === 2) strengthFill.classList.add('fair');
+            else if (score === 3) strengthFill.classList.add('good');
+            else strengthFill.classList.add('strong');
+        });
+        
+        // Simple register form (no OTP steps — just register directly)
+        const regForm = document.getElementById('registerForm');
+        regForm?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const firstName = (document.getElementById('firstName')?.value || '').trim();
+            const lastName = (document.getElementById('lastName')?.value || '').trim();
+            const phone = (document.getElementById('mobile')?.value || '').trim();
+            const email = (document.getElementById('regEmail')?.value || '').trim();
+            const password = document.getElementById('regPassword')?.value || '';
+            
+            if (!firstName || !lastName || !phone || !email || !password) {
+                UI?.showToast?.('لطفاً همه فیلدها را تکمیل کنید', 'error');
+                return;
+            }
+            
+            const btn = document.getElementById('registerBtn');
+            btn?.classList.add('loading');
+            btn && (btn.disabled = true);
+            
+            try {
+                const name = `${firstName} ${lastName}`.trim();
+                const res = await API.register({ name, email, phone, password });
+                if (res?.user) localStorage.setItem('user', JSON.stringify(res.user));
+                UI?.showToast?.('ثبت‌نام موفق! در حال انتقال...', 'success');
+                setTimeout(() => {
+                    const redirect = new URLSearchParams(window.location.search).get('redirect') || localStorage.getItem('after_login_redirect') || 'dashboard.html';
+                    localStorage.removeItem('after_login_redirect');
+                    window.location.href = redirect;
+                }, 1200);
+            } catch (err) {
+                UI?.showToast?.(err?.message || 'ثبت‌نام ناموفق بود', 'error');
+                btn?.classList.remove('loading');
+                btn && (btn.disabled = false);
+            }
+        });
+    </script>
+</body>
+</html>

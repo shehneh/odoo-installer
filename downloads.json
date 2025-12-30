@@ -34,7 +34,7 @@
           "version": "1.0.0",
           "file_type": "zip",
           "size_hint": "~130KB",
-          "requires_login": true,
+          "requires_login": false,
           "requires_purchase": false,
           "file_name": "odoo19-lite-online.zip",
           "download_url": "",

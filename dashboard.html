@@ -178,69 +178,148 @@
                 <div class="card glass system-check-card" style="grid-column: 1 / -1;">
                     <div class="card-header">
                         <h3><i class="fas fa-stethoscope"></i> <span data-i18n="dashboard.systemCheck">تست سیستم و نصب نیازمندی‌ها</span></h3>
-                        <span class="section-badge" id="systemStatus" data-i18n="dashboard.readyToTest">آماده تست</span>
+                        <div class="header-actions">
+                            <button class="btn btn-ghost btn-sm" id="openGuideBtn" title="راهنمای نصب">
+                                <i class="fas fa-question-circle"></i>
+                                <span>راهنما</span>
+                            </button>
+                            <span class="section-badge" id="systemStatus" data-i18n="dashboard.readyToTest">آماده تست</span>
+                        </div>
                     </div>
                     <p style="color: var(--text-secondary); margin-bottom: 20px;" data-i18n="dashboard.systemCheckDesc">
                         قبل از نصب Odoo، سیستم شما بررسی می‌شود و نیازمندی‌های ناموجود از منابع رسمی دانلود و نصب می‌شوند.
                     </p>
-                    <div class="system-check-grid" id="systemCheckGrid">
-                        <div class="check-item" data-check="os">
-                            <div class="check-icon"><i class="fas fa-desktop"></i></div>
-                            <div class="check-info">
-                                <h4>سیستم عامل</h4>
-                                <p>Windows 10/11 64-bit</p>
+                    
+                    <!-- New Premium System Check UI -->
+                    <div class="system-check-container" id="systemCheckContainer">
+                        <div class="check-grid-premium" id="systemCheckGrid">
+                            <div class="check-card-premium" data-check="os">
+                                <div class="check-card-icon">
+                                    <i class="fas fa-desktop"></i>
+                                    <div class="check-pulse"></div>
+                                </div>
+                                <div class="check-card-content">
+                                    <h4>سیستم عامل</h4>
+                                    <p class="check-version">Windows 10/11 64-bit</p>
+                                </div>
+                                <div class="check-card-status">
+                                    <span class="status-text">در انتظار...</span>
+                                    <div class="status-icon">
+                                        <i class="fas fa-hourglass-half"></i>
+                                    </div>
+                                </div>
                             </div>
-                            <span class="check-status">در انتظار...</span>
+                            
+                            <div class="check-card-premium" data-check="python">
+                                <div class="check-card-icon python">
+                                    <i class="fab fa-python"></i>
+                                    <div class="check-pulse"></div>
+                                </div>
+                                <div class="check-card-content">
+                                    <h4>Python 3.11</h4>
+                                    <p class="check-version">python.org</p>
+                                </div>
+                                <div class="check-card-status">
+                                    <span class="status-text">در انتظار...</span>
+                                    <div class="status-icon">
+                                        <i class="fas fa-hourglass-half"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="check-card-premium" data-check="postgresql">
+                                <div class="check-card-icon postgresql">
+                                    <i class="fas fa-database"></i>
+                                    <div class="check-pulse"></div>
+                                </div>
+                                <div class="check-card-content">
+                                    <h4>PostgreSQL 16</h4>
+                                    <p class="check-version">postgresql.org</p>
+                                </div>
+                                <div class="check-card-status">
+                                    <span class="status-text">در انتظار...</span>
+                                    <div class="status-icon">
+                                        <i class="fas fa-hourglass-half"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="check-card-premium" data-check="git">
+                                <div class="check-card-icon git">
+                                    <i class="fab fa-git-alt"></i>
+                                    <div class="check-pulse"></div>
+                                </div>
+                                <div class="check-card-content">
+                                    <h4>Git</h4>
+                                    <p class="check-version">git-scm.com</p>
+                                </div>
+                                <div class="check-card-status">
+                                    <span class="status-text">در انتظار...</span>
+                                    <div class="status-icon">
+                                        <i class="fas fa-hourglass-half"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="check-card-premium" data-check="nodejs">
+                                <div class="check-card-icon nodejs">
+                                    <i class="fab fa-node-js"></i>
+                                    <div class="check-pulse"></div>
+                                </div>
+                                <div class="check-card-content">
+                                    <h4>Node.js LTS</h4>
+                                    <p class="check-version">nodejs.org</p>
+                                </div>
+                                <div class="check-card-status">
+                                    <span class="status-text">در انتظار...</span>
+                                    <div class="status-icon">
+                                        <i class="fas fa-hourglass-half"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="check-card-premium" data-check="vcredist">
+                                <div class="check-card-icon vcredist">
+                                    <i class="fas fa-cogs"></i>
+                                    <div class="check-pulse"></div>
+                                </div>
+                                <div class="check-card-content">
+                                    <h4>VC++ Redistributable</h4>
+                                    <p class="check-version">microsoft.com</p>
+                                </div>
+                                <div class="check-card-status">
+                                    <span class="status-text">در انتظار...</span>
+                                    <div class="status-icon">
+                                        <i class="fas fa-hourglass-half"></i>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="check-item" data-check="python">
-                            <div class="check-icon"><i class="fab fa-python"></i></div>
-                            <div class="check-info">
-                                <h4>Python 3.11</h4>
-                                <p>دانلود از python.org</p>
+                        
+                        <!-- Error/Warning Details Panel -->
+                        <div class="check-details-panel" id="checkDetailsPanel" style="display: none;">
+                            <div class="details-header">
+                                <i class="fas fa-info-circle"></i>
+                                <h4>جزئیات و راه‌حل‌ها</h4>
                             </div>
-                            <span class="check-status">در انتظار...</span>
-                        </div>
-                        <div class="check-item" data-check="postgresql">
-                            <div class="check-icon"><i class="fas fa-database"></i></div>
-                            <div class="check-info">
-                                <h4>PostgreSQL 16</h4>
-                                <p>دانلود از postgresql.org</p>
+                            <div class="details-content" id="checkDetailsContent">
+                                <!-- Dynamic content will be inserted here -->
                             </div>
-                            <span class="check-status">در انتظار...</span>
-                        </div>
-                        <div class="check-item" data-check="git">
-                            <div class="check-icon"><i class="fab fa-git-alt"></i></div>
-                            <div class="check-info">
-                                <h4>Git</h4>
-                                <p>دانلود از git-scm.com</p>
-                            </div>
-                            <span class="check-status">در انتظار...</span>
-                        </div>
-                        <div class="check-item" data-check="nodejs">
-                            <div class="check-icon"><i class="fab fa-node-js"></i></div>
-                            <div class="check-info">
-                                <h4>Node.js LTS</h4>
-                                <p>دانلود از nodejs.org</p>
-                            </div>
-                            <span class="check-status">در انتظار...</span>
-                        </div>
-                        <div class="check-item" data-check="vcredist">
-                            <div class="check-icon"><i class="fas fa-cogs"></i></div>
-                            <div class="check-info">
-                                <h4>VC++ Redistributable</h4>
-                                <p>دانلود از microsoft.com</p>
-                            </div>
-                            <span class="check-status">در انتظار...</span>
                         </div>
                     </div>
-                    <div class="action-buttons" style="margin-top: 24px; display: flex; gap: 12px; justify-content: center;">
-                        <button class="btn btn-primary btn-glow" id="startSystemCheck">
+                    
+                    <div class="action-buttons-premium" style="margin-top: 24px;">
+                        <button class="btn btn-primary btn-glow btn-lg" id="startSystemCheck">
                             <i class="fas fa-search"></i>
                             <span data-i18n="dashboard.startSystemCheck">شروع بررسی سیستم</span>
                         </button>
-                        <button class="btn btn-outline" id="installMissing" style="display: none;">
+                        <button class="btn btn-success btn-lg" id="installMissing" style="display: none;">
                             <i class="fas fa-download"></i>
                             <span data-i18n="dashboard.installMissing">نصب نیازمندی‌ها</span>
+                        </button>
+                        <button class="btn btn-outline btn-lg" id="openGuideBtn2" style="display: none;">
+                            <i class="fas fa-book"></i>
+                            <span>مشاهده راهنما</span>
                         </button>
                     </div>
                 </div>
@@ -548,78 +627,1069 @@
         </div>
     </div>
 
+    <!-- Installation Guide Modal -->
+    <div class="guide-modal-overlay" id="guideModal">
+        <div class="guide-modal glass">
+            <div class="guide-modal-header">
+                <div class="guide-modal-title">
+                    <i class="fas fa-book-open"></i>
+                    <h2>راهنمای کامل نصب Odoo</h2>
+                </div>
+                <button class="guide-modal-close" id="closeGuideModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="guide-modal-body">
+                <!-- Guide Navigation -->
+                <div class="guide-nav">
+                    <button class="guide-nav-btn active" data-section="intro">
+                        <i class="fas fa-play-circle"></i>
+                        <span>شروع</span>
+                    </button>
+                    <button class="guide-nav-btn" data-section="download">
+                        <i class="fas fa-download"></i>
+                        <span>دانلود</span>
+                    </button>
+                    <button class="guide-nav-btn" data-section="systemcheck">
+                        <i class="fas fa-stethoscope"></i>
+                        <span>چک سیستم</span>
+                    </button>
+                    <button class="guide-nav-btn" data-section="install">
+                        <i class="fas fa-cogs"></i>
+                        <span>نصب</span>
+                    </button>
+                    <button class="guide-nav-btn" data-section="license">
+                        <i class="fas fa-key"></i>
+                        <span>لایسنس</span>
+                    </button>
+                    <button class="guide-nav-btn" data-section="troubleshoot">
+                        <i class="fas fa-wrench"></i>
+                        <span>رفع مشکل</span>
+                    </button>
+                </div>
+
+                <!-- Guide Content -->
+                <div class="guide-content">
+                    <!-- Section: Intro -->
+                    <div class="guide-section active" id="guide-intro">
+                        <div class="guide-section-icon">
+                            <i class="fas fa-rocket"></i>
+                        </div>
+                        <h3>به نصاب هوشمند OdooMaster خوش آمدید! 🎉</h3>
+                        <p class="guide-intro-text">
+                            این راهنما به شما کمک می‌کند تا Odoo 19 را در کمترین زمان و بدون دردسر روی سیستم خود نصب کنید.
+                        </p>
+                        
+                        <div class="guide-features-grid">
+                            <div class="guide-feature-card">
+                                <div class="feature-icon blue">
+                                    <i class="fas fa-cloud-download-alt"></i>
+                                </div>
+                                <h4>نصب آنلاین</h4>
+                                <p>با نسخه سبک (130KB) همه چیز خودکار دانلود و نصب می‌شود</p>
+                            </div>
+                            <div class="guide-feature-card">
+                                <div class="feature-icon green">
+                                    <i class="fas fa-magic"></i>
+                                </div>
+                                <h4>کاملاً خودکار</h4>
+                                <p>Python, PostgreSQL, Git و همه نیازمندی‌ها خودکار نصب می‌شوند</p>
+                            </div>
+                            <div class="guide-feature-card">
+                                <div class="feature-icon orange">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                                <h4>امن و مطمئن</h4>
+                                <p>همه فایل‌ها از منابع رسمی دانلود می‌شوند</p>
+                            </div>
+                        </div>
+
+                        <div class="guide-cta">
+                            <button class="btn btn-primary btn-glow" onclick="guideGoToSection('download')">
+                                <i class="fas fa-arrow-left"></i>
+                                شروع کنیم
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Section: Download -->
+                    <div class="guide-section" id="guide-download">
+                        <h3><i class="fas fa-download"></i> مرحله ۱: دانلود نصاب</h3>
+                        
+                        <div class="guide-step-card">
+                            <div class="step-number">۱</div>
+                            <div class="step-content">
+                                <h4>دانلود فایل ZIP نصاب</h4>
+                                <p>از بخش "دانلود نصاب" در همین داشبورد، فایل ZIP را دانلود کنید. این فایل فقط 130KB است!</p>
+                                <div class="step-tip">
+                                    <i class="fas fa-lightbulb"></i>
+                                    <span>نکته: نصاب رایگان است و نیازی به لایسنس برای دانلود ندارید.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="guide-step-card">
+                            <div class="step-number">۲</div>
+                            <div class="step-content">
+                                <h4>Unblock کردن فایل ZIP</h4>
+                                <p>ویندوز ممکن است فایل‌های دانلود شده را بلاک کند. این کار را انجام دهید:</p>
+                                <ol class="guide-steps-list">
+                                    <li>روی فایل ZIP <strong>راست‌کلیک</strong> کنید</li>
+                                    <li>گزینه <strong>Properties</strong> را انتخاب کنید</li>
+                                    <li>در پایین پنجره، تیک <strong>Unblock</strong> را بزنید</li>
+                                    <li>روی <strong>OK</strong> کلیک کنید</li>
+                                </ol>
+                                <div class="step-warning">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <span>مهم: اگر این کار را نکنید، ممکن است برنامه درست اجرا نشود!</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="guide-step-card">
+                            <div class="step-number">۳</div>
+                            <div class="step-content">
+                                <h4>استخراج (Extract) فایل</h4>
+                                <p>فایل ZIP را در یک مسیر ساده (بدون فاصله و حروف فارسی) Extract کنید.</p>
+                                <div class="step-example">
+                                    <i class="fas fa-check-circle"></i>
+                                    <code>C:\OdooMaster</code> یا <code>D:\Odoo</code>
+                                </div>
+                                <div class="step-warning">
+                                    <i class="fas fa-times-circle"></i>
+                                    <span>از مسیرهایی مثل <code>C:\Users\علی\Desktop</code> استفاده نکنید!</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="guide-nav-buttons">
+                            <button class="btn btn-outline" onclick="guideGoToSection('intro')">
+                                <i class="fas fa-arrow-right"></i> قبلی
+                            </button>
+                            <button class="btn btn-primary" onclick="guideGoToSection('systemcheck')">
+                                بعدی <i class="fas fa-arrow-left"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Section: System Check -->
+                    <div class="guide-section" id="guide-systemcheck">
+                        <h3><i class="fas fa-stethoscope"></i> مرحله ۲: بررسی سیستم</h3>
+                        
+                        <p class="guide-intro-text">
+                            قبل از نصب Odoo، باید نیازمندی‌های سیستم بررسی شوند. نصاب این کار را خودکار انجام می‌دهد.
+                        </p>
+
+                        <div class="guide-requirements-list">
+                            <div class="requirement-item">
+                                <div class="req-icon"><i class="fas fa-desktop"></i></div>
+                                <div class="req-info">
+                                    <h4>سیستم عامل</h4>
+                                    <p>Windows 10/11 (64-bit)</p>
+                                </div>
+                                <span class="req-badge required">الزامی</span>
+                            </div>
+                            <div class="requirement-item">
+                                <div class="req-icon"><i class="fab fa-python"></i></div>
+                                <div class="req-info">
+                                    <h4>Python 3.11</h4>
+                                    <p>برای اجرای Odoo - خودکار نصب می‌شود</p>
+                                </div>
+                                <span class="req-badge auto">نصب خودکار</span>
+                            </div>
+                            <div class="requirement-item">
+                                <div class="req-icon"><i class="fas fa-database"></i></div>
+                                <div class="req-info">
+                                    <h4>PostgreSQL 16</h4>
+                                    <p>دیتابیس Odoo - خودکار نصب می‌شود</p>
+                                </div>
+                                <span class="req-badge auto">نصب خودکار</span>
+                            </div>
+                            <div class="requirement-item">
+                                <div class="req-icon"><i class="fab fa-git-alt"></i></div>
+                                <div class="req-info">
+                                    <h4>Git</h4>
+                                    <p>برای دریافت سورس Odoo - خودکار نصب می‌شود</p>
+                                </div>
+                                <span class="req-badge auto">نصب خودکار</span>
+                            </div>
+                            <div class="requirement-item">
+                                <div class="req-icon"><i class="fab fa-node-js"></i></div>
+                                <div class="req-info">
+                                    <h4>Node.js LTS</h4>
+                                    <p>برای کامپایل assets - خودکار نصب می‌شود</p>
+                                </div>
+                                <span class="req-badge auto">نصب خودکار</span>
+                            </div>
+                        </div>
+
+                        <div class="guide-info-box success">
+                            <i class="fas fa-magic"></i>
+                            <div>
+                                <strong>نگران نباشید!</strong>
+                                <p>نصاب همه این موارد را بررسی می‌کند و هر کدام که نصب نباشد، خودکار از سایت رسمی دانلود و نصب می‌کند.</p>
+                            </div>
+                        </div>
+
+                        <div class="guide-nav-buttons">
+                            <button class="btn btn-outline" onclick="guideGoToSection('download')">
+                                <i class="fas fa-arrow-right"></i> قبلی
+                            </button>
+                            <button class="btn btn-primary" onclick="guideGoToSection('install')">
+                                بعدی <i class="fas fa-arrow-left"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Section: Install -->
+                    <div class="guide-section" id="guide-install">
+                        <h3><i class="fas fa-cogs"></i> مرحله ۳: اجرای نصاب</h3>
+
+                        <div class="guide-step-card">
+                            <div class="step-number">۱</div>
+                            <div class="step-content">
+                                <h4>اجرای نصاب</h4>
+                                <p>وارد پوشه Extract شده شوید و فایل زیر را اجرا کنید:</p>
+                                <div class="step-file-box">
+                                    <i class="fas fa-file-code"></i>
+                                    <code>start_ui_online.bat</code>
+                                </div>
+                                <div class="step-tip">
+                                    <i class="fas fa-lightbulb"></i>
+                                    <span>اگر آنتی‌ویروس هشدار داد، Allow یا اجازه بدهید.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="guide-step-card">
+                            <div class="step-number">۲</div>
+                            <div class="step-content">
+                                <h4>شناسه سخت‌افزاری (Hardware ID)</h4>
+                                <p>نصاب یک <strong>شناسه سخت‌افزاری</strong> منحصربه‌فرد برای سیستم شما نمایش می‌دهد. این شناسه برای فعال‌سازی لایسنس لازم است.</p>
+                                <div class="step-example">
+                                    <i class="fas fa-fingerprint"></i>
+                                    <code>مثال: A1B2C3D4E5F6G7H8</code>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="guide-step-card">
+                            <div class="step-number">۳</div>
+                            <div class="step-content">
+                                <h4>شروع چک سیستم</h4>
+                                <p>روی دکمه <strong>"شروع بررسی سیستم"</strong> کلیک کنید. نصاب موارد زیر را بررسی می‌کند:</p>
+                                <ul class="guide-check-list">
+                                    <li><i class="fas fa-check"></i> نسخه ویندوز</li>
+                                    <li><i class="fas fa-check"></i> Python نصب شده یا خیر</li>
+                                    <li><i class="fas fa-check"></i> PostgreSQL نصب شده یا خیر</li>
+                                    <li><i class="fas fa-check"></i> Git نصب شده یا خیر</li>
+                                    <li><i class="fas fa-check"></i> Node.js نصب شده یا خیر</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="guide-step-card">
+                            <div class="step-number">۴</div>
+                            <div class="step-content">
+                                <h4>نصب نیازمندی‌ها</h4>
+                                <p>اگر چیزی نصب نباشد، دکمه <strong>"نصب نیازمندی‌ها"</strong> ظاهر می‌شود. با کلیک روی آن، نصب خودکار شروع می‌شود.</p>
+                                <div class="step-tip">
+                                    <i class="fas fa-clock"></i>
+                                    <span>این مرحله بسته به سرعت اینترنت، ممکن است 10 تا 30 دقیقه طول بکشد.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="guide-nav-buttons">
+                            <button class="btn btn-outline" onclick="guideGoToSection('systemcheck')">
+                                <i class="fas fa-arrow-right"></i> قبلی
+                            </button>
+                            <button class="btn btn-primary" onclick="guideGoToSection('license')">
+                                بعدی <i class="fas fa-arrow-left"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Section: License -->
+                    <div class="guide-section" id="guide-license">
+                        <h3><i class="fas fa-key"></i> مرحله ۴: فعال‌سازی لایسنس</h3>
+
+                        <div class="guide-step-card">
+                            <div class="step-number">۱</div>
+                            <div class="step-content">
+                                <h4>کپی کردن شناسه سخت‌افزاری</h4>
+                                <p>از نصاب، شناسه سخت‌افزاری را کپی کنید.</p>
+                            </div>
+                        </div>
+
+                        <div class="guide-step-card">
+                            <div class="step-number">۲</div>
+                            <div class="step-content">
+                                <h4>خرید لایسنس</h4>
+                                <p>به بخش <strong>"خرید لایسنس"</strong> در داشبورد بروید و با وارد کردن شناسه سخت‌افزاری، لایسنس بخرید.</p>
+                                <a href="payment.html" class="btn btn-primary btn-sm" style="margin-top: 10px;">
+                                    <i class="fas fa-shopping-cart"></i> رفتن به صفحه خرید
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="guide-step-card">
+                            <div class="step-number">۳</div>
+                            <div class="step-content">
+                                <h4>دانلود فایل لایسنس</h4>
+                                <p>پس از خرید، فایل لایسنس (<code>.oml</code>) را دانلود کنید.</p>
+                            </div>
+                        </div>
+
+                        <div class="guide-step-card">
+                            <div class="step-number">۴</div>
+                            <div class="step-content">
+                                <h4>قرار دادن فایل لایسنس</h4>
+                                <p>فایل لایسنس را در <strong>همان پوشه‌ای که نصاب هست</strong> قرار دهید (کنار فایل start_ui_online.bat).</p>
+                                <div class="step-example">
+                                    <i class="fas fa-folder-open"></i>
+                                    <code>C:\OdooMaster\license.oml</code>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="guide-step-card">
+                            <div class="step-number">۵</div>
+                            <div class="step-content">
+                                <h4>نصب Odoo!</h4>
+                                <p>حالا نصاب را مجدد اجرا کنید. با داشتن لایسنس معتبر، می‌توانید Odoo را نصب کنید.</p>
+                                <div class="step-tip success">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>تبریک! پس از نصب، Odoo در آدرس <code>http://localhost:8069</code> در دسترس خواهد بود.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="guide-nav-buttons">
+                            <button class="btn btn-outline" onclick="guideGoToSection('install')">
+                                <i class="fas fa-arrow-right"></i> قبلی
+                            </button>
+                            <button class="btn btn-primary" onclick="guideGoToSection('troubleshoot')">
+                                رفع مشکلات <i class="fas fa-arrow-left"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Section: Troubleshoot -->
+                    <div class="guide-section" id="guide-troubleshoot">
+                        <h3><i class="fas fa-wrench"></i> رفع مشکلات رایج</h3>
+
+                        <div class="guide-faq-list">
+                            <div class="faq-item">
+                                <div class="faq-question" onclick="toggleFaq(this)">
+                                    <i class="fas fa-chevron-left"></i>
+                                    <span>نصاب اجرا نمی‌شود یا بسته می‌شود</span>
+                                </div>
+                                <div class="faq-answer">
+                                    <ul>
+                                        <li>مطمئن شوید فایل ZIP را Unblock کرده‌اید</li>
+                                        <li>نصاب را <strong>Run as Administrator</strong> اجرا کنید</li>
+                                        <li>آنتی‌ویروس را موقتاً غیرفعال کنید</li>
+                                        <li>مسیر نصب نباید حروف فارسی یا فاصله داشته باشد</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="faq-item">
+                                <div class="faq-question" onclick="toggleFaq(this)">
+                                    <i class="fas fa-chevron-left"></i>
+                                    <span>خطای نصب Python</span>
+                                </div>
+                                <div class="faq-answer">
+                                    <ul>
+                                        <li>اگر Python قبلاً نصب است، آن را Uninstall و دوباره نصب کنید</li>
+                                        <li>حتماً گزینه <strong>Add to PATH</strong> را تیک بزنید</li>
+                                        <li>بعد از نصب، سیستم را Restart کنید</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="faq-item">
+                                <div class="faq-question" onclick="toggleFaq(this)">
+                                    <i class="fas fa-chevron-left"></i>
+                                    <span>خطای نصب PostgreSQL</span>
+                                </div>
+                                <div class="faq-answer">
+                                    <ul>
+                                        <li>پورت پیش‌فرض 5432 باید آزاد باشد</li>
+                                        <li>رمز عبور را ساده انتخاب کنید (مثل: <code>odoo</code>)</li>
+                                        <li>اگر PostgreSQL قبلی نصب است، آن را کامل حذف کنید</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="faq-item">
+                                <div class="faq-question" onclick="toggleFaq(this)">
+                                    <i class="fas fa-chevron-left"></i>
+                                    <span>Odoo اجرا نمی‌شود</span>
+                                </div>
+                                <div class="faq-answer">
+                                    <ul>
+                                        <li>PostgreSQL باید در حال اجرا باشد (سرویس آن را چک کنید)</li>
+                                        <li>پورت 8069 نباید توسط برنامه دیگری استفاده شود</li>
+                                        <li>فایروال ویندوز ممکن است مسدود کرده باشد</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="faq-item">
+                                <div class="faq-question" onclick="toggleFaq(this)">
+                                    <i class="fas fa-chevron-left"></i>
+                                    <span>لایسنس شناسایی نمی‌شود</span>
+                                </div>
+                                <div class="faq-answer">
+                                    <ul>
+                                        <li>فایل لایسنس باید دقیقاً کنار نصاب باشد</li>
+                                        <li>نام فایل را تغییر ندهید</li>
+                                        <li>شناسه سخت‌افزاری باید با سیستم فعلی مطابقت داشته باشد</li>
+                                        <li>لایسنس منقضی نشده باشد</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="guide-info-box info">
+                            <i class="fas fa-headset"></i>
+                            <div>
+                                <strong>نیاز به کمک بیشتر دارید؟</strong>
+                                <p>با پشتیبانی ما تماس بگیرید یا از بخش تیکت‌ها سوال خود را مطرح کنید.</p>
+                            </div>
+                        </div>
+
+                        <div class="guide-nav-buttons">
+                            <button class="btn btn-outline" onclick="guideGoToSection('license')">
+                                <i class="fas fa-arrow-right"></i> قبلی
+                            </button>
+                            <button class="btn btn-primary" onclick="closeGuideModal()">
+                                <i class="fas fa-check"></i> متوجه شدم
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="js/i18n.js"></script>
     <script src="js/api.js"></script>
     <script src="js/main.js"></script>
     <script src="js/installer.js"></script>
     <script src="js/dashboard.js"></script>
     <script>
-        // System Check Integration
-        document.addEventListener('DOMContentLoaded', function() {
-            const checkBtn = document.getElementById('startSystemCheck');
-            const installBtn = document.getElementById('installMissing');
-            const statusBadge = document.getElementById('systemStatus');
+        // ============================================
+        // Installation Guide Modal Functions
+        // ============================================
+        
+        function openGuideModal() {
+            const modal = document.getElementById('guideModal');
+            if (modal) {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        
+        function closeGuideModal() {
+            const modal = document.getElementById('guideModal');
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        function guideGoToSection(sectionId) {
+            // Update nav buttons
+            document.querySelectorAll('.guide-nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.section === sectionId) {
+                    btn.classList.add('active');
+                }
+            });
             
-            if (checkBtn) {
-                checkBtn.addEventListener('click', async function() {
-                    checkBtn.disabled = true;
-                    checkBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال بررسی...';
-                    statusBadge.textContent = 'در حال بررسی...';
-                    statusBadge.style.background = 'var(--primary)';
-                    statusBadge.style.color = 'white';
+            // Update sections
+            document.querySelectorAll('.guide-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            const targetSection = document.getElementById('guide-' + sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+        }
+        
+        function toggleFaq(element) {
+            const faqItem = element.closest('.faq-item');
+            if (faqItem) {
+                faqItem.classList.toggle('open');
+            }
+        }
+        
+        // ============================================
+        // Premium System Check with Beautiful UI
+        // ============================================
+        
+        const PremiumSystemCheck = {
+            // Error solutions database
+            solutions: {
+                python: {
+                    error: {
+                        title: 'Python نصب نیست',
+                        description: 'مفسر پایتون برای اجرای Odoo ضروری است.',
+                        solution: 'نصاب به صورت خودکار Python 3.11 را از سایت رسمی دانلود و نصب می‌کند.',
+                        autoFix: true,
+                        downloadUrl: 'https://www.python.org/ftp/python/3.11.9/python-3.11.9-amd64.exe'
+                    },
+                    warning: {
+                        title: 'نسخه Python قدیمی است',
+                        description: 'نسخه فعلی Python با Odoo 19 سازگار نیست.',
+                        solution: 'Python 3.11 نصب خواهد شد. نسخه قدیمی می‌تواند باقی بماند.',
+                        autoFix: true
+                    }
+                },
+                postgresql: {
+                    error: {
+                        title: 'PostgreSQL نصب نیست',
+                        description: 'Odoo برای ذخیره داده‌ها به PostgreSQL نیاز دارد.',
+                        solution: 'PostgreSQL 16 به صورت خودکار دانلود و نصب می‌شود.',
+                        autoFix: true,
+                        downloadUrl: 'https://get.enterprisedb.com/postgresql/postgresql-16.3-1-windows-x64.exe',
+                        tips: ['رمز عبور ساده انتخاب کنید (مثل: odoo)', 'پورت پیش‌فرض 5432 را تغییر ندهید']
+                    }
+                },
+                git: {
+                    error: {
+                        title: 'Git نصب نیست',
+                        description: 'برای دریافت سورس کد Odoo از GitHub به Git نیاز است.',
+                        solution: 'Git به صورت خودکار نصب می‌شود.',
+                        autoFix: true,
+                        downloadUrl: 'https://github.com/git-for-windows/git/releases/download/v2.45.2.windows.1/Git-2.45.2-64-bit.exe'
+                    },
+                    warning: {
+                        title: 'نسخه Git قدیمی است',
+                        description: 'توصیه می‌شود Git را به‌روزرسانی کنید.',
+                        solution: 'می‌توانید ادامه دهید یا Git را آپدیت کنید.',
+                        autoFix: true
+                    }
+                },
+                nodejs: {
+                    error: {
+                        title: 'Node.js نصب نیست',
+                        description: 'برای کامپایل assets و فایل‌های frontend به Node.js نیاز است.',
+                        solution: 'Node.js LTS به صورت خودکار نصب می‌شود.',
+                        autoFix: true,
+                        downloadUrl: 'https://nodejs.org/dist/v20.14.0/node-v20.14.0-x64.msi'
+                    }
+                },
+                vcredist: {
+                    error: {
+                        title: 'Visual C++ Redistributable نصب نیست',
+                        description: 'برخی کتابخانه‌های Python به این بسته نیاز دارند.',
+                        solution: 'VC++ Redistributable 2022 نصب خواهد شد.',
+                        autoFix: true,
+                        downloadUrl: 'https://aka.ms/vs/17/release/vc_redist.x64.exe'
+                    }
+                },
+                os: {
+                    error: {
+                        title: 'سیستم عامل پشتیبانی نمی‌شود',
+                        description: 'این نصاب فقط روی Windows 10/11 64-bit کار می‌کند.',
+                        solution: 'لطفاً از ویندوز 10 یا 11 نسخه 64 بیتی استفاده کنید.',
+                        autoFix: false
+                    }
+                }
+            },
+            
+            updateCardStatus(checkName, status, message, version) {
+                const card = document.querySelector(`.check-card-premium[data-check="${checkName}"]`);
+                if (!card) return;
+                
+                // Remove all status classes
+                card.classList.remove('checking', 'success', 'warning', 'error');
+                card.classList.add(status);
+                
+                // Update status text
+                const statusText = card.querySelector('.status-text');
+                if (statusText) {
+                    statusText.textContent = version || message || this.getStatusText(status);
+                }
+                
+                // Update status icon
+                const statusIcon = card.querySelector('.status-icon i');
+                if (statusIcon) {
+                    statusIcon.className = this.getStatusIcon(status);
+                }
+                
+                // Update version info
+                const versionText = card.querySelector('.check-version');
+                if (versionText && version) {
+                    versionText.textContent = version;
+                }
+            },
+            
+            getStatusText(status) {
+                const texts = {
+                    checking: 'در حال بررسی...',
+                    success: 'نصب شده ✓',
+                    warning: 'نیاز به آپدیت',
+                    error: 'نصب نشده'
+                };
+                return texts[status] || status;
+            },
+            
+            getStatusIcon(status) {
+                const icons = {
+                    checking: 'fas fa-spinner fa-spin',
+                    success: 'fas fa-check',
+                    warning: 'fas fa-exclamation',
+                    error: 'fas fa-times'
+                };
+                return icons[status] || 'fas fa-question';
+            },
+            
+            showDetailsPanel(issues) {
+                const panel = document.getElementById('checkDetailsPanel');
+                const content = document.getElementById('checkDetailsContent');
+                
+                if (!panel || !content || issues.length === 0) {
+                    if (panel) panel.style.display = 'none';
+                    return;
+                }
+                
+                let html = '';
+                issues.forEach(issue => {
+                    const solution = this.solutions[issue.name]?.[issue.status];
+                    if (!solution) return;
                     
-                    // Run system check
-                    await OnlineInstaller.checkSystem();
+                    html += `
+                        <div class="detail-item ${issue.status}">
+                            <div class="detail-item-icon">
+                                <i class="${issue.status === 'error' ? 'fas fa-times-circle' : 'fas fa-exclamation-triangle'}"></i>
+                            </div>
+                            <div class="detail-item-content">
+                                <h5>${solution.title}</h5>
+                                <p>${solution.description}</p>
+                                <div class="detail-solution">
+                                    <strong><i class="fas fa-magic"></i> راه‌حل:</strong>
+                                    <span>${solution.solution}</span>
+                                </div>
+                                ${solution.tips ? `
+                                    <ul style="margin-top: 10px; padding-right: 20px; color: var(--text-secondary); font-size: 0.85rem;">
+                                        ${solution.tips.map(tip => `<li>${tip}</li>`).join('')}
+                                    </ul>
+                                ` : ''}
+                                ${solution.autoFix ? `
+                                    <div class="detail-actions">
+                                        <span class="btn btn-sm btn-success" style="cursor: default;">
+                                            <i class="fas fa-check"></i> نصب خودکار
+                                        </span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                content.innerHTML = html;
+                panel.style.display = 'block';
+            },
+            
+            async runCheck() {
+                const checkBtn = document.getElementById('startSystemCheck');
+                const installBtn = document.getElementById('installMissing');
+                const guideBtn2 = document.getElementById('openGuideBtn2');
+                const statusBadge = document.getElementById('systemStatus');
+                
+                if (!checkBtn) return;
+                
+                // Disable button and show loading
+                checkBtn.disabled = true;
+                checkBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال بررسی...';
+                statusBadge.textContent = 'در حال بررسی...';
+                statusBadge.style.background = 'linear-gradient(135deg, var(--primary), var(--secondary))';
+                statusBadge.style.color = 'white';
+                
+                // Hide details panel
+                const detailsPanel = document.getElementById('checkDetailsPanel');
+                if (detailsPanel) detailsPanel.style.display = 'none';
+                
+                // Set all cards to checking state
+                const checkOrder = ['os', 'python', 'postgresql', 'postgres', 'git', 'nodejs', 'vcredist', 'vc_redist', 'wkhtmltopdf'];
+                checkOrder.forEach(name => this.updateCardStatus(name, 'checking', 'در حال بررسی...'));
+                
+                const issues = [];
+                
+                try {
+                    // Try to use real API first
+                    const response = await fetch('/api/system_check');
                     
-                    // Update UI based on results
-                    const results = OnlineInstaller.state.checkResults;
-                    const grid = document.getElementById('systemCheckGrid');
+                    if (response.ok) {
+                        const data = await response.json();
+                        
+                        if (data.success && data.checks) {
+                            // Process API results
+                            for (const check of data.checks) {
+                                await this.delay(100); // Short animation delay
+                                
+                                // Map API status to UI
+                                const uiStatus = check.status === 'success' ? 'success' : 
+                                                 check.status === 'warning' ? 'warning' : 'error';
+                                
+                                this.updateCardStatus(
+                                    check.id,
+                                    uiStatus,
+                                    check.status === 'success' ? check.details : check.solution,
+                                    check.details
+                                );
+                                
+                                // Update solutions database with API data
+                                if (check.status !== 'success') {
+                                    this.solutions[check.id] = this.solutions[check.id] || {};
+                                    this.solutions[check.id][uiStatus] = {
+                                        title: check.name,
+                                        description: check.description || check.solution,
+                                        solution: check.solution,
+                                        autoFix: check.auto_fix,
+                                        downloadUrl: check.official_url
+                                    };
+                                    
+                                    issues.push({ name: check.id, status: uiStatus, result: check });
+                                }
+                                
+                                // Store result
+                                OnlineInstaller.state.checkResults[check.id] = {
+                                    installed: check.status === 'success',
+                                    version: check.details,
+                                    status: uiStatus,
+                                    install_cmd: check.install_cmd,
+                                    auto_fix: check.auto_fix,
+                                    offline_ready: check.offline_ready
+                                };
+                            }
+                            
+                            // Build install queue from API data
+                            OnlineInstaller.buildInstallQueueFromApi(data.checks);
+                            
+                            // Show success toast
+                            if (typeof showToast === 'function' && data.all_ok) {
+                                showToast('سیستم آماده نصب Odoo است!', 'success');
+                            }
+                        }
+                    } else {
+                        throw new Error('API not available');
+                    }
+                } catch (apiError) {
+                    console.warn('Real API not available, using simulation:', apiError);
                     
-                    for (const [name, result] of Object.entries(results)) {
-                        const item = grid.querySelector(`[data-check="${name}"]`);
-                        if (item) {
-                            item.classList.remove('checking', 'success', 'warning', 'error');
-                            item.classList.add(result.status);
-                            item.querySelector('.check-status').textContent = 
-                                result.installed ? result.version : (result.message || 'نصب نشده');
+                    // Fallback to simulation
+                    for (const checkName of checkOrder) {
+                        this.updateCardStatus(checkName, 'checking', 'در حال بررسی...');
+                        await this.delay(600 + Math.random() * 400);
+                        
+                        const result = await OnlineInstaller.simulateCheck(checkName);
+                        
+                        this.updateCardStatus(
+                            checkName, 
+                            result.status, 
+                            result.message || (result.installed ? result.version : 'نصب نشده'),
+                            result.version
+                        );
+                        
+                        if (result.status === 'error' || result.status === 'warning') {
+                            issues.push({ name: checkName, status: result.status, result });
                         }
                     }
                     
-                    // Show install button if needed
-                    if (OnlineInstaller.state.installQueue.length > 0) {
-                        installBtn.style.display = 'inline-flex';
-                        statusBadge.textContent = `${OnlineInstaller.state.installQueue.length} مورد نیاز به نصب`;
-                        statusBadge.style.background = '#ff5f57';
-                    } else {
-                        statusBadge.textContent = 'آماده نصب Odoo ✓';
-                        statusBadge.style.background = '#28ca42';
+                    OnlineInstaller.buildInstallQueue();
+                }
+                
+                // Show details panel if there are issues
+                this.showDetailsPanel(issues);
+                
+                // Update status badge and buttons
+                if (OnlineInstaller.state.installQueue.length > 0) {
+                    if (installBtn) installBtn.style.display = 'inline-flex';
+                    if (guideBtn2) guideBtn2.style.display = 'inline-flex';
+                    statusBadge.textContent = `${OnlineInstaller.state.installQueue.length} مورد نیاز به نصب`;
+                    statusBadge.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+                } else {
+                    if (installBtn) installBtn.style.display = 'none';
+                    statusBadge.textContent = 'آماده نصب Odoo ✓';
+                    statusBadge.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                }
+                
+                // Re-enable button
+                checkBtn.disabled = false;
+                checkBtn.innerHTML = '<i class="fas fa-redo"></i> <span>بررسی مجدد</span>';
+            },
+            
+            async startInstallation() {
+                const installBtn = document.getElementById('installMissing');
+                const queue = OnlineInstaller.state.installQueue;
+                
+                if (queue.length === 0) {
+                    if (typeof showToast === 'function') {
+                        showToast('همه نیازمندی‌ها نصب هستند!', 'success');
                     }
+                    return;
+                }
+                
+                installBtn.disabled = true;
+                installBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال آماده‌سازی...';
+                
+                // Check if any items support auto-fix
+                const autoFixItems = queue.filter(item => item.auto_fix && item.install_cmd);
+                const hasAutoFix = autoFixItems.length > 0;
+                
+                // Show modal with installation options
+                const modalContent = `
+                    <div style="text-align: center; padding: 20px;">
+                        <i class="fas fa-tools" style="font-size: 3rem; color: var(--primary); margin-bottom: 20px;"></i>
+                        <h3 style="margin-bottom: 16px; color: var(--white);">نصب نیازمندی‌ها</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 24px;">
+                            ${hasAutoFix ? 'می‌توانید نصب خودکار را انتخاب کنید یا فایل‌ها را دستی دانلود کنید.' : 'فایل‌های نصب را دانلود و اجرا کنید.'}
+                        </p>
+                        
+                        ${hasAutoFix ? `
+                            <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.2)); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+                                <h4 style="color: #10b981; margin-bottom: 8px;"><i class="fas fa-magic"></i> نصب خودکار (پیشنهادی)</h4>
+                                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 12px;">
+                                    با کلیک روی دکمه زیر، ${autoFixItems.length} مورد به صورت خودکار نصب می‌شوند.
+                                </p>
+                                <button id="autoInstallBtn" class="btn btn-success" onclick="PremiumSystemCheck.runAutoInstall()">
+                                    <i class="fas fa-play"></i> شروع نصب خودکار
+                                </button>
+                            </div>
+                        ` : ''}
+                        
+                        <div style="border-top: 1px solid var(--glass-border); padding-top: 20px; margin-top: 10px;">
+                            <h4 style="color: var(--white); margin-bottom: 12px;"><i class="fas fa-download"></i> دانلود دستی</h4>
+                            <div style="display: flex; flex-direction: column; gap: 10px; text-align: right; max-width: 450px; margin: 0 auto;">
+                                ${queue.map(item => `
+                                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: var(--glass-bg); border-radius: 10px; border: 1px solid var(--glass-border);">
+                                        <div style="flex: 1;">
+                                            <strong style="color: var(--white);">${item.name}</strong>
+                                            ${item.size ? `<span style="color: var(--text-secondary); font-size: 0.85rem; margin-right: 8px;">(${item.size})</span>` : ''}
+                                            ${item.auto_fix ? '<span style="background: #10b981; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; margin-right: 8px;">خودکار</span>' : ''}
+                                        </div>
+                                        <div style="display: flex; gap: 8px;">
+                                            ${item.auto_fix && item.install_cmd ? `
+                                                <button class="btn btn-success btn-sm" onclick="PremiumSystemCheck.installSingle('${item.id}', this)" title="نصب خودکار">
+                                                    <i class="fas fa-magic"></i>
+                                                </button>
+                                            ` : ''}
+                                            ${item.url ? `
+                                                <a href="${item.url}" target="_blank" class="btn btn-primary btn-sm" style="text-decoration: none;" title="دانلود از سایت رسمی">
+                                                    <i class="fas fa-external-link-alt"></i>
+                                                </a>
+                                            ` : ''}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Create and show modal
+                const modal = document.createElement('div');
+                modal.className = 'guide-modal-overlay active';
+                modal.id = 'downloadModal';
+                modal.innerHTML = `
+                    <div class="guide-modal glass" style="max-width: 550px;">
+                        <div class="guide-modal-header">
+                            <div class="guide-modal-title">
+                                <i class="fas fa-tools"></i>
+                                <h2>نصب نیازمندی‌ها</h2>
+                            </div>
+                            <button class="guide-modal-close" onclick="document.getElementById('downloadModal').remove(); document.body.style.overflow = '';">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div style="padding: 20px; max-height: 70vh; overflow-y: auto;">
+                            ${modalContent}
+                            <div style="text-align: center; margin-top: 20px;">
+                                <button class="btn btn-outline" onclick="document.getElementById('downloadModal').remove(); document.body.style.overflow = '';">
+                                    <i class="fas fa-times"></i> بستن
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                document.body.style.overflow = 'hidden';
+                
+                // Re-enable button
+                installBtn.disabled = false;
+                installBtn.innerHTML = '<i class="fas fa-download"></i> <span>نصب نیازمندی‌ها</span>';
+            },
+            
+            // نصب خودکار یک کامپوننت
+            async installSingle(componentId, buttonEl) {
+                if (buttonEl) {
+                    buttonEl.disabled = true;
+                    buttonEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                }
+                
+                try {
+                    const response = await fetch(`/api/auto_fix?component=${componentId}`);
+                    const data = await response.json();
                     
-                    checkBtn.disabled = false;
-                    checkBtn.innerHTML = '<i class="fas fa-redo"></i> بررسی مجدد';
+                    if (data.success) {
+                        if (typeof showToast === 'function') {
+                            showToast(`${componentId} در حال نصب...`, 'info');
+                        }
+                        if (buttonEl) {
+                            buttonEl.innerHTML = '<i class="fas fa-check"></i>';
+                            buttonEl.classList.remove('btn-success');
+                            buttonEl.classList.add('btn-outline');
+                        }
+                    } else {
+                        throw new Error(data.error || 'Installation failed');
+                    }
+                } catch (error) {
+                    console.error('Install error:', error);
+                    if (typeof showToast === 'function') {
+                        showToast(`خطا در نصب: ${error.message}`, 'error');
+                    }
+                    if (buttonEl) {
+                        buttonEl.disabled = false;
+                        buttonEl.innerHTML = '<i class="fas fa-magic"></i>';
+                    }
+                }
+            },
+            
+            // نصب خودکار همه موارد
+            async runAutoInstall() {
+                const autoBtn = document.getElementById('autoInstallBtn');
+                if (autoBtn) {
+                    autoBtn.disabled = true;
+                    autoBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال نصب...';
+                }
+                
+                const queue = OnlineInstaller.state.installQueue.filter(item => item.auto_fix && item.install_cmd);
+                let installed = 0;
+                
+                for (const item of queue) {
+                    try {
+                        const response = await fetch(`/api/auto_fix?component=${item.id}`);
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            installed++;
+                            if (typeof showToast === 'function') {
+                                showToast(`${item.name} در حال نصب... (${installed}/${queue.length})`, 'info');
+                            }
+                        }
+                        
+                        // Wait a bit between installations
+                        await this.delay(1500);
+                        
+                    } catch (error) {
+                        console.error(`Failed to install ${item.id}:`, error);
+                    }
+                }
+                
+                // Close modal
+                const modal = document.getElementById('downloadModal');
+                if (modal) {
+                    modal.remove();
+                    document.body.style.overflow = '';
+                }
+                
+                // Show completion message
+                if (typeof showToast === 'function') {
+                    showToast(`${installed} مورد در حال نصب هستند. پس از اتمام نصب، روی "بررسی مجدد" کلیک کنید.`, 'success');
+                }
+            },
+            
+            delay(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+        };
+        
+        // ============================================
+        // Initialize Everything
+        // ============================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Guide Modal
+            const openGuideBtn = document.getElementById('openGuideBtn');
+            const openGuideBtn2 = document.getElementById('openGuideBtn2');
+            const closeGuideBtn = document.getElementById('closeGuideModal');
+            
+            if (openGuideBtn) {
+                openGuideBtn.addEventListener('click', openGuideModal);
+            }
+            if (openGuideBtn2) {
+                openGuideBtn2.addEventListener('click', openGuideModal);
+            }
+            if (closeGuideBtn) {
+                closeGuideBtn.addEventListener('click', closeGuideModal);
+            }
+            
+            // Close modal on overlay click
+            const guideModal = document.getElementById('guideModal');
+            if (guideModal) {
+                guideModal.addEventListener('click', function(e) {
+                    if (e.target === guideModal) {
+                        closeGuideModal();
+                    }
+                });
+            }
+            
+            // Guide navigation
+            document.querySelectorAll('.guide-nav-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    guideGoToSection(this.dataset.section);
+                });
+            });
+            
+            // System Check
+            const checkBtn = document.getElementById('startSystemCheck');
+            const installBtn = document.getElementById('installMissing');
+            
+            if (checkBtn) {
+                checkBtn.addEventListener('click', function() {
+                    PremiumSystemCheck.runCheck();
                 });
             }
             
             if (installBtn) {
                 installBtn.addEventListener('click', function() {
-                    // Show download links for missing items
-                    const queue = OnlineInstaller.state.installQueue;
-                    let message = 'لینک‌های دانلود رسمی:\\n\\n';
-                    
-                    queue.forEach(item => {
-                        message += `${item.name} (${item.size}):\\n${item.url}\\n\\n`;
-                    });
-                    
-                    message += 'پس از نصب، دکمه "بررسی مجدد" را بزنید.';
-                    
-                    // Open first download
-                    if (queue.length > 0) {
-                        window.open(queue[0].url, '_blank');
-                    }
-                    
-                    alert(message);
+                    PremiumSystemCheck.startInstallation();
                 });
             }
+            
+            // ESC key to close modals
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeGuideModal();
+                    const downloadModal = document.getElementById('downloadModal');
+                    if (downloadModal) {
+                        downloadModal.remove();
+                        document.body.style.overflow = '';
+                    }
+                }
+            });
+            
+            // Auto-open guide if URL contains #guide
+            if (window.location.hash === '#guide') {
+                setTimeout(function() {
+                    openGuideModal();
+                }, 500);
+            }
+            
+            // Listen for hash changes
+            window.addEventListener('hashchange', function() {
+                if (window.location.hash === '#guide') {
+                    openGuideModal();
+                }
+            });
         });
     </script>
 </body>

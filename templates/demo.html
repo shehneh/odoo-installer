@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دمو نصاب | OdooMaster</title>
+    <meta name="description" content="پیش‌نمایش نصاب هوشمند OdooMaster - ببینید چگونه Odoo را به راحتی نصب کنید">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/components.css">
+    <style>
+        .demo-container {
+            min-height: 100vh;
+            padding: 100px 20px 40px;
+        }
+        .demo-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .demo-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+        .demo-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+        .demo-notice {
+            background: linear-gradient(135deg, rgba(113, 75, 103, 0.2), rgba(79, 70, 229, 0.2));
+            border: 1px solid rgba(113, 75, 103, 0.3);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .demo-notice i {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+        .demo-notice-content h3 {
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+        .demo-notice-content p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        .installer-preview {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            overflow: hidden;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .installer-titlebar {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .installer-titlebar h2 {
+            color: white;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .window-controls {
+            display: flex;
+            gap: 8px;
+        }
+        .window-controls span {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+        }
+        .window-controls .close { background: #ff5f57; }
+        .window-controls .minimize { background: #ffbd2e; }
+        .window-controls .maximize { background: #28ca42; }
+        .installer-body {
+            padding: 30px;
+        }
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 30px;
+        }
+        .step-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--border-color);
+            transition: all 0.3s;
+        }
+        .step-dot.active {
+            background: var(--primary);
+            transform: scale(1.2);
+        }
+        .step-dot.completed {
+            background: #28ca42;
+        }
+        .step-content {
+            display: none;
+        }
+        .step-content.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+        .check-list {
+            list-style: none;
+            padding: 0;
+        }
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 20px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+        }
+        .check-item.checking {
+            border: 1px solid var(--primary);
+        }
+        .check-item.success {
+            border: 1px solid #28ca42;
+        }
+        .check-item.warning {
+            border: 1px solid #ffbd2e;
+        }
+        .check-item.error {
+            border: 1px solid #ff5f57;
+        }
+        .check-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            background: var(--bg-card);
+        }
+        .check-item.checking .check-icon {
+            color: var(--primary);
+        }
+        .check-item.success .check-icon {
+            color: #28ca42;
+        }
+        .check-item.warning .check-icon {
+            color: #ffbd2e;
+        }
+        .check-item.error .check-icon {
+            color: #ff5f57;
+        }
+        .check-info {
+            flex: 1;
+        }
+        .check-info h4 {
+            margin-bottom: 4px;
+        }
+        .check-info p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        .check-status {
+            font-size: 0.85rem;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: var(--bg-card);
+        }
+        .check-item.success .check-status {
+            background: rgba(40, 202, 66, 0.1);
+            color: #28ca42;
+        }
+        .check-item.warning .check-status {
+            background: rgba(255, 189, 46, 0.1);
+            color: #e6a800;
+        }
+        .check-item.error .check-status {
+            background: rgba(255, 95, 87, 0.1);
+            color: #ff5f57;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            justify-content: center;
+        }
+        .demo-cta {
+            text-align: center;
+            margin-top: 40px;
+            padding: 40px;
+            background: var(--bg-card);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+        }
+        .demo-cta h3 {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+        }
+        .demo-cta p {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .spinning {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <div id="particles-js"></div>
+    
+    <!-- Navigation -->
+    <nav class="navbar glass">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-cube"></i>
+                </div>
+                <span>Odoo<strong>Master</strong></span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html#features" class="nav-link">ویژگی‌ها</a></li>
+                <li><a href="index.html#pricing" class="nav-link">قیمت‌گذاری</a></li>
+                <li><a href="demo.html" class="nav-link active">دمو</a></li>
+                <li><a href="support.html" class="nav-link">پشتیبانی</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="theme-toggle" title="تغییر تم">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <a href="login.html" class="btn btn-ghost">
+                    <i class="fas fa-sign-in-alt"></i>
+                    ورود
+                </a>
+                <a href="register.html" class="btn btn-primary btn-glow">
+                    <i class="fas fa-rocket"></i>
+                    شروع رایگان
+                </a>
+            </div>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="demo-container">
+        <div class="container">
+            <div class="demo-header">
+                <h1>پیش‌نمایش <span class="gradient-text">نصاب هوشمند</span></h1>
+                <p>ببینید چگونه OdooMaster سیستم شما را تحلیل می‌کند و Odoo را نصب می‌کند</p>
+            </div>
+
+            <div class="demo-notice">
+                <i class="fas fa-info-circle"></i>
+                <div class="demo-notice-content">
+                    <h3>این یک دمو است</h3>
+                    <p>برای نصب واقعی روی سیستم خود، ابتدا ثبت‌نام کنید و وارد پنل کاربری شوید.</p>
+                </div>
+            </div>
+
+            <div class="installer-preview">
+                <div class="installer-titlebar">
+                    <h2><i class="fas fa-cube"></i> OdooMaster Installer v2.0</h2>
+                    <div class="window-controls">
+                        <span class="minimize"></span>
+                        <span class="maximize"></span>
+                        <span class="close"></span>
+                    </div>
+                </div>
+                <div class="installer-body">
+                    <div class="step-indicator">
+                        <div class="step-dot active" data-step="1"></div>
+                        <div class="step-dot" data-step="2"></div>
+                        <div class="step-dot" data-step="3"></div>
+                        <div class="step-dot" data-step="4"></div>
+                    </div>
+
+                    <!-- Step 1: System Check -->
+                    <div class="step-content active" id="step1">
+                        <h3 style="text-align:center; margin-bottom: 24px;">
+                            <i class="fas fa-search"></i>
+                            بررسی سیستم
+                        </h3>
+                        <ul class="check-list" id="checkList">
+                            <li class="check-item" data-check="os">
+                                <div class="check-icon"><i class="fas fa-desktop"></i></div>
+                                <div class="check-info">
+                                    <h4>سیستم عامل</h4>
+                                    <p>Windows 10/11 64-bit</p>
+                                </div>
+                                <span class="check-status">در انتظار...</span>
+                            </li>
+                            <li class="check-item" data-check="python">
+                                <div class="check-icon"><i class="fab fa-python"></i></div>
+                                <div class="check-info">
+                                    <h4>Python 3.10+</h4>
+                                    <p>مفسر پایتون برای اجرای Odoo</p>
+                                </div>
+                                <span class="check-status">در انتظار...</span>
+                            </li>
+                            <li class="check-item" data-check="postgresql">
+                                <div class="check-icon"><i class="fas fa-database"></i></div>
+                                <div class="check-info">
+                                    <h4>PostgreSQL 14+</h4>
+                                    <p>دیتابیس Odoo</p>
+                                </div>
+                                <span class="check-status">در انتظار...</span>
+                            </li>
+                            <li class="check-item" data-check="git">
+                                <div class="check-icon"><i class="fab fa-git-alt"></i></div>
+                                <div class="check-info">
+                                    <h4>Git</h4>
+                                    <p>برای دریافت سورس Odoo</p>
+                                </div>
+                                <span class="check-status">در انتظار...</span>
+                            </li>
+                            <li class="check-item" data-check="nodejs">
+                                <div class="check-icon"><i class="fab fa-node-js"></i></div>
+                                <div class="check-info">
+                                    <h4>Node.js</h4>
+                                    <p>برای کامپایل assets</p>
+                                </div>
+                                <span class="check-status">در انتظار...</span>
+                            </li>
+                        </ul>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary btn-glow" id="startCheckBtn">
+                                <i class="fas fa-play"></i>
+                                شروع بررسی
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Install Dependencies -->
+                    <div class="step-content" id="step2">
+                        <h3 style="text-align:center; margin-bottom: 24px;">
+                            <i class="fas fa-download"></i>
+                            نصب نیازمندی‌ها
+                        </h3>
+                        <div id="installList"></div>
+                        <div class="action-buttons">
+                            <button class="btn btn-outline" id="backToStep1">
+                                <i class="fas fa-arrow-right"></i>
+                                بازگشت
+                            </button>
+                            <button class="btn btn-primary btn-glow" id="startInstallBtn">
+                                <i class="fas fa-download"></i>
+                                نصب خودکار
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Odoo Setup -->
+                    <div class="step-content" id="step3">
+                        <h3 style="text-align:center; margin-bottom: 24px;">
+                            <i class="fas fa-cog"></i>
+                            پیکربندی Odoo
+                        </h3>
+                        <div style="text-align: center; padding: 40px;">
+                            <i class="fas fa-check-circle" style="font-size: 4rem; color: #28ca42; margin-bottom: 20px;"></i>
+                            <h4>همه نیازمندی‌ها نصب شدند!</h4>
+                            <p style="color: var(--text-secondary); margin-top: 10px;">حالا Odoo را پیکربندی می‌کنیم...</p>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary btn-glow" id="configureBtn">
+                                <i class="fas fa-magic"></i>
+                                پیکربندی خودکار
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Complete -->
+                    <div class="step-content" id="step4">
+                        <div style="text-align: center; padding: 40px;">
+                            <i class="fas fa-rocket" style="font-size: 4rem; color: var(--primary); margin-bottom: 20px;"></i>
+                            <h2 style="margin-bottom: 12px;">🎉 تبریک!</h2>
+                            <p style="color: var(--text-secondary); font-size: 1.1rem;">Odoo با موفقیت نصب و راه‌اندازی شد</p>
+                            <div style="margin-top: 30px; padding: 20px; background: var(--bg-secondary); border-radius: 12px;">
+                                <p><strong>آدرس پنل:</strong> <code>http://localhost:8069</code></p>
+                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary btn-xl btn-glow" id="openOdooBtn">
+                                <i class="fas fa-external-link-alt"></i>
+                                باز کردن Odoo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="demo-cta">
+                <h3>آماده نصب روی سیستم خودتان هستید؟</h3>
+                <p>با ثبت‌نام رایگان، نصاب واقعی را دانلود کنید و Odoo را در چند دقیقه راه‌اندازی کنید.</p>
+                <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                    <a href="register.html" class="btn btn-primary btn-xl btn-glow">
+                        <i class="fas fa-user-plus"></i>
+                        ثبت‌نام رایگان
+                    </a>
+                    <a href="index.html#pricing" class="btn btn-outline btn-xl">
+                        <i class="fas fa-tags"></i>
+                        مشاهده پلن‌ها
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <a href="index.html" class="logo">
+                        <i class="fas fa-cube"></i>
+                        <span>Odoo<strong>Master</strong></span>
+                    </a>
+                    <p>پلتفرم هوشمند نصب Odoo</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© ۱۴۰۴ OdooMaster. تمامی حقوق محفوظ است.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/particles.min.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        // Demo installer simulation
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkItems = document.querySelectorAll('.check-item');
+            const stepDots = document.querySelectorAll('.step-dot');
+            const stepContents = document.querySelectorAll('.step-content');
+            
+            // Simulate system check results (for demo)
+            const demoResults = {
+                os: { status: 'success', text: 'Windows 11 64-bit' },
+                python: { status: 'error', text: 'نصب نشده' },
+                postgresql: { status: 'error', text: 'نصب نشده' },
+                git: { status: 'warning', text: 'نسخه قدیمی (2.30)' },
+                nodejs: { status: 'success', text: 'v20.10.0' }
+            };
+
+            function goToStep(stepNum) {
+                stepDots.forEach((dot, i) => {
+                    dot.classList.remove('active');
+                    if (i < stepNum - 1) dot.classList.add('completed');
+                    if (i === stepNum - 1) dot.classList.add('active');
+                });
+                stepContents.forEach((content, i) => {
+                    content.classList.remove('active');
+                    if (i === stepNum - 1) content.classList.add('active');
+                });
+            }
+
+            document.getElementById('startCheckBtn').addEventListener('click', function() {
+                const btn = this;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner spinning"></i> در حال بررسی...';
+                
+                let index = 0;
+                const items = Array.from(checkItems);
+                
+                function checkNext() {
+                    if (index >= items.length) {
+                        btn.innerHTML = '<i class="fas fa-arrow-left"></i> ادامه';
+                        btn.disabled = false;
+                        btn.onclick = () => {
+                            buildInstallList();
+                            goToStep(2);
+                        };
+                        return;
+                    }
+                    
+                    const item = items[index];
+                    const checkName = item.dataset.check;
+                    const result = demoResults[checkName];
+                    
+                    item.classList.add('checking');
+                    item.querySelector('.check-status').textContent = 'در حال بررسی...';
+                    item.querySelector('.check-icon i').className = 'fas fa-spinner spinning';
+                    
+                    setTimeout(() => {
+                        item.classList.remove('checking');
+                        item.classList.add(result.status);
+                        item.querySelector('.check-status').textContent = result.text;
+                        
+                        const iconMap = {
+                            os: 'fas fa-desktop',
+                            python: 'fab fa-python',
+                            postgresql: 'fas fa-database',
+                            git: 'fab fa-git-alt',
+                            nodejs: 'fab fa-node-js'
+                        };
+                        item.querySelector('.check-icon i').className = iconMap[checkName];
+                        
+                        index++;
+                        checkNext();
+                    }, 800);
+                }
+                
+                checkNext();
+            });
+
+            function buildInstallList() {
+                const container = document.getElementById('installList');
+                container.innerHTML = '';
+                
+                const toInstall = [
+                    { name: 'Python 3.11', icon: 'fab fa-python', url: 'python.org', size: '25 MB' },
+                    { name: 'PostgreSQL 16', icon: 'fas fa-database', url: 'postgresql.org', size: '85 MB' },
+                    { name: 'Git (آپدیت)', icon: 'fab fa-git-alt', url: 'git-scm.com', size: '55 MB' }
+                ];
+                
+                toInstall.forEach(item => {
+                    const el = document.createElement('div');
+                    el.className = 'check-item';
+                    el.innerHTML = `
+                        <div class="check-icon"><i class="${item.icon}"></i></div>
+                        <div class="check-info">
+                            <h4>${item.name}</h4>
+                            <p>دانلود از ${item.url} (${item.size})</p>
+                        </div>
+                        <span class="check-status">آماده</span>
+                    `;
+                    container.appendChild(el);
+                });
+            }
+
+            document.getElementById('backToStep1').addEventListener('click', () => goToStep(1));
+            
+            document.getElementById('startInstallBtn').addEventListener('click', function() {
+                const btn = this;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner spinning"></i> در حال نصب...';
+                
+                const items = document.querySelectorAll('#installList .check-item');
+                let index = 0;
+                
+                function installNext() {
+                    if (index >= items.length) {
+                        setTimeout(() => goToStep(3), 500);
+                        return;
+                    }
+                    
+                    const item = items[index];
+                    item.classList.add('checking');
+                    item.querySelector('.check-status').textContent = 'در حال دانلود...';
+                    
+                    setTimeout(() => {
+                        item.querySelector('.check-status').textContent = 'در حال نصب...';
+                        
+                        setTimeout(() => {
+                            item.classList.remove('checking');
+                            item.classList.add('success');
+                            item.querySelector('.check-status').textContent = 'نصب شد ✓';
+                            index++;
+                            installNext();
+                        }, 1200);
+                    }, 1000);
+                }
+                
+                installNext();
+            });
+
+            document.getElementById('configureBtn').addEventListener('click', function() {
+                const btn = this;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner spinning"></i> در حال پیکربندی...';
+                
+                setTimeout(() => goToStep(4), 2500);
+            });
+
+            document.getElementById('openOdooBtn').addEventListener('click', function() {
+                alert('🎉 این یک دمو است!\n\nبرای نصب واقعی، لطفاً ثبت‌نام کنید و وارد پنل کاربری شوید.');
+            });
+        });
+    </script>
+</body>
+</html>

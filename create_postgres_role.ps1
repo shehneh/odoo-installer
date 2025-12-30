@@ -33,7 +33,7 @@ if (-not $confPath){
     if ($found){ $confPath = $found.FullName }
 }
 $db_user = $null; $db_password = $null
-if (Test-Path $confPath){
+if ($confPath -and (Test-Path $confPath)){
     L "Reading config: $confPath"
     $lines = Get-Content $confPath
     foreach ($ln in $lines){

@@ -1780,3 +1780,1066 @@ body.rtl .sidebar.collapsed ~ .main-content {
 .dashboard-page > .lang-switcher[style*="fixed"] {
     display: none !important;
 }
+
+/* ============================================
+   Premium System Check UI
+   ============================================ */
+
+.system-check-container {
+    padding: 10px 0;
+}
+
+.check-grid-premium {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.check-card-premium {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.check-card-premium::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
+    transition: all 0.3s ease;
+}
+
+.check-card-premium:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary);
+    box-shadow: 0 8px 32px rgba(113, 75, 103, 0.2);
+}
+
+.check-card-premium.checking {
+    border-color: var(--primary);
+    animation: checkPulse 1.5s ease-in-out infinite;
+}
+
+.check-card-premium.checking::before {
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    animation: shimmer 1.5s infinite;
+}
+
+.check-card-premium.success {
+    border-color: #10b981;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), transparent);
+}
+
+.check-card-premium.success::before {
+    background: linear-gradient(90deg, #10b981, #34d399, #10b981);
+}
+
+.check-card-premium.warning {
+    border-color: #f59e0b;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.05), transparent);
+}
+
+.check-card-premium.warning::before {
+    background: linear-gradient(90deg, #f59e0b, #fbbf24, #f59e0b);
+}
+
+.check-card-premium.error {
+    border-color: #ef4444;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), transparent);
+}
+
+.check-card-premium.error::before {
+    background: linear-gradient(90deg, #ef4444, #f87171, #ef4444);
+}
+
+@keyframes checkPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(113, 75, 103, 0.4); }
+    50% { box-shadow: 0 0 0 10px rgba(113, 75, 103, 0); }
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.check-card-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    background: linear-gradient(135deg, var(--glass-bg), var(--dark));
+    border: 1px solid var(--glass-border);
+    position: relative;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.check-card-icon i {
+    z-index: 1;
+    transition: all 0.3s ease;
+}
+
+.check-pulse {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.check-card-premium.checking .check-pulse {
+    opacity: 1;
+    animation: iconPulse 1s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.2); opacity: 0; }
+}
+
+/* Icon colors */
+.check-card-icon { color: var(--text-secondary); }
+.check-card-icon.python { background: linear-gradient(135deg, rgba(55, 118, 171, 0.2), rgba(255, 212, 59, 0.1)); color: #3776ab; }
+.check-card-icon.postgresql { background: linear-gradient(135deg, rgba(51, 103, 145, 0.2), transparent); color: #336791; }
+.check-card-icon.git { background: linear-gradient(135deg, rgba(240, 80, 51, 0.2), transparent); color: #f05033; }
+.check-card-icon.nodejs { background: linear-gradient(135deg, rgba(104, 160, 99, 0.2), transparent); color: #68a063; }
+.check-card-icon.vcredist { background: linear-gradient(135deg, rgba(0, 120, 212, 0.2), transparent); color: #0078d4; }
+
+.check-card-premium.success .check-card-icon {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), transparent);
+    color: #10b981;
+}
+
+.check-card-premium.error .check-card-icon {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), transparent);
+    color: #ef4444;
+}
+
+.check-card-premium.warning .check-card-icon {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), transparent);
+    color: #f59e0b;
+}
+
+.check-card-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.check-card-content h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--white);
+}
+
+.check-card-content .check-version {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.check-card-status {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+}
+
+.check-card-status .status-text {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.check-card-status .status-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.check-card-premium.checking .status-icon {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+    animation: spin 1s linear infinite;
+}
+
+.check-card-premium.checking .status-icon i {
+    animation: none;
+}
+
+.check-card-premium.success .status-icon {
+    background: #10b981;
+    border-color: #10b981;
+    color: white;
+}
+
+.check-card-premium.warning .status-icon {
+    background: #f59e0b;
+    border-color: #f59e0b;
+    color: white;
+}
+
+.check-card-premium.error .status-icon {
+    background: #ef4444;
+    border-color: #ef4444;
+    color: white;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Details Panel */
+.check-details-panel {
+    margin-top: 20px;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), transparent);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 16px;
+    padding: 20px;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.details-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    color: var(--accent);
+}
+
+.details-header i {
+    font-size: 1.2rem;
+}
+
+.details-header h4 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.details-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.detail-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px;
+    background: var(--glass-bg);
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+}
+
+.detail-item.error {
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.detail-item.warning {
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.detail-item-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.detail-item.error .detail-item-icon {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.detail-item.warning .detail-item-icon {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.detail-item-content {
+    flex: 1;
+}
+
+.detail-item-content h5 {
+    margin: 0 0 6px 0;
+    font-size: 0.95rem;
+    color: var(--white);
+}
+
+.detail-item-content p {
+    margin: 0 0 10px 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.detail-solution {
+    padding: 10px 14px;
+    background: rgba(16, 185, 129, 0.1);
+    border-radius: 8px;
+    border-right: 3px solid #10b981;
+}
+
+.detail-solution strong {
+    color: #10b981;
+    font-size: 0.8rem;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.detail-solution span {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.detail-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.detail-actions .btn {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+}
+
+/* Action Buttons Premium */
+.action-buttons-premium {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-lg {
+    padding: 14px 28px;
+    font-size: 1rem;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+}
+
+/* Header Actions */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-ghost {
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-ghost:hover {
+    background: var(--glass-bg);
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+/* ============================================
+   Installation Guide Modal
+   ============================================ */
+
+.guide-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 10000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.guide-modal-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+.guide-modal {
+    width: 100%;
+    max-width: 900px;
+    max-height: 90vh;
+    background: var(--dark-light);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.guide-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+}
+
+.guide-modal-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.guide-modal-title i {
+    font-size: 1.5rem;
+}
+
+.guide-modal-title h2 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.guide-modal-close {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.guide-modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+}
+
+.guide-modal-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.guide-nav {
+    width: 200px;
+    background: var(--dark);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-left: 1px solid var(--glass-border);
+    flex-shrink: 0;
+}
+
+.guide-nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: right;
+}
+
+.guide-nav-btn:hover {
+    background: var(--glass-bg);
+    color: var(--white);
+}
+
+.guide-nav-btn.active {
+    background: linear-gradient(135deg, rgba(113, 75, 103, 0.2), transparent);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.guide-nav-btn i {
+    font-size: 1rem;
+    width: 20px;
+}
+
+.guide-content {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+}
+
+.guide-section {
+    display: none;
+    animation: fadeIn 0.4s ease;
+}
+
+.guide-section.active {
+    display: block;
+}
+
+.guide-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.4rem;
+    margin-bottom: 20px;
+    color: var(--white);
+}
+
+.guide-section h3 i {
+    color: var(--primary);
+}
+
+.guide-section-icon {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.guide-section-icon i {
+    font-size: 4rem;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.guide-intro-text {
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    margin-bottom: 24px;
+}
+
+.guide-features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 30px;
+}
+
+.guide-feature-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.guide-feature-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--primary);
+}
+
+.guide-feature-card .feature-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin: 0 auto 16px;
+}
+
+.guide-feature-card .feature-icon.blue {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), transparent);
+    color: #3b82f6;
+}
+
+.guide-feature-card .feature-icon.green {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), transparent);
+    color: #10b981;
+}
+
+.guide-feature-card .feature-icon.orange {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), transparent);
+    color: #f59e0b;
+}
+
+.guide-feature-card h4 {
+    margin: 0 0 8px 0;
+    color: var(--white);
+    font-size: 1rem;
+}
+
+.guide-feature-card p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.guide-cta {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.guide-step-card {
+    display: flex;
+    gap: 16px;
+    padding: 20px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    margin-bottom: 16px;
+    transition: all 0.3s ease;
+}
+
+.guide-step-card:hover {
+    border-color: var(--primary);
+}
+
+.guide-step-card .step-number {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+}
+
+.guide-step-card .step-content {
+    flex: 1;
+}
+
+.guide-step-card .step-content h4 {
+    margin: 0 0 8px 0;
+    color: var(--white);
+    font-size: 1.05rem;
+}
+
+.guide-step-card .step-content p {
+    margin: 0 0 12px 0;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.guide-steps-list {
+    margin: 12px 0;
+    padding-right: 20px;
+}
+
+.guide-steps-list li {
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    line-height: 1.6;
+}
+
+.guide-steps-list li strong {
+    color: var(--white);
+}
+
+.step-tip {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 10px;
+    border-right: 3px solid #3b82f6;
+    margin-top: 12px;
+}
+
+.step-tip i {
+    color: #3b82f6;
+    margin-top: 2px;
+}
+
+.step-tip span {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.step-tip.success {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: #10b981;
+}
+
+.step-tip.success i {
+    color: #10b981;
+}
+
+.step-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 10px;
+    border-right: 3px solid #ef4444;
+    margin-top: 12px;
+}
+
+.step-warning i {
+    color: #ef4444;
+    margin-top: 2px;
+}
+
+.step-warning span {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.step-example {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: var(--dark);
+    border-radius: 10px;
+    margin-top: 12px;
+}
+
+.step-example i {
+    color: #10b981;
+}
+
+.step-example code {
+    background: rgba(113, 75, 103, 0.2);
+    padding: 4px 10px;
+    border-radius: 6px;
+    color: var(--primary);
+    font-family: 'Courier New', monospace;
+}
+
+.step-file-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: var(--dark);
+    border-radius: 12px;
+    border: 1px dashed var(--glass-border);
+    margin-top: 12px;
+}
+
+.step-file-box i {
+    font-size: 1.5rem;
+    color: var(--primary);
+}
+
+.step-file-box code {
+    font-size: 1.1rem;
+    color: var(--secondary);
+    font-family: 'Courier New', monospace;
+}
+
+.guide-requirements-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.requirement-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+}
+
+.requirement-item .req-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    color: var(--text-secondary);
+}
+
+.requirement-item .req-info {
+    flex: 1;
+}
+
+.requirement-item .req-info h4 {
+    margin: 0 0 4px 0;
+    color: var(--white);
+}
+
+.requirement-item .req-info p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.requirement-item .req-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.requirement-item .req-badge.required {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.requirement-item .req-badge.auto {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.guide-info-box {
+    display: flex;
+    gap: 16px;
+    padding: 20px;
+    border-radius: 16px;
+    margin: 20px 0;
+}
+
+.guide-info-box i {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.guide-info-box strong {
+    display: block;
+    margin-bottom: 6px;
+}
+
+.guide-info-box p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.guide-info-box.success {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.guide-info-box.success i,
+.guide-info-box.success strong {
+    color: #10b981;
+}
+
+.guide-info-box.info {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.guide-info-box.info i,
+.guide-info-box.info strong {
+    color: #3b82f6;
+}
+
+.guide-check-list {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0;
+}
+
+.guide-check-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    color: var(--text-secondary);
+}
+
+.guide-check-list li i {
+    color: #10b981;
+}
+
+.guide-nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--glass-border);
+}
+
+/* FAQ Styles */
+.guide-faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.faq-item {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.faq-question {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.faq-question:hover {
+    background: var(--dark);
+}
+
+.faq-question i {
+    color: var(--primary);
+    transition: transform 0.3s ease;
+}
+
+.faq-question span {
+    flex: 1;
+    color: var(--white);
+    font-weight: 500;
+}
+
+.faq-item.open .faq-question i {
+    transform: rotate(-90deg);
+}
+
+.faq-answer {
+    display: none;
+    padding: 0 16px 16px 44px;
+}
+
+.faq-item.open .faq-answer {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+.faq-answer ul {
+    margin: 0;
+    padding-right: 20px;
+}
+
+.faq-answer li {
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    line-height: 1.6;
+}
+
+.faq-answer li strong {
+    color: var(--white);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .guide-modal {
+        max-height: 95vh;
+        border-radius: 16px;
+    }
+    
+    .guide-modal-body {
+        flex-direction: column;
+    }
+    
+    .guide-nav {
+        width: 100%;
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 12px;
+        border-left: none;
+        border-bottom: 1px solid var(--glass-border);
+    }
+    
+    .guide-nav-btn {
+        flex-direction: column;
+        gap: 4px;
+        padding: 10px 14px;
+        min-width: fit-content;
+    }
+    
+    .guide-nav-btn span {
+        font-size: 0.75rem;
+    }
+    
+    .guide-content {
+        padding: 16px;
+    }
+    
+    .guide-step-card {
+        flex-direction: column;
+    }
+    
+    .guide-nav-buttons {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .guide-nav-buttons .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .check-grid-premium {
+        grid-template-columns: 1fr;
+    }
+}

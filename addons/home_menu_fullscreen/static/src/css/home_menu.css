@@ -1,0 +1,158 @@
+/* Home Menu Fullscreen Style - OdooFarsi for Odoo 19 */
+
+/* Make the entire home menu page fullscreen with gradient */
+body:has(.o_home_menu_background) {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.o_home_menu_background {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    min-height: 100vh !important;
+    padding-top: 80px !important;
+}
+
+/* Hide the navbar background on home menu */
+.o_home_menu_background .o_main_navbar {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Search bar styling */
+.o_home_menu_background .o_menu_search {
+    margin-bottom: 40px !important;
+}
+
+.o_home_menu_background input[type="text"] {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: none !important;
+    border-radius: 30px !important;
+    padding: 15px 30px !important;
+    font-size: 16px !important;
+    width: 500px !important;
+    max-width: 80vw !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25) !important;
+    transition: all 0.3s ease !important;
+}
+
+.o_home_menu_background input[type="text"]:focus {
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* Apps grid container */
+.o_home_menu_background .o_apps {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 30px !important;
+    max-width: 1100px !important;
+    margin: 0 auto !important;
+    padding: 30px !important;
+}
+
+/* Individual app item */
+.o_home_menu_background .o_app {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-decoration: none !important;
+    transition: all 0.3s ease !important;
+    padding: 20px 15px !important;
+    border-radius: 20px !important;
+    width: 120px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+.o_home_menu_background .o_app:hover {
+    transform: translateY(-8px) scale(1.05) !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* App icon */
+.o_home_menu_background .o_app img {
+    width: 70px !important;
+    height: 70px !important;
+    border-radius: 18px !important;
+    margin-bottom: 12px !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25) !important;
+    transition: transform 0.3s ease !important;
+}
+
+.o_home_menu_background .o_app:hover img {
+    transform: scale(1.1) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* App name/caption */
+.o_home_menu_background .o_app .o_caption {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+    color: white !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+    line-height: 1.3 !important;
+}
+
+/* Remove default styles */
+.o_home_menu_background .o_app {
+    border: none !important;
+}
+
+/* RTL Support for Persian */
+html[dir="rtl"] .o_home_menu_background .o_apps {
+    direction: rtl !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .o_home_menu_background {
+        padding-top: 60px !important;
+    }
+    
+    .o_home_menu_background .o_apps {
+        gap: 20px !important;
+        padding: 20px 10px !important;
+    }
+    
+    .o_home_menu_background .o_app {
+        width: 100px !important;
+        padding: 15px 10px !important;
+    }
+    
+    .o_home_menu_background .o_app img {
+        width: 55px !important;
+        height: 55px !important;
+    }
+    
+    .o_home_menu_background .o_app .o_caption {
+        font-size: 11px !important;
+    }
+    
+    .o_home_menu_background input[type="text"] {
+        width: 90vw !important;
+        font-size: 14px !important;
+        padding: 12px 20px !important;
+    }
+}
+
+/* Alternative gradient themes */
+body.theme-ocean .o_home_menu_background {
+    background: linear-gradient(135deg, #2196F3 0%, #21CBF3 100%) !important;
+}
+
+body.theme-forest .o_home_menu_background {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important;
+}
+
+body.theme-sunset .o_home_menu_background {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+}
+
+body.theme-night .o_home_menu_background {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+}
+
+

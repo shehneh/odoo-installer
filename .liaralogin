@@ -1,0 +1,53 @@
+# Ignore files for Liara deployment
+.git
+.gitignore
+.venv
+venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache
+.coverage
+htmlcov
+dist
+build
+*.egg-info
+.DS_Store
+Thumbs.db
+*.log
+*.bak
+*.swp
+*.swo
+*~
+.idea
+.vscode
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Exclude local data
+data/
+BD Backups/
+Download nasab test/
+soft/
+tools/
+release/
+build/
+private_downloads/
+
+# Exclude local config
+*.local
+.env.local
+local_settings.py
+
+# Keep only essentials for deployment
+!requirements.txt
+!Dockerfile*
+!docker-compose*.yml
+!liara.json
+!config/odoo.conf
+!addons/

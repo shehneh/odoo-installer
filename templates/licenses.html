@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لایسنس‌ها | OdooMaster</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+    <div id="particles-js"></div>
+
+    <nav class="navbar glass">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon"><i class="fas fa-cube"></i></div>
+                <span>Odoo<strong>Master</strong></span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="downloads.html" class="nav-link" data-i18n="nav.downloads">دانلود</a></li>
+                <li><a href="docs.html" class="nav-link" data-i18n="nav.docs">مستندات</a></li>
+                <li><a href="support.html" class="nav-link" data-i18n="nav.support">پشتیبانی</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="theme-toggle" id="themeToggle" title="تغییر تم" data-i18n-title="theme.toggle"><i class="fas fa-moon"></i></button>
+                <a href="dashboard.html" class="btn btn-ghost"><i class="fas fa-user"></i> <span data-i18n="licenses.panel">پنل</span></a>
+            </div>
+        </div>
+    </nav>
+
+    <main style="padding-top: 110px; min-height: 100vh;">
+        <div class="container" style="max-width: 1000px;">
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-key"></i> <span data-i18n="nav.licenses">لایسنس‌ها</span></span>
+                <h1 class="section-title" data-i18n="licenses.title">مدیریت لایسنس‌ها</h1>
+                <p class="section-desc" data-i18n="licenses.desc">لایسنس‌های فعال و تاریخ انقضا</p>
+            </div>
+
+            <div class="glass" style="padding: 28px; border-radius: var(--radius-xl);">
+                <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom: 16px;">
+                    <div style="color: var(--gray-light);" data-i18n="licenses.note">برای دانلود فایل‌ها، باید لایسنس غیر Trial فعال داشته باشید.</div>
+                    <a href="payment.html" class="btn btn-primary"><i class="fas fa-shopping-cart"></i> <span data-i18n="licenses.buyLicense">خرید لایسنس</span></a>
+                </div>
+
+                <div id="licensesList" style="display:grid; gap: 14px;"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/particles.min.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/licenses.js"></script>
+</body>
+</html>

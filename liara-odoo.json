@@ -1,0 +1,12 @@
+{
+  "platform": "docker",
+  "port": 8069,
+  "app": "odoo-demo",
+  "image": "odoo:19.0",
+  "disks": [
+    {
+      "name": "odoo-web-data",
+      "mountTo": "/var/lib/odoo"
+    }
+  ]
+}

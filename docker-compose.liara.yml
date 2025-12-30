@@ -1,0 +1,47 @@
+# Liara Production Configuration
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  odoo:
+    build:
+      context: .
+      dockerfile: Dockerfile.odoo
+    depends_on:
+      - db
+    ports:
+      - "80:8069"
+    environment:
+      - HOST=db
+      - USER=odoo
+      - PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - odoo-data:/var/lib/odoo
+      - ./config:/etc/odoo
+      - ./addons:/mnt/extra-addons
+    restart: unless-stopped
+
+  website:
+    build:
+      context: .
+      dockerfile: Dockerfile.website
+    depends_on:
+      - odoo
+    ports:
+      - "8080:8080"
+    environment:
+      - ODOO_URL=http://odoo:8069
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+  odoo-data:

@@ -78,6 +78,317 @@ function showToast(message, type = 'info', duration = 4000) {
   }, duration);
 }
 
+// ============ SMART INSTALL UI FUNCTIONS ============
+
+/**
+ * Shows a professional confirmation dialog before starting installation
+ */
+async function showSmartConfirmDialog() {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.style.backdropFilter = 'blur(4px)';
+    
+    overlay.innerHTML = `
+      <div class="install-modal-pro" style="max-width: 480px;">
+        <div class="install-modal-header" style="text-align: center;">
+          <h3 style="justify-content: center;">
+            <span class="header-icon">🚀</span>
+            نصب هوشمند پیش‌نیازها
+          </h3>
+        </div>
+        <div style="padding: 28px; text-align: center;">
+          <div style="font-size: 56px; margin-bottom: 16px;">⚙️</div>
+          <h4 style="margin: 0 0 16px; font-size: 18px; color: #212529;">آماده نصب همه پیش‌نیازها</h4>
+          <p style="color: #6c757d; margin-bottom: 24px; line-height: 1.7;">
+            این فرآیند به صورت خودکار:<br>
+            ✓ Python, PostgreSQL, Node.js و سایر ابزارها را نصب می‌کند<br>
+            ✓ پکیج‌های مورد نیاز را نصب می‌کند<br>
+            ✓ تنظیمات لازم را انجام می‌دهد
+          </p>
+          <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 10px; padding: 12px; margin-bottom: 20px;">
+            <strong style="color: #856404;">⚠️ توجه:</strong>
+            <span style="color: #856404;">ممکن است پنجره‌های نصب باز شوند. لطفاً آنها را تکمیل کنید.</span>
+          </div>
+          <div style="display: flex; gap: 12px; justify-content: center;">
+            <button id="smart-install-cancel" class="btn btn-secondary" style="padding: 12px 28px; font-size: 15px;">انصراف</button>
+            <button id="smart-install-confirm" class="btn-smart-install" style="padding: 12px 28px; font-size: 15px;">
+              شروع نصب هوشمند
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(overlay);
+    
+    document.getElementById('smart-install-cancel').onclick = () => {
+      overlay.remove();
+      resolve(false);
+    };
+    
+    document.getElementById('smart-install-confirm').onclick = () => {
+      overlay.remove();
+      resolve(true);
+    };
+    
+    overlay.onclick = (e) => {
+      if (e.target === overlay) {
+        overlay.remove();
+        resolve(false);
+      }
+    };
+  });
+}
+
+/**
+ * Creates the professional installation progress modal
+ */
+function createSmartInstallModal(steps, versionText) {
+  // Remove old modal if exists
+  const oldModal = document.getElementById('smart-install-overlay');
+  if (oldModal) oldModal.remove();
+  
+  const overlay = document.createElement('div');
+  overlay.id = 'smart-install-overlay';
+  overlay.className = 'modal-overlay';
+  overlay.style.backdropFilter = 'blur(4px)';
+  
+  let stepsHtml = steps.map((step, idx) => `
+    <div class="install-step-card pending" id="step-card-${step.id}">
+      <div class="step-icon-pro pending" id="step-icon-${step.id}">${idx + 1}</div>
+      <div class="step-content-pro">
+        <div class="step-name-pro">${step.label}</div>
+        <div class="step-status-pro" id="step-status-${step.id}">
+          <span class="status-text">در انتظار...</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  
+  overlay.innerHTML = `
+    <div class="install-modal-pro">
+      <div class="install-modal-header">
+        <h3>
+          <span class="header-icon">⚙️</span>
+          نصب ${versionText}
+        </h3>
+      </div>
+      <div style="padding: 20px 24px; max-height: 400px; overflow-y: auto;">
+        ${stepsHtml}
+      </div>
+      <div class="live-progress">
+        <div class="live-progress-bar-container">
+          <div class="live-progress-bar" id="smart-progress-bar" style="width: 0%"></div>
+        </div>
+        <div class="live-progress-text">
+          <span class="live-progress-label" id="smart-progress-label">در حال آماده‌سازی...</span>
+          <span class="live-progress-percent" id="smart-progress-percent">0%</span>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // Prevent closing during installation
+  overlay.onclick = (e) => {
+    if (e.target === overlay) {
+      showToast('لطفاً صبر کنید تا نصب تمام شود...', 'warning');
+    }
+  };
+  
+  document.body.appendChild(overlay);
+  return overlay;
+}
+
+/**
+ * Updates a step in the smart install modal
+ */
+function updateSmartStep(stepId, status, statusText = '', timerSeconds = 0) {
+  const card = document.getElementById(`step-card-${stepId}`);
+  const icon = document.getElementById(`step-icon-${stepId}`);
+  const statusEl = document.getElementById(`step-status-${stepId}`);
+  
+  if (!card) return;
+  
+  // Remove all status classes
+  card.className = 'install-step-card ' + status;
+  icon.className = 'step-icon-pro ' + status;
+  
+  // Update icon content based on status
+  if (status === 'active') {
+    icon.innerHTML = '<div class="spinner-pro"></div>';
+  } else if (status === 'success') {
+    icon.innerHTML = '✓';
+  } else if (status === 'error') {
+    icon.innerHTML = '✗';
+  }
+  
+  // Update status text
+  if (statusEl) {
+    let timerHtml = '';
+    if (timerSeconds > 0 && status === 'active') {
+      const mins = Math.floor(timerSeconds / 60);
+      const secs = timerSeconds % 60;
+      timerHtml = `<span class="timer">${mins}:${secs.toString().padStart(2, '0')}</span>`;
+    }
+    statusEl.innerHTML = `<span class="status-text">${statusText}</span>${timerHtml}`;
+  }
+}
+
+/**
+ * Updates the smart progress bar
+ */
+function updateSmartProgress(percent, label) {
+  const bar = document.getElementById('smart-progress-bar');
+  const percentEl = document.getElementById('smart-progress-percent');
+  const labelEl = document.getElementById('smart-progress-label');
+  
+  if (bar) bar.style.width = percent + '%';
+  if (percentEl) percentEl.textContent = Math.round(percent) + '%';
+  if (labelEl) labelEl.textContent = label;
+}
+
+/**
+ * Shows installation result modal
+ */
+function showSmartResultModal(successSteps, failedSteps, stopped = false) {
+  const overlay = document.getElementById('smart-install-overlay');
+  if (!overlay) return;
+  
+  const hasErrors = failedSteps.length > 0;
+  const iconClass = stopped ? 'error' : (hasErrors ? 'warning' : 'success');
+  const iconEmoji = stopped ? '❌' : (hasErrors ? '⚠️' : '✅');
+  const title = stopped ? 'نصب متوقف شد' : (hasErrors ? 'نصب با مشکلاتی تکمیل شد' : 'نصب با موفقیت انجام شد!');
+  
+  let resultListHtml = '';
+  
+  if (successSteps.length > 0) {
+    resultListHtml += successSteps.map(s => `
+      <div class="result-list-item success">
+        <span class="item-icon">✓</span>
+        <span>${s}</span>
+      </div>
+    `).join('');
+  }
+  
+  if (failedSteps.length > 0) {
+    resultListHtml += failedSteps.map(s => `
+      <div class="result-list-item error">
+        <span class="item-icon">✗</span>
+        <span>${s}</span>
+      </div>
+    `).join('');
+  }
+  
+  overlay.innerHTML = `
+    <div class="install-modal-pro install-result-modal">
+      <div class="result-icon ${iconClass}">${iconEmoji}</div>
+      <h3 class="result-title">${title}</h3>
+      ${resultListHtml ? `<div class="result-list">${resultListHtml}</div>` : ''}
+      <button class="btn btn-primary" style="padding: 14px 36px; font-size: 16px;" onclick="this.closest('.modal-overlay').remove(); installationInProgress = false; refresh();">
+        متوجه شدم
+      </button>
+    </div>
+  `;
+}
+
+/**
+ * Smart wait for installation with real-time error detection
+ */
+async function smartWaitForInstall(step, onTick) {
+  const startTime = Date.now();
+  const maxWait = step.maxWaitTime || 180000;
+  const checkInterval = step.minCheckInterval || 3000;
+  let seconds = 0;
+  
+  // Clear any previous install result
+  await api('/api/clear_install_result');
+  
+  while (Date.now() - startTime < maxWait) {
+    await new Promise(r => setTimeout(r, 1000));
+    seconds++;
+    
+    // Call tick callback for timer update
+    if (onTick) onTick(seconds);
+    
+    // Check for results every few seconds
+    if (seconds % Math.ceil(checkInterval / 1000) === 0) {
+      try {
+        const statusCheck = await api('/api/check_install_status');
+        
+        // === CRITICAL: Check install_result for errors ===
+        if (statusCheck.install_result && statusCheck.install_result.step_id === step.id) {
+          if (statusCheck.install_result.success === true) {
+            return { success: true, message: 'نصب موفق' };
+          }
+          if (statusCheck.install_result.success === false) {
+            return { 
+              success: false, 
+              message: statusCheck.install_result.message || 'نصب ناموفق',
+              error: statusCheck.install_result.error || ''
+            };
+          }
+        }
+        
+        // Also check deps status for non-pip-wheels steps
+        if (statusCheck.deps && step.id !== 'pip_wheels' && step.id !== 'pg_role') {
+          const dep = statusCheck.deps.find(d => d.id === step.id);
+          if (dep && dep.ok) {
+            return { success: true, message: 'نصب موفق (تأیید از وضعیت سیستم)' };
+          }
+        }
+      } catch (e) {
+        console.error('Status check error:', e);
+      }
+    }
+  }
+  
+  // Timeout - ask user
+  return { success: null, message: 'زمان انتظار تمام شد', timeout: true };
+}
+
+/**
+ * Show continue prompt for timed out installations
+ */
+async function showSmartContinuePrompt(stepLabel) {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.style.backdropFilter = 'blur(4px)';
+    overlay.style.zIndex = '10002';
+    
+    overlay.innerHTML = `
+      <div class="install-modal-pro" style="max-width: 420px; text-align: center; padding: 32px;">
+        <div style="font-size: 56px; margin-bottom: 16px;">⏱️</div>
+        <h4 style="margin: 0 0 12px; font-size: 18px;">زمان انتظار برای ${stepLabel} به پایان رسید</h4>
+        <p style="color: #6c757d; margin-bottom: 24px;">
+          آیا نصب با موفقیت انجام شده است؟
+        </p>
+        <div style="display: flex; gap: 12px; justify-content: center;">
+          <button class="btn btn-secondary" style="padding: 12px 24px;" onclick="this.closest('.modal-overlay').remove();" id="prompt-no">
+            خیر، رد شو
+          </button>
+          <button class="btn btn-success" style="padding: 12px 24px;" id="prompt-yes">
+            بله، ادامه بده
+          </button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(overlay);
+    
+    document.getElementById('prompt-no').onclick = () => {
+      overlay.remove();
+      resolve(false);
+    };
+    
+    document.getElementById('prompt-yes').onclick = () => {
+      overlay.remove();
+      resolve(true);
+    };
+  });
+}
+
 // ============ SETTINGS ============
 async function showSettingsModal() {
   // Fetch current settings
@@ -1152,6 +1463,116 @@ function hideModal() {
   installationInProgress = false;
 }
 
+// Show a prompt asking user if installation was completed manually
+function showContinuePrompt(stepLabel) {
+  return new Promise((resolve) => {
+    const overlay = el('div', { class: 'modal-overlay continue-prompt-overlay' });
+    const modal = el('div', { class: 'continue-prompt-modal' });
+    
+    modal.innerHTML = `
+      <div class="prompt-icon">⚠️</div>
+      <h3>آیا نصب ${stepLabel} کامل شد؟</h3>
+      <p style="color: var(--text-secondary); margin: 16px 0; line-height: 1.8;">
+        به نظر می‌رسد نصب ${stepLabel} در زمان تعیین شده تکمیل نشده است.<br>
+        اگر نصب را به صورت دستی تکمیل کرده‌اید، روی <strong>"بله، ادامه بده"</strong> کلیک کنید.<br>
+        در غیر این صورت، روی <strong>"توقف نصب"</strong> کلیک کنید.
+      </p>
+      <div style="display: flex; gap: 12px; justify-content: center; margin-top: 24px;">
+        <button class="btn btn-secondary" id="prompt-stop">
+          <span>🛑</span> توقف نصب
+        </button>
+        <button class="btn btn-primary btn-glow" id="prompt-continue">
+          <span>✓</span> بله، ادامه بده
+        </button>
+      </div>
+    `;
+    
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    
+    // Style the modal
+    overlay.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 10001;';
+    modal.style.cssText = 'background: var(--surface); border-radius: 20px; padding: 32px; max-width: 500px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); border: 1px solid var(--glass-border);';
+    
+    document.getElementById('prompt-stop').onclick = () => {
+      overlay.remove();
+      resolve(false);
+    };
+    
+    document.getElementById('prompt-continue').onclick = () => {
+      overlay.remove();
+      resolve(true);
+    };
+  });
+}
+
+// Show installation summary
+function showInstallSummary(successful, failed, wasStopped = false) {
+  const overlay = el('div', { class: 'modal-overlay summary-overlay' });
+  const modal = el('div', { class: 'summary-modal' });
+  
+  const allSuccess = failed.length === 0;
+  const icon = allSuccess ? '✅' : (wasStopped ? '⚠️' : '⚠️');
+  const title = allSuccess ? 'نصب با موفقیت کامل شد!' : (wasStopped ? 'نصب متوقف شد' : 'نصب با مشکلاتی مواجه شد');
+  
+  let successList = '';
+  if (successful.length > 0) {
+    successList = `
+      <div class="summary-section success">
+        <h4>✓ نصب شده:</h4>
+        <ul>${successful.map(s => `<li>${s}</li>`).join('')}</ul>
+      </div>
+    `;
+  }
+  
+  let failedList = '';
+  if (failed.length > 0) {
+    failedList = `
+      <div class="summary-section failed">
+        <h4>✗ نصب نشده:</h4>
+        <ul>${failed.map(f => `<li>${f}</li>`).join('')}</ul>
+      </div>
+    `;
+  }
+  
+  modal.innerHTML = `
+    <div class="summary-icon">${icon}</div>
+    <h3>${title}</h3>
+    ${successList}
+    ${failedList}
+    <div style="margin-top: 24px;">
+      <button class="btn btn-primary btn-glow" id="summary-close">متوجه شدم</button>
+    </div>
+  `;
+  
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+  
+  // Style
+  overlay.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 10001;';
+  modal.style.cssText = 'background: var(--surface); border-radius: 20px; padding: 32px; max-width: 500px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); border: 1px solid var(--glass-border);';
+  
+  // Style sections
+  const style = document.createElement('style');
+  style.textContent = `
+    .summary-icon { font-size: 48px; margin-bottom: 16px; }
+    .summary-section { text-align: right; margin: 16px 0; padding: 12px; border-radius: 12px; }
+    .summary-section.success { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .summary-section.failed { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); }
+    .summary-section h4 { margin: 0 0 8px 0; font-size: 0.9rem; }
+    .summary-section.success h4 { color: #10b981; }
+    .summary-section.failed h4 { color: #ef4444; }
+    .summary-section ul { margin: 0; padding-right: 20px; }
+    .summary-section li { margin: 4px 0; font-size: 0.85rem; color: var(--text-secondary); }
+  `;
+  modal.appendChild(style);
+  
+  document.getElementById('summary-close').onclick = () => {
+    overlay.remove();
+    refresh();
+  };
+}
+
 function renderInstallSteps(steps, currentIndex) {
   const container = document.getElementById('install-steps');
   container.innerHTML = '';
@@ -1388,32 +1809,30 @@ async function runFullInstall() {
     return;
   }
   
-  if (!confirm('آیا می‌خواهید نصب کامل را شروع کنید؟\n\nاین عملیات ممکن است چند دقیقه طول بکشد و نیاز به دسترسی Administrator دارد.\n\n⚠️ توجه: ابتدا Python نصب می‌شود و سپس بقیه پیش‌نیازها.')) {
-    return;
-  }
+  // === SMART INSTALL CONFIRMATION ===
+  const confirmResult = await showSmartConfirmDialog();
+  if (!confirmResult) return;
   
   installationInProgress = true;
-  showModal();
   
-  // Set modal title with detected Odoo version
+  // Get Odoo info
   const odooInfo = cachedOdooInfo || await fetchOdooInfo();
   const odooVersion = odooInfo?.version || '';
   const versionText = odooVersion ? `Odoo ${odooVersion}` : 'Odoo';
-  document.getElementById('modal-title').textContent = `در حال نصب ${versionText}...`;
   
-  // Priority order: Python MUST be first!
+  // === SMART INSTALLATION STEPS ===
   const PRIORITY_STEPS = [
-    { id: 'python', label: 'نصب Python (اولویت اول)', cmd: 'install_python_offline', weight: 18, waitTime: 90000 },
-    { id: 'vc_redist', label: 'نصب VC++ Redistributable', cmd: 'install_vc_redist_offline', weight: 8, waitTime: 30000 },
-    { id: 'postgres', label: 'نصب PostgreSQL', cmd: 'install_postgresql_offline', weight: 20, waitTime: 120000 },
-    { id: 'wkhtmltopdf', label: 'نصب wkhtmltopdf', cmd: 'install_wkhtmltopdf_offline', weight: 12, waitTime: 45000 },
-    { id: 'nodejs', label: 'نصب Node.js', cmd: 'install_nodejs_offline', weight: 8, waitTime: 60000 },
-    { id: 'git', label: 'نصب Git', cmd: 'install_git_offline', weight: 8, waitTime: 60000 },
-    { id: 'pip_wheels', label: 'نصب پکیج‌های Python', cmd: 'install_pip_wheels', weight: 16, waitTime: 60000 },
-    { id: 'pg_role', label: 'ساخت کاربر دیتابیس', cmd: 'create_pg_role', weight: 10, waitTime: 15000 },
+    { id: 'python', label: 'Python', cmd: 'install_python_offline', weight: 18, maxWaitTime: 300000, minCheckInterval: 3000, critical: true },
+    { id: 'vc_redist', label: 'VC++ Redistributable', cmd: 'install_vc_redist_offline', weight: 8, maxWaitTime: 120000, minCheckInterval: 2000, critical: false },
+    { id: 'postgres', label: 'PostgreSQL', cmd: 'install_postgresql_offline', weight: 20, maxWaitTime: 360000, minCheckInterval: 4000, critical: true },
+    { id: 'wkhtmltopdf', label: 'wkhtmltopdf', cmd: 'install_wkhtmltopdf_offline', weight: 12, maxWaitTime: 180000, minCheckInterval: 3000, critical: false },
+    { id: 'nodejs', label: 'Node.js', cmd: 'install_nodejs_offline', weight: 8, maxWaitTime: 180000, minCheckInterval: 3000, critical: false },
+    { id: 'git', label: 'Git', cmd: 'install_git_offline', weight: 8, maxWaitTime: 180000, minCheckInterval: 3000, critical: false },
+    { id: 'pip_wheels', label: 'پکیج‌های Python', cmd: 'install_pip_wheels', weight: 16, maxWaitTime: 300000, minCheckInterval: 3000, critical: false },
+    { id: 'pg_role', label: 'کاربر دیتابیس', cmd: 'create_pg_role', weight: 10, maxWaitTime: 60000, minCheckInterval: 2000, critical: false },
   ];
   
-  // Filter steps based on what's already installed
+  // Filter already installed
   const stepsToRun = PRIORITY_STEPS.filter(step => {
     if (!currentStatus || !currentStatus.deps) return true;
     const dep = currentStatus.deps.find(d => d.id === step.id);
@@ -1422,92 +1841,94 @@ async function runFullInstall() {
   
   if (stepsToRun.length === 0) {
     showToast('همه پیش‌نیازها قبلاً نصب شده‌اند!', 'success');
-    hideModal();
+    installationInProgress = false;
     return;
   }
   
-  renderInstallSteps(stepsToRun, 0);
+  // Create smart modal
+  createSmartInstallModal(stepsToRun, versionText);
   
   let totalWeight = stepsToRun.reduce((sum, s) => sum + s.weight, 0);
   let completedWeight = 0;
+  let failedSteps = [];
+  let successfulSteps = [];
   
+  // Process each step
   for (let i = 0; i < stepsToRun.length; i++) {
     const step = stepsToRun[i];
-    currentStepIndex = i;
     
-    renderInstallSteps(stepsToRun, i);
-    updateModalProgress(Math.round((completedWeight / totalWeight) * 100), `در حال نصب: ${step.label}`);
-    updateMainProgress(Math.round((completedWeight / totalWeight) * 100), 'در حال نصب...', `مرحله ${i + 1} از ${stepsToRun.length}: ${step.label}`);
+    // Mark step as active
+    updateSmartStep(step.id, 'active', 'در حال نصب...', 0);
+    updateSmartProgress(
+      Math.round((completedWeight / totalWeight) * 100),
+      `در حال نصب: ${step.label}`
+    );
     
-    try {
-      // Start installation
-      const res = await api('/api/install/' + step.cmd);
-      if (res.error) {
-        showToast(`خطا در ${step.label}: ${res.error}`, 'error');
-        if (step.id === 'python') {
-          // If Python fails, we must stop
-          showToast('نصب Python با خطا مواجه شد. نصب متوقف می‌شود.', 'error', 8000);
-          hideModal();
+    // Start installation
+    const res = await api('/api/install/' + step.cmd);
+    
+    if (res.error) {
+      updateSmartStep(step.id, 'error', res.error);
+      failedSteps.push(`${step.label}: ${res.error}`);
+      
+      if (step.critical) {
+        showSmartResultModal(successfulSteps, failedSteps, true);
+        installationInProgress = false;
+        return;
+      }
+      completedWeight += step.weight;
+      continue;
+    }
+    
+    // Wait for installation with real-time feedback
+    const result = await smartWaitForInstall(step, (seconds) => {
+      updateSmartStep(step.id, 'active', 'در حال نصب...', seconds);
+      updateSmartProgress(
+        Math.round((completedWeight / totalWeight) * 100 + (step.weight / totalWeight) * Math.min(90, seconds * 0.5)),
+        `در حال نصب: ${step.label}`
+      );
+    });
+    
+    if (result.success === true) {
+      updateSmartStep(step.id, 'success', 'نصب شد ✓');
+      successfulSteps.push(step.label);
+    } else if (result.success === false) {
+      updateSmartStep(step.id, 'error', result.message || 'خطا در نصب');
+      failedSteps.push(`${step.label}: ${result.message || 'خطا'}`);
+      
+      if (step.critical) {
+        showSmartResultModal(successfulSteps, failedSteps, true);
+        installationInProgress = false;
+        return;
+      }
+    } else if (result.timeout) {
+      // Ask user
+      const userConfirmed = await showSmartContinuePrompt(step.label);
+      if (userConfirmed) {
+        updateSmartStep(step.id, 'success', 'تأیید شد (دستی)');
+        successfulSteps.push(step.label + ' (دستی)');
+      } else {
+        updateSmartStep(step.id, 'error', 'رد شد');
+        failedSteps.push(step.label);
+        
+        if (step.critical) {
+          showSmartResultModal(successfulSteps, failedSteps, true);
           installationInProgress = false;
           return;
         }
-      } else {
-        showToast(`${step.label} شروع شد - لطفاً منتظر بمانید...`, 'info');
-        
-        // Wait for installation to complete by polling status
-        const startTime = Date.now();
-        const maxWaitTime = step.waitTime || 60000; // Default 60 seconds
-        let installed = false;
-        
-        // Poll every 3 seconds to check if installed
-        while (Date.now() - startTime < maxWaitTime) {
-          await new Promise(resolve => setTimeout(resolve, 3000));
-          
-          const statusCheck = await api('/api/check_install_status');
-          if (statusCheck.deps) {
-            const depStatus = statusCheck.deps.find(d => d.id === step.id);
-            if (depStatus && depStatus.ok) {
-              installed = true;
-              showToast(`${step.label} با موفقیت نصب شد ✓`, 'success');
-              break;
-            }
-          }
-          
-          // Update progress indicator
-          const elapsed = Date.now() - startTime;
-          const progressInStep = Math.min(95, (elapsed / maxWaitTime) * 100);
-          updateModalProgress(
-            Math.round((completedWeight / totalWeight) * 100 + (step.weight / totalWeight * progressInStep / 100)),
-            `در حال نصب: ${step.label} (${Math.round(progressInStep)}%)`
-          );
-        }
-        
-        if (!installed) {
-          showToast(`${step.label} ممکن است هنوز در حال نصب باشد. ادامه می‌دهیم...`, 'warning');
-        }
       }
-      
-    } catch (e) {
-      showToast(`خطا: ${e.message}`, 'error');
     }
     
     completedWeight += step.weight;
   }
   
-  // Final step completed
-  renderInstallSteps(stepsToRun, stepsToRun.length);
-  updateModalProgress(100, 'نصب کامل شد!');
-  updateMainProgress(100, 'نصب کامل شد!', 'می‌توانید Odoo را اجرا کنید');
-  
-  showToast('نصب با موفقیت انجام شد! در حال بررسی نهایی...', 'success', 6000);
-  
-  // Final status check
-  await new Promise(resolve => setTimeout(resolve, 3000));
+  // All done
+  updateSmartProgress(100, 'نصب تکمیل شد!');
+  await new Promise(r => setTimeout(r, 1000));
   await refresh();
   
-  setTimeout(() => {
-    hideModal();
-  }, 2000);
+  showSmartResultModal(successfulSteps, failedSteps, false);
+  installationInProgress = false;
 }
 
 // ============ MAIN REFRESH ============

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اپلیکیشن‌های Odoo - OdooMaster</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: linear-gradient(135deg, #1a1f36 0%, #2d3561 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .search-box {
+            max-width: 600px;
+            margin: 0 auto 40px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 18px 55px 18px 25px;
+            border-radius: 50px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            font-size: 1rem;
+            font-family: 'Vazirmatn', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .search-box input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 1.2rem;
+        }
+
+        .apps-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 25px;
+            padding: 20px;
+        }
+
+        .app-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-card:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: #667eea;
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+        }
+
+        .app-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 5px;
+            background: linear-gradient(135deg, var(--icon-color-1), var(--icon-color-2));
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .app-name {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+
+        .category-section {
+            margin-bottom: 50px;
+        }
+
+        .category-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #667eea;
+            padding-right: 20px;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .apps-container {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fas fa-cubes"></i> اپلیکیشن‌های Odoo</h1>
+        <p>دسترسی به تمامی ماژول‌ها و برنامه‌های Odoo فارسی</p>
+    </div>
+
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="جستجوی اپلیکیشن...">
+        <i class="fas fa-search"></i>
+    </div>
+
+    <div class="stats-bar">
+        <div class="stat-item">
+            <div class="stat-value">3</div>
+            <div class="stat-label">دموهای فعال</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">50+</div>
+            <div class="stat-label">اپلیکیشن</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">100%</div>
+            <div class="stat-label">فارسی</div>
+        </div>
+    </div>
+
+    <div class="apps-container" id="appsContainer"></div>
+
+    <script>
+        const apps = [
+            // مالی و حسابداری
+            { name: 'حسابداری', icon: '📊', color1: '#667eea', color2: '#764ba2', category: 'مالی', url: '/web?app=account' },
+            { name: 'صورتحساب', icon: '🧾', color1: '#f093fb', color2: '#f5576c', category: 'مالی', url: '/web?app=account' },
+            { name: 'دارایی‌ها', icon: '🏦', color1: '#4facfe', color2: '#00f2fe', category: 'مالی', url: '/web?app=account_asset' },
+            { name: 'هزینه‌ها', icon: '💰', color1: '#43e97b', color2: '#38f9d7', category: 'مالی', url: '/web?app=hr_expense' },
+            
+            // فروش و CRM
+            { name: 'CRM', icon: '👥', color1: '#fa709a', color2: '#fee140', category: 'فروش', url: '/web?app=crm' },
+            { name: 'فروش', icon: '🛒', color1: '#30cfd0', color2: '#330867', category: 'فروش', url: '/web?app=sale' },
+            { name: 'نقطه فروش', icon: '🏪', color1: '#a8edea', color2: '#fed6e3', category: 'فروش', url: '/web?app=point_of_sale' },
+            
+            // خرید و انبار
+            { name: 'خرید', icon: '🛍️', color1: '#ff9a9e', color2: '#fecfef', category: 'خرید', url: '/web?app=purchase' },
+            { name: 'انبار', icon: '📦', color1: '#ffecd2', color2: '#fcb69f', category: 'خرید', url: '/web?app=stock' },
+            { name: 'تولید', icon: '🏭', color1: '#ff6e7f', color2: '#bfe9ff', category: 'خرید', url: '/web?app=mrp' },
+            
+            // منابع انسانی
+            { name: 'کارکنان', icon: '👔', color1: '#e0c3fc', color2: '#8ec5fc', category: 'منابع انسانی', url: '/web?app=hr' },
+            { name: 'حضور و غیاب', icon: '⏰', color1: '#f093fb', color2: '#f5576c', category: 'منابع انسانی', url: '/web?app=hr_attendance' },
+            { name: 'مرخصی', icon: '🏖️', color1: '#4facfe', color2: '#00f2fe', category: 'منابع انسانی', url: '/web?app=hr_holidays' },
+            { name: 'حقوق', icon: '💵', color1: '#43e97b', color2: '#38f9d7', category: 'منابع انسانی', url: '/web?app=hr_payroll' },
+            
+            // پروژه و خدمات
+            { name: 'پروژه', icon: '📋', color1: '#fa709a', color2: '#fee140', category: 'پروژه', url: '/web?app=project' },
+            { name: 'تایم‌شیت', icon: '⏱️', color1: '#30cfd0', color2: '#330867', category: 'پروژه', url: '/web?app=hr_timesheet' },
+            { name: 'خدمات', icon: '🔧', color1: '#a8edea', color2: '#fed6e3', category: 'پروژه', url: '/web?app=helpdesk' },
+            
+            // بازاریابی
+            { name: 'بازاریابی', icon: '📢', color1: '#ff9a9e', color2: '#fecfef', category: 'بازاریابی', url: '/web?app=marketing_automation' },
+            { name: 'ایمیل مارکتینگ', icon: '✉️', color1: '#ffecd2', color2: '#fcb69f', category: 'بازاریابی', url: '/web?app=mass_mailing' },
+            { name: 'وب‌سایت', icon: '🌐', color1: '#ff6e7f', color2: '#bfe9ff', category: 'بازاریابی', url: '/web?app=website' },
+            { name: 'تجارت الکترونیک', icon: '🛒', color1: '#e0c3fc', color2: '#8ec5fc', category: 'بازاریابی', url: '/web?app=website_sale' },
+            
+            // ارتباطات
+            { name: 'گفتگوها', icon: '💬', color1: '#f093fb', color2: '#f5576c', category: 'ارتباطات', url: '/web?app=mail' },
+            { name: 'تقویم', icon: '📅', color1: '#4facfe', color2: '#00f2fe', category: 'ارتباطات', url: '/web?app=calendar' },
+            { name: 'مخاطبین', icon: '📇', color1: '#43e97b', color2: '#38f9d7', category: 'ارتباطات', url: '/web?app=contacts' },
+            
+            // ابزارها
+            { name: 'تنظیمات', icon: '⚙️', color1: '#667eea', color2: '#764ba2', category: 'ابزارها', url: '/web/session/logout' },
+            { name: 'داشبورد', icon: '📊', color1: '#fa709a', color2: '#fee140', category: 'ابزارها', url: '/web' },
+            { name: 'گزارش‌ها', icon: '📈', color1: '#30cfd0', color2: '#330867', category: 'ابزارها', url: '/web?app=base' },
+        ];
+
+        const container = document.getElementById('appsContainer');
+        const searchInput = document.getElementById('searchInput');
+
+        function renderApps(filteredApps = apps) {
+            container.innerHTML = '';
+            
+            const categories = [...new Set(filteredApps.map(app => app.category))];
+            
+            categories.forEach(category => {
+                const categoryApps = filteredApps.filter(app => app.category === category);
+                
+                const section = document.createElement('div');
+                section.className = 'category-section';
+                section.innerHTML = `<h2 class="category-title">${category}</h2>`;
+                
+                const grid = document.createElement('div');
+                grid.className = 'apps-container';
+                
+                categoryApps.forEach(app => {
+                    const card = document.createElement('a');
+                    card.className = 'app-card';
+                    card.href = 'http://localhost:8070' + app.url;
+                    card.target = '_blank';
+                    
+                    card.innerHTML = `
+                        <div class="app-icon" style="--icon-color-1: ${app.color1}; --icon-color-2: ${app.color2}">
+                            ${app.icon}
+                        </div>
+                        <div class="app-name">${app.name}</div>
+                    `;
+                    
+                    grid.appendChild(card);
+                });
+                
+                section.appendChild(grid);
+                container.appendChild(section);
+            });
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filtered = apps.filter(app => 
+                app.name.toLowerCase().includes(query) ||
+                app.category.toLowerCase().includes(query)
+            );
+            renderApps(filtered);
+        });
+
+        // رندر اولیه
+        renderApps();
+    </script>
+</body>
+</html>

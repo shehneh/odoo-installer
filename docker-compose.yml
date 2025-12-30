@@ -1,0 +1,118 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database for Odoo
+  db:
+    image: postgres:16
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-odoo}
+    volumes:
+      - odoo-db-data:/var/lib/postgresql/data
+    networks:
+      - odoo-network
+    restart: unless-stopped
+
+  # Odoo Demo Instance 1
+  odoo-demo1:
+    build:
+      context: .
+      dockerfile: Dockerfile.odoo
+    depends_on:
+      - db
+    ports:
+      - "8069:8069"
+    environment:
+      - HOST=db
+      - USER=odoo
+      - PASSWORD=${POSTGRES_PASSWORD:-odoo}
+      - DATABASE=demo1
+    volumes:
+      - odoo-web-data1:/var/lib/odoo
+      - ./config:/etc/odoo
+    networks:
+      - odoo-network
+    restart: unless-stopped
+    labels:
+      - "com.odoomaster.demo=instance1"
+      - "com.odoomaster.expires=2025-02-15"
+
+  # Odoo Demo Instance 2
+  odoo-demo2:
+    build:
+      context: .
+      dockerfile: Dockerfile.odoo
+    depends_on:
+      - db
+    ports:
+      - "8070:8069"
+    environment:
+      - HOST=db
+      - USER=odoo
+      - PASSWORD=${POSTGRES_PASSWORD:-odoo}
+      - DATABASE=demo2
+    volumes:
+      - odoo-web-data2:/var/lib/odoo
+      - ./config:/etc/odoo
+    networks:
+      - odoo-network
+    restart: unless-stopped
+    labels:
+      - "com.odoomaster.demo=instance2"
+      - "com.odoomaster.expires=2025-02-15"
+
+  # Odoo Demo Instance 3
+  odoo-demo3:
+    build:
+      context: .
+      dockerfile: Dockerfile.odoo
+    depends_on:
+      - db
+    ports:
+      - "8071:8069"
+    environment:
+      - HOST=db
+      - USER=odoo
+      - PASSWORD=${POSTGRES_PASSWORD:-odoo}
+      - DATABASE=demo3
+    volumes:
+      - odoo-web-data3:/var/lib/odoo
+      - ./config:/etc/odoo
+    networks:
+      - odoo-network
+    restart: unless-stopped
+    labels:
+      - "com.odoomaster.demo=instance3"
+      - "com.odoomaster.expires=2025-02-15"
+
+  # Nginx Reverse Proxy (Optional - for subdomain routing)
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - odoo-demo1
+      - odoo-demo2
+      - odoo-demo3
+    networks:
+      - odoo-network
+    restart: unless-stopped
+
+volumes:
+  odoo-db-data:
+    driver: local
+  odoo-web-data1:
+    driver: local
+  odoo-web-data2:
+    driver: local
+  odoo-web-data3:
+    driver: local
+
+networks:
+  odoo-network:
+    driver: bridge
