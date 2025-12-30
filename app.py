@@ -487,57 +487,57 @@ def index():
 @app.route('/')
 def index():
     """صفحه اصلی"""
-    return render_template('index.html')
+    return send_from_directory('templates', 'index.html')
 
 @app.route('/dashboard')
 def dashboard():
     """داشبورد کاربر"""
-    return render_template('dashboard.html')
+    return send_from_directory('templates', 'dashboard.html')
 
 @app.route('/demo')
 def demo():
     """صفحه دمو"""
-    return render_template('demo.html')
+    return send_from_directory('templates', 'demo.html')
 
 @app.route('/login')
 def login():
     """صفحه ورود"""
-    return render_template('login.html')
+    return send_from_directory('templates', 'login.html')
 
 @app.route('/register')
 def register():
     """صفحه ثبت‌نام"""
-    return render_template('register.html')
+    return send_from_directory('templates', 'register.html')
 
 @app.route('/support')
 def support():
     """صفحه پشتیبانی"""
-    return render_template('support.html')
+    return send_from_directory('templates', 'support.html')
 
 @app.route('/downloads')
 def downloads():
     """صفحه دانلودها"""
-    return render_template('downloads.html')
+    return send_from_directory('templates', 'downloads.html')
 
 @app.route('/docs')
 def docs():
     """صفحه مستندات"""
-    return render_template('docs.html')
+    return send_from_directory('templates', 'docs.html')
 
 @app.route('/licenses')
 def licenses():
     """صفحه لایسنس‌ها"""
-    return render_template('licenses.html')
+    return send_from_directory('templates', 'licenses.html')
 
 @app.route('/payment')
 def payment():
     """صفحه پرداخت"""
-    return render_template('payment.html')
+    return send_from_directory('templates', 'payment.html')
 
 @app.route('/admin')
 def admin():
     """صفحه ادمین"""
-    return render_template('admin.html')
+    return send_from_directory('templates', 'admin.html')
 
 
 if __name__ == '__main__':
