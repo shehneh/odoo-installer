@@ -1,14 +1,5 @@
 {
   "platform": "flask",
-  "flask": {
-    "pythonVersion": "3.11",
-    "appModule": "api.server:app"
-  },
-  "disks": [
-    {
-      "name": "odoo-data",
-      "mountTo": "/var/lib/odoo"
-    }
-  ],
-  "network": "my-network"
+  "port": 5001,
+  "app": "odoo-api"
 }
