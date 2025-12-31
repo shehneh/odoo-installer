@@ -164,7 +164,6 @@ def create_tenant():
         return jsonify({'success': False, 'message': f'خطا: {str(e)}'}), 500
 
 @app.route('/api/list-customers', methods=['GET'])
-@app.route('/api/list-customers', methods=['GET'])
 def list_customers():
     """List all customers"""
     try:
