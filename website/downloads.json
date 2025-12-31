@@ -1,0 +1,83 @@
+{
+  "generated_at": "2025-12-26",
+  "platform": "windows",
+  "versions": [
+    {
+      "odoo_major": 19,
+      "badge": "جدید",
+      "items": [
+        {
+          "id": "odoo19-full-offline",
+          "title": "نسخه کامل آفلاین",
+          "description": "پکیج کامل Release شامل offline.7z و soft.7z + UI نصب. مناسب نصب بدون اینترنت.",
+          "featured": true,
+          "version": "1.0.0",
+          "file_type": "zip",
+          "size_hint": "~800MB تا 1GB",
+          "requires_login": true,
+          "requires_purchase": true,
+          "file_name": "odoo19-full-offline.zip",
+          "download_url": "",
+          "sha256": "",
+          "features": [
+            "Python + PostgreSQL + Git + NodeJS + wheels (آفلاین)",
+            "UI محلی نصب (web)",
+            "Extract خودکار offline.7z و soft.7z",
+            "مناسب مشتری و نصب سریع"
+          ]
+        },
+        {
+          "id": "odoo19-lite-online",
+          "title": "نسخه سبک آنلاین",
+          "description": "نصاب سبک رایگان - فقط دانلود کنید و اجرا کنید. لایسنس موقع نصب Odoo چک می‌شود.",
+          "featured": false,
+          "version": "1.0.0",
+          "file_type": "zip",
+          "size_hint": "~8.4MB",
+          "requires_login": false,
+          "requires_purchase": false,
+          "file_name": "odoo19-lite-online.zip",
+          "download_url": "",
+          "sha256": "22c43f9d3dc4c0abb92586bbe2b46c6bc164e5f8f5c6dce8ecb65df6edce35bf",
+          "features": [
+            "رایگان - بدون نیاز به لایسنس برای دانلود",
+            "حجم کم (~8MB)",
+            "دانلود هوشمند وابستگی‌ها",
+            "لایسنس فقط موقع نصب Odoo لازم است"
+          ]
+        },
+        {
+          "id": "addons-fa",
+          "title": "افزونه‌های فارسی",
+          "description": "پکیج افزونه‌های فارسی‌سازی/بومی‌سازی (اختیاری)",
+          "featured": false,
+          "version": "2.0",
+          "file_type": "zip",
+          "size_hint": "~50MB",
+          "requires_login": false,
+          "requires_purchase": false,
+          "file_name": "",
+          "download_url": "",
+          "sha256": "",
+          "features": [
+            "زبان فارسی",
+            "تقویم شمسی",
+            "گزارش‌ها و فونت‌ها"
+          ]
+        }
+      ]
+    },
+    {
+      "odoo_major": 18,
+      "items": []
+    },
+    {
+      "odoo_major": 17,
+      "items": []
+    },
+    {
+      "odoo_major": 16,
+      "items": []
+    }
+  ]
+}

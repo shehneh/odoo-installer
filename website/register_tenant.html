@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>راه‌اندازی اودوی اختصاصی شما</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Vazir', 'Tahoma', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+            font-family: 'Vazir', 'Tahoma', sans-serif;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-family: 'Vazir', 'Tahoma', sans-serif;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loader {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .loader.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .result.success {
+            display: block;
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .result.error {
+            display: block;
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .credentials {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+            text-align: right;
+        }
+
+        .credentials p {
+            margin: 10px 0;
+            font-size: 14px;
+        }
+
+        .credentials strong {
+            color: #667eea;
+        }
+
+        .login-link {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .login-link:hover {
+            background: #5568d3;
+        }
+
+        .features {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            color: #666;
+        }
+
+        .feature::before {
+            content: "✓";
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-left: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 راه‌اندازی اودوی اختصاصی</h1>
+        <p class="subtitle">دیتابیس و سرور Odoo شما در کمتر از 2 دقیقه آماده می‌شود</p>
+
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="companyName">نام شرکت یا کسب‌وکار *</label>
+                <input type="text" id="companyName" name="companyName" required 
+                       placeholder="مثال: شرکت فناوری پارس">
+            </div>
+
+            <div class="form-group">
+                <label for="adminEmail">ایمیل مدیر (نام کاربری شما) *</label>
+                <input type="email" id="adminEmail" name="adminEmail" required 
+                       placeholder="admin@company.com">
+            </div>
+
+            <div class="form-group">
+                <label for="adminName">نام و نام خانوادگی *</label>
+                <input type="text" id="adminName" name="adminName" required 
+                       placeholder="محمد رضایی">
+            </div>
+
+            <div class="form-group">
+                <label for="phone">شماره تماس</label>
+                <input type="tel" id="phone" name="phone" 
+                       placeholder="09123456789">
+            </div>
+
+            <button type="submit" class="btn" id="submitBtn">
+                ساخت سرور Odoo اختصاصی
+            </button>
+        </form>
+
+        <div class="loader" id="loader">
+            <div class="spinner"></div>
+            <p style="margin-top: 15px; color: #667eea; font-weight: bold;">
+                در حال ساخت دیتابیس و نصب ماژول‌ها...
+            </p>
+        </div>
+
+        <div class="result" id="result"></div>
+
+        <div class="features">
+            <div class="feature">دیتابیس اختصاصی و مجزا</div>
+            <div class="feature">ماژول‌های فارسی و زیبا نصب شده</div>
+            <div class="feature">امنیت کامل اطلاعات</div>
+            <div class="feature">پشتیبانی 24 ساعته</div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('registerForm');
+        const loader = document.getElementById('loader');
+        const result = document.getElementById('result');
+        const submitBtn = document.getElementById('submitBtn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Get form data
+            const formData = {
+                company_name: document.getElementById('companyName').value,
+                admin_email: document.getElementById('adminEmail').value,
+                admin_name: document.getElementById('adminName').value,
+                phone: document.getElementById('phone').value
+            };
+
+            // Show loader
+            loader.classList.add('active');
+            submitBtn.disabled = true;
+            result.style.display = 'none';
+
+            try {
+                // Call API
+                const response = await fetch('/api/create-tenant', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                // Hide loader
+                loader.classList.remove('active');
+                submitBtn.disabled = false;
+
+                if (data.success) {
+                    // Show success
+                    result.className = 'result success';
+                    result.innerHTML = `
+                        <h2 style="margin-bottom: 15px;">✅ سرور Odoo شما آماده است!</h2>
+                        <div class="credentials">
+                            <p><strong>نام شرکت:</strong> ${data.data.company_name}</p>
+                            <p><strong>نام دیتابیس:</strong> ${data.data.database_name}</p>
+                            <p><strong>ایمیل:</strong> ${data.data.admin_email}</p>
+                            <p><strong>رمز عبور:</strong> <code>${data.data.admin_password}</code></p>
+                            <p style="color: #dc3545; margin-top: 15px;">
+                                ⚠️ لطفاً این اطلاعات را یادداشت کنید! این صفحه دوباره نمایش داده نخواهد شد.
+                            </p>
+                        </div>
+                        <a href="${data.data.login_url}" target="_blank" class="login-link">
+                            ورود به Odoo اختصاصی شما
+                        </a>
+                    `;
+
+                    // Reset form
+                    form.reset();
+                } else {
+                    // Show error
+                    result.className = 'result error';
+                    result.innerHTML = `
+                        <h2>❌ خطا در ساخت سرور</h2>
+                        <p style="margin-top: 10px;">${data.message}</p>
+                        <p style="margin-top: 10px;">لطفاً دوباره تلاش کنید یا با پشتیبانی تماس بگیرید.</p>
+                    `;
+                }
+            } catch (error) {
+                loader.classList.remove('active');
+                submitBtn.disabled = false;
+                
+                result.className = 'result error';
+                result.innerHTML = `
+                    <h2>❌ خطا در ارتباط با سرور</h2>
+                    <p style="margin-top: 10px;">${error.message}</p>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

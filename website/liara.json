@@ -1,0 +1,13 @@
+{
+  "platform": "flask",
+  "flask": {
+    "pythonVersion": "3.11",
+    "appModule": "api.server:app"
+  },
+  "disks": [
+    {
+      "name": "odoo-data",
+      "mountTo": "/usr/src/app/data"
+    }
+  ]
+}

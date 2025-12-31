@@ -1,0 +1,10 @@
+# Render.com configuration
+services:
+  - type: web
+    name: odoomaster-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --chdir api server:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0

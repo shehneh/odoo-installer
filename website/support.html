@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پشتیبانی | OdooMaster</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <style>
+        .support-page {
+            padding-top: 100px;
+            min-height: 100vh;
+        }
+
+        .support-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 60px;
+        }
+
+        .support-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .support-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .support-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            font-size: 2rem;
+        }
+
+        .support-card h3 {
+            margin-bottom: 12px;
+        }
+
+        .support-card p {
+            color: var(--gray-light);
+            margin-bottom: 20px;
+        }
+
+        /* Tickets Section */
+        .tickets-section {
+            margin-top: 60px;
+        }
+
+        .tickets-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .ticket-filters {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 20px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-full);
+            color: var(--gray-light);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .tickets-list {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+        }
+
+        .ticket-item {
+            display: grid;
+            grid-template-columns: auto 1fr auto auto auto;
+            align-items: center;
+            gap: 20px;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--glass-border);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .ticket-item:last-child {
+            border-bottom: none;
+        }
+
+        .ticket-item:hover {
+            background: var(--dark-medium);
+        }
+
+        .ticket-id {
+            font-family: monospace;
+            color: var(--primary-light);
+            font-size: 0.9rem;
+        }
+
+        .ticket-info h4 {
+            margin-bottom: 4px;
+        }
+
+        .ticket-info p {
+            color: var(--gray-light);
+            font-size: 0.9rem;
+        }
+
+        .ticket-status {
+            padding: 6px 14px;
+            border-radius: var(--radius-full);
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .ticket-status.open {
+            background: rgba(241, 196, 15, 0.2);
+            color: #f1c40f;
+        }
+
+        .ticket-status.in-progress {
+            background: rgba(102, 126, 234, 0.2);
+            color: var(--primary-light);
+        }
+
+        .ticket-status.resolved {
+            background: rgba(78, 205, 196, 0.2);
+            color: var(--secondary);
+        }
+
+        .ticket-status.closed {
+            background: rgba(149, 165, 166, 0.2);
+            color: #95a5a6;
+        }
+
+        .ticket-date {
+            color: var(--gray-light);
+            font-size: 0.85rem;
+        }
+
+        .ticket-priority {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .ticket-priority.high {
+            background: #e74c3c;
+        }
+
+        .ticket-priority.medium {
+            background: #f39c12;
+        }
+
+        .ticket-priority.low {
+            background: #27ae60;
+        }
+
+        /* New Ticket Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--dark-light);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .modal-header h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--gray-light);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            color: var(--white);
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--dark);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            color: var(--white);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .form-group select {
+            cursor: pointer;
+        }
+
+        .modal-footer {
+            padding: 24px;
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* Ticket Detail View */
+        .ticket-detail {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            margin-top: 24px;
+            display: none;
+        }
+
+        .ticket-detail.active {
+            display: block;
+        }
+
+        .ticket-detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .ticket-messages {
+            margin-bottom: 24px;
+        }
+
+        .message {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: var(--gradient-secondary);
+        }
+
+        .message-content {
+            background: var(--dark-medium);
+            padding: 16px;
+            border-radius: var(--radius-lg);
+            max-width: 70%;
+        }
+
+        .message.user .message-content {
+            background: var(--primary);
+        }
+
+        .message-meta {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: var(--gray-light);
+        }
+
+        .reply-form {
+            display: flex;
+            gap: 12px;
+        }
+
+        .reply-form input {
+            flex: 1;
+            padding: 14px 20px;
+            background: var(--dark);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-full);
+            color: var(--white);
+        }
+
+        .reply-form input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--gray-light);
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 12px;
+        }
+
+        .empty-state p {
+            color: var(--gray-light);
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .ticket-item {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .tickets-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .ticket-filters {
+                overflow-x: auto;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Particle Background -->
+    <div id="particles-js"></div>
+    
+    <!-- Navigation -->
+    <nav class="navbar glass">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-cube"></i>
+                </div>
+                <span>Odoo<strong>Master</strong></span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html#features" class="nav-link">ویژگی‌ها</a></li>
+                <li><a href="index.html#pricing" class="nav-link">قیمت‌گذاری</a></li>
+                <li><a href="downloads.html" class="nav-link">دانلود</a></li>
+                <li><a href="docs.html" class="nav-link">مستندات</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="theme-toggle" id="themeToggle" title="تغییر تم">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <a href="login.html" class="btn btn-ghost">
+                    <i class="fas fa-sign-in-alt"></i>
+                    ورود
+                </a>
+                <a href="register.html" class="btn btn-primary">
+                    <i class="fas fa-rocket"></i>
+                    شروع رایگان
+                </a>
+            </div>
+            <button class="mobile-menu-btn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Support Page -->
+    <main class="support-page">
+        <div class="container">
+            <!-- Header -->
+            <div class="section-header">
+                <span class="section-badge"><i class="fas fa-headset"></i> پشتیبانی</span>
+                <h1 class="section-title">مرکز پشتیبانی</h1>
+                <p class="section-desc">در هر مرحله کنار شما هستیم</p>
+            </div>
+
+            <!-- Support Options -->
+            <div class="support-grid">
+                <div class="support-card">
+                    <div class="support-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <h3>مستندات</h3>
+                    <p>راهنماهای جامع نصب و استفاده</p>
+                    <a href="docs.html" class="btn btn-ghost">
+                        <i class="fas fa-arrow-left"></i>
+                        مشاهده مستندات
+                    </a>
+                </div>
+                <div class="support-card">
+                    <div class="support-icon" style="background: var(--gradient-secondary);">
+                        <i class="fab fa-telegram"></i>
+                    </div>
+                    <h3>تلگرام</h3>
+                    <p>پاسخ سریع در تلگرام</p>
+                    <a href="https://t.me/odoomaster" target="_blank" class="btn btn-ghost">
+                        <i class="fab fa-telegram"></i>
+                        @OdooMaster
+                    </a>
+                </div>
+                <div class="support-card">
+                    <div class="support-icon" style="background: linear-gradient(135deg, #f39c12, #e74c3c);">
+                        <i class="fas fa-ticket-alt"></i>
+                    </div>
+                    <h3>تیکت پشتیبانی</h3>
+                    <p>ثبت و پیگیری درخواست‌ها</p>
+                    <button class="btn btn-primary" id="newTicketBtn">
+                        <i class="fas fa-plus"></i>
+                        ثبت تیکت جدید
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tickets Section -->
+            <section class="tickets-section" id="ticketsSection">
+                <div class="tickets-header">
+                    <h2>تیکت‌های من</h2>
+                    <div class="ticket-filters">
+                        <button class="filter-btn active" data-filter="all">همه</button>
+                        <button class="filter-btn" data-filter="open">باز</button>
+                        <button class="filter-btn" data-filter="in-progress">در حال بررسی</button>
+                        <button class="filter-btn" data-filter="resolved">حل شده</button>
+                    </div>
+                </div>
+
+                <div class="tickets-list" id="ticketsList">
+                    <!-- Tickets will be loaded here -->
+                </div>
+            </section>
+
+            <!-- Ticket Detail -->
+            <div class="ticket-detail" id="ticketDetail">
+                <div class="ticket-detail-header">
+                    <div>
+                        <span class="ticket-id" id="detailTicketId">#TK-001</span>
+                        <h2 id="detailTicketTitle">عنوان تیکت</h2>
+                    </div>
+                    <button class="btn btn-ghost" id="closeDetail">
+                        <i class="fas fa-times"></i>
+                        بستن
+                    </button>
+                </div>
+                <div class="ticket-messages" id="ticketMessages">
+                    <!-- Messages will be loaded here -->
+                </div>
+                <form class="reply-form" id="replyForm">
+                    <input type="text" placeholder="پیام خود را بنویسید..." id="replyInput">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i>
+                        ارسال
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- New Ticket Modal -->
+    <div class="modal" id="newTicketModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-ticket-alt"></i> ثبت تیکت جدید</h3>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <form id="newTicketForm">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>عنوان</label>
+                        <input type="text" id="ticketTitle" placeholder="مشکل خود را خلاصه کنید" required>
+                    </div>
+                    <div class="form-group">
+                        <label>دسته‌بندی</label>
+                        <select id="ticketCategory" required>
+                            <option value="">انتخاب کنید</option>
+                            <option value="install">مشکل نصب</option>
+                            <option value="license">لایسنس</option>
+                            <option value="technical">فنی</option>
+                            <option value="billing">مالی</option>
+                            <option value="other">سایر</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>اولویت</label>
+                        <select id="ticketPriority" required>
+                            <option value="low">پایین</option>
+                            <option value="medium" selected>متوسط</option>
+                            <option value="high">بالا</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>توضیحات</label>
+                        <textarea id="ticketDescription" placeholder="مشکل خود را با جزئیات شرح دهید..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-ghost" id="cancelTicket">انصراف</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i>
+                        ثبت تیکت
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <a href="index.html" class="logo">
+                        <div class="logo-icon">
+                            <i class="fas fa-cube"></i>
+                        </div>
+                        <span>Odoo<strong>Master</strong></span>
+                    </a>
+                    <p>نصاب هوشمند Odoo</p>
+                </div>
+                <div class="footer-links">
+                    <a href="downloads.html">دانلود</a>
+                    <a href="docs.html">مستندات</a>
+                    <a href="support.html">پشتیبانی</a>
+                    <a href="about.html">درباره ما</a>
+                </div>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-telegram"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© ۱۴۰۴ OdooMaster. تمامی حقوق محفوظ است.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/particles.min.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        // Sample tickets data (would come from API)
+        const sampleTickets = [
+            {
+                id: 'TK-003',
+                title: 'مشکل در نصب PostgreSQL',
+                category: 'install',
+                status: 'open',
+                priority: 'high',
+                date: '۱۴۰۴/۰۱/۱۵',
+                description: 'هنگام نصب PostgreSQL با خطای دسترسی مواجه می‌شوم',
+                messages: [
+                    { type: 'user', text: 'سلام، هنگام نصب PostgreSQL خطای زیر ظاهر می‌شود: Access Denied', time: '۱۰:۳۰' },
+                    { type: 'support', text: 'سلام، لطفاً نصاب را با Run as Administrator اجرا کنید', time: '۱۰:۴۵' }
+                ]
+            },
+            {
+                id: 'TK-002',
+                title: 'سوال درباره فعال‌سازی لایسنس',
+                category: 'license',
+                status: 'in-progress',
+                priority: 'medium',
+                date: '۱۴۰۴/۰۱/۱۴',
+                description: 'می‌خواهم لایسنس را به سیستم دیگری منتقل کنم',
+                messages: [
+                    { type: 'user', text: 'چگونه می‌توانم لایسنس را به سیستم جدید منتقل کنم?', time: '۱۴:۲۰' }
+                ]
+            },
+            {
+                id: 'TK-001',
+                title: 'درخواست ویژگی جدید',
+                category: 'other',
+                status: 'resolved',
+                priority: 'low',
+                date: '۱۴۰۴/۰۱/۱۰',
+                description: 'پیشنهاد اضافه شدن قابلیت بکاپ خودکار',
+                messages: [
+                    { type: 'user', text: 'آیا امکان اضافه کردن بکاپ خودکار وجود دارد?', time: '۰۹:۱۵' },
+                    { type: 'support', text: 'بله، این ویژگی در نسخه بعدی اضافه خواهد شد', time: '۱۱:۳۰' },
+                    { type: 'user', text: 'عالی، ممنون!', time: '۱۲:۰۰' }
+                ]
+            }
+        ];
+
+        // Check auth
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            // Show login prompt
+            document.getElementById('ticketsList').innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <h3>ورود لازم است</h3>
+                    <p>برای مشاهده تیکت‌ها و ثبت تیکت جدید باید وارد شوید</p>
+                    <a href="login.html?redirect=support.html" class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt"></i>
+                        ورود به حساب
+                    </a>
+                </div>
+            `;
+        } else {
+            // Load tickets
+            loadTickets();
+        }
+
+        function loadTickets(filter = 'all') {
+            const list = document.getElementById('ticketsList');
+            const filtered = filter === 'all' ? sampleTickets : sampleTickets.filter(t => t.status === filter);
+            
+            if (filtered.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <h3>تیکتی یافت نشد</h3>
+                        <p>هنوز تیکتی ثبت نکرده‌اید یا تیکتی با این فیلتر وجود ندارد</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = filtered.map(ticket => `
+                <div class="ticket-item" data-id="${ticket.id}">
+                    <div class="ticket-priority ${ticket.priority}"></div>
+                    <div class="ticket-info">
+                        <h4>${ticket.title}</h4>
+                        <p>${ticket.description.substring(0, 50)}...</p>
+                    </div>
+                    <span class="ticket-id">${ticket.id}</span>
+                    <span class="ticket-status ${ticket.status}">
+                        ${getStatusText(ticket.status)}
+                    </span>
+                    <span class="ticket-date">${ticket.date}</span>
+                </div>
+            `).join('');
+
+            // Add click handlers
+            document.querySelectorAll('.ticket-item').forEach(item => {
+                item.addEventListener('click', () => showTicketDetail(item.dataset.id));
+            });
+        }
+
+        function getStatusText(status) {
+            const texts = {
+                'open': 'باز',
+                'in-progress': 'در حال بررسی',
+                'resolved': 'حل شده',
+                'closed': 'بسته شده'
+            };
+            return texts[status] || status;
+        }
+
+        function showTicketDetail(ticketId) {
+            const ticket = sampleTickets.find(t => t.id === ticketId);
+            if (!ticket) return;
+
+            document.getElementById('detailTicketId').textContent = '#' + ticket.id;
+            document.getElementById('detailTicketTitle').textContent = ticket.title;
+
+            const messages = document.getElementById('ticketMessages');
+            messages.innerHTML = ticket.messages.map(msg => `
+                <div class="message ${msg.type}">
+                    <div class="message-avatar">
+                        <i class="fas fa-${msg.type === 'user' ? 'user' : 'headset'}"></i>
+                    </div>
+                    <div class="message-content">
+                        <p>${msg.text}</p>
+                        <div class="message-meta">
+                            <span>${msg.type === 'user' ? 'شما' : 'پشتیبانی'}</span>
+                            <span>${msg.time}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('ticketDetail').classList.add('active');
+            document.getElementById('ticketsSection').style.display = 'none';
+        }
+
+        // Filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                loadTickets(btn.dataset.filter);
+            });
+        });
+
+        // Modal handlers
+        document.getElementById('newTicketBtn').addEventListener('click', () => {
+            if (!token) {
+                window.location.href = 'login.html?redirect=support.html';
+                return;
+            }
+            document.getElementById('newTicketModal').classList.add('active');
+        });
+
+        document.getElementById('closeModal').addEventListener('click', () => {
+            document.getElementById('newTicketModal').classList.remove('active');
+        });
+
+        document.getElementById('cancelTicket').addEventListener('click', () => {
+            document.getElementById('newTicketModal').classList.remove('active');
+        });
+
+        // Close detail
+        document.getElementById('closeDetail').addEventListener('click', () => {
+            document.getElementById('ticketDetail').classList.remove('active');
+            document.getElementById('ticketsSection').style.display = 'block';
+        });
+
+        // Submit ticket
+        document.getElementById('newTicketForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const title = document.getElementById('ticketTitle').value;
+            const category = document.getElementById('ticketCategory').value;
+            const priority = document.getElementById('ticketPriority').value;
+            const description = document.getElementById('ticketDescription').value;
+
+            // In production, send to API
+            console.log('New ticket:', { title, category, priority, description });
+
+            // Show success
+            document.getElementById('newTicketModal').classList.remove('active');
+            
+            if (typeof showToast === 'function') {
+                showToast('تیکت با موفقیت ثبت شد!', 'success');
+            } else {
+                alert('تیکت با موفقیت ثبت شد!');
+            }
+
+            // Reset form
+            document.getElementById('newTicketForm').reset();
+
+            // Reload tickets
+            loadTickets();
+        });
+
+        // Reply form
+        document.getElementById('replyForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const input = document.getElementById('replyInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            // Add message to UI
+            const messages = document.getElementById('ticketMessages');
+            messages.innerHTML += `
+                <div class="message user">
+                    <div class="message-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="message-content">
+                        <p>${message}</p>
+                        <div class="message-meta">
+                            <span>شما</span>
+                            <span>الان</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            input.value = '';
+        });
+    </script>
+</body>
+</html>

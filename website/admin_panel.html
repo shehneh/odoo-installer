@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پنل مدیریت مشتریان - OdooMaster</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Vazir', 'Tahoma', sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .customers-table {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: right;
+            font-weight: bold;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .badge.active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            font-family: 'Vazir', sans-serif;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .loader {
+            text-align: center;
+            padding: 50px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 50px;
+            color: #999;
+        }
+
+        .link {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 پنل مدیریت مشتریان</h1>
+            <p>مدیریت و نظارت بر سرورهای Odoo مشتریان</p>
+        </header>
+
+        <div class="stats">
+            <div class="stat-card">
+                <h3>تعداد کل مشتریان</h3>
+                <div class="number" id="totalCustomers">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>مشتریان فعال</h3>
+                <div class="number" id="activeCustomers">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>امروز عضو شده</h3>
+                <div class="number" id="todayCustomers">-</div>
+            </div>
+        </div>
+
+        <div class="customers-table">
+            <h2 style="margin-bottom: 20px;">📋 لیست مشتریان</h2>
+            
+            <div id="loader" class="loader">
+                <div class="spinner"></div>
+                <p style="margin-top: 15px; color: #667eea;">در حال بارگذاری...</p>
+            </div>
+
+            <div id="tableContainer" style="display: none;">
+                <table id="customersTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>نام شرکت</th>
+                            <th>ایمیل</th>
+                            <th>نام مدیر</th>
+                            <th>تلفن</th>
+                            <th>نام دیتابیس</th>
+                            <th>پلن</th>
+                            <th>وضعیت</th>
+                            <th>تاریخ عضویت</th>
+                            <th>عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customersBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="noData" class="no-data" style="display: none;">
+                <p>هیچ مشتری ای ثبت نشده است</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadCustomers() {
+            try {
+                const response = await fetch('/api/list-customers');
+                const data = await response.json();
+
+                document.getElementById('loader').style.display = 'none';
+
+                if (data.success && data.customers.length > 0) {
+                    document.getElementById('tableContainer').style.display = 'block';
+                    
+                    // Update stats
+                    document.getElementById('totalCustomers').textContent = data.count;
+                    const activeCount = data.customers.filter(c => c.status === 'active').length;
+                    document.getElementById('activeCustomers').textContent = activeCount;
+                    
+                    const today = new Date().toDateString();
+                    const todayCount = data.customers.filter(c => 
+                        new Date(c.created_at).toDateString() === today
+                    ).length;
+                    document.getElementById('todayCustomers').textContent = todayCount;
+
+                    // Populate table
+                    const tbody = document.getElementById('customersBody');
+                    tbody.innerHTML = '';
+
+                    data.customers.forEach((customer, index) => {
+                        const row = document.createElement('tr');
+                        const createdDate = new Date(customer.created_at).toLocaleDateString('fa-IR');
+                        
+                        row.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td><strong>${customer.company_name}</strong></td>
+                            <td>${customer.admin_email}</td>
+                            <td>${customer.admin_name}</td>
+                            <td>${customer.phone || '-'}</td>
+                            <td><code>${customer.database_name}</code></td>
+                            <td>${customer.plan}</td>
+                            <td><span class="badge active">${customer.status}</span></td>
+                            <td>${createdDate}</td>
+                            <td>
+                                <a href="/web/login?db=${customer.database_name}" 
+                                   target="_blank" class="link">ورود</a>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                } else {
+                    document.getElementById('noData').style.display = 'block';
+                    document.getElementById('totalCustomers').textContent = '0';
+                    document.getElementById('activeCustomers').textContent = '0';
+                    document.getElementById('todayCustomers').textContent = '0';
+                }
+            } catch (error) {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('noData').innerHTML = `
+                    <p style="color: #dc3545;">خطا در بارگذاری اطلاعات: ${error.message}</p>
+                `;
+                document.getElementById('noData').style.display = 'block';
+            }
+        }
+
+        // Load on page load
+        loadCustomers();
+
+        // Refresh every 30 seconds
+        setInterval(loadCustomers, 30000);
+    </script>
+</body>
+</html>
