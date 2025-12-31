@@ -1,5 +1,6 @@
 {
   "platform": "flask",
-  "port": 5001,
-  "app": "odoomaster"
+  "port": 5000,
+  "app": "odoomaster",
+  "network": "my-network"
 }
