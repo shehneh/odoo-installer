@@ -182,28 +182,6 @@ def health_check():
     """Health check"""
     return jsonify({'status': 'healthy', 'odoo_url': ODOO_URL, 'timestamp': datetime.now().isoformat()})
 
-# HTML Pages Routes
-@app.route('/')
-def index():
-    """صفحه اصلی"""
-    return send_from_directory('website', 'index.html')
-
-@app.route('/register_tenant.html')
-def register_tenant():
-    """صفحه ثبت‌نام مشتری جدید"""
-    return send_from_directory('website', 'register_tenant.html')
-
-@app.route('/admin_panel.html')
-def admin_panel():
-    """پنل مدیریت مشتریان"""
-    return send_from_directory('website', 'admin_panel.html')
-
-# Serve all static files from website folder
-@app.route('/<path:filename>')
-def serve_static(filename):
-    """Serve static files"""
-    return send_from_directory('website', filename)
-
 if __name__ == "__main__":
     init_customers_db()
     
