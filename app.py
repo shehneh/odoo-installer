@@ -454,8 +454,8 @@ def health_check():
     })
 
 
-@app.route('/', methods=['GET'])
-def index():
+@app.route('/api', methods=['GET'])
+def api_index():
     """صفحه اصلی API"""
     return jsonify({
         'name': 'OdooMaster API',
