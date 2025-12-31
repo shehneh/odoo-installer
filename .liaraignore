@@ -68,6 +68,5 @@ private_downloads/odoo19-source.zip
 website_*.zip
 OdooInstaller-*.zip
 
-# Website subdirectories (deploy separately if needed)
-website/
+# Website clean is duplicate
 website_clean/
