@@ -188,7 +188,17 @@ def list_customers():
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Health check"""
-    return jsonify({'status': 'healthy', 'odoo_url': ODOO_URL, 'timestamp': datetime.now().isoformat()})
+    return jsonify({
+        'status': 'healthy', 
+        'message': 'OdooMaster API is running',
+        'odoo_url': ODOO_URL, 
+        'timestamp': datetime.now().isoformat(),
+        'routes': {
+            'create_tenant': '/api/create-tenant [POST]',
+            'list_customers': '/api/list-customers [GET]',
+            'health': '/api/health [GET]'
+        }
+    })
 
 if __name__ == "__main__":
     init_customers_db()
