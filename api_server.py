@@ -12,7 +12,7 @@ Usage:
     Server will run on: http://localhost:5001
 """
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from datetime import datetime, timedelta
 import json
@@ -22,9 +22,130 @@ import requests
 import random
 import string
 from pathlib import Path
+import sqlite3
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    static_folder='website',
+    template_folder='website',
+)
 CORS(app)  # Enable CORS for all routes
+
+# ============================================
+# Multi-tenant SaaS configuration (Liara)
+# ============================================
+
+ODOO_URL = os.environ.get('ODOO_URL', 'https://odoo-online.liara.run')
+ODOO_MASTER_PASSWORD = os.environ.get('ODOO_MASTER_PASSWORD', 'admin')
+
+# Local SQLite database for customer management
+CUSTOMERS_DB = 'customers.db'
+
+
+def init_customers_db():
+    """Initialize SQLite database for customer management"""
+    conn = sqlite3.connect(CUSTOMERS_DB)
+    cursor = conn.cursor()
+    cursor.execute(
+        '''
+        CREATE TABLE IF NOT EXISTS customers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            company_name TEXT NOT NULL,
+            admin_email TEXT UNIQUE NOT NULL,
+            admin_name TEXT NOT NULL,
+            phone TEXT,
+            database_name TEXT UNIQUE NOT NULL,
+            admin_password TEXT NOT NULL,
+            status TEXT DEFAULT 'active',
+            plan TEXT DEFAULT 'starter',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            last_login TIMESTAMP
+        )
+        '''
+    )
+    conn.commit()
+    conn.close()
+
+
+def generate_tenant_db_name(company_name: str) -> str:
+    """Generate unique database name from company name"""
+    clean_name = ''.join(c for c in (company_name or '') if c.isalnum())[:20]
+    suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+    return f"odoo_{clean_name.lower()}_{suffix}" if clean_name else f"odoo_{suffix}"
+
+
+def generate_tenant_password(length: int = 12) -> str:
+    """Generate secure random password"""
+    chars = string.ascii_letters + string.digits + "!@#$%^&*"
+    return ''.join(random.choices(chars, k=length))
+
+
+def create_odoo_tenant_database(
+    db_name: str,
+    admin_email: str,
+    admin_password: str,
+    company_name: str,
+    lang: str = 'fa_IR',
+    country: str = 'IR',
+):
+    """Create new Odoo database using web_db API (JSON-RPC)."""
+    url = f"{ODOO_URL}/web/database/create"
+
+    payload = {
+        "jsonrpc": "2.0",
+        "method": "call",
+        "params": {
+            "master_pwd": ODOO_MASTER_PASSWORD,
+            "name": db_name,
+            "login": admin_email,
+            "password": admin_password,
+            "lang": lang,
+            "country_code": country,
+            "phone": "",
+        },
+        "id": random.randint(1, 1000000),
+    }
+
+    headers = {'Content-Type': 'application/json'}
+
+    try:
+        response = requests.post(url, json=payload, headers=headers, timeout=300)
+        result = response.json()
+
+        if 'error' in result:
+            error_msg = result.get('error', {}).get('data', {}).get('message', 'Unknown error')
+            return False, error_msg
+
+        return True, f"Database {db_name} created successfully"
+    except Exception as e:
+        return False, str(e)
+
+
+def save_customer(company_name, admin_email, admin_name, phone, database_name, admin_password):
+    """Save customer information to local database"""
+    try:
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        cursor.execute(
+            '''
+            INSERT INTO customers (company_name, admin_email, admin_name, phone, database_name, admin_password)
+            VALUES (?, ?, ?, ?, ?, ?)
+            ''',
+            (company_name, admin_email, admin_name, phone, database_name, admin_password),
+        )
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"Error saving customer: {e}")
+        return False
+
+
+# Ensure DB exists when running under gunicorn
+try:
+    init_customers_db()
+except Exception as e:
+    print(f"Warning: failed to init customers db: {e}")
 
 # Data storage (در محیط واقعی از Database استفاده کنید)
 BASE_DIR = Path(__file__).parent
@@ -132,6 +253,26 @@ def delete_odoo_database(url, db_name):
 # ============================================
 # DEMO MANAGEMENT APIs
 # ============================================
+
+# Site routes (frontend)
+@app.route('/', methods=['GET'])
+def site_index():
+    return send_from_directory('website', 'index.html')
+
+
+@app.route('/install', methods=['GET'])
+def site_install():
+    return send_from_directory('website', 'install.html')
+
+
+@app.route('/installer', methods=['GET'])
+def site_installer():
+    return send_from_directory('website', 'install.html')
+
+
+@app.route('/<path:path>', methods=['GET'])
+def site_static(path):
+    return send_from_directory('website', path)
 
 @app.route('/api/demo/list', methods=['GET'])
 def list_demos():
@@ -450,34 +591,82 @@ def health_check():
         'status': 'ok',
         'message': 'OdooMaster API is running',
         'version': '1.0.0',
-        'timestamp': datetime.now().isoformat()
-    })
-
-
-@app.route('/', methods=['GET'])
-def index():
-    """صفحه اصلی API"""
-    return jsonify({
-        'name': 'OdooMaster API',
-        'version': '1.0.0',
-        'endpoints': {
-            'demo': {
-                'list': 'GET /api/demo/list',
-                'create': 'POST /api/demo/create',
-                'delete': 'DELETE /api/demo/<id>'
-            },
-            'tickets': {
-                'list': 'GET /api/tickets/list',
-                'create': 'POST /api/tickets/create',
-                'reply': 'POST /api/tickets/<id>/reply'
-            },
-            'user': {
-                'me': 'GET /api/user/me',
-                'stats': 'GET /api/user/stats'
-            }
+        'timestamp': datetime.now().isoformat(),
+        'app': 'api_server.py',
+        'odoo_url': ODOO_URL,
+        'routes': {
+            'create_tenant': '/api/create-tenant [POST]',
+            'list_customers': '/api/list-customers [GET]',
+            'health': '/api/health [GET]',
         },
-        'docs': 'See DASHBOARD_README.md for full API documentation'
     })
+
+
+# ============================================
+# TENANT PROVISIONING APIs
+# ============================================
+
+
+@app.route('/api/create-tenant', methods=['POST'])
+def create_tenant():
+    """API endpoint to create new tenant (customer Odoo instance)"""
+    try:
+        data = request.get_json(silent=True) or {}
+
+        company_name = data.get('company_name')
+        admin_email = data.get('admin_email')
+        admin_name = data.get('admin_name', 'Admin')
+        phone = data.get('phone', '')
+
+        if not company_name or not admin_email:
+            return jsonify({'success': False, 'message': 'نام شرکت و ایمیل الزامی است'}), 400
+
+        db_name = generate_tenant_db_name(company_name)
+        admin_password = generate_tenant_password()
+
+        success, message = create_odoo_tenant_database(
+            db_name=db_name,
+            admin_email=admin_email,
+            admin_password=admin_password,
+            company_name=company_name,
+        )
+
+        if not success:
+            return jsonify({'success': False, 'message': f'خطا در ساخت دیتابیس: {message}'}), 500
+
+        save_customer(company_name, admin_email, admin_name, phone, db_name, admin_password)
+
+        return jsonify(
+            {
+                'success': True,
+                'message': 'سرور Odoo شما با موفقیت ساخته شد',
+                'data': {
+                    'company_name': company_name,
+                    'database_name': db_name,
+                    'admin_email': admin_email,
+                    'admin_password': admin_password,
+                    'url': f"{ODOO_URL}/web?db={db_name}",
+                    'login_url': f"{ODOO_URL}/web/login?db={db_name}",
+                },
+            }
+        ), 201
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'خطا: {str(e)}'}), 500
+
+
+@app.route('/api/list-customers', methods=['GET'])
+def list_customers():
+    """List all customers"""
+    try:
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM customers ORDER BY created_at DESC')
+        customers = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return jsonify({'success': True, 'count': len(customers), 'customers': customers})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 
 if __name__ == '__main__':
@@ -494,4 +683,6 @@ if __name__ == '__main__':
     print("\n  Press Ctrl+C to stop the server\n")
     print("="*50 + "\n")
     
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    # Respect $PORT for PaaS environments
+    port = int(os.environ.get('PORT', 5001))
+    app.run(host='0.0.0.0', port=port, debug=True)
