@@ -2,5 +2,8 @@
   "platform": "flask",
   "port": 5000,
   "app": "odoomaster",
-  "network": "my-network"
+  "network": "my-network",
+  "flask": {
+    "module": "website_server:app"
+  }
 }
