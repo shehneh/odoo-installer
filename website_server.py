@@ -119,6 +119,14 @@ def save_customer(company_name, admin_email, admin_name, phone, database_name, a
 def index():
     return send_from_directory('website', 'index.html')
 
+@app.route('/install')
+def install():
+    return send_from_directory('website', 'install.html')
+
+@app.route('/installer')
+def installer():
+    return send_from_directory('website', 'install.html')
+
 @app.route('/<path:path>')
 def serve_static(path):
     return send_from_directory('website', path)
@@ -185,19 +193,25 @@ def health_check():
 if __name__ == "__main__":
     init_customers_db()
     
+    # Get port from environment variable (for Liara/Heroku) or default to 5000
+    port = int(os.environ.get('PORT', 5000))
+    
     print(f"\n{'='*60}")
     print(f"  🚀 OdooMaster Multi-Tenant SaaS Platform")
     print(f"{'='*60}")
-    print(f"\n  🌐 Flask Server: http://localhost:5000")
+    print(f"\n  🌐 Flask Server: http://localhost:{port}")
     print(f"  🔗 Odoo Server: {ODOO_URL}")
     print(f"\n  📄 Pages:")
-    print(f"    • Home:        http://localhost:5000/")
-    print(f"    • Register:    http://localhost:5000/register_tenant.html")
+    print(f"    • Home:        http://localhost:{port}/")
+    print(f"    • Install:     http://localhost:{port}/install")
+    print(f"    • Register:    http://localhost:{port}/register_tenant.html")
     print(f"\n  🔌 API:")
     print(f"    • POST /api/create-tenant")
     print(f"    • GET  /api/list-customers")
     print(f"\n  Press Ctrl+C to stop\n")
     print(f"{'='*60}\n")
     
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    # Use debug=False in production (Liara)
+    debug = os.environ.get('FLASK_ENV') != 'production'
+    app.run(host='0.0.0.0', port=port, debug=debug)
 
