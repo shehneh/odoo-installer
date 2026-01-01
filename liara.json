@@ -4,6 +4,6 @@
   "app": "odoomaster",
   "network": "my-network",
   "flask": {
-    "module": "website_server:app"
+    "module": "app:app"
   }
 }

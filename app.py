@@ -191,6 +191,8 @@ def health_check():
     return jsonify({
         'status': 'healthy', 
         'message': 'OdooMaster API is running',
+        'version': '2.0.0',
+        'app_file': 'app.py',
         'odoo_url': ODOO_URL, 
         'timestamp': datetime.now().isoformat(),
         'routes': {
