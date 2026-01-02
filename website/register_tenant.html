@@ -316,14 +316,16 @@
                 loader.classList.remove('active');
                 submitBtn.disabled = false;
 
-                // اگر تکراری بود
-                if (data.existing) {
-                    result.className = 'result error';
+                // اگر تکراری بود (409)
+                if (response.status === 409 || data.existing) {
+                    result.className = 'result success';  // سبز چون قبلا ساخته شده
                     result.innerHTML = `
-                        <h2>⚠️ این ایمیل قبلاً ثبت شده است</h2>
+                        <h2>ℹ️ این ایمیل قبلاً ثبت شده است</h2>
+                        <p style="margin: 15px 0; color: #155724;">سرور Odoo شما قبلاً ساخته شده. از لینک زیر وارد شوید:</p>
                         <div class="credentials">
                             <p><strong>نام دیتابیس:</strong> ${data.data.database_name}</p>
                             <p><strong>تاریخ ثبت:</strong> ${data.data.created_at}</p>
+                            <p style="color: #856404; margin-top: 10px;">⚠️ اگر رمز عبور را فراموش کردید، با پشتیبانی تماس بگیرید.</p>
                         </div>
                         <a href="${data.data.login_url}" target="_blank" class="login-link">
                             ورود به Odoo شما

@@ -62,8 +62,12 @@ def init_customers_db():
     conn.close()
 
 def generate_db_name(company_name):
-    """Generate unique database name from company name"""
-    clean_name = ''.join(c for c in company_name if c.isalnum())[:20]
+    """Generate unique database name from company name (English only)"""
+    # Only keep ASCII alphanumeric characters
+    import re
+    clean_name = re.sub(r'[^a-zA-Z0-9]', '', company_name)[:20]
+    if not clean_name:
+        clean_name = 'tenant'  # Fallback if no English chars
     suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
     return f"odoo_{clean_name.lower()}_{suffix}"
 
