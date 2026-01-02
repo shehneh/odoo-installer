@@ -33,10 +33,14 @@ except ImportError:
     DB_PASSWORD = os.environ.get('DB_PASSWORD', 'lu46zbfKF1s8j04thKOUI24b')
 
 # Local SQLite database for customer management
-CUSTOMERS_DB = 'customers.db'
+# Use /tmp for writable storage on Liara (or local path for development)
+DATA_DIR = os.environ.get('DATA_DIR', '/tmp')
+CUSTOMERS_DB = os.path.join(DATA_DIR, 'customers.db')
 
 def init_customers_db():
     """Initialize SQLite database for customer management"""
+    # Ensure directory exists
+    os.makedirs(os.path.dirname(CUSTOMERS_DB) if os.path.dirname(CUSTOMERS_DB) else '.', exist_ok=True)
     conn = sqlite3.connect(CUSTOMERS_DB)
     cursor = conn.cursor()
     cursor.execute('''

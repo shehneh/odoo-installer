@@ -70,3 +70,15 @@ OdooInstaller-*.zip
 
 # Website clean is duplicate
 website_clean/
+
+# Odoo docker files
+odoo-docker/
+
+# OCA temp
+oca_web_temp/
+
+# Templates duplicate
+templates/
+
+# API directory (if exists)
+api/
