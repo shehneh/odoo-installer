@@ -189,8 +189,10 @@ def list_customers():
 def health_check():
     """Health check"""
     return jsonify({
-        'status': 'healthy', 
+        'status': 'ok', 
         'message': 'OdooMaster API is running',
+        'version': '3.0.0',
+        'deploy_test': 'SUCCESS - Liara Deploy Working!',
         'odoo_url': ODOO_URL, 
         'timestamp': datetime.now().isoformat(),
         'routes': {
