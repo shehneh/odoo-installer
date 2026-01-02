@@ -189,9 +189,9 @@ def list_customers():
 def health_check():
     """Health check"""
     return jsonify({
-        'status': 'healthy', 
+        'status': 'ok', 
         'message': 'OdooMaster API is running',
-        'version': '2.0.0',
+        'version': '2.1.0',
         'app_file': 'app.py',
         'odoo_url': ODOO_URL, 
         'timestamp': datetime.now().isoformat(),
