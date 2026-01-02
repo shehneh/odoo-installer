@@ -191,7 +191,8 @@ def health_check():
     return jsonify({
         'status': 'ok', 
         'message': 'OdooMaster API is running',
-        'version': '2.1.0',
+        'version': '3.0.0',
+        'deploy_test': 'SUCCESS - Liara Deploy Working!',
         'app_file': 'app.py',
         'odoo_url': ODOO_URL, 
         'timestamp': datetime.now().isoformat(),
