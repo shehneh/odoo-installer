@@ -235,7 +235,7 @@ def health_check():
     return jsonify({
         'status': 'ok', 
         'message': 'OdooMaster API is running',
-        'version': '3.0.0',
+        'version': '3.1.0',
         'deploy_test': 'SUCCESS - Liara Deploy Working!',
         'app_file': 'app.py',
         'odoo_url': ODOO_URL, 
@@ -247,9 +247,10 @@ def health_check():
         }
     })
 
+# Initialize database on module load (for gunicorn in Liara)
+init_customers_db()
+
 if __name__ == "__main__":
-    init_customers_db()
-    
     # Get port from environment variable (for Liara/Heroku) or default to 5000
     port = int(os.environ.get('PORT', 5000))
     
