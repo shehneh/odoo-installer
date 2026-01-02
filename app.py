@@ -21,13 +21,16 @@ app = Flask(__name__,
             template_folder='website')
 CORS(app)
 
-# Configuration
-ODOO_URL = os.environ.get('ODOO_URL', 'https://odoo-online.liara.run')
-ODOO_MASTER_PASSWORD = os.environ.get('ODOO_MASTER_PASSWORD', 'admin')
-DB_HOST = os.environ.get('DB_HOST', 'odoo-db')
-DB_PORT = os.environ.get('DB_PORT', '5432')
-DB_USER = os.environ.get('DB_USER', 'root')
-DB_PASSWORD = os.environ.get('DB_PASSWORD', 'lu46zbfKF1s8j04thKOUI24b')
+# Configuration - از فایل config.py بخوان، اگر نبود از متغیر محیطی
+try:
+    from config import ODOO_URL, ODOO_MASTER_PASSWORD, DB_HOST, DB_PORT, DB_USER, DB_PASSWORD
+except ImportError:
+    ODOO_URL = os.environ.get('ODOO_URL', 'https://odoo-online.liara.run')
+    ODOO_MASTER_PASSWORD = os.environ.get('ODOO_MASTER_PASSWORD', 'admin')
+    DB_HOST = os.environ.get('DB_HOST', 'odoo-db')
+    DB_PORT = os.environ.get('DB_PORT', '5432')
+    DB_USER = os.environ.get('DB_USER', 'root')
+    DB_PASSWORD = os.environ.get('DB_PASSWORD', 'lu46zbfKF1s8j04thKOUI24b')
 
 # Local SQLite database for customer management
 CUSTOMERS_DB = 'customers.db'
@@ -66,37 +69,50 @@ def generate_password(length=12):
     return ''.join(random.choices(chars, k=length))
 
 def create_odoo_database(db_name, admin_email, admin_password, company_name, lang='fa_IR', country='IR'):
-    """Create new Odoo database using web_db API"""
+    """Create new Odoo database using web_db API (Odoo 18/19 format)"""
     url = f"{ODOO_URL}/web/database/create"
     
+    # Odoo 18/19 uses form data, not JSON-RPC
     payload = {
-        "jsonrpc": "2.0",
-        "method": "call",
-        "params": {
-            "master_pwd": ODOO_MASTER_PASSWORD,
-            "name": db_name,
-            "login": admin_email,
-            "password": admin_password,
-            "lang": lang,
-            "country_code": country,
-            "phone": ""
-        },
-        "id": random.randint(1, 1000000)
+        "master_pwd": ODOO_MASTER_PASSWORD,
+        "name": db_name,
+        "login": admin_email,
+        "password": admin_password,
+        "lang": lang,
+        "country_code": country,
+        "phone": ""
     }
     
-    headers = {'Content-Type': 'application/json'}
-    
     try:
-        response = requests.post(url, json=payload, headers=headers, timeout=300)
-        result = response.json()
+        response = requests.post(url, data=payload, timeout=300, allow_redirects=False)
         
-        if 'error' in result:
-            error_msg = result.get('error', {}).get('data', {}).get('message', 'Unknown error')
-            return False, error_msg
+        # Success = redirect to the new database
+        if response.status_code in [302, 303]:
+            return True, f"Database {db_name} created successfully"
         
-        return True, f"Database {db_name} created successfully"
+        # Check for error in response
+        if response.status_code == 200:
+            # Check if redirected to login page (success)
+            if 'web/login' in response.text or db_name in response.text:
+                return True, f"Database {db_name} created successfully"
+            return True, f"Database {db_name} created"
+        
+        return False, f"HTTP {response.status_code}: {response.text[:200]}"
     except Exception as e:
         return False, str(e)
+
+def check_customer_exists(admin_email):
+    """Check if customer with this email already exists"""
+    try:
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        cursor.execute('SELECT database_name, created_at FROM customers WHERE admin_email = ?', (admin_email,))
+        result = cursor.fetchone()
+        conn.close()
+        return result  # Returns (database_name, created_at) or None
+    except Exception as e:
+        print(f"Error checking customer: {e}")
+        return None
 
 def save_customer(company_name, admin_email, admin_name, phone, database_name, admin_password):
     """Save customer information to local database"""
@@ -138,6 +154,9 @@ def create_tenant():
     try:
         data = request.json
         
+        if not data:
+            return jsonify({'success': False, 'message': 'داده‌ای دریافت نشد', 'debug': 'request.json is None'}), 400
+        
         company_name = data.get('company_name')
         admin_email = data.get('admin_email')
         admin_name = data.get('admin_name', 'Admin')
@@ -145,6 +164,21 @@ def create_tenant():
         
         if not company_name or not admin_email:
             return jsonify({'success': False, 'message': 'نام شرکت و ایمیل الزامی است'}), 400
+        
+        # چک تکراری نبودن
+        existing = check_customer_exists(admin_email)
+        if existing:
+            db_name, created_at = existing
+            return jsonify({
+                'success': False, 
+                'message': f'این ایمیل قبلاً ثبت شده است',
+                'existing': True,
+                'data': {
+                    'database_name': db_name,
+                    'login_url': f"{ODOO_URL}/web/login?db={db_name}",
+                    'created_at': str(created_at)
+                }
+            }), 409  # 409 Conflict
         
         db_name = generate_db_name(company_name)
         admin_password = generate_password()
@@ -169,7 +203,13 @@ def create_tenant():
             }
         }), 201
     except Exception as e:
-        return jsonify({'success': False, 'message': f'خطا: {str(e)}'}), 500
+        import traceback
+        return jsonify({
+            'success': False, 
+            'message': f'خطا: {str(e)}',
+            'error_type': type(e).__name__,
+            'traceback': traceback.format_exc()
+        }), 500
 
 @app.route('/api/list-customers', methods=['GET'])
 def list_customers():

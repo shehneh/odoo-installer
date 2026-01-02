@@ -4,6 +4,9 @@
 *.7z
 *.zip
 
+# --- Sensitive config files (passwords) ---
+config.py
+
 # BUT keep installer ZIPs for website downloads
 !private_downloads/installers/*.zip
 !downloads/installers/*.zip

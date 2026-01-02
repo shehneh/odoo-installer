@@ -297,6 +297,8 @@
             result.style.display = 'none';
 
             try {
+                console.log('📤 Sending request:', formData);
+                
                 // Call API
                 const response = await fetch('/api/create-tenant', {
                     method: 'POST',
@@ -306,11 +308,29 @@
                     body: JSON.stringify(formData)
                 });
 
+                console.log('📥 Response status:', response.status);
                 const data = await response.json();
+                console.log('📦 Response data:', data);
 
                 // Hide loader
                 loader.classList.remove('active');
                 submitBtn.disabled = false;
+
+                // اگر تکراری بود
+                if (data.existing) {
+                    result.className = 'result error';
+                    result.innerHTML = `
+                        <h2>⚠️ این ایمیل قبلاً ثبت شده است</h2>
+                        <div class="credentials">
+                            <p><strong>نام دیتابیس:</strong> ${data.data.database_name}</p>
+                            <p><strong>تاریخ ثبت:</strong> ${data.data.created_at}</p>
+                        </div>
+                        <a href="${data.data.login_url}" target="_blank" class="login-link">
+                            ورود به Odoo شما
+                        </a>
+                    `;
+                    return;
+                }
 
                 if (data.success) {
                     // Show success
