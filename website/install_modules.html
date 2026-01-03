@@ -530,6 +530,7 @@
 
         <div class="alert alert-success" id="successAlert"></div>
         <div class="alert alert-error" id="errorAlert"></div>
+        <div class="alert alert-info" id="infoAlert"></div>
 
         <div class="info-box">
             <p><strong>💡 راهنما:</strong></p>
@@ -787,6 +788,7 @@
         const progressBox = document.getElementById('progressBox');
         const successAlert = document.getElementById('successAlert');
         const errorAlert = document.getElementById('errorAlert');
+        const infoAlert = document.getElementById('infoAlert');
 
         // Quick selection functions
         function selectAll() {
@@ -881,7 +883,8 @@
 
                 if (state === 'installed') {
                     label.classList.add('is-installed');
-                    cb.checked = true;
+                    // Installed = show as installed, but not "selected for install"
+                    cb.checked = false;
                     cb.disabled = true;
                     setTileStatus(moduleName, 'installed', 'نصب شده');
                 } else if (state === 'not_found') {
@@ -894,6 +897,36 @@
 
             updateCounter();
             return data;
+        }
+
+        let lastAutoCheckKey = '';
+        let autoCheckTimer = null;
+        async function autoCheckModuleStatesIfReady() {
+            const dbName = document.getElementById('dbName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            if (!dbName || !email || !password) return;
+
+            const key = `${dbName}|${email}|${password.length}`;
+            if (key === lastAutoCheckKey) return;
+
+            lastAutoCheckKey = key;
+            try {
+                showInfo('در حال بررسی وضعیت ماژول‌ها در دیتابیس...');
+                await fetchAndApplyDbModuleStates(dbName, email, password);
+                hideInfo();
+            } catch (e) {
+                // Don't block user; just hide info quietly
+                hideInfo();
+                console.warn('Auto-check failed:', e);
+            }
+        }
+
+        function scheduleAutoCheck() {
+            if (autoCheckTimer) clearTimeout(autoCheckTimer);
+            autoCheckTimer = setTimeout(() => {
+                autoCheckModuleStatesIfReady();
+            }, 650);
         }
 
         // Update counter on checkbox change
@@ -909,6 +942,14 @@
         if (urlParams.get('db')) document.getElementById('dbName').value = urlParams.get('db');
         if (urlParams.get('email')) document.getElementById('email').value = urlParams.get('email');
         if (urlParams.get('password')) document.getElementById('password').value = urlParams.get('password');
+
+        // Auto-check status when credentials are present
+        document.getElementById('dbName').addEventListener('input', scheduleAutoCheck);
+        document.getElementById('email').addEventListener('input', scheduleAutoCheck);
+        document.getElementById('password').addEventListener('input', scheduleAutoCheck);
+        window.addEventListener('load', () => {
+            scheduleAutoCheck();
+        });
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -972,7 +1013,7 @@
 
                 // Apply immediate statuses (installed / not found)
                 (statusData.installed || []).forEach(moduleName => {
-                    updateModuleStatus(moduleName, 'already-installed', '↺ از قبل نصب بود');
+                    updateModuleStatus(moduleName, 'already-installed', '✅ نصب شده');
                 });
                 (statusData.not_found || []).forEach(moduleName => {
                     updateModuleStatus(moduleName, 'skipped', '⊘ موجود نیست');
@@ -1224,6 +1265,15 @@
             successAlert.innerHTML = message;
             successAlert.style.display = 'block';
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showInfo(message) {
+            infoAlert.textContent = message;
+            infoAlert.style.display = 'block';
+        }
+
+        function hideInfo() {
+            infoAlert.style.display = 'none';
         }
 
         function showError(message) {
