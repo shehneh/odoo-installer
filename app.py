@@ -4,7 +4,7 @@ OdooMaster Multi-Tenant SaaS Platform
 Flask server with auto-provisioning API for creating Odoo instances
 """
 
-from flask import Flask, render_template, request, jsonify, send_from_directory
+from flask import Flask, render_template, request, jsonify, send_from_directory, Response
 from flask_cors import CORS
 import psycopg2
 import string
@@ -170,6 +170,121 @@ def serve_static(path):
 
 import xmlrpc.client
 
+def install_odoo_modules_stream(db_name, admin_email, admin_password, modules=None):
+    """Install Odoo modules with streaming progress (generator)"""
+    if modules is None:
+        modules = ['l10n_ir', 'web_responsive', 'base_setup']
+    
+    import json
+    import time
+    
+    try:
+        yield json.dumps({'event': 'status', 'module': None, 'status': 'connecting', 'message': 'در حال اتصال به Odoo...'})
+        
+        common_url = f"{ODOO_URL}/xmlrpc/2/common"
+        object_url = f"{ODOO_URL}/xmlrpc/2/object"
+        
+        common = xmlrpc.client.ServerProxy(common_url, allow_none=True)
+        
+        yield json.dumps({'event': 'status', 'module': None, 'status': 'authenticating', 'message': 'در حال احراز هویت...'})
+        
+        uid = common.authenticate(db_name, admin_email, admin_password, {})
+        if not uid:
+            yield json.dumps({'event': 'error', 'message': 'Authentication failed'})
+            return
+        
+        models = xmlrpc.client.ServerProxy(object_url, allow_none=True)
+        
+        # Update module list
+        yield json.dumps({'event': 'status', 'module': None, 'status': 'updating', 'message': 'به‌روزرسانی لیست ماژول‌ها...'})
+        try:
+            models.execute_kw(db_name, uid, admin_password, 'ir.module.module', 'update_list', [[]])
+            time.sleep(1)
+        except Exception as e:
+            print(f"⚠ Could not update module list: {e}")
+        
+        newly_installed = []
+        already_installed = []
+        skipped = []
+        failed = []
+        
+        total = len(modules)
+        for idx, module_name in enumerate(modules, 1):
+            try:
+                yield json.dumps({'event': 'progress', 'module': module_name, 'status': 'searching', 'current': idx, 'total': total})
+                
+                module_ids = models.execute_kw(
+                    db_name, uid, admin_password,
+                    'ir.module.module', 'search',
+                    [[('name', '=', module_name)]]
+                )
+                
+                if not module_ids:
+                    skipped.append(module_name)
+                    yield json.dumps({'event': 'module_status', 'module': module_name, 'status': 'skipped', 'message': 'ماژول موجود نیست'})
+                    continue
+                
+                # Get module state
+                module_data = models.execute_kw(
+                    db_name, uid, admin_password,
+                    'ir.module.module', 'read',
+                    [module_ids], {'fields': ['state']}
+                )
+                
+                if module_data[0]['state'] == 'installed':
+                    already_installed.append(module_name)
+                    yield json.dumps({'event': 'module_status', 'module': module_name, 'status': 'already-installed', 'message': 'از قبل نصب بود'})
+                    continue
+                
+                # Install module
+                yield json.dumps({'event': 'progress', 'module': module_name, 'status': 'installing', 'current': idx, 'total': total})
+                
+                models.execute_kw(
+                    db_name, uid, admin_password,
+                    'ir.module.module', 'button_immediate_install',
+                    [module_ids]
+                )
+                
+                newly_installed.append(module_name)
+                yield json.dumps({'event': 'module_status', 'module': module_name, 'status': 'installed', 'message': 'نصب شد'})
+                time.sleep(0.5)
+                
+            except Exception as e:
+                print(f"❌ Error installing '{module_name}': {e}")
+                failed.append(module_name)
+                yield json.dumps({'event': 'module_status', 'module': module_name, 'status': 'failed', 'message': str(e)[:100]})
+        
+        # Final report
+        details_parts = []
+        if newly_installed:
+            details_parts.append(f"✓ Newly Installed: {', '.join(newly_installed)}")
+        if already_installed:
+            details_parts.append(f"↺ Already Installed: {', '.join(already_installed)}")
+        if skipped:
+            details_parts.append(f"⊘ Skipped (not found): {', '.join(skipped)}")
+        if failed:
+            details_parts.append(f"✗ Failed: {', '.join(failed)}")
+
+        details = " | ".join(details_parts) if details_parts else "No changes"
+
+        report = {
+            'requested': list(modules) if modules else [],
+            'installed': newly_installed,
+            'already_installed': already_installed,
+            'skipped': skipped,
+            'failed': failed,
+        }
+
+        success = bool(newly_installed or already_installed)
+        yield json.dumps({'event': 'complete', 'success': success, 'report': report, 'details': details})
+            
+    except Exception as e:
+        print(f"❌ Error: {e}")
+        import traceback
+        traceback.print_exc()
+        yield json.dumps({'event': 'error', 'message': str(e)})
+
+
 def install_odoo_modules(db_name, admin_email, admin_password, modules=None):
     """Install Odoo modules using XML-RPC"""
     if modules is None:
@@ -306,6 +421,44 @@ def api_test():
         'message': 'API is working!',
         'timestamp': datetime.now().isoformat()
     })
+
+
+@app.route('/api/install-modules-stream', methods=['POST', 'OPTIONS'])
+def api_install_modules_stream():
+    """Install Odoo modules with streaming progress (SSE)"""
+    if request.method == 'OPTIONS':
+        return '', 200
+    
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({'success': False, 'error': 'No data received'}), 400
+        
+        db_name = data.get('db_name')
+        admin_email = data.get('admin_email')
+        admin_password = data.get('admin_password')
+        modules = data.get('modules', ['l10n_ir', 'web_responsive', 'base_setup'])
+        
+        if not all([db_name, admin_email, admin_password]):
+            return jsonify({
+                'success': False,
+                'error': 'Database name, email and password are required'
+            }), 400
+        
+        def generate():
+            for event in install_odoo_modules_stream(db_name, admin_email, admin_password, modules):
+                yield f"data: {event}\n\n"
+        
+        return Response(generate(), mimetype='text/event-stream')
+            
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': f'Error: {str(e)}'
+        }), 500
 
 
 @app.route('/api/install-modules', methods=['POST', 'OPTIONS'])

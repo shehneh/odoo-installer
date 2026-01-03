@@ -693,12 +693,13 @@
             });
 
             try {
-                // Try to detect the API base URL
+                // Use Server-Sent Events for real-time progress
                 const apiBase = window.location.origin;
-                const apiUrl = `${apiBase}/api/install-modules`;
+                const apiUrl = `${apiBase}/api/install-modules-stream`;
                 
-                console.log('Calling API:', apiUrl);
+                console.log('Starting module installation with SSE:', apiUrl);
                 
+                // First, send the request to get stream
                 const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: {
@@ -712,82 +713,45 @@
                     })
                 });
 
-                // Check if response is OK
                 if (!response.ok) {
                     const text = await response.text();
-                    console.error('Response status:', response.status);
-                    console.error('Response text:', text);
-                    throw new Error(`Server error: ${response.status} - ${text.substring(0, 200)}`);
+                    throw new Error(`Server error: ${response.status}`);
                 }
 
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    const text = await response.text();
-                    console.error('Invalid content-type:', contentType);
-                    console.error('Response text:', text);
-                    throw new Error('سرور JSON برنگرداند. ممکن است API در دسترس نباشد.');
-                }
+                // Read the stream
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
 
-                const data = await response.json();
+                while (true) {
+                    const { done, value } = await reader.read();
+                    
+                    if (done) break;
+                    
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || '';
 
-                // Update progress to 100%
-                progressBar.style.width = '100%';
-                progressBar.textContent = '100%';
-
-                // Process and display module statuses
-                if (data.report) {
-                    const report = data.report;
-                    
-                    // Mark newly installed modules
-                    if (Array.isArray(report.installed)) {
-                        report.installed.forEach(moduleName => {
-                            updateModuleStatus(moduleName, 'installed', '✅ نصب شد');
-                        });
-                    }
-                    
-                    // Mark already installed modules
-                    if (Array.isArray(report.already_installed)) {
-                        report.already_installed.forEach(moduleName => {
-                            updateModuleStatus(moduleName, 'already-installed', '↺ از قبل نصب بود');
-                        });
-                    }
-                    
-                    // Mark skipped modules
-                    if (Array.isArray(report.skipped)) {
-                        report.skipped.forEach(moduleName => {
-                            updateModuleStatus(moduleName, 'skipped', '⊘ رد شد');
-                        });
-                    }
-                    
-                    // Mark failed modules
-                    if (Array.isArray(report.failed)) {
-                        report.failed.forEach(moduleName => {
-                            updateModuleStatus(moduleName, 'failed', '✗ خطا');
-                        });
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            const jsonData = line.substring(6);
+                            try {
+                                const event = JSON.parse(jsonData);
+                                handleStreamEvent(event, modules.length);
+                            } catch (e) {
+                                console.error('Failed to parse event:', jsonData, e);
+                            }
+                        }
                     }
                 }
 
                 // Wait a bit to show final status
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                await new Promise(resolve => setTimeout(resolve, 1000));
 
                 progressBox.style.display = 'none';
                 form.style.display = 'block';
                 submitBtn.disabled = false;
-
-                if (data.success) {
-                    const reportHtml = renderReportHtml(data.report, data.details);
-                    showSuccess(`✅ ${escapeHtml(data.message || 'عملیات نصب کامل شد')}<br>${reportHtml}`);
-                    
-                    // Add link to Odoo
-                    setTimeout(() => {
-                        const loginLink = `https://odoo-online.liara.run/web/login?db=${dbName}`;
-                        successAlert.innerHTML += `<br><br><a href="${loginLink}" target="_blank" style="color: #155724; font-weight: bold; text-decoration: underline;">🚀 ورود به Odoo</a>`;
-                    }, 500);
-                } else {
-                    const reportText = renderReportText(data.report, data.details);
-                    const baseError = data.error || 'خطا در نصب ماژول‌ها';
-                    showError(`${baseError}${reportText ? `\n\n${reportText}` : ''}`);
-                }
+                
             } catch (error) {
                 progressBox.style.display = 'none';
                 form.style.display = 'block';
@@ -795,6 +759,79 @@
                 showError(`خطا در ارتباط با سرور: ${error.message}`);
             }
         });
+
+        // Global variables for final report
+        let finalReport = null;
+        let finalSuccess = false;
+
+        function handleStreamEvent(event, totalModules) {
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            
+            console.log('Stream event:', event);
+
+            if (event.event === 'status') {
+                // General status updates
+                progressText.textContent = event.message || 'در حال پردازش...';
+            } 
+            else if (event.event === 'progress') {
+                // Module progress
+                const percent = Math.round((event.current / event.total) * 100);
+                progressBar.style.width = `${percent}%`;
+                progressBar.textContent = `${percent}%`;
+                progressText.textContent = `در حال پردازش ${event.current} از ${event.total} ماژول...`;
+                
+                // Update module status to "installing"
+                if (event.status === 'installing') {
+                    updateModuleStatus(event.module, 'installing', '⚙️ در حال نصب...');
+                }
+            } 
+            else if (event.event === 'module_status') {
+                // Final module status
+                const statusMap = {
+                    'installed': { status: 'installed', text: '✅ نصب شد' },
+                    'already-installed': { status: 'already-installed', text: '↺ از قبل نصب بود' },
+                    'skipped': { status: 'skipped', text: '⊘ رد شد' },
+                    'failed': { status: 'failed', text: '✗ خطا' }
+                };
+                
+                const mapping = statusMap[event.status];
+                if (mapping) {
+                    updateModuleStatus(event.module, mapping.status, mapping.text);
+                }
+            } 
+            else if (event.event === 'complete') {
+                // Installation complete
+                progressBar.style.width = '100%';
+                progressBar.textContent = '100%';
+                progressText.textContent = 'نصب کامل شد!';
+                
+                // Store report for later use
+                finalReport = event.report;
+                finalSuccess = event.success;
+                
+                // Show final message
+                setTimeout(() => {
+                    const reportHtml = renderReportHtml(event.report, event.details);
+                    if (event.success) {
+                        showSuccess(`✅ عملیات نصب کامل شد<br>${reportHtml}`);
+                        
+                        // Add Odoo link
+                        const dbName = document.getElementById('db_name').value;
+                        setTimeout(() => {
+                            const loginLink = `https://odoo-online.liara.run/web/login?db=${dbName}`;
+                            successAlert.innerHTML += `<br><br><a href="${loginLink}" target="_blank" style="color: #155724; font-weight: bold; text-decoration: underline;">🚀 ورود به Odoo</a>`;
+                        }, 500);
+                    } else {
+                        showError(`خطا در نصب ماژول‌ها<br>${reportHtml}`);
+                    }
+                }, 500);
+            } 
+            else if (event.event === 'error') {
+                progressText.textContent = 'خطا در نصب!';
+                showError(`خطا: ${event.message}`);
+            }
+        }
 
         function updateModuleStatus(moduleName, status, badgeText) {
             const moduleItem = document.getElementById(`status-${moduleName}`);
