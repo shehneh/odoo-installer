@@ -190,12 +190,13 @@ def get_odoo_modules_status(db_name, admin_email, admin_password, modules):
         common_url = f"{ODOO_URL}/xmlrpc/2/common"
         object_url = f"{ODOO_URL}/xmlrpc/2/object"
 
-        common = xmlrpc.client.ServerProxy(common_url, allow_none=True)
+        transport = TimeoutTransport(timeout=60)
+        common = xmlrpc.client.ServerProxy(common_url, allow_none=True, transport=transport)
         uid = common.authenticate(db_name, admin_email, admin_password, {})
         if not uid:
             return False, "Authentication failed", None
 
-        models = xmlrpc.client.ServerProxy(object_url, allow_none=True)
+        models = xmlrpc.client.ServerProxy(object_url, allow_none=True, transport=transport)
 
         # Best-effort refresh
         try:
