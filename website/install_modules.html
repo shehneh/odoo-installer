@@ -21,7 +21,7 @@
         }
 
         .container {
-            max-width: 700px;
+            max-width: 980px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
@@ -87,41 +87,125 @@
             margin: 20px 0;
         }
 
-        .module-item {
-            display: flex;
-            align-items: center;
-            padding: 12px;
-            background: white;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            border: 2px solid #e0e0e0;
-            transition: all 0.3s;
+        /* Odoo-like launcher grid */
+        .launcher-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 14px;
+            margin-bottom: 6px;
         }
 
-        .module-item:hover {
-            border-color: #667eea;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+        .module-item {
+            display: block;
+            cursor: pointer;
+            user-select: none;
         }
 
         .module-item input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            margin-left: 15px;
+            position: absolute;
+            opacity: 0;
+            width: 1px;
+            height: 1px;
         }
 
-        .module-info {
-            flex: 1;
+        .tile {
+            position: relative;
+            background: white;
+            border-radius: 14px;
+            border: 2px solid #e0e0e0;
+            padding: 14px 12px 12px;
+            text-align: center;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+            min-height: 150px;
         }
 
-        .module-name {
+        .module-item:hover .tile {
+            transform: translateY(-2px);
+            border-color: #667eea;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.18);
+        }
+
+        .tile-icon {
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 10px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border: 1px solid #e0e0e0;
+        }
+
+        .tile-title {
             font-weight: bold;
             color: #333;
-            margin-bottom: 3px;
+            font-size: 13px;
+            line-height: 1.3;
+            margin-bottom: 4px;
+            min-height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .module-desc {
-            font-size: 13px;
+        .tile-code {
+            font-size: 11px;
             color: #666;
+            margin-bottom: 8px;
+            direction: ltr;
+        }
+
+        .tile-desc {
+            font-size: 11px;
+            color: #666;
+            line-height: 1.5;
+            max-height: 48px;
+            overflow: hidden;
+        }
+
+        .tile-check {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            box-shadow: 0 6px 14px rgba(102, 126, 234, 0.25);
+        }
+
+        .module-item input[type="checkbox"]:focus + .tile {
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
+        }
+
+        .module-item input[type="checkbox"]:checked + .tile {
+            border-color: #667eea;
+            box-shadow: 0 12px 26px rgba(102, 126, 234, 0.22);
+        }
+
+        .module-item input[type="checkbox"]:checked + .tile .tile-check {
+            display: flex;
+        }
+
+        .module-item.recommended .tile::after {
+            content: 'پیشنهادی';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 10px;
+            font-weight: bold;
+            color: #667eea;
+            background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+            border: 1px solid #e0e0e0;
+            padding: 3px 8px;
+            border-radius: 999px;
         }
 
         .btn {
@@ -376,23 +460,28 @@
         }
 
         .module-item input[type="checkbox"] {
-            width: 22px;
-            height: 22px;
-            margin-left: 15px;
             accent-color: #667eea;
-            cursor: pointer;
         }
 
         .module-item.optional {
-            opacity: 0.85;
+            opacity: 0.9;
+        }
+
+        .module-item.optional .tile {
             border-style: dashed;
         }
 
-        .module-item.optional .module-name::after {
-            content: ' (اختیاری)';
-            font-size: 11px;
-            color: #999;
-            font-weight: normal;
+        .module-item.optional .tile::before {
+            content: 'اختیاری';
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            font-size: 10px;
+            color: #666;
+            background: #f8f9fa;
+            border: 1px dashed #e0e0e0;
+            padding: 3px 8px;
+            border-radius: 999px;
         }
     </style>
 </head>
@@ -450,133 +539,189 @@
                     <i class="fas fa-language"></i>
                     <h4>فارسی و رابط کاربری</h4>
                 </div>
-                <div class="module-item">
-                    <input type="checkbox" id="mod_l10n_ir" value="l10n_ir" checked>
-                    <div class="module-info">
-                        <div class="module-name">🇮🇷 بسته ایران (l10n_ir)</div>
-                        <div class="module-desc">پایه‌ی فارسی/ایران: تنظیمات محلی، ساختارهای استاندارد ایران (در صورت موجود بودن).</div>
-                    </div>
-                </div>
-                <div class="module-item">
-                    <input type="checkbox" id="mod_web_responsive" value="web_responsive" checked>
-                    <div class="module-info">
-                        <div class="module-name">📱 UI ریسپانسیو (web_responsive)</div>
-                        <div class="module-desc">تجربه بهتر روی موبایل و نمایش حرفه‌ای‌تر صفحات.</div>
-                    </div>
-                </div>
-                <div class="module-item">
-                    <input type="checkbox" id="mod_home_menu" value="home_menu_fullscreen" checked>
-                    <div class="module-info">
-                        <div class="module-name">🎨 داشبورد/منوی تمام‌صفحه (home_menu_fullscreen)</div>
-                        <div class="module-desc">آیکون‌های بزرگ و صفحه‌ی اصلی جذاب‌تر (اگر با نسخه شما سازگار باشد).</div>
-                    </div>
-                </div>
-                <div class="module-item">
-                    <input type="checkbox" id="mod_base_setup" value="base_setup" checked>
-                    <div class="module-info">
-                        <div class="module-name">⚙️ تنظیمات پایه (base_setup)</div>
-                        <div class="module-desc">فعال‌سازی تنظیمات اولیه و گزینه‌های استاندارد سیستم.</div>
-                    </div>
+                <div class="launcher-grid">
+                    <label class="module-item recommended">
+                        <input type="checkbox" id="mod_l10n_ir" value="l10n_ir" checked>
+                        <div class="tile">
+                            <div class="tile-check"><i class="fas fa-check"></i></div>
+                            <div class="tile-icon">🇮🇷</div>
+                            <div class="tile-title">بسته ایران</div>
+                            <div class="tile-code">l10n_ir</div>
+                            <div class="tile-desc">تنظیمات محلی و ساختارهای پایه ایران (اگر در نسخه شما موجود باشد).</div>
+                        </div>
+                    </label>
+                    <label class="module-item recommended">
+                        <input type="checkbox" id="mod_web_responsive" value="web_responsive" checked>
+                        <div class="tile">
+                            <div class="tile-check"><i class="fas fa-check"></i></div>
+                            <div class="tile-icon">📱</div>
+                            <div class="tile-title">UI ریسپانسیو</div>
+                            <div class="tile-code">web_responsive</div>
+                            <div class="tile-desc">نمایش بهتر روی موبایل + تجربه کاربری حرفه‌ای‌تر در صفحات Odoo.</div>
+                        </div>
+                    </label>
+                    <label class="module-item recommended">
+                        <input type="checkbox" id="mod_home_menu" value="home_menu_fullscreen" checked>
+                        <div class="tile">
+                            <div class="tile-check"><i class="fas fa-check"></i></div>
+                            <div class="tile-icon">🎨</div>
+                            <div class="tile-title">منوی تمام‌صفحه</div>
+                            <div class="tile-code">home_menu_fullscreen</div>
+                            <div class="tile-desc">داشبورد لانچر جذاب‌تر با آیکون‌های بزرگ (در صورت سازگاری با نسخه).</div>
+                        </div>
+                    </label>
+                    <label class="module-item recommended">
+                        <input type="checkbox" id="mod_base_setup" value="base_setup" checked>
+                        <div class="tile">
+                            <div class="tile-check"><i class="fas fa-check"></i></div>
+                            <div class="tile-icon">⚙️</div>
+                            <div class="tile-title">تنظیمات پایه</div>
+                            <div class="tile-code">base_setup</div>
+                            <div class="tile-desc">فعال‌سازی تنظیمات اولیه و گزینه‌های استاندارد برای شروع سریع‌تر.</div>
+                        </div>
+                    </label>
                 </div>
 
                 <div class="category-header">
                     <i class="fas fa-coins"></i>
                     <h4>مالی و حسابداری</h4>
                 </div>
-                <div class="module-item">
-                    <input type="checkbox" id="mod_account" value="account" checked>
-                    <div class="module-info">
-                        <div class="module-name">💳 حسابداری (account)</div>
-                        <div class="module-desc">فاکتور، دریافت/پرداخت، گزارش‌های مالی و مدیریت حساب‌ها.</div>
-                    </div>
+                <div class="launcher-grid">
+                    <label class="module-item recommended">
+                        <input type="checkbox" id="mod_account" value="account" checked>
+                        <div class="tile">
+                            <div class="tile-check"><i class="fas fa-check"></i></div>
+                            <div class="tile-icon">💳</div>
+                            <div class="tile-title">حسابداری</div>
+                            <div class="tile-code">account</div>
+                            <div class="tile-desc">فاکتور، دریافت/پرداخت، گزارش‌های مالی و مدیریت حساب‌ها.</div>
+                        </div>
+                    </label>
                 </div>
 
                 <div class="category-header">
                     <i class="fas fa-bag-shopping"></i>
                     <h4>فروش و خرید</h4>
                 </div>
-                <div class="module-item">
-                    <input type="checkbox" id="mod_crm" value="crm" checked>
-                    <div class="module-info">
-                        <div class="module-name">📈 CRM (crm)</div>
-                        <div class="module-desc">قیف فروش، پیگیری سرنخ‌ها، فرصت‌ها و فعالیت‌های فروش.</div>
-                    </div>
-                </div>
-                <div class="module-item">
-                    <input type="checkbox" id="mod_sale_mgmt" value="sale_management" checked>
-                    <div class="module-info">
-                        <div class="module-name">🧾 فروش (sale_management)</div>
-                        <div class="module-desc">پیش‌فاکتور/سفارش فروش، قیمت‌گذاری، فرایند فروش استاندارد.</div>
-                    </div>
-                </div>
-                <div class="module-item">
-                    <input type="checkbox" id="mod_purchase" value="purchase" checked>
-                    <div class="module-info">
-                        <div class="module-name">🛒 خرید (purchase)</div>
-                        <div class="module-desc">درخواست خرید، سفارش خرید، تامین‌کنندگان و جریان خرید.</div>
-                    </div>
+                <div class="launcher-grid">
+                    <label class="module-item recommended">
+                        <input type="checkbox" id="mod_crm" value="crm" checked>
+                        <div class="tile">
+                            <div class="tile-check"><i class="fas fa-check"></i></div>
+                            <div class="tile-icon">📈</div>
+                            <div class="tile-title">CRM</div>
+                            <div class="tile-code">crm</div>
+                            <div class="tile-desc">قیف فروش، فرصت‌ها و فعالیت‌ها؛ برای نظم‌دادن به پیگیری مشتری‌ها.</div>
+                        </div>
+                    </label>
+                    <label class="module-item recommended">
+                        <input type="checkbox" id="mod_sale_mgmt" value="sale_management" checked>
+                        <div class="tile">
+                            <div class="tile-check"><i class="fas fa-check"></i></div>
+                            <div class="tile-icon">🧾</div>
+                            <div class="tile-title">فروش</div>
+                            <div class="tile-code">sale_management</div>
+                            <div class="tile-desc">پیش‌فاکتور/سفارش فروش، قیمت‌گذاری و فرایند فروش استاندارد.</div>
+                        </div>
+                    </label>
+                    <label class="module-item recommended">
+                        <input type="checkbox" id="mod_purchase" value="purchase" checked>
+                        <div class="tile">
+                            <div class="tile-check"><i class="fas fa-check"></i></div>
+                            <div class="tile-icon">🛒</div>
+                            <div class="tile-title">خرید</div>
+                            <div class="tile-code">purchase</div>
+                            <div class="tile-desc">درخواست/سفارش خرید، تامین‌کنندگان و کنترل چرخه خرید.</div>
+                        </div>
+                    </label>
                 </div>
 
                 <div class="category-header">
                     <i class="fas fa-warehouse"></i>
                     <h4>انبار و لجستیک</h4>
                 </div>
-                <div class="module-item">
-                    <input type="checkbox" id="mod_stock" value="stock" checked>
-                    <div class="module-info">
-                        <div class="module-name">🏷️ انبار (stock)</div>
-                        <div class="module-desc">ورودی/خروجی کالا، موجودی، انبارگردانی و ردیابی عملیات.</div>
-                    </div>
+                <div class="launcher-grid">
+                    <label class="module-item recommended">
+                        <input type="checkbox" id="mod_stock" value="stock" checked>
+                        <div class="tile">
+                            <div class="tile-check"><i class="fas fa-check"></i></div>
+                            <div class="tile-icon">🏷️</div>
+                            <div class="tile-title">انبار</div>
+                            <div class="tile-code">stock</div>
+                            <div class="tile-desc">ورودی/خروجی، موجودی، انبارگردانی و ردیابی عملیات انبار.</div>
+                        </div>
+                    </label>
                 </div>
 
                 <div class="category-header">
                     <i class="fas fa-people-group"></i>
                     <h4>منابع انسانی</h4>
                 </div>
-                <div class="module-item optional">
-                    <input type="checkbox" id="mod_hr" value="hr">
-                    <div class="module-info">
-                        <div class="module-name">👥 کارکنان (hr)</div>
-                        <div class="module-desc">پروفایل کارکنان، ساختار سازمانی و اطلاعات پرسنلی.</div>
-                    </div>
-                </div>
-                <div class="module-item optional">
-                    <input type="checkbox" id="mod_hr_holidays" value="hr_holidays">
-                    <div class="module-info">
-                        <div class="module-name">🗓️ مرخصی‌ها (hr_holidays)</div>
-                        <div class="module-desc">درخواست/تایید مرخصی و مدیریت مانده مرخصی.</div>
-                    </div>
+                <div class="launcher-grid">
+                    <label class="module-item optional">
+                        <input type="checkbox" id="mod_hr" value="hr">
+                        <div class="tile">
+                            <div class="tile-check"><i class="fas fa-check"></i></div>
+                            <div class="tile-icon">👥</div>
+                            <div class="tile-title">کارکنان</div>
+                            <div class="tile-code">hr</div>
+                            <div class="tile-desc">پروفایل کارکنان و ساختار سازمانی. (ممکن است زمان نصب طولانی‌تر شود)</div>
+                        </div>
+                    </label>
+                    <label class="module-item optional">
+                        <input type="checkbox" id="mod_hr_holidays" value="hr_holidays">
+                        <div class="tile">
+                            <div class="tile-check"><i class="fas fa-check"></i></div>
+                            <div class="tile-icon">🗓️</div>
+                            <div class="tile-title">مرخصی‌ها</div>
+                            <div class="tile-code">hr_holidays</div>
+                            <div class="tile-desc">درخواست/تایید مرخصی و مدیریت مانده مرخصی (پیشنهاد: بعد از نصب HR)</div>
+                        </div>
+                    </label>
                 </div>
 
                 <div class="category-header">
                     <i class="fas fa-diagram-project"></i>
                     <h4>پروژه و عملیات</h4>
                 </div>
-                <div class="module-item">
-                    <input type="checkbox" id="mod_project" value="project" checked>
-                    <div class="module-info">
-                        <div class="module-name">📌 پروژه‌ها (project)</div>
-                        <div class="module-desc">مدیریت پروژه‌ها، تسک‌ها، کانبان و پیگیری پیشرفت.</div>
-                    </div>
+                <div class="launcher-grid">
+                    <label class="module-item recommended">
+                        <input type="checkbox" id="mod_project" value="project" checked>
+                        <div class="tile">
+                            <div class="tile-check"><i class="fas fa-check"></i></div>
+                            <div class="tile-icon">📌</div>
+                            <div class="tile-title">پروژه‌ها</div>
+                            <div class="tile-code">project</div>
+                            <div class="tile-desc">تسک‌ها، کانبان و پیگیری پیشرفت؛ مناسب تیم‌های خدماتی/اجرایی.</div>
+                        </div>
+                    </label>
                 </div>
 
                 <div class="category-header">
                     <i class="fas fa-globe"></i>
                     <h4>وب‌سایت و فروش آنلاین</h4>
                 </div>
-                <div class="module-item optional">
-                    <input type="checkbox" id="mod_website" value="website">
-                    <div class="module-info">
-                        <div class="module-name">🌐 وب‌سایت (website)</div>
-                        <div class="module-desc">ساخت سایت شرکتی، صفحات معرفی و فرم‌های ارتباطی.</div>
-                    </div>
-                </div>
-                <div class="module-item optional">
-                    <input type="checkbox" id="mod_website_sale" value="website_sale">
-                    <div class="module-info">
-                        <div class="module-name">🛍️ فروشگاه آنلاین (website_sale)</div>
-                        <div class="module-desc">فروش اینترنتی، سبد خرید و کاتالوگ محصولات (در صورت موجود بودن).</div>
-                    </div>
+                <div class="launcher-grid">
+                    <label class="module-item optional">
+                        <input type="checkbox" id="mod_website" value="website">
+                        <div class="tile">
+                            <div class="tile-check"><i class="fas fa-check"></i></div>
+                            <div class="tile-icon">🌐</div>
+                            <div class="tile-title">وب‌سایت</div>
+                            <div class="tile-code">website</div>
+                            <div class="tile-desc">ساخت سایت شرکتی و صفحات معرفی؛ بهتر است بعد از پایه‌ها نصب شود.</div>
+                        </div>
+                    </label>
+                    <label class="module-item optional">
+                        <input type="checkbox" id="mod_website_sale" value="website_sale">
+                        <div class="tile">
+                            <div class="tile-check"><i class="fas fa-check"></i></div>
+                            <div class="tile-icon">🛍️</div>
+                            <div class="tile-title">فروشگاه آنلاین</div>
+                            <div class="tile-code">website_sale</div>
+                            <div class="tile-desc">سبد خرید و فروش اینترنتی (به‌ترتیب: ابتدا Website سپس Website Sale).</div>
+                        </div>
+                    </label>
                 </div>
             </div>
 
@@ -756,7 +901,7 @@
                 progressBox.style.display = 'none';
                 form.style.display = 'block';
                 submitBtn.disabled = false;
-                showError(`خطا در ارتباط با سرور: ${error.message}`);
+                showError(`خطا در ارتباط با سرور: ${escapeHtml(error.message || '')}`);
             }
         });
 
@@ -817,7 +962,7 @@
                         showSuccess(`✅ عملیات نصب کامل شد<br>${reportHtml}`);
                         
                         // Add Odoo link
-                        const dbName = document.getElementById('db_name').value;
+                        const dbName = document.getElementById('dbName').value;
                         setTimeout(() => {
                             const loginLink = `https://odoo-online.liara.run/web/login?db=${dbName}`;
                             successAlert.innerHTML += `<br><br><a href="${loginLink}" target="_blank" style="color: #155724; font-weight: bold; text-decoration: underline;">🚀 ورود به Odoo</a>`;
@@ -829,7 +974,7 @@
             } 
             else if (event.event === 'error') {
                 progressText.textContent = 'خطا در نصب!';
-                showError(`خطا: ${event.message}`);
+                showError(`خطا: ${escapeHtml(event.message || '')}`);
             }
         }
 
@@ -921,7 +1066,7 @@
         }
 
         function showError(message) {
-            errorAlert.textContent = message;
+            errorAlert.innerHTML = message;
             errorAlert.style.display = 'block';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
