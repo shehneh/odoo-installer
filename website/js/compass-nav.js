@@ -8,21 +8,18 @@ const navStructure = {
     main: [
         { title: 'صفحه اصلی', url: 'index.html', icon: 'fa-home' },
         { title: 'دمو رایگان', url: 'demo.html', icon: 'fa-eye' },
-        { title: 'نصب آنلاین', url: 'install.html', icon: 'fa-rocket', highlight: true },
-        { title: 'داشبورد من', url: 'dashboard.html', icon: 'fa-th-large' }
+        { title: 'نصب آنلاین', url: 'install.html', icon: 'fa-download' }
     ],
-    odoo: [
-        { title: 'ثبت دیتابیس اختصاصی', url: 'register_tenant.html', icon: 'fa-user-plus', highlight: true },
-        { title: 'ورود کاربران', url: 'login.html', icon: 'fa-sign-in-alt' },
-        { title: 'داشبورد کاربر', url: 'user_dashboard.html', icon: 'fa-user' },
-        { title: 'دانلودها', url: 'downloads.html', icon: 'fa-download' },
-        { title: 'پشتیبانی', url: 'support.html', icon: 'fa-headset' }
+    account: [
+        { title: 'ثبت نام', url: 'register_tenant.html', icon: 'fa-user-plus', highlight: true },
+        { title: 'ورود', url: 'login.html', icon: 'fa-sign-in-alt' },
+        { title: 'نصب ماژول‌ها', url: 'install_modules.html', icon: 'fa-puzzle-piece' },
+        { title: 'پنل ادمین', url: 'admin_customers.html', icon: 'fa-shield-alt' }
     ],
-    info: [
+    resources: [
         { title: 'مستندات', url: 'docs.html', icon: 'fa-book' },
-        { title: 'لایسنس‌ها', url: 'licenses.html', icon: 'fa-key' },
-        { title: 'قیمت‌گذاری', url: 'payment.html', icon: 'fa-credit-card' },
-        { title: 'راهنمای چند دیتابیس', url: 'multi_database_help.html', icon: 'fa-database' }
+        { title: 'پشتیبانی', url: 'support.html', icon: 'fa-headset' },
+        { title: 'دانلودها', url: 'downloads.html', icon: 'fa-cloud-download-alt' }
     ]
 };
 
@@ -40,7 +37,7 @@ function createUnifiedNav() {
                 
                 <div class="nav-groups">
                     <div class="nav-group">
-                        <span class="nav-group-title">منوی اصلی</span>
+                        <span class="nav-group-title">اصلی</span>
                         ${navStructure.main.map(item => `
                             <a href="${item.url}" class="nav-item ${currentPage === item.url ? 'active' : ''} ${item.highlight ? 'highlight' : ''}">
                                 <i class="fas ${item.icon}"></i>
@@ -50,9 +47,9 @@ function createUnifiedNav() {
                     </div>
                     
                     <div class="nav-group">
-                        <span class="nav-group-title">Odoo</span>
-                        ${navStructure.odoo.map(item => `
-                            <a href="${item.url}" class="nav-item ${currentPage === item.url ? 'active' : ''}">
+                        <span class="nav-group-title">حساب کاربری</span>
+                        ${navStructure.account.map(item => `
+                            <a href="${item.url}" class="nav-item ${currentPage === item.url ? 'active' : ''} ${item.highlight ? 'highlight' : ''}">
                                 <i class="fas ${item.icon}"></i>
                                 <span>${item.title}</span>
                             </a>
@@ -60,8 +57,8 @@ function createUnifiedNav() {
                     </div>
                     
                     <div class="nav-group">
-                        <span class="nav-group-title">اطلاعات</span>
-                        ${navStructure.info.map(item => `
+                        <span class="nav-group-title">منابع</span>
+                        ${navStructure.resources.map(item => `
                             <a href="${item.url}" class="nav-item ${currentPage === item.url ? 'active' : ''}">
                                 <i class="fas ${item.icon}"></i>
                                 <span>${item.title}</span>
@@ -71,23 +68,22 @@ function createUnifiedNav() {
                 </div>
                 
                 <div class="nav-actions">
+                    <button class="nav-item" id="settingsBtn" title="تنظیمات" style="cursor: pointer;">
+                        <i class="fas fa-cog"></i>
+                    </button>
                     <button class="nav-toggle" id="navToggle">
                         <i class="fas fa-bars"></i>
-                    </button>
-                    <button class="nav-item" id="settingsBtn" title="تنظیمات" style="margin-left: 10px;">
-                        <i class="fas fa-cog"></i>
                     </button>
                 </div>
             </div>
         </nav>
     `;
     
-    // Insert at the beginning of body
     document.body.insertAdjacentHTML('afterbegin', navHTML);
     
-    // Add mobile menu toggle
     const navToggle = document.getElementById('navToggle');
     const unifiedNav = document.getElementById('unifiedNav');
+    const settingsBtn = document.getElementById('settingsBtn');
     
     if (navToggle) {
         navToggle.addEventListener('click', () => {
@@ -95,9 +91,17 @@ function createUnifiedNav() {
         });
     }
     
-    // Close menu when clicking outside
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', () => {
+            const settingsModal = document.getElementById('settingsModal');
+            if (settingsModal) {
+                settingsModal.style.display = 'flex';
+            }
+        });
+    }
+    
     document.addEventListener('click', (e) => {
-        if (!unifiedNav.contains(e.target) && unifiedNav.classList.contains('mobile-open')) {
+        if (unifiedNav && !unifiedNav.contains(e.target) && unifiedNav.classList.contains('mobile-open')) {
             unifiedNav.classList.remove('mobile-open');
         }
     });
@@ -108,7 +112,6 @@ function createBreadcrumb() {
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
     let pageName = 'صفحه اصلی';
     
-    // Find page name
     for (const category of Object.values(navStructure)) {
         const page = category.find(item => item.url === currentPage);
         if (page) {
@@ -133,10 +136,9 @@ function createBreadcrumb() {
 
 // Add quick action floating button
 function createQuickActions() {
-    // Check if compass is disabled
     const compassDisabled = localStorage.getItem('compassDisabled') === 'true';
     if (compassDisabled) {
-        return; // Don't create compass if disabled
+        return;
     }
     
     const quickActionsHTML = `
@@ -147,28 +149,29 @@ function createQuickActions() {
             <div class="quick-action-menu">
                 <a href="register_tenant.html" class="quick-action-item register" style="background: linear-gradient(135deg, rgba(113, 75, 103, 0.3), rgba(147, 112, 219, 0.3)); border-color: rgba(113, 75, 103, 0.5);">
                     <i class="fas fa-user-plus"></i>
-                    <span>ساخت دیتابیس اختصاصی</span>
-                </a>
-                <a href="install.html" class="quick-action-item install">
-                    <i class="fas fa-rocket"></i>
-                    <span>نصب آنلاین</span>
-                </a>
-                <a href="demo.html" class="quick-action-item demo">
-                    <i class="fas fa-play-circle"></i>
-                    <span>دمو رایگان</span>
-                </a>
-                <a href="dashboard.html" class="quick-action-item dashboard">
-                    <i class="fas fa-th-large"></i>
-                    <span>داشبورد من</span>
+                    <span>ثبت نام</span>
                 </a>
                 <a href="login.html" class="quick-action-item login">
                     <i class="fas fa-sign-in-alt"></i>
-                    <span>ورود کاربر</span>
+                    <span>ورود</span>
                 </a>
-                <a href="index.html" class="quick-action-item home">
-                    <i class="fas fa-home"></i>
-                    <span>صفحه اصلی</span>
+                <a href="demo.html" class="quick-action-item demo">
+                    <i class="fas fa-eye"></i>
+                    <span>دمو رایگان</span>
                 </a>
+                <a href="docs.html" class="quick-action-item docs">
+                    <i class="fas fa-book"></i>
+                    <span>مستندات</span>
+                </a>
+                <a href="support.html" class="quick-action-item support">
+                    <i class="fas fa-headset"></i>
+                    <span>پشتیبانی</span>
+                </a>
+                <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 8px 0;"></div>
+                <button class="quick-action-item settings" id="compassSettings" style="background: rgba(113, 75, 103, 0.2); border-color: rgba(113, 75, 103, 0.3); cursor: pointer; width: 100%; border: 1px solid rgba(113, 75, 103, 0.3);">
+                    <i class="fas fa-cog"></i>
+                    <span>تنظیمات</span>
+                </button>
             </div>
         </div>
     `;
@@ -177,31 +180,24 @@ function createQuickActions() {
     
     const trigger = document.getElementById('quickActionTrigger');
     const quickActions = document.getElementById('quickActions');
+    const settingsBtn = document.getElementById('compassSettings');
     
     if (trigger) {
         trigger.addEventListener('click', () => {
             quickActions.classList.toggle('active');
         });
     }
-}
-
-// Add compass toggle button to nav
-function addCompassToggle() {
-    const compassDisabled = localStorage.getItem('compassDisabled') === 'true';
     
-    if (compassDisabled) {
-        // Add enable button to nav
-        const navActions = document.querySelector('.nav-actions');
-        if (navActions) {
-            const enableBtn = document.createElement('button');
-            enableBtn.className = 'nav-item';
-            enableBtn.innerHTML = '<i class="fas fa-compass"></i><span>فعال‌سازی قطب‌نما</span>';
-            enableBtn.style.cssText = 'background: rgba(40, 167, 69, 0.2); border: 1px solid rgba(40, 167, 69, 0.5); cursor: pointer; margin-left: 10px;';
-            enableBtn.addEventListener('click', () => {
-                localStorage.removeItem('compassDisabled');
-                location.reload();
-            });
- 
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', () => {
+            quickActions.classList.remove('active');
+            const settingsModal = document.getElementById('settingsModal');
+            if (settingsModal) {
+                settingsModal.style.display = 'flex';
+            }
+        });
+    }
+}
 
 // Create settings modal
 function createSettingsModal() {
@@ -209,7 +205,6 @@ function createSettingsModal() {
     
     const modalHTML = `
         <div class="settings-modal" id="settingsModal" style="display: none;">
-    createSettingsModal();
             <div class="settings-modal-overlay"></div>
             <div class="settings-modal-content">
                 <div class="settings-modal-header">
@@ -236,17 +231,9 @@ function createSettingsModal() {
     
     document.body.insertAdjacentHTML('beforeend', modalHTML);
     
-    // Event listeners
-    const settingsBtn = document.getElementById('settingsBtn');
-    const settingsModal = document.getElementById('settingsModal');
     const closeSettings = document.getElementById('closeSettings');
+    const settingsModal = document.getElementById('settingsModal');
     const compassToggle = document.getElementById('compassToggle');
-    
-    if (settingsBtn) {
-        settingsBtn.addEventListener('click', () => {
-            settingsModal.style.display = 'flex';
-        });
-    }
     
     if (closeSettings) {
         closeSettings.addEventListener('click', () => {
@@ -254,12 +241,12 @@ function createSettingsModal() {
         });
     }
     
-    // Close on overlay click
-    settingsModal.querySelector('.settings-modal-overlay').addEventListener('click', () => {
-        settingsModal.style.display = 'none';
-    });
+    if (settingsModal) {
+        settingsModal.querySelector('.settings-modal-overlay').addEventListener('click', () => {
+            settingsModal.style.display = 'none';
+        });
+    }
     
-    // Handle compass toggle
     if (compassToggle) {
         compassToggle.addEventListener('change', (e) => {
             if (e.target.checked) {
@@ -270,9 +257,6 @@ function createSettingsModal() {
             location.reload();
         });
     }
-}           navActions.insertBefore(enableBtn, navActions.firstChild);
-        }
-    }
 }
 
 // Initialize on page load
@@ -280,8 +264,8 @@ document.addEventListener('DOMContentLoaded', () => {
     createUnifiedNav();
     createBreadcrumb();
     createQuickActions();
-    addCompassToggle();
+    createSettingsModal();
     
-    console.log('✅ Unified Navigation System loaded');
-    console.log('💡 Compass status:', localStorage.getItem('compassDisabled') === 'true' ? 'Disabled' : 'Enabled');
+    console.log('✅ Navigation System loaded');
+    console.log('💡 Compass:', localStorage.getItem('compassDisabled') === 'true' ? 'Disabled' : 'Enabled');
 });

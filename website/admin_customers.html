@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت مشتریان - OdooMaster</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/compass-nav.css?v=1">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Vazir', 'Tahoma', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 30px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 28px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 32px;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 15px 50px 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: 'Vazir', 'Tahoma', sans-serif;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: right;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            text-align: right;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .copy-btn.copied {
+            background: #28a745;
+        }
+
+        .badge {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .badge.active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .btn-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        .btn-link:hover {
+            color: #5568d3;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #667eea;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 50px;
+            color: #999;
+        }
+
+        .refresh-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .refresh-btn:hover {
+            background: #5568d3;
+        }
+
+        code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-users"></i> مدیریت مشتریان</h1>
+            <div>
+                <button class="refresh-btn" onclick="loadCustomers()" style="margin-left: 10px;">
+                    <i class="fas fa-sync-alt"></i> بروزرسانی
+                </button>
+                <button class="refresh-btn" onclick="logout()" style="background: #dc3545;">
+                    <i class="fas fa-sign-out-alt"></i> خروج
+                </button>
+            </div>
+        </div>
+
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <h3 id="totalCount">0</h3>
+                <p>تعداد کل مشتریان</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="activeCount">0</h3>
+                <p>مشتریان فعال</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="todayCount">0</h3>
+                <p>ثبت نام امروز</p>
+            </div>
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="جستجو بر اساس نام، ایمیل یا دیتابیس...">
+            <i class="fas fa-search"></i>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>در حال بارگذاری مشتریان...</p>
+        </div>
+
+        <div class="table-container" id="tableContainer" style="display: none;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ردیف</th>
+                        <th>نام شرکت</th>
+                        <th>نام مدیر</th>
+                        <th>ایمیل</th>
+                        <th>رمز عبور</th>
+                        <th>نام دیتابیس</th>
+                        <th>موبایل</th>
+                        <th>وضعیت</th>
+                        <th>تاریخ ثبت</th>
+                        <th>عملیات</th>
+                    </tr>
+                </thead>
+                <tbody id="customersTable">
+                </tbody>
+            </table>
+        </div>
+
+        <div class="no-data" id="noData" style="display: none;">
+            <i class="fas fa-inbox" style="font-size: 48px; color: #ddd;"></i>
+            <p>هیچ مشتری‌ای یافت نشد</p>
+        </div>
+    </div>
+
+    <script src="js/compass-nav.js?v=1"></script>
+    <script>
+        let allCustomers = [];
+
+        // Check authentication
+        function checkAuth() {
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                window.location.href = '/admin_login.html?redirect=admin_customers.html';
+                return false;
+            }
+            return true;
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('adminToken');
+            window.location.href = '/admin_login.html';
+        }
+
+        async function loadCustomers() {
+            const loading = document.getElementById('loading');
+            const tableContainer = document.getElementById('tableContainer');
+            const noData = document.getElementById('noData');
+
+            loading.style.display = 'block';
+            tableContainer.style.display = 'none';
+            noData.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/list-customers');
+                const data = await response.json();
+
+                if (data.success && data.customers.length > 0) {
+                    allCustomers = data.customers;
+                    displayCustomers(allCustomers);
+                    updateStats(allCustomers);
+                    loading.style.display = 'none';
+                    tableContainer.style.display = 'block';
+                } else {
+                    loading.style.display = 'none';
+                    noData.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error loading customers:', error);
+                loading.style.display = 'none';
+                noData.style.display = 'block';
+            }
+        }
+
+        function displayCustomers(customers) {
+            const tbody = document.getElementById('customersTable');
+            tbody.innerHTML = '';
+
+            customers.forEach((customer, index) => {
+                const row = document.createElement('tr');
+                const createdDate = new Date(customer.created_at).toLocaleDateString('fa-IR');
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><strong>${customer.company_name || '-'}</strong></td>
+                    <td>${customer.admin_name || '-'}</td>
+                    <td>
+                        <code>${customer.admin_email}</code>
+                        <button class="copy-btn" onclick="copyToClipboard('${customer.admin_email}', this)">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </td>
+                    <td>
+                        <code>${customer.admin_password}</code>
+                        <button class="copy-btn" onclick="copyToClipboard('${customer.admin_password}', this)">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </td>
+                    <td><code>${customer.database_name}</code></td>
+                    <td>${customer.phone || '-'}</td>
+                    <td>
+                        <span class="badge ${customer.status === 'active' ? 'active' : 'pending'}">
+                            ${customer.status === 'active' ? 'فعال' : 'در انتظار'}
+                        </span>
+                    </td>
+                    <td>${createdDate}</td>
+                    <td>
+                        <a href="https://odoo-online.liara.run/web/login?db=${customer.database_name}" 
+                           target="_blank" class="btn-link">
+                            <i class="fas fa-external-link-alt"></i> ورود
+                        </a>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateStats(customers) {
+            document.getElementById('totalCount').textContent = customers.length;
+            
+            const activeCount = customers.filter(c => c.status === 'active').length;
+            document.getElementById('activeCount').textContent = activeCount;
+
+            const today = new Date().toISOString().split('T')[0];
+            const todayCount = customers.filter(c => {
+                const createdDate = new Date(c.created_at).toISOString().split('T')[0];
+                return createdDate === today;
+            }).length;
+            document.getElementById('todayCount').textContent = todayCount;
+        }
+
+        function copyToClipboard(text, button) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalHTML = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check"></i>';
+                button.classList.add('copied');
+                
+                setTimeout(() => {
+                    button.innerHTML = originalHTML;
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                alert('خطا در کپی کردن');
+            });
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filtered = allCustomers.filter(customer => {
+                return (
+                    customer.company_name?.toLowerCase().includes(searchTerm) ||
+                    customer.admin_name?.toLowerCase().includes(searchTerm) ||
+                    customer.admin_email?.toLowerCase().includes(searchTerm) ||
+                    customer.database_name?.toLowerCase().includes(searchTerm) ||
+                    customer.phone?.includes(searchTerm)
+                );
+            });
+            displayCustomers(filtered);
+        });
+
+        // Check authentication and load customers on page load
+        if (checkAuth()) {
+            loadCustomers();
+        }
+    </script>
+</body>
+</html>

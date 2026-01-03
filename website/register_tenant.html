@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>راه‌اندازی اودوی اختصاصی شما</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/unified-nav.css">
+    <link rel="stylesheet" href="css/unified-nav.css?v=4">
     <style>
         * {
             margin: 0;
@@ -117,6 +117,136 @@
         .loader {
             display: none;
             text-align: center;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .loader.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Progress Tracking */
+        .progress-container {
+            margin-top: 20px;
+        }
+
+        .progress-bar-container {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .progress-steps {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .progress-step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            opacity: 0.5;
+            transition: all 0.3s ease;
+        }
+
+        .progress-step.active {
+            opacity: 1;
+            background: #e3f2fd;
+            border-right: 3px solid #667eea;
+        }
+
+        .progress-step.completed {
+            opacity: 1;
+            background: #d4edda;
+            border-right: 3px solid #28a745;
+        }
+
+        .progress-step-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 12px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .progress-step.waiting .progress-step-icon {
+            background: #e0e0e0;
+            color: #999;
+        }
+
+        .progress-step.active .progress-step-icon {
+            background: #667eea;
+            color: white;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .progress-step.completed .progress-step-icon {
+            background: #28a745;
+            color: white;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .progress-step-content {
+            flex: 1;
+        }
+
+        .progress-step-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .progress-step-desc {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .progress-step-time {
+            font-size: 12px;
+            color: #667eea;
+            margin-top: 5px;
+        }
+
+        .loader {
+            display: none;
+            text-align: center;
             margin: 20px 0;
         }
 
@@ -172,10 +302,46 @@
         .credentials p {
             margin: 10px 0;
             font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
         }
 
         .credentials strong {
             color: #667eea;
+        }
+
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .copy-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .copy-btn:active {
+            transform: translateY(0);
+        }
+
+        .copy-btn.copied {
+            background: #28a745;
+        }
+
+        .copy-btn i {
+            font-size: 14px;
         }
 
         .login-link {
@@ -252,6 +418,19 @@
                        placeholder="09123456789">
             </div>
 
+            <div class="form-group" style="margin-top: 25px;">
+                <label style="display: flex; align-items: center; cursor: pointer; user-select: none;">
+                    <input type="checkbox" id="installModules" name="installModules" checked 
+                           style="width: 20px; height: 20px; margin-left: 10px; cursor: pointer;">
+                    <span style="font-weight: normal;">
+                        نصب ماژول‌های فارسی و داشبورد زیبا 
+                        <small style="color: #666; display: block; margin-top: 5px; font-size: 13px;">
+                            (شامل: رابط کاربری ریسپانسیو، داشبورد برنامه‌ها، و تنظیمات فارسی)
+                        </small>
+                    </span>
+                </label>
+            </div>
+
             <button type="submit" class="btn" id="submitBtn">
                 ساخت سرور Odoo اختصاصی
             </button>
@@ -259,9 +438,57 @@
 
         <div class="loader" id="loader">
             <div class="spinner"></div>
-            <p style="margin-top: 15px; color: #667eea; font-weight: bold;">
-                در حال ساخت دیتابیس و نصب ماژول‌ها...
+            <p style="margin-top: 15px; color: #667eea; font-weight: bold; font-size: 18px;">
+                در حال ساخت سرور Odoo شما...
             </p>
+            
+            <div class="progress-container">
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" id="progressBar"></div>
+                </div>
+                
+                <ul class="progress-steps">
+                    <li class="progress-step waiting" id="step1">
+                        <div class="progress-step-icon">1</div>
+                        <div class="progress-step-content">
+                            <div class="progress-step-title">ساخت دیتابیس</div>
+                            <div class="progress-step-desc">در حال ایجاد دیتابیس اختصاصی شما در سرور...</div>
+                            <div class="progress-step-time" id="step1-time"></div>
+                        </div>
+                    </li>
+                    
+                    <li class="progress-step waiting" id="step2">
+                        <div class="progress-step-icon">2</div>
+                        <div class="progress-step-content">
+                            <div class="progress-step-title">نصب ماژول‌های پایه</div>
+                            <div class="progress-step-desc">نصب ماژول‌های اصلی Odoo و تنظیمات اولیه...</div>
+                            <div class="progress-step-time" id="step2-time"></div>
+                        </div>
+                    </li>
+                    
+                    <li class="progress-step waiting" id="step3">
+                        <div class="progress-step-icon">3</div>
+                        <div class="progress-step-content">
+                            <div class="progress-step-title">نصب ماژول‌های فارسی</div>
+                            <div class="progress-step-desc">نصب رابط کاربری ریسپانسیو و فارسی‌سازی...</div>
+                            <div class="progress-step-time" id="step3-time"></div>
+                        </div>
+                    </li>
+                    
+                    <li class="progress-step waiting" id="step4">
+                        <div class="progress-step-icon">4</div>
+                        <div class="progress-step-content">
+                            <div class="progress-step-title">تنظیمات نهایی</div>
+                            <div class="progress-step-desc">آماده‌سازی سرور و ذخیره اطلاعات...</div>
+                            <div class="progress-step-time" id="step4-time"></div>
+                        </div>
+                    </li>
+                </ul>
+                
+                <p style="margin-top: 20px; color: #666; font-size: 14px;">
+                    ⏱️ زمان تخمینی: <span id="totalTime" style="font-weight: bold; color: #667eea;">60-90 ثانیه</span>
+                </p>
+            </div>
         </div>
 
         <div class="result" id="result"></div>
@@ -280,6 +507,133 @@
         const result = document.getElementById('result');
         const submitBtn = document.getElementById('submitBtn');
 
+        // Progress tracking functions
+        let progressStartTime = 0;
+        let currentStep = 0;
+        let stepTimers = {};
+        let activeTimerIntervals = [];
+
+        function updateProgress(step, percentage) {
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = percentage + '%';
+        }
+
+        function setStepActive(stepNum, estimatedTime = null) {
+            currentStep = stepNum;
+            const stepElement = document.getElementById(`step${stepNum}`);
+            
+            // Mark previous steps as completed
+            for (let i = 1; i < stepNum; i++) {
+                const prevStep = document.getElementById(`step${i}`);
+                prevStep.classList.remove('active', 'waiting');
+                prevStep.classList.add('completed');
+                const icon = prevStep.querySelector('.progress-step-icon');
+                icon.textContent = '✓';
+            }
+            
+            // Mark current step as active
+            stepElement.classList.remove('waiting', 'completed');
+            stepElement.classList.add('active');
+            
+            // Start timer for current step
+            if (estimatedTime) {
+                stepTimers[stepNum] = Date.now();
+                const timeElement = document.getElementById(`step${stepNum}-time`);
+                updateStepTimer(stepNum, estimatedTime);
+            }
+        }
+
+        function updateStepTimer(stepNum, estimatedTime) {
+            const timeElement = document.getElementById(`step${stepNum}-time`);
+            const startTime = stepTimers[stepNum];
+            
+            const interval = setInterval(() => {
+                if (currentStep !== stepNum) {
+                    clearInterval(interval);
+                    timeElement.textContent = '';
+                    return;
+                }
+                
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const remaining = Math.max(0, estimatedTime - elapsed);
+                
+                if (remaining > 0) {
+                    timeElement.textContent = `⏱️ حدود ${remaining} ثانیه باقی مانده...`;
+                } else {
+                    timeElement.textContent = '⏱️ در حال تکمیل...';
+                }
+            }, 1000);
+            
+            // Track this interval so we can clear it later
+            activeTimerIntervals.push(interval);
+        }
+
+        function completeAllSteps() {
+            // Clear all active timers
+            activeTimerIntervals.forEach(interval => clearInterval(interval));
+            activeTimerIntervals = [];
+            
+            for (let i = 1; i <= 4; i++) {
+                const stepElement = document.getElementById(`step${i}`);
+                stepElement.classList.remove('active', 'waiting');
+                stepElement.classList.add('completed');
+                const icon = stepElement.querySelector('.progress-step-icon');
+                icon.textContent = '✓';
+                
+                // Clear timer text
+                const timeElement = document.getElementById(`step${i}-time`);
+                if (timeElement) {
+                    timeElement.textContent = '';
+                }
+            }
+            updateProgress(4, 100);
+        }
+
+        function simulateProgress(installModules) {
+            progressStartTime = Date.now();
+            
+            // Step 1: Creating database (0-40%)
+            setTimeout(() => {
+                setStepActive(1, 30);
+                updateProgress(1, 10);
+            }, 500);
+            
+            setTimeout(() => updateProgress(1, 25), 5000);
+            setTimeout(() => updateProgress(1, 40), 15000);
+            
+            // Step 2: Installing base modules (40-60%)
+            setTimeout(() => {
+                setStepActive(2, 20);
+                updateProgress(2, 50);
+            }, 25000);
+            
+            setTimeout(() => updateProgress(2, 60), 35000);
+            
+            if (installModules) {
+                // Step 3: Installing Persian modules (60-85%)
+                setTimeout(() => {
+                    setStepActive(3, 25);
+                    updateProgress(3, 70);
+                }, 40000);
+                
+                setTimeout(() => updateProgress(3, 85), 55000);
+                
+                // Step 4: Final setup (85-95%)
+                setTimeout(() => {
+                    setStepActive(4, 10);
+                    updateProgress(4, 90);
+                }, 60000);
+            } else {
+                // Skip step 3, go to step 4
+                setTimeout(() => {
+                    const step3 = document.getElementById('step3');
+                    step3.style.display = 'none';
+                    setStepActive(4, 10);
+                    updateProgress(4, 85);
+                }, 40000);
+            }
+        }
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -288,13 +642,43 @@
                 company_name: document.getElementById('companyName').value,
                 admin_email: document.getElementById('adminEmail').value,
                 admin_name: document.getElementById('adminName').value,
-                phone: document.getElementById('phone').value
+                phone: document.getElementById('phone').value,
+                install_modules: document.getElementById('installModules').checked
             };
 
-            // Show loader
+            // Show loader and start progress tracking
             loader.classList.add('active');
             submitBtn.disabled = true;
             result.style.display = 'none';
+            
+            // Clear all existing timers
+            activeTimerIntervals.forEach(interval => clearInterval(interval));
+            activeTimerIntervals = [];
+            
+            // Reset progress
+            updateProgress(0, 0);
+            currentStep = 0;
+            stepTimers = {};
+            
+            // Reset all steps to waiting state
+            for (let i = 1; i <= 4; i++) {
+                const stepElement = document.getElementById(`step${i}`);
+                if (stepElement) {
+                    stepElement.classList.remove('active', 'completed');
+                    stepElement.classList.add('waiting');
+                    const icon = stepElement.querySelector('.progress-step-icon');
+                    if (icon) icon.textContent = i;
+                    const timeElement = document.getElementById(`step${i}-time`);
+                    if (timeElement) timeElement.textContent = '';
+                }
+            }
+            
+            // Show step 3 again if it was hidden
+            const step3 = document.getElementById('step3');
+            if (step3) step3.style.display = '';
+            
+            // Start simulated progress
+            simulateProgress(formData.install_modules);
 
             try {
                 console.log('📤 Sending request:', formData);
@@ -312,6 +696,12 @@
                 const data = await response.json();
                 console.log('📦 Response data:', data);
 
+                // Complete all steps
+                completeAllSteps();
+                
+                // Wait a moment to show completion
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
                 // Hide loader
                 loader.classList.remove('active');
                 submitBtn.disabled = false;
@@ -325,33 +715,80 @@
                         <div class="credentials">
                             <p><strong>نام دیتابیس:</strong> ${data.data.database_name}</p>
                             <p><strong>تاریخ ثبت:</strong> ${data.data.created_at}</p>
-                            <p style="color: #856404; margin-top: 10px;">⚠️ اگر رمز عبور را فراموش کردید، با پشتیبانی تماس بگیرید.</p>
+                            <p style="color: #856404; margin-top: 10px; display: block;">
+                                ℹ️ برای دریافت رمز عبور، به 
+                                <a href="/admin_customers.html" target="_blank" style="color: #667eea; font-weight: bold;">
+                                    پنل مدیریت مشتریان
+                                </a> 
+                                مراجعه کنید.
+                            </p>
                         </div>
                         <a href="${data.data.login_url}" target="_blank" class="login-link">
                             ورود به Odoo شما
                         </a>
                     `;
+                    result.style.display = 'block';
                     return;
                 }
 
                 if (data.success) {
                     // Show success
                     result.className = 'result success';
+                    
+                    const modulesInfo = data.data.modules_installed ? 
+                        '<p style="color: #28a745; margin-top: 10px;">✓ ماژول‌های فارسی و رابط کاربری زیبا نصب شده‌اند</p>' : '';
+                    
                     result.innerHTML = `
                         <h2 style="margin-bottom: 15px;">✅ سرور Odoo شما آماده است!</h2>
+                        ${modulesInfo}
                         <div class="credentials">
                             <p><strong>نام شرکت:</strong> ${data.data.company_name}</p>
                             <p><strong>نام دیتابیس:</strong> ${data.data.database_name}</p>
-                            <p><strong>ایمیل:</strong> ${data.data.admin_email}</p>
-                            <p><strong>رمز عبور:</strong> <code>${data.data.admin_password}</code></p>
-                            <p style="color: #dc3545; margin-top: 15px;">
+                            <p>
+                                <button class="copy-btn" onclick="copyToClipboard('${data.data.admin_email}', this)">
+                                    <i class="fas fa-copy"></i> کپی
+                                </button>
+                                <span><strong>ایمیل:</strong> ${data.data.admin_email}</span>
+                            </p>
+                            <p>
+                                <button class="copy-btn" onclick="copyToClipboard('${data.data.admin_password}', this)">
+                                    <i class="fas fa-copy"></i> کپی
+                                </button>
+                                <span><strong>رمز عبور:</strong> <code>${data.data.admin_password}</code></span>
+                            </p>
+                            <p style="color: #dc3545; margin-top: 15px; display: block;">
                                 ⚠️ لطفاً این اطلاعات را یادداشت کنید! این صفحه دوباره نمایش داده نخواهد شد.
                             </p>
+                            <div style="background: #fff3cd; border-right: 4px solid #ffc107; padding: 15px; margin-top: 20px; border-radius: 8px; text-align: right;">
+                                <p style="color: #856404; font-weight: bold; margin-bottom: 10px; display: block;">🔔 نکته مهم برای استفاده همزمان از چند دیتابیس:</p>
+                                <p style="color: #856404; font-size: 14px; line-height: 1.8; display: block;">
+                                    اگر قصد دارید همزمان به چند دیتابیس متفاوت دسترسی داشته باشید، حتماً از 
+                                    <strong>مرورگرهای مختلف</strong> یا <strong>پنجره‌های ناشناس جداگانه</strong> استفاده کنید.
+                                    در غیر این صورت، ممکن است session ها با هم تداخل پیدا کنند.
+                                </p>
+                                <a href="/multi_database_help.html" target="_blank" style="color: #007bff; text-decoration: underline; font-size: 14px;">
+                                    📖 راهنمای کامل استفاده همزمان از چند دیتابیس
+                                </a>
+                            </div>
                         </div>
-                        <a href="${data.data.login_url}" target="_blank" class="login-link">
-                            ورود به Odoo اختصاصی شما
+                        <a href="/auto_login.html?db=${data.data.database_name}&email=${encodeURIComponent(data.data.admin_email)}&password=${encodeURIComponent(data.data.admin_password)}" target="_blank" class="login-link">
+                            <i class="fas fa-rocket"></i> ورود خودکار به Odoo اختصاصی شما
                         </a>
+                        
+                        ${!data.data.modules_installed ? `
+                        <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 10px; border-right: 4px solid #ffc107;">
+                            <p style="color: #856404; margin-bottom: 10px;">
+                                <i class="fas fa-info-circle"></i> <strong>نکته:</strong> ماژول‌های فارسی نصب نشدند
+                            </p>
+                            <a href="/install_modules.html?db=${data.data.database_name}&email=${encodeURIComponent(data.data.admin_email)}&password=${encodeURIComponent(data.data.admin_password)}" 
+                               target="_blank"
+                               style="display: inline-block; background: #667eea; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; margin-top: 10px;">
+                                <i class="fas fa-puzzle-piece"></i> نصب ماژول‌های فارسی
+                            </a>
+                        </div>
+                        ` : ''}
                     `;
+                    result.style.display = 'block';
 
                     // Reset form
                     form.reset();
@@ -363,6 +800,7 @@
                         <p style="margin-top: 10px;">${data.message}</p>
                         <p style="margin-top: 10px;">لطفاً دوباره تلاش کنید یا با پشتیبانی تماس بگیرید.</p>
                     `;
+                    result.style.display = 'block';
                 }
             } catch (error) {
                 loader.classList.remove('active');
@@ -373,9 +811,44 @@
                     <h2>❌ خطا در ارتباط با سرور</h2>
                     <p style="margin-top: 10px;">${error.message}</p>
                 `;
+                result.style.display = 'block';
             }
         });
+
+        // Copy to clipboard function
+        function copyToClipboard(text, button) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Change button appearance
+                const originalHTML = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check"></i> کپی شد!';
+                button.classList.add('copied');
+                
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    button.innerHTML = originalHTML;
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                alert('خطا در کپی کردن');
+            });
+        }
+
+        // Make copyToClipboard available globally
+        window.copyToClipboard = copyToClipboard;
     </script>
-    <script src="js/unified-nav.js"></script>
+    <script src="js/compass-nav.js?v=1"></script>
+    <script>
+        // Force create compass after page load
+        setTimeout(() => {
+            console.log('🧭 Checking compass...');
+            if (!document.getElementById('quickActions')) {
+                console.log('⚠️ Compass not found, creating manually...');
+                createQuickActions();
+            } else {
+                console.log('✅ Compass already exists');
+            }
+        }, 500);
+    </script>
 </body>
 </html>

@@ -74,9 +74,6 @@ function createUnifiedNav() {
                     <button class="nav-toggle" id="navToggle">
                         <i class="fas fa-bars"></i>
                     </button>
-                    <button class="nav-item" id="settingsBtn" title="تنظیمات" style="margin-left: 10px;">
-                        <i class="fas fa-cog"></i>
-                    </button>
                 </div>
             </div>
         </nav>
@@ -169,6 +166,10 @@ function createQuickActions() {
                     <i class="fas fa-home"></i>
                     <span>صفحه اصلی</span>
                 </a>
+                <button class="quick-action-item disable" id="disableCompass" style="background: rgba(220, 53, 69, 0.2); border-color: rgba(220, 53, 69, 0.5); cursor: pointer; border: 1px solid rgba(220, 53, 69, 0.5); width: 100%;">
+                    <i class="fas fa-times-circle"></i>
+                    <span>غیرفعال کردن قطب‌نما</span>
+                </button>
             </div>
         </div>
     `;
@@ -177,10 +178,23 @@ function createQuickActions() {
     
     const trigger = document.getElementById('quickActionTrigger');
     const quickActions = document.getElementById('quickActions');
+    const disableBtn = document.getElementById('disableCompass');
     
     if (trigger) {
         trigger.addEventListener('click', () => {
             quickActions.classList.toggle('active');
+        });
+    }
+    
+    // Handle disable compass button
+    if (disableBtn) {
+        disableBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (confirm('آیا مطمئن هستید که می‌خواهید قطب‌نما را غیرفعال کنید؟\n\nبرای فعال‌سازی دوباره، از تنظیمات مرورگر یا Console استفاده کنید:\nlocalStorage.removeItem("compassDisabled")')) {
+                localStorage.setItem('compassDisabled', 'true');
+                quickActions.style.display = 'none';
+                alert('قطب‌نما غیرفعال شد. برای فعال‌سازی دوباره صفحه را رفرش کنید و از Console استفاده کنید:\nlocalStorage.removeItem("compassDisabled")');
+            }
         });
     }
 }
@@ -201,76 +215,7 @@ function addCompassToggle() {
                 localStorage.removeItem('compassDisabled');
                 location.reload();
             });
- 
-
-// Create settings modal
-function createSettingsModal() {
-    const compassDisabled = localStorage.getItem('compassDisabled') === 'true';
-    
-    const modalHTML = `
-        <div class="settings-modal" id="settingsModal" style="display: none;">
-    createSettingsModal();
-            <div class="settings-modal-overlay"></div>
-            <div class="settings-modal-content">
-                <div class="settings-modal-header">
-                    <h3><i class="fas fa-cog"></i> تنظیمات</h3>
-                    <button class="settings-close" id="closeSettings">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="settings-modal-body">
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h4><i class="fas fa-compass"></i> قطب‌نمای ناوبری</h4>
-                            <p>دکمه شناور برای دسترسی سریع به صفحات</p>
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="compassToggle" ${compassDisabled ? '' : 'checked'}>
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
-    
-    // Event listeners
-    const settingsBtn = document.getElementById('settingsBtn');
-    const settingsModal = document.getElementById('settingsModal');
-    const closeSettings = document.getElementById('closeSettings');
-    const compassToggle = document.getElementById('compassToggle');
-    
-    if (settingsBtn) {
-        settingsBtn.addEventListener('click', () => {
-            settingsModal.style.display = 'flex';
-        });
-    }
-    
-    if (closeSettings) {
-        closeSettings.addEventListener('click', () => {
-            settingsModal.style.display = 'none';
-        });
-    }
-    
-    // Close on overlay click
-    settingsModal.querySelector('.settings-modal-overlay').addEventListener('click', () => {
-        settingsModal.style.display = 'none';
-    });
-    
-    // Handle compass toggle
-    if (compassToggle) {
-        compassToggle.addEventListener('change', (e) => {
-            if (e.target.checked) {
-                localStorage.removeItem('compassDisabled');
-            } else {
-                localStorage.setItem('compassDisabled', 'true');
-            }
-            location.reload();
-        });
-    }
-}           navActions.insertBefore(enableBtn, navActions.firstChild);
+            navActions.insertBefore(enableBtn, navActions.firstChild);
         }
     }
 }

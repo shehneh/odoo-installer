@@ -59,14 +59,29 @@ def create_database(db_name, admin_email, admin_password, company_name, lang='fa
     }
     
     try:
+        print(f"Creating database: {db_name}")
         response = requests.post(url, json=payload, headers=headers, timeout=300)
         result = response.json()
         
         if 'error' in result:
-            return False, result['error']['data']['message']
+            error_msg = result['error'].get('data', {}).get('message', str(result['error']))
+            print(f"Error creating database: {error_msg}")
+            return False, error_msg
+        
+        print(f"Database {db_name} created successfully")
+        
+        # Force assets regeneration by accessing the database
+        try:
+            login_url = f"{ODOO_URL}/web/database/selector?db={db_name}"
+            requests.get(login_url, timeout=10)
+        except:
+            pass  # Ignore errors, just trying to trigger asset generation
         
         return True, f"Database {db_name} created successfully"
+    except requests.Timeout:
+        return False, "Database creation timeout - but may have been created. Check manually."
     except Exception as e:
+        print(f"Exception: {str(e)}")
         return False, str(e)
 
 def install_modules(db_name, admin_password, modules=['web_responsive', 'home_menu_fullscreen']):
@@ -139,8 +154,10 @@ def create_tenant():
                 'database_name': db_name,
                 'admin_email': admin_email,
                 'admin_password': admin_password,  # Send via email in production!
-                'url': f"{ODOO_URL}/web?db={db_name}",
-                'login_url': f"{ODOO_URL}/web/login?db={db_name}"
+                'url': f"{ODOO_URL}?db={db_name}",
+                'login_url': f"{ODOO_URL}/web/login?db={db_name}",
+                'direct_url': f"{ODOO_URL}/web?db={db_name}",
+                'note': 'If login page does not load properly, wait 1-2 minutes and refresh the page'
             }
         }), 201
         

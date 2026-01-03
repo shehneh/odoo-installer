@@ -24,6 +24,8 @@ import string
 from pathlib import Path
 import sqlite3
 
+import xmlrpc.client
+
 app = Flask(
     __name__,
     static_folder='website',
@@ -87,6 +89,7 @@ def create_odoo_tenant_database(
     company_name: str,
     lang: str = 'fa_IR',
     country: str = 'IR',
+    with_demo: bool = True,
 ):
     """Create new Odoo database using web_db API (JSON-RPC)."""
     url = f"{ODOO_URL}/web/database/create"
@@ -102,6 +105,7 @@ def create_odoo_tenant_database(
             "lang": lang,
             "country_code": country,
             "phone": "",
+            "demo": "true" if with_demo else "false",
         },
         "id": random.randint(1, 1000000),
     }
@@ -109,15 +113,19 @@ def create_odoo_tenant_database(
     headers = {'Content-Type': 'application/json'}
 
     try:
+        print(f"📦 Creating database: {db_name} with lang={lang}, country={country}, demo={with_demo}")
         response = requests.post(url, json=payload, headers=headers, timeout=300)
         result = response.json()
 
         if 'error' in result:
             error_msg = result.get('error', {}).get('data', {}).get('message', 'Unknown error')
+            print(f"❌ Error creating database: {error_msg}")
             return False, error_msg
 
+        print(f"✅ Database {db_name} created successfully with Persian language")
         return True, f"Database {db_name} created successfully"
     except Exception as e:
+        print(f"❌ Exception creating database: {str(e)}")
         return False, str(e)
 
 
@@ -508,6 +516,321 @@ def reply_ticket(ticket_id):
 
 
 # ============================================
+# AUTHENTICATION APIs
+# ============================================
+
+@app.route('/api/auth/register', methods=['POST'])
+def auth_register():
+    """ثبت نام کاربر جدید"""
+    try:
+        data = request.get_json()
+        name = data.get('name', '').strip()
+        email = data.get('email', '').strip()
+        phone = data.get('phone', '').strip()
+        password = data.get('password', '')
+        
+        if not all([name, email, phone, password]):
+            return jsonify({
+                'success': False,
+                'error': 'لطفاً همه فیلدهای الزامی را تکمیل کنید'
+            }), 400
+        
+        # Check if user already exists
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        cursor.execute('SELECT id FROM customers WHERE admin_email = ?', (email,))
+        existing = cursor.fetchone()
+        
+        if existing:
+            conn.close()
+            return jsonify({
+                'success': False,
+                'error': 'این ایمیل قبلاً ثبت شده است'
+            }), 400
+        
+        # Create new user
+        cursor.execute(
+            '''
+            INSERT INTO customers (company_name, admin_email, admin_name, phone, database_name, admin_password, status, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''',
+            (name, email, name, phone, '', password, 'pending', datetime.now().isoformat())
+        )
+        user_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
+        
+        # Generate token (simple demo token)
+        token = f"token_{user_id}_{uuid.uuid4().hex[:16]}"
+        
+        user = {
+            'id': user_id,
+            'name': name,
+            'email': email,
+            'phone': phone,
+            'level': 1,
+            'xp': 0,
+            'avatar': f'https://ui-avatars.com/api/?name={name}&background=714B67&color=fff'
+        }
+        
+        return jsonify({
+            'success': True,
+            'message': 'ثبت نام با موفقیت انجام شد',
+            'user': user,
+            'token': token
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'خطا در ثبت نام: {str(e)}'
+        }), 500
+
+
+@app.route('/api/auth/login', methods=['POST'])
+def auth_login():
+    """ورود کاربر"""
+    try:
+        data = request.get_json()
+        email = data.get('email', '').strip()
+        password = data.get('password', '')
+        
+        if not email or not password:
+            return jsonify({
+                'success': False,
+                'error': 'ایمیل و رمز عبور الزامی است'
+            }), 400
+        
+        # Find user
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT id, company_name, admin_name, admin_email, phone, admin_password FROM customers WHERE admin_email = ?',
+            (email,)
+        )
+        row = cursor.fetchone()
+        
+        if not row:
+            conn.close()
+            return jsonify({
+                'success': False,
+                'error': 'ایمیل یا رمز عبور اشتباه است'
+            }), 401
+        
+        user_id, company_name, admin_name, admin_email, phone, stored_password = row
+        
+        # Verify password (in production, use proper hashing!)
+        if password != stored_password:
+            conn.close()
+            return jsonify({
+                'success': False,
+                'error': 'ایمیل یا رمز عبور اشتباه است'
+            }), 401
+        
+        # Update last login
+        cursor.execute(
+            'UPDATE customers SET last_login = ? WHERE id = ?',
+            (datetime.now().isoformat(), user_id)
+        )
+        conn.commit()
+        conn.close()
+        
+        # Generate token
+        token = f"token_{user_id}_{uuid.uuid4().hex[:16]}"
+        
+        user = {
+            'id': user_id,
+            'name': admin_name or company_name,
+            'email': admin_email,
+            'phone': phone,
+            'level': 3,
+            'xp': 750,
+            'avatar': f'https://ui-avatars.com/api/?name={admin_name or company_name}&background=714B67&color=fff'
+        }
+        
+        return jsonify({
+            'success': True,
+            'message': 'ورود موفقیت آمیز',
+            'user': user,
+            'token': token
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'خطا در ورود: {str(e)}'
+        }), 500
+
+
+@app.route('/api/auth/admin-login', methods=['POST'])
+def auth_admin_login():
+    """ورود مدیر سیستم"""
+    try:
+        data = request.get_json()
+        username = data.get('username', '').strip()
+        password = data.get('password', '')
+        
+        # Simple admin check (در production از database استفاده کنید)
+        ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'admin')
+        ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'admin123')
+        
+        if username != ADMIN_USERNAME or password != ADMIN_PASSWORD:
+            return jsonify({
+                'success': False,
+                'error': 'نام کاربری یا رمز عبور مدیر اشتباه است'
+            }), 401
+        
+        # Generate admin token
+        token = f"admin_token_{uuid.uuid4().hex[:16]}"
+        
+        user = {
+            'id': 0,
+            'name': 'مدیر سیستم',
+            'email': 'admin@odoomaster.com',
+            'role': 'admin',
+            'avatar': 'https://ui-avatars.com/api/?name=Admin&background=FF6B6B&color=fff'
+        }
+        
+        return jsonify({
+            'success': True,
+            'message': 'ورود مدیر موفقیت آمیز',
+            'user': user,
+            'token': token
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'خطا در ورود مدیر: {str(e)}'
+        }), 500
+
+
+@app.route('/api/test', methods=['GET'])
+def api_test():
+    """Test endpoint to verify API is working"""
+    return jsonify({
+        'success': True,
+        'message': 'API is working!',
+        'timestamp': datetime.now().isoformat()
+    })
+
+
+@app.route('/api/install-modules', methods=['POST', 'OPTIONS'])
+def api_install_modules():
+    """نصب ماژول‌های Odoo برای یک دیتابیس خاص"""
+    if request.method == 'OPTIONS':
+        return '', 200
+    
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'داده‌ای دریافت نشد'
+            }), 400
+        
+        db_name = data.get('db_name')
+        admin_email = data.get('admin_email')
+        admin_password = data.get('admin_password')
+        modules = data.get('modules', ['l10n_ir', 'web_responsive', 'home_menu_fullscreen', 'base_setup'])
+        
+        if not all([db_name, admin_email, admin_password]):
+            return jsonify({
+                'success': False,
+                'error': 'اطلاعات دیتابیس، ایمیل و رمز عبور الزامی است'
+            }), 400
+        
+        print(f"📦 Installing modules for database: {db_name}")
+        print(f"   Modules to install: {modules}")
+        
+        success, message = install_odoo_modules(
+            db_name=db_name,
+            admin_email=admin_email,
+            admin_password=admin_password,
+            modules=modules
+        )
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'ماژول‌ها با موفقیت نصب شدند',
+                'details': message
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': message
+            }), 500
+            
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': f'خطا در نصب ماژول‌ها: {str(e)}'
+        }), 500
+
+
+@app.route('/api/auth/logout', methods=['POST'])
+def auth_logout():
+    """خروج کاربر"""
+    return jsonify({
+        'success': True,
+        'message': 'خروج موفقیت آمیز'
+    })
+
+
+@app.route('/api/auth/me', methods=['GET'])
+def auth_me():
+    """اطلاعات کاربر فعلی از روی توکن"""
+    # Extract token from Authorization header
+    auth_header = request.headers.get('Authorization', '')
+    
+    if not auth_header.startswith('Bearer '):
+        return jsonify({
+            'success': False,
+            'error': 'توکن معتبر نیست'
+        }), 401
+    
+    token = auth_header.replace('Bearer ', '').strip()
+    
+    # Parse token to get user_id
+    if token.startswith('token_'):
+        try:
+            user_id = int(token.split('_')[1])
+            
+            conn = sqlite3.connect(CUSTOMERS_DB)
+            cursor = conn.cursor()
+            cursor.execute(
+                'SELECT id, company_name, admin_name, admin_email, phone FROM customers WHERE id = ?',
+                (user_id,)
+            )
+            row = cursor.fetchone()
+            conn.close()
+            
+            if row:
+                user_id, company_name, admin_name, admin_email, phone = row
+                user = {
+                    'id': user_id,
+                    'name': admin_name or company_name,
+                    'email': admin_email,
+                    'phone': phone,
+                    'level': 3,
+                    'xp': 750,
+                    'avatar': f'https://ui-avatars.com/api/?name={admin_name or company_name}&background=714B67&color=fff'
+                }
+                return jsonify({'success': True, 'user': user})
+        except:
+            pass
+    
+    return jsonify({
+        'success': False,
+        'error': 'کاربر یافت نشد'
+    }), 401
+
+
+# ============================================
 # USER & STATS APIs
 # ============================================
 
@@ -607,6 +930,164 @@ def health_check():
 # ============================================
 
 
+def check_database_exists_in_odoo(db_name):
+    """Check if database actually exists in Odoo server"""
+    try:
+        url = f"{ODOO_URL}/web/database/list"
+        payload = {
+            "jsonrpc": "2.0",
+            "method": "call",
+            "params": {},
+            "id": random.randint(1, 1000000)
+        }
+        headers = {'Content-Type': 'application/json'}
+        
+        response = requests.post(url, json=payload, headers=headers, timeout=10)
+        result = response.json()
+        
+        if 'result' in result:
+            db_list = result['result']
+            return db_name in db_list
+        
+        return False
+    except Exception as e:
+        print(f"Error checking database existence: {e}")
+        return False
+
+
+def install_odoo_modules(db_name, admin_email, admin_password, modules=None):
+    """
+    Install Odoo modules using XML-RPC after database creation
+    
+    Args:
+        db_name: Name of the database
+        admin_email: Admin email (username)
+        admin_password: Admin password
+        modules: List of module names to install. Defaults to Persian and UI modules.
+    
+    Returns:
+        tuple: (success: bool, message: str)
+    """
+    if modules is None:
+        # Use only modules that are commonly available
+        modules = ['web_responsive', 'l10n_ir', 'home_menu_fullscreen', 'base_setup']
+    
+    try:
+        print(f"🔌 Connecting to Odoo XML-RPC: {ODOO_URL}")
+        
+        # XML-RPC URLs
+        common_url = f"{ODOO_URL}/xmlrpc/2/common"
+        object_url = f"{ODOO_URL}/xmlrpc/2/object"
+        
+        # Connect to Odoo
+        common = xmlrpc.client.ServerProxy(common_url, allow_none=True, verbose=False)
+        
+        # Authenticate
+        print(f"🔐 Authenticating with db={db_name}, user={admin_email}")
+        uid = common.authenticate(db_name, admin_email, admin_password, {})
+        if not uid:
+            return False, "Authentication failed - incorrect credentials"
+        
+        print(f"✓ Authenticated successfully as user ID: {uid}")
+        
+        # Connect to object endpoint
+        models = xmlrpc.client.ServerProxy(object_url, allow_none=True, verbose=False)
+        
+        # First, update module list to ensure all modules are visible
+        print(f"📦 Updating module list...")
+        try:
+            models.execute_kw(
+                db_name, uid, admin_password,
+                'ir.module.module', 'update_list', [[]]
+            )
+            print(f"✓ Module list updated")
+            
+            # Wait a bit after update
+            import time
+            time.sleep(2)
+        except Exception as e:
+            print(f"⚠ Could not update module list: {str(e)}")
+        
+        installed_modules = []
+        failed_modules = []
+        skipped_modules = []
+        
+        for module_name in modules:
+            try:
+                print(f"🔍 Searching for module: {module_name}")
+                
+                # Search for module
+                module_ids = models.execute_kw(
+                    db_name, uid, admin_password,
+                    'ir.module.module', 'search',
+                    [[('name', '=', module_name)]]
+                )
+                
+                if not module_ids:
+                    print(f"⚠ Module '{module_name}' not found in module list")
+                    skipped_modules.append(module_name)
+                    continue
+                
+                print(f"✓ Module '{module_name}' found with ID: {module_ids[0]}")
+                
+                # Get module state
+                module_data = models.execute_kw(
+                    db_name, uid, admin_password,
+                    'ir.module.module', 'read',
+                    [module_ids], {'fields': ['name', 'state', 'shortdesc']}
+                )
+                
+                current_state = module_data[0]['state']
+                module_title = module_data[0].get('shortdesc', module_name)
+                
+                print(f"📊 Module '{module_title}' state: {current_state}")
+                
+                if current_state == 'installed':
+                    print(f"✓ Module '{module_name}' already installed")
+                    installed_modules.append(module_name)
+                    continue
+                
+                # Install module
+                print(f"⚙️ Installing module '{module_name}'...")
+                models.execute_kw(
+                    db_name, uid, admin_password,
+                    'ir.module.module', 'button_immediate_install',
+                    [module_ids]
+                )
+                
+                print(f"✅ Module '{module_name}' installed successfully!")
+                installed_modules.append(module_name)
+                
+                # Wait a bit between installations
+                time.sleep(2)
+                
+            except Exception as e:
+                error_detail = str(e)
+                print(f"❌ Error installing '{module_name}': {error_detail}")
+                failed_modules.append(module_name)
+        
+        # Prepare result message
+        success_parts = []
+        if installed_modules:
+            success_parts.append(f"✓ {', '.join(installed_modules)}")
+        if skipped_modules:
+            success_parts.append(f"⊗ {', '.join(skipped_modules)}")
+        if failed_modules:
+            success_parts.append(f"✗ {', '.join(failed_modules)}")
+        
+        if installed_modules or skipped_modules:
+            return True, " | ".join(success_parts)
+        else:
+            return False, f"هیچ ماژولی نصب نشد: {', '.join(failed_modules)}"
+            
+    except Exception as e:
+        error_msg = f"خطا در نصب ماژول‌ها: {str(e)}"
+        print(f"❌ {error_msg}")
+        import traceback
+        traceback.print_exc()
+        return False, error_msg
+
+
 @app.route('/api/create-tenant', methods=['POST'])
 def create_tenant():
     """API endpoint to create new tenant (customer Odoo instance)"""
@@ -617,13 +1098,49 @@ def create_tenant():
         admin_email = data.get('admin_email')
         admin_name = data.get('admin_name', 'Admin')
         phone = data.get('phone', '')
+        install_modules = data.get('install_modules', False)
 
         if not company_name or not admin_email:
             return jsonify({'success': False, 'message': 'نام شرکت و ایمیل الزامی است'}), 400
 
+        # Check if customer already exists in our database
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        cursor.execute('SELECT database_name, created_at FROM customers WHERE admin_email = ?', (admin_email,))
+        existing = cursor.fetchone()
+        
+        if existing:
+            db_name, created_at = existing
+            
+            # Check if the database actually exists in Odoo
+            db_exists_in_odoo = check_database_exists_in_odoo(db_name)
+            
+            if db_exists_in_odoo:
+                # Database still exists in Odoo - return existing info
+                conn.close()
+                return jsonify({
+                    'success': False,
+                    'existing': True,
+                    'message': 'این ایمیل قبلاً ثبت شده است',
+                    'data': {
+                        'database_name': db_name,
+                        'created_at': created_at,
+                        'login_url': f"{ODOO_URL}/web/login?db={db_name}",
+                    }
+                }), 409
+            else:
+                # Database was deleted from Odoo - remove old record and create new one
+                print(f"Database {db_name} was deleted from Odoo. Removing old record and creating new one.")
+                cursor.execute('DELETE FROM customers WHERE admin_email = ?', (admin_email,))
+                conn.commit()
+        
+        conn.close()
+
+        # Generate new database credentials
         db_name = generate_tenant_db_name(company_name)
         admin_password = generate_tenant_password()
 
+        print(f"Creating database {db_name}...")
         success, message = create_odoo_tenant_database(
             db_name=db_name,
             admin_email=admin_email,
@@ -634,12 +1151,41 @@ def create_tenant():
         if not success:
             return jsonify({'success': False, 'message': f'خطا در ساخت دیتابیس: {message}'}), 500
 
+        print(f"✓ Database {db_name} created successfully")
+        
+        # Install modules if requested
+        modules_installed_msg = ""
+        if install_modules:
+            print(f"⏳ Waiting 15 seconds for database to be fully initialized...")
+            import time
+            time.sleep(15)  # Wait even longer for database to be fully ready
+            
+            print(f"📦 Starting module installation for {db_name}...")
+            
+            # Try to install commonly available modules
+            # Include home_menu_fullscreen for beautiful dashboard
+            basic_modules = ['l10n_ir', 'web_responsive', 'home_menu_fullscreen', 'base_setup']
+            
+            modules_success, modules_msg = install_odoo_modules(
+                db_name=db_name,
+                admin_email=admin_email,
+                admin_password=admin_password,
+                modules=basic_modules
+            )
+            
+            if modules_success:
+                print(f"✅ Modules installed successfully: {modules_msg}")
+                modules_installed_msg = f" ✓ ماژول‌های فارسی و UI نصب شد"
+            else:
+                print(f"⚠️ Module installation had issues: {modules_msg}")
+                modules_installed_msg = f" ⚠ نصب ماژول‌ها: {modules_msg}"
+
         save_customer(company_name, admin_email, admin_name, phone, db_name, admin_password)
 
         return jsonify(
             {
                 'success': True,
-                'message': 'سرور Odoo شما با موفقیت ساخته شد',
+                'message': 'سرور Odoo شما با موفقیت ساخته شد' + modules_installed_msg,
                 'data': {
                     'company_name': company_name,
                     'database_name': db_name,
@@ -647,10 +1193,13 @@ def create_tenant():
                     'admin_password': admin_password,
                     'url': f"{ODOO_URL}/web?db={db_name}",
                     'login_url': f"{ODOO_URL}/web/login?db={db_name}",
+                    'modules_installed': install_modules,
                 },
             }
         ), 201
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return jsonify({'success': False, 'message': f'خطا: {str(e)}'}), 500
 
 
@@ -667,6 +1216,73 @@ def list_customers():
         return jsonify({'success': True, 'count': len(customers), 'customers': customers})
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/delete-customer/<int:customer_id>', methods=['DELETE'])
+def delete_customer(customer_id):
+    """Delete a customer record from database"""
+    try:
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM customers WHERE id = ?', (customer_id,))
+        conn.commit()
+        deleted = cursor.rowcount > 0
+        conn.close()
+        
+        if deleted:
+            return jsonify({'success': True, 'message': 'کاربر با موفقیت حذف شد'})
+        else:
+            return jsonify({'success': False, 'message': 'کاربر یافت نشد'}), 404
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/delete-customer-by-email', methods=['POST'])
+def delete_customer_by_email():
+    """Delete a customer record by email"""
+    try:
+        data = request.get_json(silent=True) or {}
+        email = data.get('email', '').strip()
+        
+        if not email:
+            return jsonify({'success': False, 'message': 'ایمیل الزامی است'}), 400
+        
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM customers WHERE admin_email = ?', (email,))
+        conn.commit()
+        deleted = cursor.rowcount > 0
+        conn.close()
+        
+        if deleted:
+            return jsonify({'success': True, 'message': 'رکورد کاربر با موفقیت حذف شد'})
+        else:
+            return jsonify({'success': False, 'message': 'کاربری با این ایمیل یافت نشد'}), 404
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+# Serve static files - only if not API route
+@app.route('/<path:filename>')
+def serve_static(filename):
+    """Serve static files from website folder - excluding API routes"""
+    # Don't intercept API routes
+    if filename.startswith('api/'):
+        return jsonify({'error': 'Not found'}), 404
+    
+    from flask import send_from_directory
+    try:
+        return send_from_directory(app.static_folder, filename)
+    except:
+        # If file not found, try index.html
+        return send_from_directory(app.static_folder, 'index.html')
+
+
+@app.route('/')
+def index():
+    """Serve index.html"""
+    from flask import send_from_directory
+    return send_from_directory(app.static_folder, 'index.html')
 
 
 if __name__ == '__main__':

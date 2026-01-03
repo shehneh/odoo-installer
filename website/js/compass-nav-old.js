@@ -52,7 +52,7 @@ function createUnifiedNav() {
                     <div class="nav-group">
                         <span class="nav-group-title">Odoo</span>
                         ${navStructure.odoo.map(item => `
-                            <a href="${item.url}" class="nav-item ${currentPage === item.url ? 'active' : ''}">
+                            <a href="${item.url}" class="nav-item ${currentPage === item.url ? 'active' : ''} ${item.highlight ? 'highlight' : ''}">
                                 <i class="fas ${item.icon}"></i>
                                 <span>${item.title}</span>
                             </a>
@@ -71,11 +71,11 @@ function createUnifiedNav() {
                 </div>
                 
                 <div class="nav-actions">
+                    <button class="nav-item" id="settingsBtn" title="تنظیمات" style="cursor: pointer;">
+                        <i class="fas fa-cog"></i>
+                    </button>
                     <button class="nav-toggle" id="navToggle">
                         <i class="fas fa-bars"></i>
-                    </button>
-                    <button class="nav-item" id="settingsBtn" title="تنظیمات" style="margin-left: 10px;">
-                        <i class="fas fa-cog"></i>
                     </button>
                 </div>
             </div>
@@ -88,10 +88,21 @@ function createUnifiedNav() {
     // Add mobile menu toggle
     const navToggle = document.getElementById('navToggle');
     const unifiedNav = document.getElementById('unifiedNav');
+    const settingsBtn = document.getElementById('settingsBtn');
     
     if (navToggle) {
         navToggle.addEventListener('click', () => {
             unifiedNav.classList.toggle('mobile-open');
+        });
+    }
+    
+    // Settings button
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', () => {
+            const settingsModal = document.getElementById('settingsModal');
+            if (settingsModal) {
+                settingsModal.style.display = 'flex';
+            }
         });
     }
     
@@ -169,13 +180,30 @@ function createQuickActions() {
                     <i class="fas fa-home"></i>
                     <span>صفحه اصلی</span>
                 </a>
+                <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 8px 0;"></div>
+                <button class="quick-action-item settings" id="compassSettings" style="background: rgba(113, 75, 103, 0.2); border-color: rgba(113, 75, 103, 0.3);">
+                    <i class="fas fa-cog"></i>
+                    <span>تنظیمات قطب‌نما</span>
+                </button>
             </div>
         </div>
     `;
+    const settingsBtn = document.getElementById('compassSettings');
     
-    document.body.insertAdjacentHTML('beforeend', quickActionsHTML);
+    if (trigger) {
+        trigger.addEventListener('click', () => {
+            quickActions.classList.toggle('active');
+        });
+    }
     
-    const trigger = document.getElementById('quickActionTrigger');
+    // Handle settings button
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', () => {
+            quickActions.classList.remove('active');
+            const settingsModal = document.getElementById('settingsModal');
+            if (settingsModal) {
+                settingsModal.style.display = 'flex';
+            }tionTrigger');
     const quickActions = document.getElementById('quickActions');
     
     if (trigger) {

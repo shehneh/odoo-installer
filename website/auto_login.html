@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>در حال انتقال به Odoo...</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Vazir', 'Tahoma', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+            text-align: center;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 30px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .message {
+            color: #666;
+            font-size: 16px;
+            margin-top: 20px;
+            line-height: 1.8;
+        }
+
+        .credentials-box {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 25px 0;
+            text-align: right;
+        }
+
+        .credentials-box h3 {
+            text-align: center;
+        }
+
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .copy-btn.copied {
+            background: #48bb78;
+        }
+
+        .manual-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .manual-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .manual-link i {
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-key"></i> اطلاعات ورود به Odoo</h1>
+        <div class="spinner" id="spinner"></div>
+        <p class="message" id="message">
+            در حال آماده‌سازی اطلاعات ورود...
+        </p>
+        
+        <div class="credentials-box" id="credentialsBox" style="display: none;">
+            <h3 style="color: #667eea; margin-bottom: 15px; text-align: center;">
+                <i class="fas fa-info-circle"></i> اطلاعات ورود شما
+            </h3>
+            
+            <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <strong style="color: #667eea;">نام کاربری (ایمیل):</strong>
+                    <button class="copy-btn" onclick="copyToClipboard('email')">
+                        <i class="fas fa-copy"></i> کپی
+                    </button>
+                </div>
+                <input type="text" id="emailInput" readonly style="width: 100%; padding: 10px; border: 2px solid #667eea; border-radius: 6px; font-size: 16px; text-align: center; background: #f8f9fa;">
+            </div>
+
+            <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <strong style="color: #667eea;">رمز عبور:</strong>
+                    <button class="copy-btn" onclick="copyToClipboard('password')">
+                        <i class="fas fa-copy"></i> کپی
+                    </button>
+                </div>
+                <input type="text" id="passwordInput" readonly style="width: 100%; padding: 10px; border: 2px solid #667eea; border-radius: 6px; font-size: 16px; text-align: center; background: #f8f9fa; font-family: monospace;">
+            </div>
+
+            <div style="background: #e7f3ff; border-right: 4px solid #2196f3; padding: 15px; margin: 20px 0; border-radius: 8px;">
+                <p style="color: #0d47a1; font-weight: bold; margin-bottom: 10px;">
+                    🚀 ورود یک کلیکی!
+                </p>
+                <ol style="color: #1565c0; font-size: 14px; line-height: 1.8; margin-right: 20px;">
+                    <li>روی دکمه "ورود به Odoo" کلیک کنید</li>
+                    <li>صفحه Odoo با ایمیل و رمز عبور باز می‌شود</li>
+                    <li>فقط روی دکمه <strong>Login</strong> کلیک کنید!</li>
+                </ol>
+            </div>
+            
+            <div style="background: #fff3cd; border-right: 4px solid #ffc107; padding: 12px; margin: 10px 0; border-radius: 8px;">
+                <p style="color: #856404; font-size: 13px; margin: 0;">
+                    💡 <strong>نکته:</strong> می‌توانید از دکمه‌های کپی استفاده کنید یا اطلاعات را دستی تایپ کنید
+                </p>
+            </div>
+        </div>
+
+        <button id="manualLink" class="manual-link" style="display: none; border: none; cursor: pointer;">
+            <i class="fas fa-sign-in-alt"></i> ورود به Odoo
+        </button>
+    </div>
+
+    <script>
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const db = urlParams.get('db');
+        const email = urlParams.get('email');
+        const password = urlParams.get('password');
+        const odooUrl = 'https://odoo-online.liara.run';
+
+        if (!db || !email || !password) {
+            document.getElementById('message').innerHTML = '❌ اطلاعات ورود ناقص است!<br>لطفاً دوباره از صفحه ثبت نام تلاش کنید.';
+            document.getElementById('spinner').style.display = 'none';
+        } else {
+            // Show credentials
+            setTimeout(() => {
+                document.getElementById('spinner').style.display = 'none';
+                document.getElementById('message').innerHTML = '✅ اطلاعات ورود شما آماده است';
+                
+                document.getElementById('emailInput').value = email;
+                document.getElementById('passwordInput').value = password;
+                document.getElementById('credentialsBox').style.display = 'block';
+                
+                const manualLink = document.getElementById('manualLink');
+                manualLink.style.display = 'inline-block';
+                
+                // Add click handler for smart login
+                manualLink.addEventListener('click', () => {
+                    smartLogin();
+                });
+            }, 1000);
+        }
+
+        async function smartLogin() {
+            const btn = document.getElementById('manualLink');
+            const originalHTML = btn.innerHTML;
+            
+            // Step 1: Copy email
+            try {
+                const emailInput = document.getElementById('emailInput');
+                emailInput.select();
+                document.execCommand('copy');
+                
+                btn.innerHTML = '<i class="fas fa-check"></i> ایمیل کپی شد...';
+                await sleep(800);
+                
+                // Step 2: Show password copy instruction
+                btn.innerHTML = '<i class="fas fa-info-circle"></i> در حال باز کردن Odoo...';
+                
+                // Save to localStorage for retrieval
+                localStorage.setItem('odoo_login_email', email);
+                localStorage.setItem('odoo_login_password', password);
+                localStorage.setItem('odoo_login_db', db);
+                localStorage.setItem('odoo_login_timestamp', Date.now());
+                
+                await sleep(1000);
+                
+                // Step 3: Open Odoo with email and password
+                const loginUrl = `${odooUrl}/web/login?db=${db}&login=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
+                window.open(loginUrl, '_blank');
+                
+                // Step 4: Show next instructions
+                btn.innerHTML = '<i class="fas fa-check-double"></i> Odoo باز شد';
+                
+                setTimeout(() => {
+                    document.getElementById('message').innerHTML = `
+                        <div style="background: #d4edda; border: 2px solid #28a745; border-radius: 8px; padding: 15px; margin-top: 15px;">
+                            <p style="color: #155724; font-weight: bold; margin-bottom: 10px;">
+                                ✅ ایمیل و رمز عبور منتقل شدند!
+                            </p>
+                            <p style="color: #155724; font-size: 14px; line-height: 1.8;">
+                                🎯 در صفحه Odoo، فقط روی دکمه <strong>Login</strong> کلیک کنید!<br>
+                                <span style="font-size: 12px; opacity: 0.8;">اگر رمز نیامد، از دکمه کپی استفاده کنید</span>
+                            </p>
+                        </div>
+                    `;
+                    btn.innerHTML = originalHTML;
+                }, 2000);
+                
+            } catch (err) {
+                btn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> خطا - دستی کپی کنید';
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                }, 2000);
+            }
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function copyToClipboard(field) {
+            const input = field === 'email' ? document.getElementById('emailInput') : document.getElementById('passwordInput');
+            input.select();
+            input.setSelectionRange(0, 99999);
+            
+            try {
+                document.execCommand('copy');
+                
+                const btn = event.target.closest('.copy-btn');
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i> کپی شد';
+                btn.classList.add('copied');
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.classList.remove('copied');
+                }, 2000);
+            } catch (err) {
+                alert('خطا در کپی کردن! لطفاً دستی کپی کنید.');
+            }
+        }
+    </script>
+</body>
+</html>
