@@ -18,30 +18,10 @@ import sqlite3
 import xmlrpc.client
 import socket
 
-# Custom Transport with timeout for XMLRPC (supports HTTPS)
-class TimeoutTransport(xmlrpc.client.SafeTransport):
-    """Transport with configurable timeout for HTTPS connections"""
-    def __init__(self, timeout=300, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._timeout = timeout
-    
-    def make_connection(self, host):
-        # SafeTransport uses HTTPS by default
-        if self._connection and host == self._connection[0]:
-            return self._connection[1]
-        
-        import http.client
-        import ssl
-        
-        # Create HTTPS connection with timeout
-        chost, self._extra_headers, x509 = self.get_host_info(host)
-        context = ssl.create_default_context()
-        self._connection = host, http.client.HTTPSConnection(
-            chost, 
-            timeout=self._timeout,
-            context=context
-        )
-        return self._connection[1]
+# Set global socket timeout for XMLRPC operations
+def set_socket_timeout(timeout):
+    """Set socket timeout for XMLRPC operations"""
+    socket.setdefaulttimeout(timeout)
 
 app = Flask(__name__, 
             static_folder='website',
@@ -200,17 +180,18 @@ import xmlrpc.client
 
 def get_odoo_modules_status(db_name, admin_email, admin_password, modules):
     """Return module availability/state for given database."""
+    old_timeout = socket.getdefaulttimeout()
     try:
+        socket.setdefaulttimeout(60)  # 60 seconds for status check
         common_url = f"{ODOO_URL}/xmlrpc/2/common"
         object_url = f"{ODOO_URL}/xmlrpc/2/object"
 
-        transport = TimeoutTransport(timeout=60)
-        common = xmlrpc.client.ServerProxy(common_url, allow_none=True, transport=transport)
+        common = xmlrpc.client.ServerProxy(common_url, allow_none=True)
         uid = common.authenticate(db_name, admin_email, admin_password, {})
         if not uid:
             return False, "Authentication failed", None
 
-        models = xmlrpc.client.ServerProxy(object_url, allow_none=True, transport=transport)
+        models = xmlrpc.client.ServerProxy(object_url, allow_none=True)
 
         # Best-effort refresh
         try:
@@ -260,6 +241,8 @@ def get_odoo_modules_status(db_name, admin_email, admin_password, modules):
         }
     except Exception as e:
         return False, str(e), None
+    finally:
+        socket.setdefaulttimeout(old_timeout)
 
 def install_odoo_modules_stream(db_name, admin_email, admin_password, modules=None):
     """Install Odoo modules with streaming progress (generator)"""
@@ -272,12 +255,13 @@ def install_odoo_modules_stream(db_name, admin_email, admin_password, modules=No
     try:
         yield json.dumps({'event': 'status', 'module': None, 'status': 'connecting', 'message': 'در حال اتصال به Odoo...'})
         
+        # Set socket timeout for long operations (5 minutes)
+        socket.setdefaulttimeout(300)
+        
         common_url = f"{ODOO_URL}/xmlrpc/2/common"
         object_url = f"{ODOO_URL}/xmlrpc/2/object"
         
-        # Create proxies with extended timeout (5 minutes per operation)
-        transport = TimeoutTransport(timeout=300)
-        common = xmlrpc.client.ServerProxy(common_url, allow_none=True, transport=transport)
+        common = xmlrpc.client.ServerProxy(common_url, allow_none=True)
         
         yield json.dumps({'event': 'status', 'module': None, 'status': 'authenticating', 'message': 'در حال احراز هویت...'})
         
@@ -286,7 +270,7 @@ def install_odoo_modules_stream(db_name, admin_email, admin_password, modules=No
             yield json.dumps({'event': 'error', 'message': 'Authentication failed'})
             return
         
-        models = xmlrpc.client.ServerProxy(object_url, allow_none=True, transport=transport)
+        models = xmlrpc.client.ServerProxy(object_url, allow_none=True)
         
         # Update module list
         yield json.dumps({'event': 'status', 'module': None, 'status': 'updating', 'message': 'به‌روزرسانی لیست ماژول‌ها...'})
