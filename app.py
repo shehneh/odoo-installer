@@ -15,6 +15,19 @@ import os
 from pathlib import Path
 from datetime import datetime
 import sqlite3
+import xmlrpc.client
+import socket
+
+# Custom Transport with timeout for XMLRPC
+class TimeoutTransport(xmlrpc.client.Transport):
+    def __init__(self, timeout=300, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._timeout = timeout
+    
+    def make_connection(self, host):
+        conn = super().make_connection(host)
+        conn.timeout = self._timeout
+        return conn
 
 app = Flask(__name__, 
             static_folder='website',
@@ -247,7 +260,9 @@ def install_odoo_modules_stream(db_name, admin_email, admin_password, modules=No
         common_url = f"{ODOO_URL}/xmlrpc/2/common"
         object_url = f"{ODOO_URL}/xmlrpc/2/object"
         
-        common = xmlrpc.client.ServerProxy(common_url, allow_none=True)
+        # Create proxies with extended timeout (5 minutes per operation)
+        transport = TimeoutTransport(timeout=300)
+        common = xmlrpc.client.ServerProxy(common_url, allow_none=True, transport=transport)
         
         yield json.dumps({'event': 'status', 'module': None, 'status': 'authenticating', 'message': 'در حال احراز هویت...'})
         
@@ -256,7 +271,7 @@ def install_odoo_modules_stream(db_name, admin_email, admin_password, modules=No
             yield json.dumps({'event': 'error', 'message': 'Authentication failed'})
             return
         
-        models = xmlrpc.client.ServerProxy(object_url, allow_none=True)
+        models = xmlrpc.client.ServerProxy(object_url, allow_none=True, transport=transport)
         
         # Update module list
         yield json.dumps({'event': 'status', 'module': None, 'status': 'updating', 'message': 'به‌روزرسانی لیست ماژول‌ها...'})
