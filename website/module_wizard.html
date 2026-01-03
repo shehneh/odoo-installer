@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دستیار هوشمند نصب ماژول - OdooMaster</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/unified-nav.css?v=8">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Vazir', 'Tahoma', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 80px 20px 20px;
+        }
+
+        .wizard-container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.35);
+            padding: 0;
+            overflow: hidden;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Header */
+        .wizard-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+
+        .wizard-header h1 {
+            font-size: 26px;
+            margin-bottom: 8px;
+        }
+
+        .wizard-header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            padding: 20px 40px 0;
+            background: #f8f9fa;
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .progress-bar-track {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 10px;
+            transition: width 0.4s ease;
+            width: 0%;
+        }
+
+        /* Wizard Body */
+        .wizard-body {
+            padding: 40px;
+            min-height: 350px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Question Card */
+        .question-card {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .question-card.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .question-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+        }
+
+        .question-text {
+            font-size: 22px;
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .question-hint {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        /* Answer Buttons */
+        .answer-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .answer-btn {
+            padding: 16px 40px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            background: white;
+            font-size: 18px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 140px;
+        }
+
+        .answer-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .answer-btn.yes {
+            border-color: #28a745;
+            color: #28a745;
+        }
+
+        .answer-btn.yes:hover {
+            background: #28a745;
+            color: white;
+        }
+
+        .answer-btn.no {
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+
+        .answer-btn.no:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+        /* Multi-choice options */
+        .choice-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .choice-btn {
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 14px;
+            background: white;
+            font-size: 15px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .choice-btn:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102,126,234,0.15);
+        }
+
+        .choice-btn.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+        }
+
+        .choice-btn .choice-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        /* Summary Section */
+        .summary-section {
+            display: none;
+        }
+
+        .summary-section.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .summary-title {
+            font-size: 22px;
+            color: #333;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .summary-subtitle {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .selected-modules {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .module-tag {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 50px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .module-tag .remove-btn {
+            background: rgba(255,255,255,0.3);
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: white;
+            transition: background 0.2s;
+        }
+
+        .module-tag .remove-btn:hover {
+            background: rgba(255,255,255,0.5);
+        }
+
+        .summary-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .action-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102,126,234,0.4);
+        }
+
+        .action-btn.secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #e0e0e0;
+        }
+
+        .action-btn.secondary:hover {
+            border-color: #667eea;
+        }
+
+        /* Intro Section */
+        .intro-section {
+            text-align: center;
+        }
+
+        .intro-section h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 16px;
+        }
+
+        .intro-section p {
+            color: #666;
+            margin-bottom: 24px;
+            line-height: 1.8;
+        }
+
+        .intro-features {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .intro-feature {
+            text-align: center;
+        }
+
+        .intro-feature i {
+            font-size: 32px;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .intro-feature span {
+            display: block;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .start-btn {
+            padding: 18px 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102,126,234,0.4);
+        }
+
+        /* Navigation */
+        .wizard-nav {
+            padding: 20px 40px;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 12px 24px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .nav-btn.hidden {
+            visibility: hidden;
+        }
+
+        /* Skip link */
+        .skip-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .skip-link a {
+            color: #666;
+            font-size: 13px;
+            text-decoration: none;
+        }
+
+        .skip-link a:hover {
+            color: #667eea;
+            text-decoration: underline;
+        }
+
+        /* Category badge in summary */
+        .category-group {
+            margin-bottom: 20px;
+        }
+
+        .category-label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .wizard-container {
+                margin: 10px;
+                border-radius: 16px;
+            }
+
+            .wizard-header {
+                padding: 20px;
+            }
+
+            .wizard-body {
+                padding: 25px 20px;
+            }
+
+            .question-text {
+                font-size: 18px;
+            }
+
+            .choice-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .intro-features {
+                flex-direction: column;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wizard-container">
+        <div class="wizard-header">
+            <h1><i class="fas fa-magic"></i> دستیار هوشمند نصب</h1>
+            <p>با پاسخ به چند سوال ساده، ماژول‌های مناسب کسب‌وکار شما را انتخاب می‌کنیم</p>
+        </div>
+
+        <div class="progress-container" id="progressContainer" style="display: none;">
+            <div class="progress-steps">
+                <span>شروع</span>
+                <span id="progressLabel">سوال ۱ از ۸</span>
+                <span>پایان</span>
+            </div>
+            <div class="progress-bar-track">
+                <div class="progress-bar-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <div class="wizard-body">
+            <!-- Intro -->
+            <div class="intro-section active" id="introSection">
+                <h2>🎯 به دستیار هوشمند خوش آمدید</h2>
+                <p>
+                    این ابزار با پرسیدن سوالات ساده درباره کسب‌وکار شما،<br>
+                    ماژول‌های Odoo مناسب را به صورت خودکار انتخاب می‌کند.
+                </p>
+                <div class="intro-features">
+                    <div class="intro-feature">
+                        <i class="fas fa-clock"></i>
+                        <span>کمتر از ۲ دقیقه</span>
+                    </div>
+                    <div class="intro-feature">
+                        <i class="fas fa-brain"></i>
+                        <span>انتخاب هوشمند</span>
+                    </div>
+                    <div class="intro-feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>بدون نیاز به دانش فنی</span>
+                    </div>
+                </div>
+                <button class="start-btn" onclick="startWizard()">
+                    <i class="fas fa-play"></i> شروع کنید
+                </button>
+                <div class="skip-link">
+                    <a href="install_modules.html">ترجیح می‌دهم خودم ماژول‌ها را انتخاب کنم</a>
+                </div>
+            </div>
+
+            <!-- Questions Container -->
+            <div id="questionsContainer"></div>
+
+            <!-- Summary -->
+            <div class="summary-section" id="summarySection">
+                <div class="summary-title">🎉 تبریک! پرسشنامه تکمیل شد</div>
+                <div class="summary-subtitle">ماژول‌های پیشنهادی بر اساس نیازهای شما:</div>
+                
+                <div class="selected-modules" id="selectedModulesTags"></div>
+                
+                <div class="summary-actions">
+                    <button class="action-btn primary" onclick="proceedToInstall()">
+                        <i class="fas fa-download"></i> ادامه و نصب
+                    </button>
+                    <button class="action-btn secondary" onclick="editManually()">
+                        <i class="fas fa-edit"></i> ویرایش دستی
+                    </button>
+                </div>
+                
+                <div class="skip-link" style="margin-top: 16px;">
+                    <a href="#" onclick="restartWizard(); return false;">شروع مجدد پرسشنامه</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="wizard-nav" id="wizardNav" style="display: none;">
+            <button class="nav-btn" id="prevBtn" onclick="prevQuestion()">
+                <i class="fas fa-arrow-right"></i> قبلی
+            </button>
+            <button class="nav-btn hidden" id="skipBtn" onclick="skipQuestion()">
+                رد شدن <i class="fas fa-forward"></i>
+            </button>
+        </div>
+    </div>
+
+    <script src="js/compass-nav.js?v=7"></script>
+    <script>
+        // =====================================================
+        // QUESTIONNAIRE DATA - World-Class Business Assessment
+        // =====================================================
+        const questions = [
+            {
+                id: 'business_type',
+                icon: '🏢',
+                text: 'نوع کسب‌وکار شما چیست؟',
+                hint: 'این به ما کمک می‌کند ماژول‌های پایه را انتخاب کنیم',
+                type: 'choice',
+                choices: [
+                    { value: 'trading', icon: '📦', label: 'بازرگانی', hint: 'خرید و فروش کالا' },
+                    { value: 'manufacturing', icon: '🏭', label: 'تولیدی', hint: 'تولید محصولات' },
+                    { value: 'service', icon: '💼', label: 'خدماتی', hint: 'ارائه خدمات' },
+                    { value: 'mixed', icon: '🔄', label: 'ترکیبی', hint: 'همه موارد' }
+                ],
+                modules: {
+                    'trading': ['sale_management', 'purchase', 'stock', 'account'],
+                    'manufacturing': ['sale_management', 'purchase', 'stock', 'account'],
+                    'service': ['sale_management', 'project', 'account'],
+                    'mixed': ['sale_management', 'purchase', 'stock', 'project', 'account']
+                }
+            },
+            {
+                id: 'has_products',
+                icon: '📦',
+                text: 'آیا محصولات فیزیکی می‌فروشید؟',
+                hint: 'کالاهایی که نیاز به انبارداری و ارسال دارند',
+                type: 'yesno',
+                modules: { yes: ['stock', 'sale_management'], no: [] }
+            },
+            {
+                id: 'has_purchase',
+                icon: '🛒',
+                text: 'آیا کالا یا مواد اولیه خریداری می‌کنید؟',
+                hint: 'از تامین‌کنندگان یا بازار',
+                type: 'yesno',
+                modules: { yes: ['purchase'], no: [] }
+            },
+            {
+                id: 'has_warehouse',
+                icon: '🏭',
+                text: 'آیا انبار یا موجودی کالا دارید؟',
+                hint: 'محلی برای نگهداری محصولات یا مواد',
+                type: 'yesno',
+                modules: { yes: ['stock'], no: [] }
+            },
+            {
+                id: 'needs_crm',
+                icon: '📈',
+                text: 'آیا نیاز به پیگیری مشتریان بالقوه دارید؟',
+                hint: 'مدیریت سرنخ‌ها، فرصت‌های فروش و ارتباط با مشتری',
+                type: 'yesno',
+                modules: { yes: ['crm'], no: [] }
+            },
+            {
+                id: 'has_employees',
+                icon: '👥',
+                text: 'چند نفر کارمند دارید؟',
+                hint: 'شامل کارمندان تمام‌وقت و پاره‌وقت',
+                type: 'choice',
+                choices: [
+                    { value: 'solo', icon: '👤', label: 'فقط خودم', hint: 'بدون کارمند' },
+                    { value: 'small', icon: '👥', label: '۲ تا ۱۰ نفر', hint: 'تیم کوچک' },
+                    { value: 'medium', icon: '👨‍👩‍👧‍👦', label: '۱۱ تا ۵۰ نفر', hint: 'تیم متوسط' },
+                    { value: 'large', icon: '🏢', label: 'بیش از ۵۰ نفر', hint: 'سازمان بزرگ' }
+                ],
+                modules: {
+                    'solo': [],
+                    'small': ['hr'],
+                    'medium': ['hr', 'hr_holidays'],
+                    'large': ['hr', 'hr_holidays']
+                }
+            },
+            {
+                id: 'has_projects',
+                icon: '📋',
+                text: 'آیا پروژه‌های خدماتی یا اجرایی دارید؟',
+                hint: 'کارهایی که نیاز به پیگیری تسک و مراحل دارند',
+                type: 'yesno',
+                modules: { yes: ['project'], no: [] }
+            },
+            {
+                id: 'needs_website',
+                icon: '🌐',
+                text: 'آیا به وب‌سایت شرکتی نیاز دارید؟',
+                hint: 'سایت معرفی، بلاگ یا صفحات محصولات',
+                type: 'yesno',
+                modules: { yes: ['website'], no: [] }
+            },
+            {
+                id: 'needs_ecommerce',
+                icon: '🛍️',
+                text: 'آیا می‌خواهید فروش آنلاین داشته باشید؟',
+                hint: 'فروشگاه اینترنتی با سبد خرید',
+                type: 'yesno',
+                condition: (answers) => answers['needs_website'] === 'yes',
+                modules: { yes: ['website', 'website_sale'], no: [] }
+            }
+        ];
+
+        // Base modules that are always recommended
+        const baseModules = ['l10n_ir', 'web_responsive', 'home_menu_fullscreen', 'base_setup'];
+
+        // Module display names
+        const moduleNames = {
+            'l10n_ir': '🇮🇷 بسته ایران',
+            'web_responsive': '📱 رابط ریسپانسیو',
+            'home_menu_fullscreen': '🎨 منوی تمام‌صفحه',
+            'base_setup': '⚙️ تنظیمات پایه',
+            'account': '💳 حسابداری',
+            'crm': '📈 CRM',
+            'sale_management': '🧾 فروش',
+            'purchase': '🛒 خرید',
+            'stock': '🏷️ انبار',
+            'hr': '👥 کارکنان',
+            'hr_holidays': '🗓️ مرخصی‌ها',
+            'project': '📌 پروژه',
+            'website': '🌐 وب‌سایت',
+            'website_sale': '🛍️ فروشگاه آنلاین'
+        };
+
+        // State
+        let currentQuestion = 0;
+        let answers = {};
+        let selectedModules = new Set(baseModules);
+        let visibleQuestions = [];
+
+        function startWizard() {
+            document.getElementById('introSection').classList.remove('active');
+            document.getElementById('progressContainer').style.display = 'block';
+            document.getElementById('wizardNav').style.display = 'flex';
+            
+            // Calculate visible questions
+            updateVisibleQuestions();
+            renderCurrentQuestion();
+        }
+
+        function updateVisibleQuestions() {
+            visibleQuestions = questions.filter(q => {
+                if (!q.condition) return true;
+                return q.condition(answers);
+            });
+        }
+
+        function renderCurrentQuestion() {
+            updateVisibleQuestions();
+            
+            if (currentQuestion >= visibleQuestions.length) {
+                showSummary();
+                return;
+            }
+
+            const q = visibleQuestions[currentQuestion];
+            const container = document.getElementById('questionsContainer');
+            
+            // Update progress
+            const progress = ((currentQuestion + 1) / visibleQuestions.length) * 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+            document.getElementById('progressLabel').textContent = `سوال ${currentQuestion + 1} از ${visibleQuestions.length}`;
+
+            // Update navigation
+            document.getElementById('prevBtn').classList.toggle('hidden', currentQuestion === 0);
+
+            // Render question
+            let html = `
+                <div class="question-card active" id="question-${q.id}">
+                    <div class="question-icon">${q.icon}</div>
+                    <div class="question-text">${q.text}</div>
+                    <div class="question-hint">${q.hint}</div>
+            `;
+
+            if (q.type === 'yesno') {
+                html += `
+                    <div class="answer-buttons">
+                        <button class="answer-btn yes" onclick="answerQuestion('${q.id}', 'yes')">
+                            <i class="fas fa-check"></i> بله
+                        </button>
+                        <button class="answer-btn no" onclick="answerQuestion('${q.id}', 'no')">
+                            <i class="fas fa-times"></i> خیر
+                        </button>
+                    </div>
+                `;
+            } else if (q.type === 'choice') {
+                html += '<div class="choice-grid">';
+                q.choices.forEach(choice => {
+                    const selected = answers[q.id] === choice.value ? 'selected' : '';
+                    html += `
+                        <button class="choice-btn ${selected}" onclick="answerQuestion('${q.id}', '${choice.value}')">
+                            <span class="choice-icon">${choice.icon}</span>
+                            <strong>${choice.label}</strong>
+                            <small style="display:block; color:#666; margin-top:4px;">${choice.hint}</small>
+                        </button>
+                    `;
+                });
+                html += '</div>';
+            }
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function answerQuestion(questionId, answer) {
+            answers[questionId] = answer;
+
+            // Find the question and add its modules
+            const q = questions.find(q => q.id === questionId);
+            if (q && q.modules) {
+                const modules = q.modules[answer] || [];
+                modules.forEach(m => selectedModules.add(m));
+            }
+
+            // Move to next question
+            currentQuestion++;
+            renderCurrentQuestion();
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderCurrentQuestion();
+            }
+        }
+
+        function skipQuestion() {
+            currentQuestion++;
+            renderCurrentQuestion();
+        }
+
+        function showSummary() {
+            document.getElementById('progressContainer').style.display = 'none';
+            document.getElementById('wizardNav').style.display = 'none';
+            document.getElementById('questionsContainer').innerHTML = '';
+            document.getElementById('summarySection').classList.add('active');
+
+            renderModuleTags();
+        }
+
+        function renderModuleTags() {
+            const container = document.getElementById('selectedModulesTags');
+            
+            // Sort modules by category
+            const sortedModules = Array.from(selectedModules).sort((a, b) => {
+                const order = Object.keys(moduleNames);
+                return order.indexOf(a) - order.indexOf(b);
+            });
+
+            container.innerHTML = sortedModules.map(m => `
+                <div class="module-tag" data-module="${m}">
+                    ${moduleNames[m] || m}
+                    ${!baseModules.includes(m) ? `<button class="remove-btn" onclick="removeModule('${m}')" title="حذف">×</button>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function removeModule(moduleName) {
+            selectedModules.delete(moduleName);
+            renderModuleTags();
+        }
+
+        function proceedToInstall() {
+            // Get URL params
+            const urlParams = new URLSearchParams(window.location.search);
+            const db = urlParams.get('db') || '';
+            const email = urlParams.get('email') || '';
+            const password = urlParams.get('password') || '';
+
+            // Build modules list
+            const modules = Array.from(selectedModules).join(',');
+
+            // Redirect to install page with pre-selected modules
+            let url = `install_modules.html?wizard_modules=${encodeURIComponent(modules)}`;
+            if (db) url += `&db=${encodeURIComponent(db)}`;
+            if (email) url += `&email=${encodeURIComponent(email)}`;
+            if (password) url += `&password=${encodeURIComponent(password)}`;
+
+            window.location.href = url;
+        }
+
+        function editManually() {
+            // Same as proceed but with edit flag
+            proceedToInstall();
+        }
+
+        function restartWizard() {
+            currentQuestion = 0;
+            answers = {};
+            selectedModules = new Set(baseModules);
+            
+            document.getElementById('summarySection').classList.remove('active');
+            document.getElementById('introSection').classList.add('active');
+            document.getElementById('progressContainer').style.display = 'none';
+            document.getElementById('wizardNav').style.display = 'none';
+            document.getElementById('questionsContainer').innerHTML = '';
+        }
+    </script>
+</body>
+</html>

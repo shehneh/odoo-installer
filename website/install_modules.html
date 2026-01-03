@@ -509,6 +509,67 @@
             border-style: dashed;
         }
 
+        /* Wizard Banner */
+        .wizard-banner {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border: 2px solid #667eea;
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .wizard-banner-icon {
+            font-size: 40px;
+        }
+
+        .wizard-banner-content {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .wizard-banner-content strong {
+            color: #333;
+            font-size: 16px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .wizard-banner-content p {
+            color: #666;
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .wizard-banner-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .wizard-banner-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102,126,234,0.4);
+        }
+
+        .wizard-banner.from-wizard {
+            background: linear-gradient(135deg, #28a74515 0%, #20c99715 100%);
+            border-color: #28a745;
+        }
+
+        .wizard-banner.from-wizard .wizard-banner-btn {
+            background: #28a745;
+        }
+
         .module-item.optional .tile::before {
             content: 'اختیاری';
             position: absolute;
@@ -555,10 +616,24 @@
                 <input type="password" id="password" required placeholder="••••••••">
             </div>
 
+            <!-- Wizard Banner -->
+            <div class="wizard-banner" id="wizardBanner">
+                <div class="wizard-banner-icon">🧙‍♂️</div>
+                <div class="wizard-banner-content">
+                    <strong>نمی‌دانید کدام ماژول‌ها را نصب کنید؟</strong>
+                    <p>از دستیار هوشمند استفاده کنید تا با چند سوال ساده، ماژول‌های مناسب کسب‌وکار شما انتخاب شوند.</p>
+                </div>
+                <a href="module_wizard.html" class="wizard-banner-btn" id="wizardLink">
+                    <i class="fas fa-magic"></i> شروع پرسشنامه
+                </a>
+            </div>
+
             <div class="module-selection">
                 <h3 style="margin-bottom: 15px; color: #333;">
                     <i class="fas fa-list-check"></i> انتخاب ماژول‌ها
                 </h3>
+
+                <div class="info-box" style="margin-bottom: 16px;" id="wizardResultInfo" style="display: none;"></div>
 
                 <div class="info-box" style="margin-bottom: 16px;">
                     <p><strong>✅ پیشنهاد ما برای شروع:</strong> مواردی که تیک دارند معمولاً برای اکثر شرکت‌ها ضروری‌اند. موارد اختیاری با خط‌چین مشخص شده‌اند.</p>
@@ -942,6 +1017,63 @@
         if (urlParams.get('db')) document.getElementById('dbName').value = urlParams.get('db');
         if (urlParams.get('email')) document.getElementById('email').value = urlParams.get('email');
         if (urlParams.get('password')) document.getElementById('password').value = urlParams.get('password');
+
+        // Handle wizard_modules parameter - apply wizard selections
+        const wizardModules = urlParams.get('wizard_modules');
+        if (wizardModules) {
+            const moduleList = wizardModules.split(',').map(m => m.trim()).filter(m => m);
+            
+            // First, uncheck all
+            document.querySelectorAll('.module-item input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+            });
+            
+            // Then check only wizard-selected modules
+            moduleList.forEach(moduleName => {
+                const cb = document.querySelector(`.module-item input[type="checkbox"][value="${moduleName}"]`);
+                if (cb) cb.checked = true;
+            });
+            
+            // Update banner to show wizard result
+            const banner = document.getElementById('wizardBanner');
+            banner.classList.add('from-wizard');
+            banner.innerHTML = `
+                <div class="wizard-banner-icon">✅</div>
+                <div class="wizard-banner-content">
+                    <strong>ماژول‌ها بر اساس پاسخ‌های شما انتخاب شدند</strong>
+                    <p>${moduleList.length} ماژول انتخاب شده. می‌توانید قبل از نصب تغییرات دلخواه را اعمال کنید.</p>
+                </div>
+                <a href="module_wizard.html" class="wizard-banner-btn">
+                    <i class="fas fa-redo"></i> شروع مجدد
+                </a>
+            `;
+            
+            updateCounter();
+        }
+
+        // Update wizard link with current credentials
+        function updateWizardLink() {
+            const db = document.getElementById('dbName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            
+            const link = document.getElementById('wizardLink');
+            if (!link) return;
+            
+            let url = 'module_wizard.html';
+            const params = [];
+            if (db) params.push(`db=${encodeURIComponent(db)}`);
+            if (email) params.push(`email=${encodeURIComponent(email)}`);
+            if (password) params.push(`password=${encodeURIComponent(password)}`);
+            if (params.length) url += '?' + params.join('&');
+            
+            link.href = url;
+        }
+
+        document.getElementById('dbName').addEventListener('input', updateWizardLink);
+        document.getElementById('email').addEventListener('input', updateWizardLink);
+        document.getElementById('password').addEventListener('input', updateWizardLink);
+        updateWizardLink();
 
         // Auto-check status when credentials are present
         document.getElementById('dbName').addEventListener('input', scheduleAutoCheck);
