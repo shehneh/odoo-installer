@@ -178,7 +178,113 @@
             border-radius: 10px;
             padding: 20px;
             margin: 20px 0;
+        }
+
+        .progress-header {
             text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .modules-status {
+            max-height: 400px;
+            overflow-y: auto;
+            text-align: right;
+        }
+
+        .module-status-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            margin: 8px 0;
+            background: white;
+            border-radius: 8px;
+            border-right: 4px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+
+        .module-status-item.installing {
+            border-right-color: #ffc107;
+            background: #fff3cd;
+        }
+
+        .module-status-item.installed {
+            border-right-color: #28a745;
+            background: #d4edda;
+        }
+
+        .module-status-item.already-installed {
+            border-right-color: #17a2b8;
+            background: #d1ecf1;
+        }
+
+        .module-status-item.skipped {
+            border-right-color: #6c757d;
+            background: #e9ecef;
+        }
+
+        .module-status-item.failed {
+            border-right-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .module-status-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .module-status-badge {
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .badge-installing {
+            background: #ffc107;
+            color: #856404;
+        }
+
+        .badge-installed {
+            background: #28a745;
+            color: white;
+        }
+
+        .badge-already {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .badge-skipped {
+            background: #6c757d;
+            color: white;
+        }
+
+        .badge-failed {
+            background: #dc3545;
+            color: white;
         }
 
         .spinner {
@@ -480,8 +586,14 @@
         </form>
 
         <div class="progress-box" id="progressBox">
-            <div class="spinner"></div>
-            <p id="progressText">در حال نصب ماژول‌ها...</p>
+            <div class="progress-header">
+                <h3 style="color: #667eea; margin-bottom: 10px;"><i class="fas fa-cog fa-spin"></i> در حال نصب...</h3>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <p id="progressText" style="margin-top: 10px; font-size: 14px; color: #666;">آماده‌سازی...</p>
+            </div>
+            <div class="modules-status" id="modulesStatus"></div>
         </div>
     </div>
 
@@ -556,9 +668,29 @@
             // Show progress
             form.style.display = 'none';
             progressBox.style.display = 'block';
-            document.getElementById('progressText').textContent = 'در حال نصب ماژول‌ها... (این کار ممکن است چند دقیقه طول بکشد)';
-
             submitBtn.disabled = true;
+
+            // Initialize progress UI
+            const modulesStatus = document.getElementById('modulesStatus');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            
+            modulesStatus.innerHTML = '';
+            progressBar.style.width = '0%';
+            progressBar.textContent = '0%';
+            progressText.textContent = `در حال نصب ${modules.length} ماژول... (این کار ممکن است چند دقیقه طول بکشد)`;
+
+            // Create status items for all modules
+            modules.forEach(moduleName => {
+                const moduleItem = document.createElement('div');
+                moduleItem.className = 'module-status-item';
+                moduleItem.id = `status-${moduleName}`;
+                moduleItem.innerHTML = `
+                    <span class="module-status-name">${getModuleDisplayName(moduleName)}</span>
+                    <span class="module-status-badge">در صف انتظار...</span>
+                `;
+                modulesStatus.appendChild(moduleItem);
+            });
 
             try {
                 // Try to detect the API base URL
@@ -598,19 +730,59 @@
 
                 const data = await response.json();
 
+                // Update progress to 100%
+                progressBar.style.width = '100%';
+                progressBar.textContent = '100%';
+
+                // Process and display module statuses
+                if (data.report) {
+                    const report = data.report;
+                    
+                    // Mark newly installed modules
+                    if (Array.isArray(report.installed)) {
+                        report.installed.forEach(moduleName => {
+                            updateModuleStatus(moduleName, 'installed', '✅ نصب شد');
+                        });
+                    }
+                    
+                    // Mark already installed modules
+                    if (Array.isArray(report.already_installed)) {
+                        report.already_installed.forEach(moduleName => {
+                            updateModuleStatus(moduleName, 'already-installed', '↺ از قبل نصب بود');
+                        });
+                    }
+                    
+                    // Mark skipped modules
+                    if (Array.isArray(report.skipped)) {
+                        report.skipped.forEach(moduleName => {
+                            updateModuleStatus(moduleName, 'skipped', '⊘ رد شد');
+                        });
+                    }
+                    
+                    // Mark failed modules
+                    if (Array.isArray(report.failed)) {
+                        report.failed.forEach(moduleName => {
+                            updateModuleStatus(moduleName, 'failed', '✗ خطا');
+                        });
+                    }
+                }
+
+                // Wait a bit to show final status
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
                 progressBox.style.display = 'none';
                 form.style.display = 'block';
                 submitBtn.disabled = false;
 
                 if (data.success) {
                     const reportHtml = renderReportHtml(data.report, data.details);
-                    showSuccess(`✅ ${escapeHtml(data.message || 'ماژول‌ها با موفقیت نصب شدند')}<br>${reportHtml}`);
+                    showSuccess(`✅ ${escapeHtml(data.message || 'عملیات نصب کامل شد')}<br>${reportHtml}`);
                     
                     // Add link to Odoo
                     setTimeout(() => {
                         const loginLink = `https://odoo-online.liara.run/web/login?db=${dbName}`;
                         successAlert.innerHTML += `<br><br><a href="${loginLink}" target="_blank" style="color: #155724; font-weight: bold; text-decoration: underline;">🚀 ورود به Odoo</a>`;
-                    }, 1000);
+                    }, 500);
                 } else {
                     const reportText = renderReportText(data.report, data.details);
                     const baseError = data.error || 'خطا در نصب ماژول‌ها';
@@ -624,6 +796,38 @@
             }
         });
 
+        function updateModuleStatus(moduleName, status, badgeText) {
+            const moduleItem = document.getElementById(`status-${moduleName}`);
+            if (moduleItem) {
+                moduleItem.className = `module-status-item ${status}`;
+                const badge = moduleItem.querySelector('.module-status-badge');
+                if (badge) {
+                    badge.textContent = badgeText;
+                    badge.className = `module-status-badge badge-${status === 'already-installed' ? 'already' : status}`;
+                }
+            }
+        }
+
+        function getModuleDisplayName(moduleName) {
+            const moduleNames = {
+                'l10n_ir': '🇮🇷 بسته ایران',
+                'web_responsive': '📱 UI ریسپانسیو',
+                'home_menu_fullscreen': '🎨 منوی تمام‌صفحه',
+                'base_setup': '⚙️ تنظیمات پایه',
+                'account': '💳 حسابداری',
+                'crm': '📈 CRM',
+                'sale_management': '🧾 فروش',
+                'purchase': '🛒 خرید',
+                'stock': '🏷️ انبار',
+                'hr': '👥 کارکنان',
+                'hr_holidays': '🗓️ مرخصی‌ها',
+                'project': '📌 پروژه',
+                'website': '🌐 وب‌سایت',
+                'website_sale': '🛍️ فروشگاه'
+            };
+            return moduleNames[moduleName] || moduleName;
+        }
+
         function escapeHtml(value) {
             return String(value)
                 .replaceAll('&', '&amp;')
@@ -634,15 +838,17 @@
         }
 
         function renderReportHtml(report, detailsFallback) {
-            if (report && (Array.isArray(report.installed) || Array.isArray(report.skipped) || Array.isArray(report.failed))) {
+            if (report && (Array.isArray(report.installed) || Array.isArray(report.already_installed) || Array.isArray(report.skipped) || Array.isArray(report.failed))) {
                 const installed = Array.isArray(report.installed) ? report.installed : [];
+                const alreadyInstalled = Array.isArray(report.already_installed) ? report.already_installed : [];
                 const skipped = Array.isArray(report.skipped) ? report.skipped : [];
                 const failed = Array.isArray(report.failed) ? report.failed : [];
 
                 const parts = [];
-                if (installed.length) parts.push(`<div><strong>✓ Installed:</strong> ${installed.map(escapeHtml).join(', ')}</div>`);
-                if (skipped.length) parts.push(`<div><strong>⊘ Skipped:</strong> ${skipped.map(escapeHtml).join(', ')}</div>`);
-                if (failed.length) parts.push(`<div><strong>✗ Failed:</strong> ${failed.map(escapeHtml).join(', ')}</div>`);
+                if (installed.length) parts.push(`<div><strong>✅ نصب جدید:</strong> ${installed.map(escapeHtml).join(', ')}</div>`);
+                if (alreadyInstalled.length) parts.push(`<div><strong>↺ از قبل نصب:</strong> ${alreadyInstalled.map(escapeHtml).join(', ')}</div>`);
+                if (skipped.length) parts.push(`<div><strong>⊘ رد شد:</strong> ${skipped.map(escapeHtml).join(', ')}</div>`);
+                if (failed.length) parts.push(`<div><strong>✗ خطا:</strong> ${failed.map(escapeHtml).join(', ')}</div>`);
 
                 return `<small style="display:block; margin-top:8px; line-height:1.8;">${parts.join('')}</small>`;
             }
@@ -654,15 +860,17 @@
         }
 
         function renderReportText(report, detailsFallback) {
-            if (report && (Array.isArray(report.installed) || Array.isArray(report.skipped) || Array.isArray(report.failed))) {
+            if (report && (Array.isArray(report.installed) || Array.isArray(report.already_installed) || Array.isArray(report.skipped) || Array.isArray(report.failed))) {
                 const installed = Array.isArray(report.installed) ? report.installed : [];
+                const alreadyInstalled = Array.isArray(report.already_installed) ? report.already_installed : [];
                 const skipped = Array.isArray(report.skipped) ? report.skipped : [];
                 const failed = Array.isArray(report.failed) ? report.failed : [];
 
                 const lines = [];
-                if (installed.length) lines.push(`✓ Installed: ${installed.join(', ')}`);
-                if (skipped.length) lines.push(`⊘ Skipped: ${skipped.join(', ')}`);
-                if (failed.length) lines.push(`✗ Failed: ${failed.join(', ')}`);
+                if (installed.length) lines.push(`✅ نصب جدید: ${installed.join(', ')}`);
+                if (alreadyInstalled.length) lines.push(`↺ از قبل نصب: ${alreadyInstalled.join(', ')}`);
+                if (skipped.length) lines.push(`⊘ رد شد: ${skipped.join(', ')}`);
+                if (failed.length) lines.push(`✗ خطا: ${failed.join(', ')}`);
                 return lines.join('\n');
             }
 

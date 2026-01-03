@@ -201,7 +201,8 @@ def install_odoo_modules(db_name, admin_email, admin_password, modules=None):
         except Exception as e:
             print(f"⚠ Could not update module list: {e}")
         
-        installed = []
+        newly_installed = []
+        already_installed = []
         skipped = []
         failed = []
         
@@ -230,8 +231,8 @@ def install_odoo_modules(db_name, admin_email, admin_password, modules=None):
                 )
                 
                 if module_data[0]['state'] == 'installed':
-                    print(f"✓ Module '{module_name}' already installed")
-                    installed.append(module_name)
+                    print(f"✓ Module '{module_name}' already installed (skipping)")
+                    already_installed.append(module_name)
                     continue
                 
                 # Install module
@@ -243,7 +244,7 @@ def install_odoo_modules(db_name, admin_email, admin_password, modules=None):
                 )
                 
                 print(f"✅ Module '{module_name}' installed!")
-                installed.append(module_name)
+                newly_installed.append(module_name)
                 import time
                 time.sleep(2)
                 
@@ -251,9 +252,14 @@ def install_odoo_modules(db_name, admin_email, admin_password, modules=None):
                 print(f"❌ Error installing '{module_name}': {e}")
                 failed.append(module_name)
         
+        # Combine all installed for backward compatibility
+        all_installed = newly_installed + already_installed
+        
         details_parts = []
-        if installed:
-            details_parts.append(f"✓ Installed: {', '.join(installed)}")
+        if newly_installed:
+            details_parts.append(f"✓ Newly Installed: {', '.join(newly_installed)}")
+        if already_installed:
+            details_parts.append(f"↺ Already Installed: {', '.join(already_installed)}")
         if skipped:
             details_parts.append(f"⊘ Skipped (not found): {', '.join(skipped)}")
         if failed:
@@ -263,16 +269,17 @@ def install_odoo_modules(db_name, admin_email, admin_password, modules=None):
 
         report = {
             'requested': list(modules) if modules else [],
-            'installed': installed,
+            'installed': newly_installed,
+            'already_installed': already_installed,
             'skipped': skipped,
             'failed': failed,
         }
 
         # Success rules:
-        # - If we installed (or it was already installed) at least one module -> success
+        # - If we installed new modules or skipped already-installed -> success
         # - If everything was skipped because not found -> not successful (user selected modules but none applicable)
         # - If failures happened but some installed -> still success with warnings
-        if installed:
+        if newly_installed or already_installed:
             return True, details, report
         if skipped and not failed:
             return False, f"No selected modules were found in this Odoo build. {details}", report
@@ -285,6 +292,7 @@ def install_odoo_modules(db_name, admin_email, admin_password, modules=None):
         return False, str(e), {
             'requested': list(modules) if modules else [],
             'installed': [],
+            'already_installed': [],
             'skipped': [],
             'failed': [],
         }
