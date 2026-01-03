@@ -18,16 +18,30 @@ import sqlite3
 import xmlrpc.client
 import socket
 
-# Custom Transport with timeout for XMLRPC
-class TimeoutTransport(xmlrpc.client.Transport):
+# Custom Transport with timeout for XMLRPC (supports HTTPS)
+class TimeoutTransport(xmlrpc.client.SafeTransport):
+    """Transport with configurable timeout for HTTPS connections"""
     def __init__(self, timeout=300, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._timeout = timeout
     
     def make_connection(self, host):
-        conn = super().make_connection(host)
-        conn.timeout = self._timeout
-        return conn
+        # SafeTransport uses HTTPS by default
+        if self._connection and host == self._connection[0]:
+            return self._connection[1]
+        
+        import http.client
+        import ssl
+        
+        # Create HTTPS connection with timeout
+        chost, self._extra_headers, x509 = self.get_host_info(host)
+        context = ssl.create_default_context()
+        self._connection = host, http.client.HTTPSConnection(
+            chost, 
+            timeout=self._timeout,
+            context=context
+        )
+        return self._connection[1]
 
 app = Flask(__name__, 
             static_folder='website',
@@ -200,7 +214,7 @@ def get_odoo_modules_status(db_name, admin_email, admin_password, modules):
 
         # Best-effort refresh
         try:
-            models.execute_kw(db_name, uid, admin_password, 'ir.module.module', 'update_list', [[]])
+            models.execute_kw(db_name, uid, admin_password, 'ir.module.module', 'update_list', [])
         except Exception as e:
             print(f"⚠ Could not update module list (status check): {e}")
 
@@ -277,7 +291,7 @@ def install_odoo_modules_stream(db_name, admin_email, admin_password, modules=No
         # Update module list
         yield json.dumps({'event': 'status', 'module': None, 'status': 'updating', 'message': 'به‌روزرسانی لیست ماژول‌ها...'})
         try:
-            models.execute_kw(db_name, uid, admin_password, 'ir.module.module', 'update_list', [[]])
+            models.execute_kw(db_name, uid, admin_password, 'ir.module.module', 'update_list', [])
             time.sleep(1)
         except Exception as e:
             print(f"⚠ Could not update module list: {e}")
