@@ -1216,7 +1216,7 @@
                             const jsonData = line.substring(6);
                             try {
                                 const event = JSON.parse(jsonData);
-                                handleStreamEvent(event, modules.length);
+                                handleStreamEvent(event, modulesToInstall.length);
                             } catch (e) {
                                 console.error('Failed to parse event:', jsonData, e);
                             }
