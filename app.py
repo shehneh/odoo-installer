@@ -170,6 +170,69 @@ def serve_static(path):
 
 import xmlrpc.client
 
+
+def get_odoo_modules_status(db_name, admin_email, admin_password, modules):
+    """Return module availability/state for given database."""
+    try:
+        common_url = f"{ODOO_URL}/xmlrpc/2/common"
+        object_url = f"{ODOO_URL}/xmlrpc/2/object"
+
+        common = xmlrpc.client.ServerProxy(common_url, allow_none=True)
+        uid = common.authenticate(db_name, admin_email, admin_password, {})
+        if not uid:
+            return False, "Authentication failed", None
+
+        models = xmlrpc.client.ServerProxy(object_url, allow_none=True)
+
+        # Best-effort refresh
+        try:
+            models.execute_kw(db_name, uid, admin_password, 'ir.module.module', 'update_list', [[]])
+        except Exception as e:
+            print(f"⚠ Could not update module list (status check): {e}")
+
+        statuses = {}
+        installed = []
+        not_found = []
+        available = []
+
+        for module_name in modules:
+            try:
+                module_ids = models.execute_kw(
+                    db_name, uid, admin_password,
+                    'ir.module.module', 'search',
+                    [[('name', '=', module_name)]],
+                )
+
+                if not module_ids:
+                    statuses[module_name] = 'not_found'
+                    not_found.append(module_name)
+                    continue
+
+                module_data = models.execute_kw(
+                    db_name, uid, admin_password,
+                    'ir.module.module', 'read',
+                    [module_ids], {'fields': ['state']},
+                )
+                state = (module_data[0] or {}).get('state')
+                if state == 'installed':
+                    statuses[module_name] = 'installed'
+                    installed.append(module_name)
+                else:
+                    statuses[module_name] = 'available'
+                    available.append(module_name)
+            except Exception as e:
+                print(f"⚠ Status check failed for {module_name}: {e}")
+                statuses[module_name] = 'unknown'
+
+        return True, "OK", {
+            'statuses': statuses,
+            'installed': installed,
+            'not_found': not_found,
+            'available': available,
+        }
+    except Exception as e:
+        return False, str(e), None
+
 def install_odoo_modules_stream(db_name, admin_email, admin_password, modules=None):
     """Install Odoo modules with streaming progress (generator)"""
     if modules is None:
@@ -283,6 +346,35 @@ def install_odoo_modules_stream(db_name, admin_email, admin_password, modules=No
         import traceback
         traceback.print_exc()
         yield json.dumps({'event': 'error', 'message': str(e)})
+
+
+@app.route('/api/modules-status', methods=['POST', 'OPTIONS'])
+def api_modules_status():
+    """Check which modules are installed/available in a given database."""
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    try:
+        data = request.get_json() or {}
+        db_name = data.get('db_name')
+        admin_email = data.get('admin_email')
+        admin_password = data.get('admin_password')
+        modules = data.get('modules') or []
+
+        if not all([db_name, admin_email, admin_password]):
+            return jsonify({'success': False, 'error': 'Database name, email and password are required'}), 400
+        if not isinstance(modules, list) or not modules:
+            return jsonify({'success': False, 'error': 'Modules list is required'}), 400
+
+        ok, msg, payload = get_odoo_modules_status(db_name, admin_email, admin_password, modules)
+        if not ok:
+            return jsonify({'success': False, 'error': msg}), 500
+
+        return jsonify({'success': True, **payload})
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 def install_odoo_modules(db_name, admin_email, admin_password, modules=None):

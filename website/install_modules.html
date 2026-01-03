@@ -113,10 +113,48 @@
             background: white;
             border-radius: 14px;
             border: 2px solid #e0e0e0;
-            padding: 14px 12px 12px;
+            padding: 14px 12px 44px;
             text-align: center;
             transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
             min-height: 150px;
+        }
+
+        .tile-status {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 10px;
+            font-weight: bold;
+            border-radius: 999px;
+            padding: 3px 8px;
+            border: 1px solid #e0e0e0;
+            background: #f8f9fa;
+            color: #666;
+            display: none;
+        }
+
+        .tile-status.is-installed {
+            display: inline-block;
+            background: #d1ecf1;
+            border-color: #bee5eb;
+            color: #0c5460;
+        }
+
+        .tile-status.is-not-found {
+            display: inline-block;
+            background: #e9ecef;
+            border-color: #dee2e6;
+            color: #495057;
+        }
+
+        .module-item.is-installed .tile {
+            border-color: #17a2b8;
+            background: #f3fbfd;
+        }
+
+        .module-item.is-not-found .tile {
+            opacity: 0.6;
+            background: #f8f9fa;
         }
 
         .module-item:hover .tile {
@@ -752,26 +790,110 @@
 
         // Quick selection functions
         function selectAll() {
-            document.querySelectorAll('.module-item input[type="checkbox"]').forEach(cb => cb.checked = true);
+            document.querySelectorAll('.module-item input[type="checkbox"]').forEach(cb => {
+                if (!cb.disabled) cb.checked = true;
+            });
             updateCounter();
         }
 
         function selectNone() {
-            document.querySelectorAll('.module-item input[type="checkbox"]').forEach(cb => cb.checked = false);
+            document.querySelectorAll('.module-item input[type="checkbox"]').forEach(cb => {
+                if (!cb.disabled) cb.checked = false;
+            });
             updateCounter();
         }
 
         function selectRecommended() {
             // Reset all, then check only recommended (non-optional)
             document.querySelectorAll('.module-item input[type="checkbox"]').forEach(cb => {
+                if (cb.disabled) return;
                 cb.checked = !cb.closest('.module-item').classList.contains('optional');
             });
             updateCounter();
         }
 
         function updateCounter() {
-            const count = document.querySelectorAll('.module-item input[type="checkbox"]:checked').length;
+            const count = Array.from(document.querySelectorAll('.module-item input[type="checkbox"]:checked'))
+                .filter(cb => !cb.disabled)
+                .length;
             document.getElementById('selectedCount').textContent = count;
+        }
+
+        function setTileStatus(moduleName, kind, text) {
+            const cb = document.querySelector(`.module-item input[type="checkbox"][value="${moduleName}"]`);
+            if (!cb) return;
+            const tile = cb.nextElementSibling;
+            if (!tile || !tile.classList.contains('tile')) return;
+
+            let statusEl = tile.querySelector('.tile-status');
+            if (!statusEl) {
+                statusEl = document.createElement('div');
+                statusEl.className = 'tile-status';
+                tile.appendChild(statusEl);
+            }
+
+            statusEl.classList.remove('is-installed', 'is-not-found');
+            if (kind === 'installed') statusEl.classList.add('is-installed');
+            if (kind === 'not_found') statusEl.classList.add('is-not-found');
+            statusEl.textContent = text || '';
+            statusEl.style.display = text ? 'inline-block' : 'none';
+        }
+
+        async function fetchAndApplyDbModuleStates(dbName, email, password) {
+            const allCbs = Array.from(document.querySelectorAll('.module-item input[type="checkbox"]'));
+            const allModules = allCbs.map(cb => cb.value);
+            const apiUrl = `${window.location.origin}/api/modules-status`;
+
+            const resp = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    db_name: dbName,
+                    admin_email: email,
+                    admin_password: password,
+                    modules: allModules
+                })
+            });
+
+            const data = await resp.json().catch(() => null);
+            if (!resp.ok || !data || !data.success) {
+                throw new Error((data && data.error) ? data.error : `Server error: ${resp.status}`);
+            }
+
+            // Reset any previous DB-driven state
+            allCbs.forEach(cb => {
+                const label = cb.closest('.module-item');
+                label.classList.remove('is-installed', 'is-not-found');
+                // Only re-enable if it was disabled by us (status badges exist)
+                const tile = cb.nextElementSibling;
+                const hasStatus = tile && tile.querySelector && tile.querySelector('.tile-status');
+                if (hasStatus && cb.disabled) {
+                    cb.disabled = false;
+                }
+                setTileStatus(cb.value, null, '');
+            });
+
+            const statuses = data.statuses || {};
+            Object.entries(statuses).forEach(([moduleName, state]) => {
+                const cb = document.querySelector(`.module-item input[type="checkbox"][value="${moduleName}"]`);
+                if (!cb) return;
+                const label = cb.closest('.module-item');
+
+                if (state === 'installed') {
+                    label.classList.add('is-installed');
+                    cb.checked = true;
+                    cb.disabled = true;
+                    setTileStatus(moduleName, 'installed', 'نصب شده');
+                } else if (state === 'not_found') {
+                    label.classList.add('is-not-found');
+                    cb.checked = false;
+                    cb.disabled = true;
+                    setTileStatus(moduleName, 'not_found', 'موجود نیست');
+                }
+            });
+
+            updateCounter();
+            return data;
         }
 
         // Update counter on checkbox change
@@ -795,13 +917,9 @@
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
 
-            // Get selected modules
-            const modules = [];
-            document.querySelectorAll('.module-item input[type="checkbox"]:checked').forEach(checkbox => {
-                modules.push(checkbox.value);
-            });
-
-            if (modules.length === 0) {
+            // Require at least one selection attempt
+            const selectedBeforeCheck = Array.from(document.querySelectorAll('.module-item input[type="checkbox"]:checked')).length;
+            if (selectedBeforeCheck === 0) {
                 showError('لطفاً حداقل یک ماژول را انتخاب کنید');
                 return;
             }
@@ -823,21 +941,64 @@
             modulesStatus.innerHTML = '';
             progressBar.style.width = '0%';
             progressBar.textContent = '0%';
-            progressText.textContent = `در حال نصب ${modules.length} ماژول... (این کار ممکن است چند دقیقه طول بکشد)`;
-
-            // Create status items for all modules
-            modules.forEach(moduleName => {
-                const moduleItem = document.createElement('div');
-                moduleItem.className = 'module-status-item';
-                moduleItem.id = `status-${moduleName}`;
-                moduleItem.innerHTML = `
-                    <span class="module-status-name">${getModuleDisplayName(moduleName)}</span>
-                    <span class="module-status-badge">در صف انتظار...</span>
-                `;
-                modulesStatus.appendChild(moduleItem);
-            });
+            progressText.textContent = 'در حال بررسی وضعیت ماژول‌ها در دیتابیس...';
 
             try {
+                // 1) Pre-check DB to mark installed modules and disable them
+                const statusData = await fetchAndApplyDbModuleStates(dbName, email, password);
+
+                // 2) Decide what to show in monitoring list (checked or disabled)
+                const cbsForMonitoring = Array.from(document.querySelectorAll('.module-item input[type="checkbox"]'))
+                    .filter(cb => cb.checked || cb.disabled);
+                const modulesForMonitoring = cbsForMonitoring.map(cb => cb.value);
+
+                // 3) Modules that actually need installation
+                const modulesToInstall = cbsForMonitoring
+                    .filter(cb => cb.checked && !cb.disabled)
+                    .map(cb => cb.value);
+
+                // Render monitoring list
+                modulesStatus.innerHTML = '';
+                modulesForMonitoring.forEach(moduleName => {
+                    const moduleItem = document.createElement('div');
+                    moduleItem.className = 'module-status-item';
+                    moduleItem.id = `status-${moduleName}`;
+                    moduleItem.innerHTML = `
+                        <span class="module-status-name">${getModuleDisplayName(moduleName)}</span>
+                        <span class="module-status-badge">در صف انتظار...</span>
+                    `;
+                    modulesStatus.appendChild(moduleItem);
+                });
+
+                // Apply immediate statuses (installed / not found)
+                (statusData.installed || []).forEach(moduleName => {
+                    updateModuleStatus(moduleName, 'already-installed', '↺ از قبل نصب بود');
+                });
+                (statusData.not_found || []).forEach(moduleName => {
+                    updateModuleStatus(moduleName, 'skipped', '⊘ موجود نیست');
+                });
+
+                // If nothing to install, finish immediately
+                if (modulesToInstall.length === 0) {
+                    progressBar.style.width = '100%';
+                    progressBar.textContent = '100%';
+                    progressText.textContent = 'چیزی برای نصب باقی نمانده.';
+
+                    await new Promise(resolve => setTimeout(resolve, 600));
+                    progressBox.style.display = 'none';
+                    form.style.display = 'block';
+                    submitBtn.disabled = false;
+
+                    const reportHtml = renderReportHtml({
+                        installed: [],
+                        already_installed: statusData.installed || [],
+                        skipped: statusData.not_found || [],
+                        failed: []
+                    }, null);
+                    showSuccess(`✅ همه موارد انتخابی یا از قبل نصب بوده‌اند یا در این نسخه موجود نیستند.<br>${reportHtml}`);
+                    return;
+                }
+
                 // Use Server-Sent Events for real-time progress
                 const apiBase = window.location.origin;
                 const apiUrl = `${apiBase}/api/install-modules-stream`;
@@ -854,7 +1015,7 @@
                         db_name: dbName,
                         admin_email: email,
                         admin_password: password,
-                        modules: modules
+                        modules: modulesToInstall
                     })
                 });
 
