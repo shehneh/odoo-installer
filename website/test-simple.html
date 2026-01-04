@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Page</title>
+    <style>
+        body {
+            background: #667eea;
+            color: white;
+            font-family: Arial;
+            padding: 40px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>✅ سرور کار می‌کند!</h1>
+    <p>اگر این متن را می‌بینید، سرور Flask درست کار می‌کند.</p>
+    <p>زمان: <span id="time"></span></p>
+    <script>
+        document.getElementById('time').textContent = new Date().toLocaleString('fa-IR');
+        console.log('✅ JavaScript کار می‌کند!');
+    </script>
+</body>
+</html>
