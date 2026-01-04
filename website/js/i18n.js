@@ -581,11 +581,18 @@ const I18N = {
      */
     updateSwitcherButton() {
         const btn = document.getElementById('langSwitcherBtn');
-        if (!btn) return;
+        if (btn) {
+            const otherLang = this.currentLang === 'fa' ? 'en' : 'fa';
+            const langInfo = this.languages[otherLang];
+            btn.innerHTML = `<span class="lang-flag" style="font-size: 1.2rem;">${langInfo.flag}</span><span class="lang-name">${langInfo.name}</span>`;
+        }
         
-        const otherLang = this.currentLang === 'fa' ? 'en' : 'fa';
-        const langInfo = this.languages[otherLang];
-        btn.innerHTML = `<span class="lang-flag" style="font-size: 1.2rem;">${langInfo.flag}</span><span class="lang-name">${langInfo.name}</span>`;
+        // Update nav language switcher
+        const navLangBtn = document.getElementById('langNameNav');
+        if (navLangBtn) {
+            const currentLangInfo = this.languages[this.currentLang];
+            navLangBtn.textContent = currentLangInfo.name;
+        }
         
         // Update floating switcher position based on direction
         const switcher = document.getElementById('langSwitcher');
