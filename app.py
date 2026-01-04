@@ -59,6 +59,9 @@ PUBLIC_PAGES = [
     'user-login.html', 'user-register.html',
     'verify-account.html', 'email-verified.html',
     'onboarding.html',  # Allow access for demo/trial
+    'onboarding-v2.html',  # Simplified onboarding
+    'onboarding-simple.html',  # Test page
+    'test-simple.html',  # Basic test page
     'app-details.html',  # App information pages
     'apps.html',  # App listing
     'favicon.svg', 'css/', 'js/', 'images/', 'api/'

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>راه‌اندازی Odoo - OdooMaster</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 32px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .required {
+            color: #e74c3c;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .success {
+            background: #f0f9ff;
+            border: 2px solid #10b981;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            display: none;
+        }
+
+        .success h3 {
+            color: #10b981;
+            margin-bottom: 15px;
+        }
+
+        .success p {
+            color: #555;
+            line-height: 1.6;
+            margin: 10px 0;
+        }
+
+        .loading {
+            text-align: center;
+            color: #667eea;
+            display: none;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px 0;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fee;
+            border: 2px solid #e74c3c;
+            border-radius: 10px;
+            padding: 15px;
+            color: #c0392b;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .info-value {
+            color: #333;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 راه‌اندازی Odoo آنلاین</h1>
+        <p class="subtitle">در عرض چند دقیقه، Odoo اختصاصی خود را راه‌اندازی کنید</p>
+
+        <form id="setupForm" onsubmit="handleSubmit(event)">
+            <div class="form-group">
+                <label class="form-label">نام شرکت <span class="required">*</span></label>
+                <input type="text" class="form-input" id="companyName" placeholder="مثال: شرکت فناوری پارس" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">نام و نام خانوادگی مدیر <span class="required">*</span></label>
+                <input type="text" class="form-input" id="adminName" placeholder="مثال: محمد رضایی" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">ایمیل <span class="required">*</span></label>
+                <input type="email" class="form-input" id="adminEmail" placeholder="admin@company.com" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">شماره موبایل</label>
+                <input type="tel" class="form-input" id="phoneNumber" placeholder="09123456789">
+            </div>
+
+            <button type="submit" class="btn" id="submitBtn">
+                ✨ ایجاد Odoo من
+            </button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <p>در حال ایجاد دیتابیس شما...</p>
+            <p style="font-size: 14px; color: #999; margin-top: 10px;">این کار ممکن است چند دقیقه طول بکشد</p>
+        </div>
+
+        <div class="error" id="error"></div>
+
+        <div class="success" id="success">
+            <h3>🎉 دیتابیس شما با موفقیت ایجاد شد!</h3>
+            <div class="info-box" id="infoBox"></div>
+            <button onclick="loginNow()" class="btn" style="margin-top: 20px;">
+                🔐 ورود به Odoo
+            </button>
+        </div>
+    </div>
+
+    <script>
+        console.log('✅ Script loaded successfully!');
+        
+        let tenantData = null;
+
+        async function handleSubmit(event) {
+            event.preventDefault();
+            console.log('Form submitted');
+
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const success = document.getElementById('success');
+            const form = document.getElementById('setupForm');
+
+            // Hide previous messages
+            error.style.display = 'none';
+            success.style.display = 'none';
+
+            // Get form data
+            const companyName = document.getElementById('companyName').value.trim();
+            const adminName = document.getElementById('adminName').value.trim();
+            const adminEmail = document.getElementById('adminEmail').value.trim();
+            const phoneNumber = document.getElementById('phoneNumber').value.trim();
+
+            // Show loading
+            form.style.display = 'none';
+            loading.style.display = 'block';
+
+            try {
+                console.log('Creating tenant...');
+                
+                const response = await fetch('/api/create-tenant', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        company_name: companyName,
+                        admin_email: adminEmail,
+                        admin_name: adminName,
+                        phone: phoneNumber
+                    })
+                });
+
+                const result = await response.json();
+                console.log('Response:', result);
+
+                if (result.success && result.data) {
+                    tenantData = {
+                        database: result.data.database_name,
+                        email: result.data.admin_email,
+                        password: result.data.admin_password,
+                        company: result.data.company_name
+                    };
+
+                    // Show success
+                    loading.style.display = 'none';
+                    success.style.display = 'block';
+
+                    // Fill info
+                    document.getElementById('infoBox').innerHTML = `
+                        <div class="info-row">
+                            <span class="info-label">نام دیتابیس:</span>
+                            <span class="info-value">${tenantData.database}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">ایمیل:</span>
+                            <span class="info-value">${tenantData.email}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">رمز عبور:</span>
+                            <span class="info-value">${tenantData.password}</span>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(result.message || 'خطا در ایجاد دیتابیس');
+                }
+
+            } catch (err) {
+                console.error('Error:', err);
+                loading.style.display = 'none';
+                form.style.display = 'block';
+                error.style.display = 'block';
+                error.textContent = '❌ خطا: ' + err.message;
+            }
+        }
+
+        function loginNow() {
+            if (tenantData) {
+                const url = `/auto_login.html?db=${encodeURIComponent(tenantData.database)}&email=${encodeURIComponent(tenantData.email)}&password=${encodeURIComponent(tenantData.password)}`;
+                window.open(url, '_blank');
+            }
+        }
+    </script>
+</body>
+</html>
