@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OdooMaster | نصاب هوشمند Odoo</title>
-    <meta name="description" content="پلتفرم هوشمند نصب و مدیریت Odoo - سریع، آسان، حرفه‌ای">
+    <title>OdooMaster | پلتفرم هوشمند Odoo در ایران</title>
+    <meta name="description" content="اولین و بهترین پلتفرم ارائه Odoo در ایران - آنلاین، نصب هوشمند و پشتیبانی 24/7">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -12,344 +12,817 @@
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/animations.css">
     <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/unified-nav.css?v=4">
+    <link rel="stylesheet" href="css/unified-nav.css?v=8">
+    <style>
+        /* Modern Landing Page Styles */
+        .hero-modern {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e3a8a 100%);
+        }
+        
+        .hero-modern::before {
+            content: '';
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            background: radial-gradient(circle at 30% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(147, 51, 234, 0.15) 0%, transparent 50%);
+            animation: gradientShift 20s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(-10%, -10%) rotate(5deg); }
+        }
+        
+        .hero-grid {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(99, 102, 241, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99, 102, 241, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+        }
+        
+        @keyframes gridMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 50px 50px; }
+        }
+        
+        .hero-content-modern {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            max-width: 900px;
+            padding: 0 20px;
+        }
+        
+        .hero-badge-modern {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 20px;
+            border-radius: 100px;
+            color: white;
+            font-size: 14px;
+            margin-bottom: 30px;
+            animation: fadeInUp 0.8s ease;
+        }
+        
+        .badge-pulse {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+        }
+        
+        .hero-title-modern {
+            font-size: clamp(48px, 8vw, 80px);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            animation: fadeInUp 0.8s ease 0.2s both;
+        }
+        
+        .hero-title-modern .gradient-text {
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero-subtitle {
+            font-size: clamp(18px, 2.5vw, 24px);
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 40px;
+            line-height: 1.6;
+            animation: fadeInUp 0.8s ease 0.4s both;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.8s ease 0.6s both;
+        }
+        
+        .btn-hero-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 16px 40px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-hero-primary::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .btn-hero-primary:hover::before {
+            opacity: 1;
+        }
+        
+        .btn-hero-primary span {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .btn-hero-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 14px 38px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-hero-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* What is Odoo Section */
+        .odoo-intro {
+            padding: 100px 0;
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+            position: relative;
+        }
+        
+        .intro-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .section-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 100px;
+            color: #a78bfa;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        
+        .section-title {
+            font-size: clamp(36px, 5vw, 56px);
+            font-weight: 800;
+            color: white;
+            margin-bottom: 16px;
+        }
+        
+        .section-desc {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .intro-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+        
+        .intro-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            transition: all 0.3s ease;
+        }
+        
+        .intro-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 20px 60px rgba(99, 102, 241, 0.2);
+        }
+        
+        .intro-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+            margin-bottom: 24px;
+        }
+        
+        .intro-card h3 {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 12px;
+        }
+        
+        .intro-card p {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+        }
+        
+        /* Services Section */
+        .services-section {
+            padding: 100px 0;
+            background: #0f172a;
+        }
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+        
+        .service-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 24px;
+            padding: 50px 40px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+        
+        .service-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        
+        .service-card:hover::before {
+            opacity: 1;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 80px rgba(99, 102, 241, 0.3);
+        }
+        
+        .service-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: white;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .service-card h3 {
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .service-card p {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.8;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .service-features {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .service-features li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 12px;
+            font-size: 15px;
+        }
+        
+        .service-features li i {
+            color: #10b981;
+            font-size: 16px;
+        }
+        
+        .service-btn {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 14px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-size: 16px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .service-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+        
+        /* Why Choose Section */
+        .why-choose {
+            padding: 100px 0;
+            background: linear-gradient(180deg, #0f172a 0%, #1e1b4b 100%);
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+        
+        .feature-item {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateY(-5px);
+        }
+        
+        .feature-item i {
+            font-size: 40px;
+            color: #6366f1;
+            margin-bottom: 20px;
+        }
+        
+        .feature-item h4 {
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 12px;
+        }
+        
+        .feature-item p {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.6;
+        }
+        
+        /* CTA Section */
+        .cta-section {
+            padding: 100px 20px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url('data:image/svg+xml,<svg width="60" height="60" xmlns="http://www.w3.org/2000/svg"><circle cx="30" cy="30" r="2" fill="white" opacity="0.1"/></svg>');
+            animation: movePattern 20s linear infinite;
+        }
+        
+        @keyframes movePattern {
+            0% { background-position: 0 0; }
+            100% { background-position: 60px 60px; }
+        }
+        
+        .cta-content {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .cta-content h2 {
+            font-size: clamp(36px, 5vw, 56px);
+            font-weight: 900;
+            color: white;
+            margin-bottom: 24px;
+        }
+        
+        .cta-content p {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 40px;
+        }
+        
+        .cta-buttons-center {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn-cta-white {
+            background: white;
+            color: #6366f1;
+            padding: 16px 40px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-cta-white:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-cta-outline {
+            background: transparent;
+            border: 2px solid white;
+            color: white;
+            padding: 14px 38px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-cta-outline:hover {
+            background: white;
+            color: #6366f1;
+            transform: translateY(-3px);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title-modern {
+                font-size: 48px;
+            }
+            
+            .cta-buttons, .cta-buttons-center {
+                flex-direction: column;
+            }
+            
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation -->
     <div id="mainNav"></div>
     
-    <!-- Particle Background -->
-    <div id="particles-js"></div>
-    
-    <!-- Cursor Glow Effect -->
-    <div class="cursor-glow"></div>
-
     <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-bg">
-            <div class="gradient-orb orb-1"></div>
-            <div class="gradient-orb orb-2"></div>
-            <div class="gradient-orb orb-3"></div>
-        </div>
-        <div class="container">
-            <div class="hero-content">
-                <div class="hero-badge animate-float" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 0 30px rgba(16, 185, 129, 0.5);">
-                    <span class="badge-dot"></span>
-                    <span data-i18n="hero.badge">🚀 نسخه ۳.۰ - تست دیپلوی موفق!</span>
-                    <i class="fas fa-arrow-left"></i>
-                </div>
-                <h1 class="hero-title">
-                    <span class="line" data-i18n="hero.title.1">قدرت</span>
-                    <span class="line gradient-text" data-i18n="hero.title.2">Odoo</span>
-                    <span class="line" data-i18n="hero.title.3">در دستان شما</span>
-                </h1>
-                <p class="hero-desc" data-i18n="hero.desc">
-                    با پلتفرم هوشمند OdooMaster، سیستم ERP قدرتمند خود را 
-                    در کمتر از ۵ دقیقه راه‌اندازی کنید. بدون پیچیدگی، بدون نیاز به دانش فنی.
-                </p>
-                <div class="hero-cta">
-                    <a href="demo.html" class="btn btn-glass btn-xl">
-                        <i class="fas fa-play-circle"></i>
-                        <span data-i18n="hero.btn.demo">مشاهده دمو نصاب</span>
-                    </a>
-                    <a href="#pricing" class="btn btn-primary btn-xl btn-glow">
-                        <span class="btn-content">
-                            <i class="fas fa-shopping-cart"></i>
-                            <span data-i18n="hero.btn.buy">خرید لایسنس</span>
-                        </span>
-                        <span class="btn-shimmer"></span>
-                    </a>
-                </div>
-                <div class="hero-stats">
-                    <div class="stat-card glass">
-                        <div class="stat-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <div class="stat-info">
-                            <span class="stat-number" data-count="12847">0</span>
-                            <span class="stat-label" data-i18n="hero.stat.users">کاربر فعال</span>
-                        </div>
-                    </div>
-                    <div class="stat-card glass">
-                        <div class="stat-icon">
-                            <i class="fas fa-download"></i>
-                        </div>
-                        <div class="stat-info">
-                            <span class="stat-number" data-count="45892">0</span>
-                            <span class="stat-label" data-i18n="hero.stat.installs">نصب موفق</span>
-                        </div>
-                    </div>
-                    <div class="stat-card glass">
-                        <div class="stat-icon">
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <div class="stat-info">
-                            <span class="stat-number" data-count="4.9">0</span>
-                            <span class="stat-label" data-i18n="hero.stat.rating">امتیاز کاربران</span>
-                        </div>
-                    </div>
-                </div>
+    <section class="hero-modern">
+        <div class="hero-grid"></div>
+        <div class="hero-content-modern">
+            <div class="hero-badge-modern">
+                <span class="badge-pulse"></span>
+                <span>🚀 پیشرو در ارائه Odoo در ایران</span>
             </div>
-            <div class="hero-visual">
-                <div class="dashboard-preview">
-                    <div class="preview-frame glass">
-                        <div class="frame-header">
-                            <div class="frame-dots">
-                                <span class="dot red"></span>
-                                <span class="dot yellow"></span>
-                                <span class="dot green"></span>
-                            </div>
-                            <div class="frame-title">OdooMaster Dashboard</div>
-                        </div>
-                        <div class="frame-content">
-                            <div class="mock-sidebar">
-                                <div class="mock-logo"></div>
-                                <div class="mock-nav-item active"></div>
-                                <div class="mock-nav-item"></div>
-                                <div class="mock-nav-item"></div>
-                                <div class="mock-nav-item"></div>
-                            </div>
-                            <div class="mock-main">
-                                <div class="mock-header-bar"></div>
-                                <div class="mock-cards">
-                                    <div class="mock-card"></div>
-                                    <div class="mock-card"></div>
-                                    <div class="mock-card"></div>
-                                </div>
-                                <div class="mock-chart"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="floating-cards">
-                        <div class="float-card card-1 glass animate-float-slow">
-                            <i class="fas fa-check-circle"></i>
-                            <span data-i18n="float.installed">نصب کامل شد!</span>
-                        </div>
-                        <div class="float-card card-2 glass animate-float-medium">
-                            <i class="fas fa-bolt"></i>
-                            <span data-i18n="float.uptime">۹۹.۹% آپتایم</span>
-                        </div>
-                        <div class="float-card card-3 glass animate-float-fast">
-                            <i class="fas fa-shield-alt"></i>
-                            <span data-i18n="float.security">امنیت کامل</span>
-                        </div>
-                    </div>
-                </div>
+            <h1 class="hero-title-modern">
+                قدرت <span class="gradient-text">Odoo</span><br>
+                در دستان شما
+            </h1>
+            <p class="hero-subtitle">
+                با پلتفرم هوشمند OdooMaster، سیستم ERP قدرتمند خود را در کمتر از 5 دقیقه راه‌اندازی کنید.<br>
+                آنلاین، نصب هوشمند و پشتیبانی 24/7 - همه چیز در یک جا
+            </p>
+            <div class="cta-buttons">
+                <a href="/user-register.html" class="btn-hero-primary">
+                    <span><i class="fas fa-rocket"></i> شروع رایگان</span>
+                </a>
+                <a href="#services" class="btn-hero-secondary">
+                    <span><i class="fas fa-info-circle"></i> بیشتر بدانید</span>
+                </a>
             </div>
-        </div>
-        <div class="scroll-indicator">
-            <div class="mouse">
-                <div class="wheel"></div>
-            </div>
-            <span data-i18n="hero.scroll">اسکرول کنید</span>
         </div>
     </section>
 
-    <!-- Features Section -->
-    <section id="features" class="features section">
-        <div class="container">
+    <!-- What is Odoo -->
+    <section class="odoo-intro">
+        <div class="intro-container">
             <div class="section-header">
-                <span class="section-badge" data-i18n="features.badge">ویژگی‌ها</span>
+                <span class="section-badge">Odoo چیست؟</span>
                 <h2 class="section-title">
-                    <span data-i18n="features.title">چرا</span> <span class="gradient-text" data-i18n="features.title.brand">OdooMaster</span><span data-i18n="features.title.end">؟</span>
+                    یک پلتفرم، <span class="gradient-text">هزاران امکان</span>
                 </h2>
-                <p class="section-desc" data-i18n="features.desc">
-                    ابزارهای قدرتمندی که کسب‌وکار شما را متحول می‌کنند
+                <p class="section-desc">
+                    Odoo یک سیستم ERP متن‌باز و یکپارچه است که تمام نیازهای کسب‌وکار شما را در یک پلتفرم جمع می‌کند
                 </p>
             </div>
-            <div class="features-grid">
-                <div class="feature-card glass" data-tilt>
-                    <div class="feature-icon">
-                        <div class="icon-bg"></div>
-                        <i class="fas fa-bolt"></i>
+            <div class="intro-content">
+                <div class="intro-card">
+                    <div class="intro-icon">
+                        <i class="fas fa-boxes"></i>
                     </div>
-                    <h3 data-i18n="feature.fast.title">نصب برق‌آسا</h3>
-                    <p data-i18n="feature.fast.desc">در کمتر از ۵ دقیقه Odoo را روی سیستم خود نصب کنید.</p>
-                    <div class="feature-link">
-                        <span data-i18n="features.more">بیشتر بدانید</span>
-                        <i class="fas fa-arrow-left"></i>
-                    </div>
+                    <h3>مدیریت جامع</h3>
+                    <p>
+                        مدیریت فروش، انبار، حسابداری، منابع انسانی، CRM، تولید و بیش از 40 ماژول دیگر - همه در یک سیستم
+                    </p>
                 </div>
-                <div class="feature-card glass" data-tilt>
-                    <div class="feature-icon purple">
-                        <div class="icon-bg"></div>
-                        <i class="fas fa-cloud-download-alt"></i>
-                    </div>
-                    <h3 data-i18n="feature.online.title">نصب آنلاین هوشمند</h3>
-                    <p data-i18n="feature.online.desc">دانلود مستقیم از منابع رسمی، بدون نیاز به فایل‌های حجیم.</p>
-                    <div class="feature-link">
-                        <span data-i18n="features.more">بیشتر بدانید</span>
-                        <i class="fas fa-arrow-left"></i>
-                    </div>
-                </div>
-                <div class="feature-card glass" data-tilt>
-                    <div class="feature-icon cyan">
-                        <div class="icon-bg"></div>
-                        <i class="fas fa-shield-halved"></i>
-                    </div>
-                    <h3 data-i18n="feature.security.title">امنیت بالا</h3>
-                    <p data-i18n="feature.security.desc">فایل‌ها از منابع رسمی با امضای دیجیتال.</p>
-                    <div class="feature-link">
-                        <span data-i18n="features.more">بیشتر بدانید</span>
-                        <i class="fas fa-arrow-left"></i>
-                    </div>
-                </div>
-                <div class="feature-card glass" data-tilt>
-                    <div class="feature-icon orange">
-                        <div class="icon-bg"></div>
-                        <i class="fas fa-headset"></i>
-                    </div>
-                    <h3 data-i18n="feature.support.title">پشتیبانی ۲۴/۷</h3>
-                    <p data-i18n="feature.support.desc">تیم پشتیبانی همیشه در کنار شماست.</p>
-                    <div class="feature-link">
-                        <span data-i18n="features.more">بیشتر بدانید</span>
-                        <i class="fas fa-arrow-left"></i>
-                    </div>
-                </div>
-                <div class="feature-card glass" data-tilt>
-                    <div class="feature-icon pink">
-                        <div class="icon-bg"></div>
+                <div class="intro-card">
+                    <div class="intro-icon">
                         <i class="fas fa-puzzle-piece"></i>
                     </div>
-                    <h3 data-i18n="feature.allinone.title">همه چیز در یکجا</h3>
-                    <p data-i18n="feature.allinone.desc">Python, PostgreSQL و تمام وابستگی‌ها.</p>
-                    <div class="feature-link">
-                        <span data-i18n="features.more">بیشتر بدانید</span>
-                        <i class="fas fa-arrow-left"></i>
-                    </div>
+                    <h3>یکپارچگی کامل</h3>
+                    <p>
+                        تمام بخش‌های کسب‌وکار شما به صورت یکپارچه با هم کار می‌کنند. هیچ نیازی به نرم‌افزارهای جداگانه نیست
+                    </p>
                 </div>
-                <div class="feature-card glass" data-tilt>
-                    <div class="feature-icon green">
-                        <div class="icon-bg"></div>
-                        <i class="fas fa-sync-alt"></i>
+                <div class="intro-card">
+                    <div class="intro-icon">
+                        <i class="fas fa-chart-line"></i>
                     </div>
-                    <h3 data-i18n="feature.update.title">آپدیت خودکار</h3>
-                    <p data-i18n="feature.update.desc">همیشه به‌روز با آپدیت‌های خودکار.</p>
-                    <div class="feature-link">
-                        <span data-i18n="features.more">بیشتر بدانید</span>
-                        <i class="fas fa-arrow-left"></i>
+                    <h3>رشد بدون محدودیت</h3>
+                    <p>
+                        از استارتاپ کوچک تا شرکت بزرگ - Odoo با شما رشد می‌کند. بدون نیاز به تغییر سیستم
+                    </p>
+                </div>
+                <div class="intro-card">
+                    <div class="intro-icon">
+                        <i class="fas fa-code-branch"></i>
                     </div>
+                    <h3>منبع باز و انعطاف‌پذیر</h3>
+                    <p>
+                        کدهای منبع باز، امکان سفارشی‌سازی کامل و عدم وابستگی به یک شرکت خاص
+                    </p>
+                </div>
+                <div class="intro-card">
+                    <div class="intro-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3>دسترسی از همه جا</h3>
+                    <p>
+                        رابط کاربری مدرن، responsive و اپلیکیشن موبایل - کسب‌وکار خود را از هر جا مدیریت کنید
+                    </p>
+                </div>
+                <div class="intro-card">
+                    <div class="intro-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>جامعه جهانی</h3>
+                    <p>
+                        میلیون‌ها کاربر در سراسر جهان، هزاران افزونه رایگان و پشتیبانی فعال کامیونیتی
+                    </p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Pricing Section -->
-    <section id="pricing" class="pricing section">
-        <div class="container">
+    <!-- Our Services -->
+    <section id="services" class="services-section">
+        <div class="intro-container">
             <div class="section-header">
-                <span class="section-badge" data-i18n="pricing.badge">قیمت‌گذاری</span>
+                <span class="section-badge">سرویس‌های ما</span>
                 <h2 class="section-title">
-                    <span data-i18n="pricing.title">پلن مناسب</span> <span class="gradient-text" data-i18n="pricing.title.end">خود را انتخاب کنید</span>
+                    چرا <span class="gradient-text">OdooMaster</span>؟
+                </h2>
+                <p class="section-desc">
+                    ما سه راه برای شروع کار با Odoo ارائه می‌دهیم - شما انتخاب کنید
+                </p>
+            </div>
+            <div class="services-grid">
+                <!-- Online SaaS -->
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-cloud"></i>
+                    </div>
+                    <h3>نصب پرتابلا</h3>
+                    <p>
+                        سریع‌ترین راه شروع کار! Odoo آنلاین در کمتر از 5 دقیقه آماده استفاده. بدون نیاز به هیچ دانش فنی
+                    </p>
+                    <ul class="service-features">
+                        <li><i class="fas fa-check-circle"></i> راه‌اندازی فوری</li>
+                        <li><i class="fas fa-check-circle"></i> بدون نیاز به سرور</li>
+                        <li><i class="fas fa-check-circle"></i> آپدیت خودکار</li>
+                        <li><i class="fas fa-check-circle"></i> بکاپ روزانه</li>
+                        <li><i class="fas fa-check-circle"></i> SSL رایگان</li>
+                        <li><i class="fas fa-check-circle"></i> پشتیبانی 24/7</li>
+                    </ul>
+                    <a href="/user-register.html" class="service-btn">
+                        <i class="fas fa-rocket"></i> شروع کنید
+                    </a>
+                </div>
+
+                <!-- Online Installer -->
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-download"></i>
+                    </div>
+                    <h3>نصب آنلاین روی رایانه</h3>
+                    <p>
+                        نصاب هوشمند ما را دانلود کنید و Odoo را روی رایانه خود نصب کنید. کنترل کامل در دستان شما
+                    </p>
+                    <ul class="service-features">
+                        <li><i class="fas fa-check-circle"></i> نصب یک‌کلیکه</li>
+                        <li><i class="fas fa-check-circle"></i> نیاز به اینترنت دارد</li>
+                        <li><i class="fas fa-check-circle"></i> نصب خودکار نیازمندی‌ها</li>
+                        <li><i class="fas fa-check-circle"></i> پایگاه داده لوکال</li>
+                        <li><i class="fas fa-check-circle"></i> رایگان برای تست</li>
+                        <li><i class="fas fa-check-circle"></i> لایسنس ساده</li>
+                    </ul>
+                    <a href="/onboarding.html" class="service-btn">
+                        <i class="fas fa-download"></i> دانلود نصاب
+                    </a>
+                </div>
+
+                <!-- Offline Installer -->
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <h3>نصب آفلاین</h3>
+                    <p>
+                        نیاز به نصب بدون اینترنت دارید؟ پکیج کامل آفلاین شامل تمام فایل‌ها و نیازمندی‌ها
+                    </p>
+                    <ul class="service-features">
+                        <li><i class="fas fa-check-circle"></i> بدون نیاز به اینترنت</li>
+                        <li><i class="fas fa-check-circle"></i> پکیج کامل All-in-One</li>
+                        <li><i class="fas fa-check-circle"></i> PostgreSQL + Python + Odoo</li>
+                        <li><i class="fas fa-check-circle"></i> راهنمای گام‌به‌گام</li>
+                        <li><i class="fas fa-check-circle"></i> ایده‌آل برای سازمان‌ها</li>
+                        <li><i class="fas fa-check-circle"></i> پشتیبانی تلفنی</li>
+                    </ul>
+                    <a href="/support.html" class="service-btn">
+                        <i class="fas fa-headset"></i> تماس با فروش
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Us -->
+    <section class="why-choose">
+        <div class="intro-container">
+            <div class="section-header">
+                <span class="section-badge">مزایا</span>
+                <h2 class="section-title">
+                    چرا باید OdooMaster را انتخاب کنید؟
                 </h2>
             </div>
-            <div class="pricing-grid">
-                <div class="pricing-card glass">
-                    <div class="pricing-header">
-                        <div class="plan-icon"><i class="fas fa-seedling"></i></div>
-                        <h3 data-i18n="plan.free">رایگان</h3>
-                    </div>
-                    <div class="pricing-price">
-                        <span class="amount" data-i18n="plan.free.price">۰</span>
-                        <span class="currency" data-i18n="pricing.currency">تومان</span>
-                    </div>
-                    <ul class="pricing-features">
-                        <li><i class="fas fa-check"></i> <span data-i18n="plan.feature.basic">نصاب پایه</span></li>
-                        <li><i class="fas fa-check"></i> <span data-i18n="plan.feature.community">ماژول‌های Community</span></li>
-                        <li class="disabled"><i class="fas fa-times"></i> <span data-i18n="plan.feature.nosupport">پشتیبانی</span></li>
-                    </ul>
-                    <a href="register.html" class="btn btn-outline btn-block" data-i18n="pricing.start">شروع رایگان</a>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <i class="fas fa-bolt"></i>
+                    <h4>نصب سریع</h4>
+                    <p>کمتر از 5 دقیقه تا راه‌اندازی کامل</p>
                 </div>
-                <div class="pricing-card glass featured">
-                    <div class="featured-badge"><i class="fas fa-crown"></i> <span data-i18n="pricing.popular">پرطرفدار</span></div>
-                    <div class="pricing-header">
-                        <div class="plan-icon"><i class="fas fa-gem"></i></div>
-                        <h3 data-i18n="plan.pro">حرفه‌ای</h3>
-                    </div>
-                    <div class="pricing-price">
-                        <span class="amount" data-i18n="plan.pro.price">۴۹۰,۰۰۰</span>
-                        <span class="currency" data-i18n="pricing.currency">تومان</span>
-                    </div>
-                    <ul class="pricing-features">
-                        <li><i class="fas fa-check"></i> <span data-i18n="plan.feature.full">نصاب کامل</span></li>
-                        <li><i class="fas fa-check"></i> <span data-i18n="plan.feature.support3">پشتیبانی ۳ ماهه</span></li>
-                        <li><i class="fas fa-check"></i> <span data-i18n="plan.feature.video">آموزش ویدیویی</span></li>
-                    </ul>
-                    <a href="payment.html" class="btn btn-primary btn-block btn-glow" data-i18n="pricing.buy">خرید</a>
+                <div class="feature-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <h4>امنیت بالا</h4>
+                    <p>SSL، بکاپ روزانه و امنیت چندلایه</p>
                 </div>
-                <div class="pricing-card glass">
-                    <div class="pricing-header">
-                        <div class="plan-icon"><i class="fas fa-building"></i></div>
-                        <h3 data-i18n="plan.enterprise">سازمانی</h3>
-                    </div>
-                    <div class="pricing-price">
-                        <span class="amount" data-i18n="plan.enterprise.price">۱,۴۹۰,۰۰۰</span>
-                        <span class="currency" data-i18n="pricing.currency">تومان</span>
-                    </div>
-                    <ul class="pricing-features">
-                        <li><i class="fas fa-check"></i> <span data-i18n="plan.feature.all">همه امکانات</span></li>
-                        <li><i class="fas fa-check"></i> <span data-i18n="plan.feature.support12">پشتیبانی ۱ ساله</span></li>
-                        <li><i class="fas fa-check"></i> <span data-i18n="plan.feature.remote">نصب از راه دور</span></li>
-                    </ul>
-                    <a href="payment.html" class="btn btn-outline btn-block" data-i18n="pricing.buy">خرید</a>
+                <div class="feature-item">
+                    <i class="fas fa-headset"></i>
+                    <h4>پشتیبانی 24/7</h4>
+                    <p>تیم فنی فارسی‌زبان همیشه در کنار شما</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <h4>قیمت مناسب</h4>
+                    <p>پلن‌های متنوع از رایگان تا حرفه‌ای</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-language"></i>
+                    <h4>فارسی‌سازی کامل</h4>
+                    <p>رابط فارسی، پشتیبانی فارسی و مستندات فارسی</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-sync-alt"></i>
+                    <h4>آپدیت رایگان</h4>
+                    <p>همیشه از آخرین نسخه Odoo استفاده کنید</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- CTA Section -->
-    <section class="cta section">
-        <div class="container">
-            <div class="cta-card glass">
-                <h2 data-i18n="cta.title">آماده نصب Odoo هستید؟</h2>
-                <p data-i18n="cta.desc">ابتدا دمو را ببینید، سپس لایسنس بخرید و Odoo را در چند دقیقه نصب کنید</p>
-                <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 24px;">
-                    <a href="demo.html" class="btn btn-glass btn-xl">
-                        <i class="fas fa-play-circle"></i>
-                        <span data-i18n="cta.btn.demo">مشاهده دمو</span>
-                    </a>
-                    <a href="#pricing" class="btn btn-primary btn-xl btn-glow">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span data-i18n="cta.btn.buy">خرید لایسنس</span>
-                    </a>
-                </div>
+    <section class="cta-section">
+        <div class="cta-content">
+            <h2>آماده نصب Odoo هستید؟</h2>
+            <p>
+                ابتدا دمو رایگان را ببینید، سپس لایسنس بخرید و Odoo را در چند دقیقه نصب کنید
+            </p>
+            <div class="cta-buttons-center">
+                <a href="/user-register.html" class="btn-cta-white">
+                    <i class="fas fa-user-plus"></i> ثبت‌نام رایگان
+                </a>
+                <a href="/docs.html" class="btn-cta-outline">
+                    <i class="fas fa-book"></i> مشاهده مستندات
+                </a>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-brand">
-                    <a href="index.html" class="logo">
-                        <i class="fas fa-cube"></i>
-                        <span>Odoo<strong>Master</strong></span>
-                    </a>
-                    <p data-i18n="footer.desc">پلتفرم هوشمند نصب Odoo</p>
-                </div>
-                <div class="footer-links">
-                    <a href="#" data-i18n="footer.about">درباره ما</a>
-                    <a href="#" data-i18n="footer.contact">تماس</a>
-                    <a href="#" data-i18n="footer.support">پشتیبانی</a>
-                    <a href="#" data-i18n="footer.blog">بلاگ</a>
-                </div>
-                <div class="social-links">
-                    <a href="#"><i class="fab fa-telegram"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                    <a href="#"><i class="fab fa-linkedin"></i></a>
-                </div>
+    <footer style="background: #0f172a; padding: 60px 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1);">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <div style="display: flex; justify-content: center; gap: 40px; margin-bottom: 30px; flex-wrap: wrap;">
+                <a href="/docs.html" style="color: rgba(255,255,255,0.7); text-decoration: none;">راهنما</a>
+                <a href="/support.html" style="color: rgba(255,255,255,0.7); text-decoration: none;">پشتیبانی</a>
+                <a href="/user-login.html" style="color: rgba(255,255,255,0.7); text-decoration: none;">ورود</a>
+                <a href="/user-register.html" style="color: rgba(255,255,255,0.7); text-decoration: none;">ثبت‌نام</a>
             </div>
-            <div class="footer-bottom">
-                <p data-i18n="footer.copyright">© ۱۴۰۴ OdooMaster. تمامی حقوق محفوظ است.</p>
+            <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 30px;">
+                <a href="#" style="color: rgba(255,255,255,0.5); font-size: 24px;"><i class="fab fa-telegram"></i></a>
+                <a href="#" style="color: rgba(255,255,255,0.5); font-size: 24px;"><i class="fab fa-instagram"></i></a>
+                <a href="#" style="color: rgba(255,255,255,0.5); font-size: 24px;"><i class="fab fa-linkedin"></i></a>
             </div>
+            <p style="color: rgba(255,255,255,0.5); margin: 0;">
+                &copy; 2026 OdooMaster. تمام حقوق محفوظ است.
+            </p>
         </div>
     </footer>
 
-    <script src="js/particles.min.js"></script>
-    <script src="js/i18n.js"></script>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script src="js/main.js"></script>
-    <script src="/js/nav-loader.js"></script>
-    <script src="/js/global-nav.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/nav-loader.js"></script>
+    <script>
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
 </body>
 </html>
