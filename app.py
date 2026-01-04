@@ -58,15 +58,18 @@ PUBLIC_PAGES = [
     'downloads.html',
     'user-login.html', 'user-register.html',
     'verify-account.html', 'email-verified.html',
+    'onboarding.html',  # Allow access for demo/trial
+    'app-details.html',  # App information pages
+    'apps.html',  # App listing
     'favicon.svg', 'css/', 'js/', 'images/', 'api/'
 ]
 
 # Protected pages - require login AND verification
 PROTECTED_PAGES = [
-    'onboarding.html', 
     'profile.html',
     'module_wizard.html',
-    'auto_login.html'
+    'auto_login.html',
+    'dashboard.html'
 ]
 
 # Legacy/deprecated pages - redirect to new pages
