@@ -220,47 +220,47 @@
     <script>
         const apps = [
             // مالی و حسابداری
-            { name: 'حسابداری', icon: '📊', color1: '#667eea', color2: '#764ba2', category: 'مالی', url: '/web?app=account' },
-            { name: 'صورتحساب', icon: '🧾', color1: '#f093fb', color2: '#f5576c', category: 'مالی', url: '/web?app=account' },
-            { name: 'دارایی‌ها', icon: '🏦', color1: '#4facfe', color2: '#00f2fe', category: 'مالی', url: '/web?app=account_asset' },
-            { name: 'هزینه‌ها', icon: '💰', color1: '#43e97b', color2: '#38f9d7', category: 'مالی', url: '/web?app=hr_expense' },
+            { name: 'حسابداری', icon: '📊', color1: '#667eea', color2: '#764ba2', category: 'مالی', url: '/app-details.html?app=account' },
+            { name: 'صورتحساب', icon: '🧾', color1: '#f093fb', color2: '#f5576c', category: 'مالی', url: '/app-details.html?app=account' },
+            { name: 'دارایی‌ها', icon: '🏦', color1: '#4facfe', color2: '#00f2fe', category: 'مالی', url: '/app-details.html?app=account' },
+            { name: 'هزینه‌ها', icon: '💰', color1: '#43e97b', color2: '#38f9d7', category: 'مالی', url: '/app-details.html?app=account' },
             
             // فروش و CRM
-            { name: 'CRM', icon: '👥', color1: '#fa709a', color2: '#fee140', category: 'فروش', url: '/web?app=crm' },
-            { name: 'فروش', icon: '🛒', color1: '#30cfd0', color2: '#330867', category: 'فروش', url: '/web?app=sale' },
-            { name: 'نقطه فروش', icon: '🏪', color1: '#a8edea', color2: '#fed6e3', category: 'فروش', url: '/web?app=point_of_sale' },
+            { name: 'CRM', icon: '👥', color1: '#fa709a', color2: '#fee140', category: 'فروش', url: '/app-details.html?app=crm' },
+            { name: 'فروش', icon: '🛒', color1: '#30cfd0', color2: '#330867', category: 'فروش', url: '/app-details.html?app=sale' },
+            { name: 'نقطه فروش', icon: '🏪', color1: '#a8edea', color2: '#fed6e3', category: 'فروش', url: '/app-details.html?app=point_of_sale' },
             
             // خرید و انبار
-            { name: 'خرید', icon: '🛍️', color1: '#ff9a9e', color2: '#fecfef', category: 'خرید', url: '/web?app=purchase' },
-            { name: 'انبار', icon: '📦', color1: '#ffecd2', color2: '#fcb69f', category: 'خرید', url: '/web?app=stock' },
-            { name: 'تولید', icon: '🏭', color1: '#ff6e7f', color2: '#bfe9ff', category: 'خرید', url: '/web?app=mrp' },
+            { name: 'خرید', icon: '🛍️', color1: '#ff9a9e', color2: '#fecfef', category: 'خرید', url: '/app-details.html?app=purchase' },
+            { name: 'انبار', icon: '📦', color1: '#ffecd2', color2: '#fcb69f', category: 'خرید', url: '/app-details.html?app=stock' },
+            { name: 'تولید', icon: '🏭', color1: '#ff6e7f', color2: '#bfe9ff', category: 'خرید', url: '/app-details.html?app=mrp' },
             
             // منابع انسانی
-            { name: 'کارکنان', icon: '👔', color1: '#e0c3fc', color2: '#8ec5fc', category: 'منابع انسانی', url: '/web?app=hr' },
-            { name: 'حضور و غیاب', icon: '⏰', color1: '#f093fb', color2: '#f5576c', category: 'منابع انسانی', url: '/web?app=hr_attendance' },
-            { name: 'مرخصی', icon: '🏖️', color1: '#4facfe', color2: '#00f2fe', category: 'منابع انسانی', url: '/web?app=hr_holidays' },
-            { name: 'حقوق', icon: '💵', color1: '#43e97b', color2: '#38f9d7', category: 'منابع انسانی', url: '/web?app=hr_payroll' },
+            { name: 'کارکنان', icon: '👔', color1: '#e0c3fc', color2: '#8ec5fc', category: 'منابع انسانی', url: '/app-details.html?app=hr' },
+            { name: 'حضور و غیاب', icon: '⏰', color1: '#f093fb', color2: '#f5576c', category: 'منابع انسانی', url: '/app-details.html?app=hr' },
+            { name: 'مرخصی', icon: '🏖️', color1: '#4facfe', color2: '#00f2fe', category: 'منابع انسانی', url: '/app-details.html?app=hr' },
+            { name: 'حقوق', icon: '💵', color1: '#43e97b', color2: '#38f9d7', category: 'منابع انسانی', url: '/app-details.html?app=hr' },
             
             // پروژه و خدمات
-            { name: 'پروژه', icon: '📋', color1: '#fa709a', color2: '#fee140', category: 'پروژه', url: '/web?app=project' },
-            { name: 'تایم‌شیت', icon: '⏱️', color1: '#30cfd0', color2: '#330867', category: 'پروژه', url: '/web?app=hr_timesheet' },
-            { name: 'خدمات', icon: '🔧', color1: '#a8edea', color2: '#fed6e3', category: 'پروژه', url: '/web?app=helpdesk' },
+            { name: 'پروژه', icon: '📋', color1: '#fa709a', color2: '#fee140', category: 'پروژه', url: '/app-details.html?app=project' },
+            { name: 'تایم‌شیت', icon: '⏱️', color1: '#30cfd0', color2: '#330867', category: 'پروژه', url: '/app-details.html?app=project' },
+            { name: 'خدمات', icon: '🔧', color1: '#a8edea', color2: '#fed6e3', category: 'پروژه', url: '/app-details.html?app=project' },
             
             // بازاریابی
-            { name: 'بازاریابی', icon: '📢', color1: '#ff9a9e', color2: '#fecfef', category: 'بازاریابی', url: '/web?app=marketing_automation' },
-            { name: 'ایمیل مارکتینگ', icon: '✉️', color1: '#ffecd2', color2: '#fcb69f', category: 'بازاریابی', url: '/web?app=mass_mailing' },
-            { name: 'وب‌سایت', icon: '🌐', color1: '#ff6e7f', color2: '#bfe9ff', category: 'بازاریابی', url: '/web?app=website' },
-            { name: 'تجارت الکترونیک', icon: '🛒', color1: '#e0c3fc', color2: '#8ec5fc', category: 'بازاریابی', url: '/web?app=website_sale' },
+            { name: 'بازاریابی', icon: '📢', color1: '#ff9a9e', color2: '#fecfef', category: 'بازاریابی', url: '/app-details.html?app=crm' },
+            { name: 'ایمیل مارکتینگ', icon: '✉️', color1: '#ffecd2', color2: '#fcb69f', category: 'بازاریابی', url: '/app-details.html?app=crm' },
+            { name: 'وب‌سایت', icon: '🌐', color1: '#ff6e7f', color2: '#bfe9ff', category: 'بازاریابی', url: '/onboarding.html' },
+            { name: 'تجارت الکترونیک', icon: '🛒', color1: '#e0c3fc', color2: '#8ec5fc', category: 'بازاریابی', url: '/app-details.html?app=sale' },
             
             // ارتباطات
-            { name: 'گفتگوها', icon: '💬', color1: '#f093fb', color2: '#f5576c', category: 'ارتباطات', url: '/web?app=mail' },
-            { name: 'تقویم', icon: '📅', color1: '#4facfe', color2: '#00f2fe', category: 'ارتباطات', url: '/web?app=calendar' },
-            { name: 'مخاطبین', icon: '📇', color1: '#43e97b', color2: '#38f9d7', category: 'ارتباطات', url: '/web?app=contacts' },
+            { name: 'گفتگوها', icon: '💬', color1: '#f093fb', color2: '#f5576c', category: 'ارتباطات', url: '/support.html' },
+            { name: 'تقویم', icon: '📅', color1: '#4facfe', color2: '#00f2fe', category: 'ارتباطات', url: '/onboarding.html' },
+            { name: 'مخاطبین', icon: '📇', color1: '#43e97b', color2: '#38f9d7', category: 'ارتباطات', url: '/app-details.html?app=crm' },
             
             // ابزارها
-            { name: 'تنظیمات', icon: '⚙️', color1: '#667eea', color2: '#764ba2', category: 'ابزارها', url: '/web/session/logout' },
-            { name: 'داشبورد', icon: '📊', color1: '#fa709a', color2: '#fee140', category: 'ابزارها', url: '/web' },
-            { name: 'گزارش‌ها', icon: '📈', color1: '#30cfd0', color2: '#330867', category: 'ابزارها', url: '/web?app=base' },
+            { name: 'تنظیمات', icon: '⚙️', color1: '#667eea', color2: '#764ba2', category: 'ابزارها', url: '/profile.html' },
+            { name: 'داشبورد', icon: '📊', color1: '#fa709a', color2: '#fee140', category: 'ابزارها', url: '/dashboard.html' },
+            { name: 'گزارش‌ها', icon: '📈', color1: '#30cfd0', color2: '#330867', category: 'ابزارها', url: '/dashboard.html' },
         ];
 
         const container = document.getElementById('appsContainer');
@@ -284,8 +284,7 @@
                 categoryApps.forEach(app => {
                     const card = document.createElement('a');
                     card.className = 'app-card';
-                    card.href = 'http://localhost:8070' + app.url;
-                    card.target = '_blank';
+                    card.href = app.url;
                     
                     card.innerHTML = `
                         <div class="app-icon" style="--icon-color-1: ${app.color1}; --icon-color-2: ${app.color2}">

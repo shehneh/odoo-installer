@@ -190,7 +190,8 @@
             display: none;
         }
 
-        .compass-nav:hover .compass-menu {
+        .compass-nav:hover .compass-menu,
+        .compass-nav.active .compass-menu {
             display: block;
         }
 
@@ -412,7 +413,7 @@
     </nav>
 
     <!-- Compass -->
-    <div class="compass-nav">
+    <div class="compass-nav" id="compassNav">
         <div class="compass-icon">🧭</div>
         <div class="compass-menu">
             <a href="/" class="compass-item"><span style="font-size:20px;width:32px;text-align:center">🏠</span> خانه</a>
@@ -434,7 +435,7 @@
         </div>
     </div>
 
-    <script src="js/compass-nav.js?v=7"></script>
+    <script src="js/global-compass.js?v=1"></script>
     <script>
         async function loadProfile() {
             // Try to get from localStorage first

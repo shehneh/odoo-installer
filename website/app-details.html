@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اپلیکیشن Odoo - OdooMaster</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            min-height: 100vh;
+            padding-top: 80px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border-radius: 30px;
+            padding: 60px;
+            margin-bottom: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .app-icon {
+            font-size: 100px;
+            margin-bottom: 20px;
+            display: inline-block;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .app-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+
+        .app-subtitle {
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+
+        .app-category {
+            display: inline-block;
+            background: rgba(99, 102, 241, 0.2);
+            color: #a5b4fc;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+        }
+
+        /* Screenshot Section */
+        .screenshot-section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .screenshot-container {
+            background: #1e293b;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .screenshot-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: #0f172a;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+        }
+
+        .screenshot-placeholder {
+            width: 100%;
+            height: 500px;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 1.2rem;
+            margin-top: 40px;
+        }
+
+        .screenshot-placeholder i {
+            font-size: 80px;
+        }
+
+        /* Features Grid */
+        .features-section {
+            margin-bottom: 50px;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .section-title i {
+            color: #6366f1;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+
+        .feature-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .feature-desc {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.6;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+            border-radius: 30px;
+            padding: 60px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" fill="rgba(255,255,255,0.05)"/></svg>') repeat;
+            opacity: 0.3;
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .cta-subtitle {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 40px;
+            line-height: 1.8;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 18px 40px;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #6366f1;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px);
+        }
+
+        /* Benefits List */
+        .benefits-list {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 40px 0;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 20px;
+            margin-bottom: 15px;
+            background: rgba(99, 102, 241, 0.05);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .benefit-item:hover {
+            background: rgba(99, 102, 241, 0.1);
+            transform: translateX(-5px);
+        }
+
+        .benefit-icon {
+            font-size: 30px;
+            color: #10b981;
+            flex-shrink: 0;
+        }
+
+        .benefit-text h4 {
+            color: white;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .benefit-text p {
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.6;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 40px 30px;
+            }
+
+            .app-title {
+                font-size: 2.5rem;
+            }
+
+            .app-subtitle {
+                font-size: 1.2rem;
+            }
+
+            .cta-section {
+                padding: 40px 30px;
+            }
+
+            .cta-title {
+                font-size: 2rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+    <script src="/js/nav-loader.js"></script>
+    <script src="/js/global-nav.js"></script>
+</head>
+<body>
+    <!-- Navigation will be loaded here -->
+    <div id="mainNav"></div>
+
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero">
+            <div class="hero-content">
+                <div class="app-icon" id="appIcon">📊</div>
+                <div class="app-category" id="appCategory">دسته‌بندی</div>
+                <h1 class="app-title" id="appTitle">نام اپلیکیشن</h1>
+                <p class="app-subtitle" id="appSubtitle">توضیحات کوتاه اپلیکیشن</p>
+            </div>
+        </div>
+
+        <!-- Screenshot Section -->
+        <div class="screenshot-section">
+            <h2 class="section-title">
+                <i class="fas fa-desktop"></i>
+                نمایی از محیط کاربری
+            </h2>
+            <div class="screenshot-container">
+                <div class="screenshot-placeholder">
+                    <i class="fas fa-image"></i>
+                    <div>پیش‌نمایش این ماژول پس از نصب Odoo در دسترس خواهد بود</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="features-section">
+            <h2 class="section-title">
+                <i class="fas fa-star"></i>
+                امکانات کلیدی
+            </h2>
+            <div class="features-grid" id="featuresGrid">
+                <!-- Will be populated by JS -->
+            </div>
+        </div>
+
+        <!-- Benefits Section -->
+        <div class="benefits-list">
+            <h2 class="section-title">
+                <i class="fas fa-check-circle"></i>
+                مزایای استفاده
+            </h2>
+            <div id="benefitsList">
+                <!-- Will be populated by JS -->
+            </div>
+        </div>
+
+        <!-- CTA Section -->
+        <div class="cta-section">
+            <div class="cta-content">
+                <h2 class="cta-title">آماده شروع هستید؟</h2>
+                <p class="cta-subtitle">
+                    با نصب Odoo، این ماژول و صدها ماژول دیگر را در اختیار خواهید داشت.<br>
+                    تنها در چند دقیقه، سیستم یکپارچه خود را راه‌اندازی کنید!
+                </p>
+                <div class="cta-buttons">
+                    <a href="/onboarding.html" class="btn btn-primary">
+                        <i class="fas fa-rocket"></i>
+                        نصب دیتابیس (رایگان)
+                    </a>
+                    <a href="/user-register.html" class="btn btn-secondary">
+                        <i class="fas fa-user-plus"></i>
+                        ثبت‌نام و شروع
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // App data definitions
+        const appData = {
+            'account': {
+                name: 'حسابداری',
+                icon: '📊',
+                category: 'مالی و حسابداری',
+                subtitle: 'مدیریت جامع حسابداری، صورت‌حساب، دریافت و پرداخت با استانداردهای بین‌المللی',
+                features: [
+                    { icon: '💰', title: 'حسابداری جامع', desc: 'ثبت دقیق تمام اسناد مالی با چارت حساب کامل' },
+                    { icon: '📑', title: 'صورت‌حساب', desc: 'صدور خودکار فاکتور، پیش‌فاکتور و صورتحساب' },
+                    { icon: '📊', title: 'گزارش‌های مالی', desc: 'ترازنامه، سود و زیان، جریان وجه نقد' },
+                    { icon: '💳', title: 'بانک و چک', desc: 'مدیریت حساب‌های بانکی و تسویه خودکار' },
+                    { icon: '🔄', title: 'تسویه حساب', desc: 'هماهنگ‌سازی خودکار با صورتحساب بانکی' },
+                    { icon: '📈', title: 'تحلیل مالی', desc: 'داشبورد تحلیلی و نمودارهای زنده' }
+                ],
+                benefits: [
+                    { title: 'صرفه‌جویی در زمان', desc: 'اتوماسیون فرآیندهای مالی تا 80% زمان را کاهش می‌دهد' },
+                    { title: 'دقت بالا', desc: 'کاهش خطاهای انسانی با محاسبات خودکار' },
+                    { title: 'گزارش‌گیری آسان', desc: 'دسترسی لحظه‌ای به گزارشات مالی کامل' },
+                    { title: 'یکپارچگی کامل', desc: 'اتصال مستقیم با فروش، خرید، انبار و سایر بخش‌ها' }
+                ]
+            },
+            'crm': {
+                name: 'CRM',
+                icon: '👥',
+                category: 'فروش و بازاریابی',
+                subtitle: 'مدیریت روابط با مشتریان، پیگیری فرصت‌های فروش و افزایش نرخ تبدیل',
+                features: [
+                    { icon: '📞', title: 'مدیریت سرنخ', desc: 'ثبت و پیگیری خودکار سرنخ‌های فروش' },
+                    { icon: '🎯', title: 'فرصت فروش', desc: 'ردیابی قیف فروش و پیش‌بینی درآمد' },
+                    { icon: '📧', title: 'ایمیل مارکتینگ', desc: 'کمپین‌های ایمیلی هوشمند و خودکار' },
+                    { icon: '📊', title: 'داشبورد فروش', desc: 'نمای کامل از عملکرد تیم فروش' },
+                    { icon: '📱', title: 'تماس و پیامک', desc: 'ثبت تماس‌ها و ارسال پیامک انبوه' },
+                    { icon: '🤝', title: 'مدیریت مشتری', desc: 'پروفایل کامل هر مشتری با تاریخچه' }
+                ],
+                benefits: [
+                    { title: 'افزایش فروش', desc: 'تا 30% افزایش نرخ تبدیل با پیگیری هوشمند' },
+                    { title: 'رضایت مشتری', desc: 'پاسخگویی سریع‌تر و خدمات بهتر' },
+                    { title: 'همکاری تیمی', desc: 'هماهنگی کامل بین اعضای تیم فروش' },
+                    { title: 'تحلیل دقیق', desc: 'شناخت بهتر مشتریان و نیازهایشان' }
+                ]
+            },
+            'sale': {
+                name: 'فروش',
+                icon: '🛒',
+                category: 'فروش',
+                subtitle: 'مدیریت سفارشات، پیش‌فاکتور، فاکتور فروش و ردیابی تحویل کالا',
+                features: [
+                    { icon: '📝', title: 'سفارش فروش', desc: 'ثبت و مدیریت سفارشات با workflow کامل' },
+                    { icon: '💵', title: 'قیمت‌گذاری', desc: 'قیمت‌گذاری پویا با تخفیف و پروموشن' },
+                    { icon: '📦', title: 'تحویل کالا', desc: 'یکپارچگی با انبار برای تحویل خودکار' },
+                    { icon: '💳', title: 'پرداخت', desc: 'پرداخت آنلاین و اقساطی' },
+                    { icon: '📊', title: 'گزارش فروش', desc: 'تحلیل روند فروش و پرفروش‌ترین‌ها' },
+                    { icon: '🔄', title: 'مرجوعی', desc: 'مدیریت مرجوعی و استرداد وجه' }
+                ],
+                benefits: [
+                    { title: 'سرعت بالا', desc: 'صدور فاکتور در چند ثانیه' },
+                    { title: 'کنترل موجودی', desc: 'جلوگیری از فروش بیش از موجودی' },
+                    { title: 'رضایت مشتری', desc: 'پیگیری دقیق وضعیت سفارش' },
+                    { title: 'افزایش سود', desc: 'تحلیل سودآوری هر محصول' }
+                ]
+            },
+            'purchase': {
+                name: 'خرید',
+                icon: '🛍️',
+                category: 'خرید و تأمین',
+                subtitle: 'مدیریت درخواست خرید، سفارش به تأمین‌کنندگان و کنترل هزینه‌ها',
+                features: [
+                    { icon: '📋', title: 'درخواست خرید', desc: 'ثبت نیازها و تأیید چندمرحله‌ای' },
+                    { icon: '🏪', title: 'تأمین‌کنندگان', desc: 'مدیریت قراردادها و قیمت‌ها' },
+                    { icon: '💰', title: 'مقایسه قیمت', desc: 'انتخاب بهترین تأمین‌کننده' },
+                    { icon: '📦', title: 'دریافت کالا', desc: 'ثبت رسید انبار و کنترل کیفیت' },
+                    { icon: '📊', title: 'تحلیل خرید', desc: 'گزارش هزینه‌ها و عملکرد تأمین‌کنندگان' },
+                    { icon: '🔔', title: 'یادآوری', desc: 'هشدار کمبود موجودی و سفارش خودکار' }
+                ],
+                benefits: [
+                    { title: 'کاهش هزینه', desc: 'تا 20% صرفه‌جویی در هزینه‌های خرید' },
+                    { title: 'شفافیت', desc: 'ردیابی کامل فرآیند خرید' },
+                    { title: 'کنترل بودجه', desc: 'جلوگیری از خرید بیش از بودجه' },
+                    { title: 'روابط بهتر', desc: 'مدیریت حرفه‌ای تأمین‌کنندگان' }
+                ]
+            },
+            'stock': {
+                name: 'انبار',
+                icon: '📦',
+                category: 'انبارداری',
+                subtitle: 'مدیریت انبار، ردیابی موجودی، انتقالات و موجودی لحظه‌ای',
+                features: [
+                    { icon: '📍', title: 'موجودی لحظه‌ای', desc: 'مشاهده موجودی در همه انبارها' },
+                    { icon: '🔄', title: 'انتقال کالا', desc: 'جابجایی بین انبارها و مکان‌ها' },
+                    { icon: '📊', title: 'بارکد', desc: 'ورود و خروج با بارکد و RFID' },
+                    { icon: '📦', title: 'بسته‌بندی', desc: 'مدیریت بسته‌ها و lot number' },
+                    { icon: '🚚', title: 'ارسال', desc: 'یکپارچگی با شرکت‌های حمل' },
+                    { icon: '⚠️', title: 'هشدار', desc: 'اعلان کمبود موجودی' }
+                ],
+                benefits: [
+                    { title: 'دقت 100%', desc: 'موجودی دقیق بدون اشتباه' },
+                    { title: 'سرعت', desc: 'ورود و خروج سریع با بارکد' },
+                    { title: 'کنترل', desc: 'ردیابی هر قلم کالا' },
+                    { title: 'بهینه‌سازی', desc: 'کاهش موجودی اضافی و کمبود' }
+                ]
+            },
+            'hr': {
+                name: 'کارکنان',
+                icon: '👔',
+                category: 'منابع انسانی',
+                subtitle: 'مدیریت پرسنل، حضور و غیاب، مرخصی، ارزیابی عملکرد و حقوق',
+                features: [
+                    { icon: '👤', title: 'پرونده پرسنلی', desc: 'اطلاعات کامل هر کارمند' },
+                    { icon: '⏰', title: 'حضور و غیاب', desc: 'ثبت ورود و خروج با دستگاه' },
+                    { icon: '🏖️', title: 'مرخصی', desc: 'درخواست و تأیید مرخصی آنلاین' },
+                    { icon: '💵', title: 'حقوق', desc: 'محاسبه خودکار حقوق و مزایا' },
+                    { icon: '📊', title: 'ارزیابی', desc: 'ارزیابی دوره‌ای عملکرد' },
+                    { icon: '📄', title: 'قراردادها', desc: 'مدیریت قراردادهای کاری' }
+                ],
+                benefits: [
+                    { title: 'شفافیت', desc: 'دسترسی کارکنان به اطلاعات خود' },
+                    { title: 'دقت حقوق', desc: 'حذف خطا در محاسبات' },
+                    { title: 'صرفه‌جویی', desc: 'کاهش ساعات اداری HR' },
+                    { title: 'رضایت کارکنان', desc: 'سیستم شفاف و منصفانه' }
+                ]
+            },
+            'project': {
+                name: 'پروژه',
+                icon: '📋',
+                category: 'مدیریت پروژه',
+                subtitle: 'برنامه‌ریزی، تخصیص منابع، ردیابی وظایف و گزارش پیشرفت پروژه‌ها',
+                features: [
+                    { icon: '📅', title: 'برنامه‌ریزی', desc: 'تقویم پروژه و milestone ها' },
+                    { icon: '✅', title: 'وظایف', desc: 'task ها با اولویت و deadline' },
+                    { icon: '👥', title: 'تیم', desc: 'تخصیص منابع و مسئولیت‌ها' },
+                    { icon: '⏱️', title: 'تایم‌شیت', desc: 'ثبت ساعات کار روی هر task' },
+                    { icon: '💰', title: 'بودجه', desc: 'کنترل هزینه‌ها و درآمدها' },
+                    { icon: '📊', title: 'گزارش', desc: 'پیشرفت پروژه و عملکرد تیم' }
+                ],
+                benefits: [
+                    { title: 'موفقیت پروژه', desc: 'افزایش نرخ موفقیت پروژه‌ها' },
+                    { title: 'همکاری', desc: 'هماهنگی بهتر بین اعضای تیم' },
+                    { title: 'شفافیت', desc: 'دید کامل مدیریت از وضعیت' },
+                    { title: 'به موقع', desc: 'تحویل پروژه‌ها در زمان مقرر' }
+                ]
+            },
+            'mrp': {
+                name: 'تولید',
+                icon: '🏭',
+                category: 'تولید و ساخت',
+                subtitle: 'مدیریت فرآیند تولید، BOM، سفارش کار و کنترل کیفیت',
+                features: [
+                    { icon: '📋', title: 'BOM', desc: 'bill of materials برای هر محصول' },
+                    { icon: '🔧', title: 'سفارش تولید', desc: 'برنامه‌ریزی و اجرای تولید' },
+                    { icon: '📍', title: 'routing', desc: 'مسیر تولید و workstation ها' },
+                    { icon: '✅', title: 'کنترل کیفیت', desc: 'بازرسی و تست محصول' },
+                    { icon: '📊', title: 'بهره‌وری', desc: 'تحلیل راندمان خطوط تولید' },
+                    { icon: '🔄', title: 'نگهداری', desc: 'maintenance تجهیزات' }
+                ],
+                benefits: [
+                    { title: 'بهینه‌سازی', desc: 'افزایش بهره‌وری تولید' },
+                    { title: 'کاهش ضایعات', desc: 'کنترل دقیق مصرف مواد' },
+                    { title: 'کیفیت', desc: 'تضمین کیفیت محصولات' },
+                    { title: 'برنامه‌ریزی', desc: 'تولید بهینه بر اساس سفارش' }
+                ]
+            },
+            'point_of_sale': {
+                name: 'نقطه فروش',
+                icon: '🏪',
+                category: 'خرده‌فروشی',
+                subtitle: 'فروشگاه، کافی‌شاپ، رستوران - صندوق فروش آنلاین/آفلاین',
+                features: [
+                    { icon: '💳', title: 'فروش سریع', desc: 'رابط کاربری ساده و سریع' },
+                    { icon: '📱', title: 'آفلاین', desc: 'کار بدون اینترنت' },
+                    { icon: '💰', title: 'پرداخت', desc: 'نقد، کارت، اقساط' },
+                    { icon: '🎫', title: 'چاپ فیش', desc: 'پرینتر حرارتی و A4' },
+                    { icon: '📊', title: 'گزارش روزانه', desc: 'تسویه صندوق خودکار' },
+                    { icon: '👥', title: 'مشتریان', desc: 'باشگاه مشتریان و امتیاز' }
+                ],
+                benefits: [
+                    { title: 'سرعت', desc: 'فروش در چند ثانیه' },
+                    { title: 'دقت', desc: 'صندوق همیشه تسویه' },
+                    { title: 'آسان', desc: 'آموزش سریع پرسنل' },
+                    { title: 'یکپارچه', desc: 'اتصال مستقیم به انبار' }
+                ]
+            }
+        };
+
+        // Get app parameter from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const appName = urlParams.get('app') || 'account';
+        const data = appData[appName] || appData['account'];
+
+        // Populate page
+        document.getElementById('appIcon').textContent = data.icon;
+        document.getElementById('appCategory').textContent = data.category;
+        document.getElementById('appTitle').textContent = data.name;
+        document.getElementById('appSubtitle').textContent = data.subtitle;
+        document.title = `${data.name} - OdooMaster`;
+
+        // Populate features
+        const featuresGrid = document.getElementById('featuresGrid');
+        data.features.forEach(feature => {
+            featuresGrid.innerHTML += `
+                <div class="feature-card">
+                    <div class="feature-icon">${feature.icon}</div>
+                    <h3 class="feature-title">${feature.title}</h3>
+                    <p class="feature-desc">${feature.desc}</p>
+                </div>
+            `;
+        });
+
+        // Populate benefits
+        const benefitsList = document.getElementById('benefitsList');
+        data.benefits.forEach(benefit => {
+            benefitsList.innerHTML += `
+                <div class="benefit-item">
+                    <div class="benefit-icon">✅</div>
+                    <div class="benefit-text">
+                        <h4>${benefit.title}</h4>
+                        <p>${benefit.desc}</p>
+                    </div>
+                </div>
+            `;
+        });
+    </script>
+</body>
+</html>

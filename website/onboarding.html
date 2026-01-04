@@ -21,6 +21,7 @@
             display: flex;
             flex-direction: column;
             padding: 20px;
+            padding-top: 90px; /* Space for fixed navigation */
         }
 
         .onboarding-container {
@@ -968,10 +969,10 @@
             font-family: monospace;
             color: #667eea;
         }
-    </style>
 </head>
 <body>
-    <div id="compass-nav"></div>
+    <!-- Navigation will be loaded here -->
+    <div id="mainNav"></div>
 
     <div class="onboarding-container">
         <!-- Progress Stepper -->
@@ -1240,7 +1241,6 @@
         </div>
     </div>
 
-    <script src="js/compass-nav.js?v=7"></script>
     <script>
         let currentStep = 1;
         let quizAnswers = {};

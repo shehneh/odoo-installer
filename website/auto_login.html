@@ -201,7 +201,7 @@
         let db = urlParams.get('db');
         let email = urlParams.get('email');
         let password = urlParams.get('password');
-        const odooUrl = 'https://odoo-online.liara.run';
+        const odooUrl = window.location.origin + '/odoo';
         
         let demoUsers = [];
         let currentUser = null;

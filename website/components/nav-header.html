@@ -219,6 +219,16 @@
     .compass-nav:hover .compass-menu,
     .compass-nav.active .compass-menu {
         display: block;
+        pointer-events: auto;
+    }
+
+    .compass-menu {
+        pointer-events: none;
+    }
+
+    .compass-nav.active .compass-menu,
+    .compass-nav:hover .compass-menu {
+        pointer-events: auto;
     }
 
     .compass-item {
@@ -361,8 +371,13 @@
                     🛠️ خدمات
                     <span style="font-size: 10px;">▼</span>
                 </a>
-                <div class="dropdown-menu">
-                    <a href="/install.html" class="dropdown-item">
+                <div class="dropdown-menu">                    <a href="/onboarding.html" class="dropdown-item" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; font-weight: 600; border-radius: 8px; margin-bottom: 8px;">
+                        ☁️ Odoo آنلاین ✨
+                    </a>
+                    <a href="/onboarding.html" class="dropdown-item">
+                        🚀 نصب دیتابیس
+                    </a>
+                    <div class="dropdown-divider"></div>                    <a href="/install.html" class="dropdown-item">
                         � نصب Odoo
                     </a>
                     <a href="/register_tenant.html" class="dropdown-item">
@@ -391,6 +406,16 @@
             </li>
         </ul>
 
+        <!-- Odoo Online Button (Prominent) -->
+        <a href="/onboarding.html" 
+           style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 10px 24px; border-radius: 12px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); transition: all 0.3s ease; font-size: 15px;"
+           onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(16, 185, 129, 0.6)'"
+           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(16, 185, 129, 0.4)'">
+            <span style="font-size: 18px;">☁️</span>
+            <span>Odoo آنلاین</span>
+            <span style="font-size: 10px; background: rgba(255,255,255,0.3); padding: 2px 8px; border-radius: 8px;">آسان</span>
+        </a>
+
         <!-- User Menu -->
         <div class="user-menu" id="userMenuContainer">
             <!-- Will be populated by JS -->
@@ -413,9 +438,9 @@
 </nav>
 
 <!-- Compass Navigation -->
-<div class="compass-nav" id="compassNav">
+<div class="compass-nav" id="compassNav" onclick="toggleCompass(event)">
     <div class="compass-icon">🧭</div>
-    <div class="compass-menu">
+    <div class="compass-menu" onclick="event.stopPropagation()">
         <a href="/" class="compass-item">
             <span class="compass-item-icon">🏠</span>
             <span>خانه</span>
@@ -452,6 +477,21 @@
 </div>
 
 <script>
+// Toggle compass navigation
+function toggleCompass(event) {
+    event.stopPropagation();
+    const compass = document.getElementById('compassNav');
+    compass.classList.toggle('active');
+}
+
+// Close compass when clicking outside
+document.addEventListener('click', function(event) {
+    const compass = document.getElementById('compassNav');
+    if (compass && !compass.contains(event.target)) {
+        compass.classList.remove('active');
+    }
+});
+
 // Check user login status and render user menu
 async function checkUserStatus() {
     try {

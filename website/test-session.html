@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست Session - OdooMaster</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+        .info-value {
+            color: #212529;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 2rem;
+            color: #667eea;
+            margin: 20px 0;
+            font-weight: 700;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .btn-secondary:hover {
+            background: #dee2e6;
+        }
+
+        .log {
+            background: #212529;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+        }
+
+        .timestamp {
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 تست پایداری Session</h1>
+
+        <div class="info-box">
+            <div class="info-label">وضعیت لاگین:</div>
+            <div class="info-value">
+                <span id="loginStatus" class="status">در حال بررسی...</span>
+            </div>
+
+            <div class="info-label">نام کاربر:</div>
+            <div class="info-value" id="userName">-</div>
+
+            <div class="info-label">ایمیل:</div>
+            <div class="info-value" id="userEmail">-</div>
+
+            <div class="info-label">موبایل:</div>
+            <div class="info-value" id="userPhone">-</div>
+
+            <div class="info-label">روش ورود:</div>
+            <div class="info-value" id="authMethod">-</div>
+        </div>
+
+        <div class="info-box">
+            <div class="info-label">زمان از آخرین چک:</div>
+            <div class="timer" id="timer">00:00</div>
+            <div style="text-align: center; color: #6c757d; font-size: 0.9rem;">
+                Session هر 5 ثانیه چک می‌شود. اگر لاگین پایدار باشد، باید همیشه وضعیت "لاگین شده" نمایش دهد.
+            </div>
+        </div>
+
+        <div class="buttons">
+            <button class="btn btn-primary" onclick="checkStatus()">
+                🔄 بررسی دوباره
+            </button>
+            <button class="btn btn-secondary" onclick="window.location.href='/dashboard.html'">
+                📊 رفتن به داشبورد
+            </button>
+        </div>
+
+        <div class="log" id="log"></div>
+    </div>
+
+    <script>
+        let checkInterval;
+        let startTime = Date.now();
+        let logEntries = [];
+
+        function addLog(message) {
+            const timestamp = new Date().toLocaleTimeString('fa-IR');
+            const entry = `<div class="log-entry"><span class="timestamp">[${timestamp}]</span> ${message}</div>`;
+            logEntries.push(entry);
+            
+            // Keep only last 10 entries
+            if (logEntries.length > 10) {
+                logEntries.shift();
+            }
+            
+            document.getElementById('log').innerHTML = logEntries.join('');
+            
+            // Scroll to bottom
+            const log = document.getElementById('log');
+            log.scrollTop = log.scrollHeight;
+        }
+
+        async function checkStatus() {
+            try {
+                const response = await fetch('/api/user-status');
+                const result = await response.json();
+
+                const statusEl = document.getElementById('loginStatus');
+                
+                if (result.logged_in && result.user) {
+                    statusEl.textContent = '✅ لاگین شده';
+                    statusEl.className = 'status success';
+                    
+                    document.getElementById('userName').textContent = result.user.name || '-';
+                    document.getElementById('userEmail').textContent = result.user.email || '-';
+                    document.getElementById('userPhone').textContent = result.user.phone || '-';
+                    document.getElementById('authMethod').textContent = result.user.auth_method || '-';
+                    
+                    addLog(`✅ Session فعال است - کاربر: ${result.user.name}`);
+                } else {
+                    statusEl.textContent = '❌ خارج شده';
+                    statusEl.className = 'status error';
+                    
+                    document.getElementById('userName').textContent = '-';
+                    document.getElementById('userEmail').textContent = '-';
+                    document.getElementById('userPhone').textContent = '-';
+                    document.getElementById('authMethod').textContent = '-';
+                    
+                    addLog('❌ Session منقضی شده - باید دوباره لاگین کنید');
+                    
+                    // Redirect to login after 3 seconds
+                    setTimeout(() => {
+                        window.location.href = '/user-login.html?expired=1';
+                    }, 3000);
+                }
+            } catch (error) {
+                console.error('Error checking status:', error);
+                addLog('⚠️ خطا در بررسی وضعیت');
+            }
+        }
+
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            
+            document.getElementById('timer').textContent = 
+                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        // Initial check
+        checkStatus();
+        addLog('🚀 تست پایداری Session شروع شد');
+        addLog('📌 Session باید 7 روز پایدار بماند');
+
+        // Check every 5 seconds
+        checkInterval = setInterval(checkStatus, 5000);
+        
+        // Update timer every second
+        setInterval(updateTimer, 1000);
+
+        // Log on page unload
+        window.addEventListener('beforeunload', () => {
+            addLog('👋 صفحه بسته شد');
+        });
+    </script>
+</body>
+</html>
