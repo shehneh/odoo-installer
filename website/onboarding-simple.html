@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست Onboarding ساده</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .test-card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 32px;
+        }
+
+        p {
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .success {
+            color: #10b981;
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 15px 40px;
+            border-radius: 10px;
+            text-decoration: none;
+            margin-top: 20px;
+            font-size: 18px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .info-box {
+            background: #f0f4ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: right;
+        }
+
+        .info-box strong {
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-card">
+        <div class="success">✅</div>
+        <h1>صفحه Onboarding ساده</h1>
+        <p><strong>اگر این متن رو می‌بینید یعنی:</strong></p>
+        
+        <div class="info-box">
+            <p>✓ سرور Flask درست کار می‌کنه</p>
+            <p>✓ فایل‌های HTML لود می‌شن</p>
+            <p>✓ CSS هم اعمال می‌شه</p>
+            <p>✓ مرورگر شما مشکلی نداره</p>
+        </div>
+
+        <p style="margin-top: 30px;">
+            <strong>پس مشکل onboarding.html اصلی احتمالاً از JavaScript هست!</strong>
+        </p>
+
+        <a href="/onboarding.html" class="btn">رفتن به Onboarding اصلی</a>
+        <a href="/" class="btn" style="background: #10b981; margin-right: 10px;">برگشت به خانه</a>
+    </div>
+
+    <script>
+        console.log('✅ JavaScript هم کار می‌کنه!');
+        console.log('زمان لود صفحه:', new Date().toLocaleString('fa-IR'));
+    </script>
+</body>
+</html>
