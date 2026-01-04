@@ -384,7 +384,8 @@
             if (nextPage && !nextPage.includes('login') && !nextPage.includes('register') && !nextPage.includes('verify')) {
                 window.location.href = nextPage;
             } else {
-                window.location.href = '/';
+                // اگر از Google OAuth اومده، به onboarding برو
+                window.location.href = '/onboarding.html';
             }
         }
 

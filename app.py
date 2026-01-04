@@ -1805,6 +1805,7 @@ def google_callback():
             cursor.execute('UPDATE website_users SET last_login = ?, email_verified = 1 WHERE id = ?',
                           (datetime.now(), user_id))
             conn.commit()
+            conn.close()
             
             session.permanent = True  # Keep session for 7 days
             session['user_id'] = user_id
@@ -1813,19 +1814,15 @@ def google_callback():
             session['auth_method'] = 'email'  # Google login is email-based
             session['google_login'] = True
             
-            # Check if phone verified
-            if not existing_user[2]:
-                conn.close()
-                return redirect('/verify-account.html')
-            
-            conn.close()
+            # Google OAuth users don't need phone verification for basic access
+            # Go directly to onboarding
             return redirect('/onboarding.html')
         else:
-            # New user - create account
+            # New user - create account with active status
             cursor.execute('''
                 INSERT INTO website_users 
-                (full_name, email, phone, password_hash, email_verified, status)
-                VALUES (?, ?, '', '', 1, 'pending')
+                (full_name, email, phone, password_hash, email_verified, phone_verified, status)
+                VALUES (?, ?, '', '', 1, 0, 'active')
             ''', (name, email.lower()))
             conn.commit()
             user_id = cursor.lastrowid
@@ -1838,8 +1835,9 @@ def google_callback():
             session['auth_method'] = 'email'  # Google login is email-based
             session['google_login'] = True
             
-            # Need to verify phone
-            return redirect('/verify-account.html')
+            # New Google user - go directly to onboarding
+            # Phone verification is optional for Google OAuth users
+            return redirect('/onboarding.html')
             
     except Exception as e:
         import traceback
