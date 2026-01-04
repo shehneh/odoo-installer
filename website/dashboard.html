@@ -972,6 +972,34 @@
             return String(num).replace(/\d/g, d => persianDigits[d]);
         }
 
+        // Check user status and admin access on page load
+        fetch('/api/user-status')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.user) {
+                    // Update user info in sidebar
+                    const userCard = document.querySelector('.user-card');
+                    if (userCard) {
+                        const userName = userCard.querySelector('strong');
+                        const userAvatar = userCard.querySelector('img');
+                        if (userName) userName.textContent = data.user.name || 'کاربر';
+                        if (userAvatar && data.user.name) {
+                            userAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.user.name)}&background=714B67&color=fff`;
+                        }
+                    }
+                    
+                    // Show admin section if user is admin
+                    if (data.user.is_admin) {
+                        const adminSection = document.getElementById('adminNavSection');
+                        if (adminSection) {
+                            adminSection.style.display = 'block';
+                        }
+                        console.log('Admin access granted for:', data.user.email);
+                    }
+                }
+            })
+            .catch(err => console.error('Failed to get user status:', err));
+
         // System Check Integration
         document.addEventListener('DOMContentLoaded', function() {
             const checkBtn = document.getElementById('startSystemCheck');

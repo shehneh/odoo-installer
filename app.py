@@ -157,6 +157,13 @@ SMTP_USER = os.environ.get('SMTP_USER', 'your-email@gmail.com')
 SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', 'your-app-password')
 EMAIL_FROM = os.environ.get('EMAIL_FROM', 'OdooMaster <noreply@odoomaster.ir>')
 
+# Admin Users - These emails have full admin access
+ADMIN_EMAILS = [
+    'shehneh.m@gmail.com',
+    'admin@odoomaster.ir',
+    'support@odoomaster.ir'
+]
+
 # SMS configuration (Kavenegar)
 KAVENEGAR_API_KEY = os.environ.get('KAVENEGAR_API_KEY', '4F696144434E4A595339686F6B3773467A62516277745A666566785A67756E5167564D67596D2B757368513D')
 KAVENEGAR_TEMPLATE = os.environ.get('KAVENEGAR_TEMPLATE', 'verify')  # نام template در کاوه‌نگار
@@ -1991,6 +1998,9 @@ def api_user_status():
         # Use session auth_method (current login method) instead of database value
         current_auth_method = session.get('auth_method', db_auth_method or 'email')
         
+        # Check if user is admin
+        is_admin = email.lower() in [e.lower() for e in ADMIN_EMAILS]
+        
         return jsonify({
             'success': True,
             'logged_in': True,
@@ -2002,7 +2012,8 @@ def api_user_status():
                 'auth_method': current_auth_method,  # روش فعلی لاگین از session
                 'email_verified': bool(email_verified),
                 'phone_verified': bool(phone_verified),
-                'status': status
+                'status': status,
+                'is_admin': is_admin
             }
         })
         
