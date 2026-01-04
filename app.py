@@ -54,12 +54,10 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)  # 7 days session
 # Public pages - accessible without login
 PUBLIC_PAGES = [
     '/', 'index.html', 
-    'demo.html', 
     'docs.html', 
     'downloads.html',
     'user-login.html', 'user-register.html',
     'verify-account.html', 'email-verified.html',
-    'install.html',  # نصب آفلاین - عمومی
     'favicon.svg', 'css/', 'js/', 'images/', 'api/'
 ]
 
@@ -67,7 +65,6 @@ PUBLIC_PAGES = [
 PROTECTED_PAGES = [
     'onboarding.html', 
     'profile.html',
-    'install_modules.html',
     'module_wizard.html',
     'auto_login.html'
 ]
@@ -77,9 +74,7 @@ LEGACY_REDIRECTS = {
     'login.html': '/user-login.html',
     'register.html': '/user-register.html',
     'register_tenant.html': '/user-register.html',
-    'dashboard.html': '/profile.html',
-    'dashboard-test.html': '/profile.html',
-    'dashboard-welcome.html': '/profile.html'
+    'dashboard.html': '/profile.html'
 }
 
 # Middleware to check authentication before serving protected pages
@@ -108,9 +103,9 @@ def check_authentication():
         return redirect(LEGACY_REDIRECTS[path])
     
     # Check if it's explicitly a public page (exact match)
-    if path == '' or path in ['', 'index.html', 'demo.html', 'docs.html', 'downloads.html', 
+    if path == '' or path in ['', 'index.html', 'docs.html', 'downloads.html', 
                                'user-login.html', 'user-register.html', 
-                               'verify-account.html', 'email-verified.html', 'install.html']:
+                               'verify-account.html', 'email-verified.html']:
         return None  # Allow access
     
     # Check if it's a protected page (exact match)
@@ -493,11 +488,13 @@ def index():
 
 @app.route('/install')
 def install():
-    return send_from_directory('website', 'install.html')
+    # Redirect to onboarding page instead
+    return redirect('/onboarding.html')
 
 @app.route('/installer')
 def installer():
-    return send_from_directory('website', 'install.html')
+    # Redirect to onboarding page instead
+    return redirect('/onboarding.html')
 
 # Removed old serve_static route - now handled at the end of file with middleware
 
