@@ -37,8 +37,15 @@ app = Flask(__name__,
             template_folder='website')
 CORS(app)
 
-# Secret key for session management
-app.secret_key = os.environ.get('SECRET_KEY', secrets.token_hex(32))
+# Secret key for session management - MUST be fixed, not random!
+# Random key causes session loss on every server restart
+app.secret_key = os.environ.get('SECRET_KEY', 'OdooMaster-Fixed-Secret-Key-2025-Do-Not-Change!')
+
+# Session configuration - make sessions persistent
+app.config['SESSION_COOKIE_SECURE'] = False  # Set True only for HTTPS
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)  # 7 days session
 
 # =====================================
 # Page Access Control
@@ -1515,6 +1522,7 @@ def api_login():
         conn.close()
         
         # Set session - use CURRENT auth_method (what user chose to login with)
+        session.permanent = True  # Keep session for 7 days
         session['user_id'] = user_id
         session['user_email'] = user_email
         session['user_phone'] = user_phone
@@ -1683,6 +1691,7 @@ def api_login_with_otp():
         conn.close()
         
         # Set session
+        session.permanent = True  # Keep session for 7 days
         session['user_id'] = user_id
         session['user_email'] = user_email
         session['user_phone'] = user_phone
@@ -1793,6 +1802,7 @@ def google_callback():
                           (datetime.now(), user_id))
             conn.commit()
             
+            session.permanent = True  # Keep session for 7 days
             session['user_id'] = user_id
             session['user_email'] = email.lower()
             session['user_name'] = name
@@ -1817,6 +1827,7 @@ def google_callback():
             user_id = cursor.lastrowid
             conn.close()
             
+            session.permanent = True  # Keep session for 7 days
             session['user_id'] = user_id
             session['user_email'] = email.lower()
             session['user_name'] = name
