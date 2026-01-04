@@ -7,8 +7,8 @@
         fetch('/components/nav-header.html')
             .then(response => response.text())
             .then(html => {
-                // Create container if doesn't exist
-                let navContainer = document.getElementById('navHeader');
+                // Try both possible container IDs
+                let navContainer = document.getElementById('mainNav') || document.getElementById('navHeader');
                 if (!navContainer) {
                     navContainer = document.createElement('div');
                     navContainer.id = 'navHeader';
