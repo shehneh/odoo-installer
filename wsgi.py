@@ -1,7 +1,7 @@
 """
 WSGI entry point for Liara deployment
 """
-from api_server import app
+from app import app
 
 if __name__ == "__main__":
     app.run()

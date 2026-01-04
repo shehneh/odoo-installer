@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حساب کاربری - OdooMaster</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f7fafc;
+            min-height: 100vh;
+        }
+
+        /* Navigation Styles */
+        .top-nav {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            height: 70px;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            text-decoration: none;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-size: 15px;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            min-width: 220px;
+            padding: 8px;
+            margin-top: 8px;
+            display: none;
+            animation: fadeInDown 0.3s;
+        }
+
+        .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            color: #2d3748;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .dropdown-item:hover {
+            background: #f7fafc;
+            color: #667eea;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 8px 0;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-button {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.15);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .user-button:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* Compass */
+        .compass-nav {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4);
+            cursor: pointer;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .compass-nav:hover {
+            transform: scale(1.1) rotate(90deg);
+        }
+
+        .compass-icon {
+            font-size: 28px;
+        }
+
+        .compass-menu {
+            position: absolute;
+            bottom: 75px;
+            left: 0;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.25);
+            padding: 12px;
+            min-width: 250px;
+            display: none;
+        }
+
+        .compass-nav:hover .compass-menu {
+            display: block;
+        }
+
+        .compass-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: #2d3748;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .compass-item:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .profile-container {
+            max-width: 1000px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 40px;
+        }
+
+        h1 {
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #718096;
+            margin-bottom: 30px;
+        }
+
+        .info-card {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .info-card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .info-value {
+            color: #2d3748;
+            font-family: monospace;
+            direction: ltr;
+            text-align: left;
+        }
+
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-right: 10px;
+        }
+
+        .copy-btn:hover {
+            background: #5568d3;
+        }
+
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .user-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 15px;
+            transition: all 0.3s;
+        }
+
+        .user-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .user-role {
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .user-login {
+            font-size: 13px;
+            color: #718096;
+            margin-bottom: 4px;
+        }
+
+        .user-password {
+            font-size: 13px;
+            color: #718096;
+            font-family: monospace;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #718096;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">
+                <span>🚀</span>
+                <span>OdooMaster</span>
+            </a>
+
+            <ul class="nav-menu">
+                <li><a href="/" class="nav-link">🏠 خانه</a></li>
+                <li class="dropdown">
+                    <a href="#" class="nav-link">✨ امکانات ▼</a>
+                    <div class="dropdown-menu">
+                        <a href="/apps.html" class="dropdown-item">📦 اپلیکیشن‌ها</a>
+                        <a href="/docs.html" class="dropdown-item">📚 مستندات</a>
+                        <a href="/comparison.html" class="dropdown-item">⚖️ مقایسه نسخه‌ها</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="/demo.html" class="dropdown-item">🎮 دمو آنلاین</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#" class="nav-link">🛠️ خدمات ▼</a>
+                    <div class="dropdown-menu">
+                        <a href="/install.html" class="dropdown-item">💻 نصب Odoo</a>
+                        <a href="/register_tenant.html" class="dropdown-item">🌐 ساخت سرور</a>
+                        <a href="/support.html" class="dropdown-item">💬 پشتیبانی</a>
+                    </div>
+                </li>
+            </ul>
+
+            <div class="user-menu" id="userMenuContainer">
+                <!-- JS will populate -->
+            </div>
+        </div>
+    </nav>
+
+    <!-- Compass -->
+    <div class="compass-nav">
+        <div class="compass-icon">🧭</div>
+        <div class="compass-menu">
+            <a href="/" class="compass-item"><span style="font-size:20px;width:32px;text-align:center">🏠</span> خانه</a>
+            <a href="/dashboard.html" class="compass-item"><span style="font-size:20px;width:32px;text-align:center">📊</span> داشبورد</a>
+            <a href="/profile.html" class="compass-item"><span style="font-size:20px;width:32px;text-align:center">👤</span> حساب کاربری</a>
+            <a href="/apps.html" class="compass-item"><span style="font-size:20px;width:32px;text-align:center">📦</span> اپلیکیشن‌ها</a>
+        </div>
+    </div>
+
+    <div class="profile-container">
+        <h1>👤 حساب کاربری</h1>
+        <p class="subtitle">اطلاعات دیتابیس و کاربران شما</p>
+
+        <div id="profileContent">
+            <div class="empty-state">
+                <div class="empty-state-icon">🔍</div>
+                <p>در حال بارگذاری اطلاعات...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/compass-nav.js?v=7"></script>
+    <script>
+        async function loadProfile() {
+            // Try to get from localStorage first
+            const localData = localStorage.getItem('tenantData');
+            
+            if (localData) {
+                const data = JSON.parse(localData);
+                displayProfile(data);
+                
+                // Also try to fetch from server
+                if (data.email) {
+                    fetchFromServer(data.email);
+                }
+            } else {
+                document.getElementById('profileContent').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>هیچ اطلاعاتی یافت نشد</p>
+                        <p style="margin-top: 10px; font-size: 14px;">لطفاً ابتدا یک دیتابیس ایجاد کنید.</p>
+                        <div class="action-buttons" style="justify-content: center; margin-top: 20px;">
+                            <a href="/onboarding.html" class="btn btn-primary">🚀 ایجاد دیتابیس جدید</a>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        async function fetchFromServer(email) {
+            try {
+                const response = await fetch(`/api/profile/${encodeURIComponent(email)}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    const data = {
+                        database: result.customer.database_name,
+                        email: result.customer.admin_email,
+                        password: result.customer.admin_password,
+                        company: result.customer.company_name,
+                        demoUsers: result.demo_users.map(u => ({
+                            name: u.name,
+                            login: u.login,
+                            password: u.password,
+                            role: u.role
+                        }))
+                    };
+                    
+                    localStorage.setItem('tenantData', JSON.stringify(data));
+                    displayProfile(data);
+                }
+            } catch (error) {
+                console.error('Error fetching profile:', error);
+            }
+        }
+
+        function displayProfile(data) {
+            const content = `
+                <div class="info-card">
+                    <h2>🗄️ اطلاعات دیتابیس</h2>
+                    <div class="info-row">
+                        <span class="info-label">نام شرکت:</span>
+                        <span class="info-value">${data.company || 'نامشخص'}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">نام دیتابیس:</span>
+                        <span class="info-value">
+                            ${data.database}
+                            <button class="copy-btn" onclick="copyToClipboard('${data.database}')">📋 کپی</button>
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">ایمیل مدیر:</span>
+                        <span class="info-value">
+                            ${data.email}
+                            <button class="copy-btn" onclick="copyToClipboard('${data.email}')">📋 کپی</button>
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">رمز عبور:</span>
+                        <span class="info-value">
+                            ${data.password}
+                            <button class="copy-btn" onclick="copyToClipboard('${data.password}')">📋 کپی</button>
+                        </span>
+                    </div>
+                </div>
+
+                ${data.demoUsers && data.demoUsers.length > 0 ? `
+                <div class="info-card">
+                    <h2>👥 کاربران نمونه</h2>
+                    <div class="users-grid">
+                        ${data.demoUsers.map(user => `
+                            <div class="user-card">
+                                <div class="user-role">${user.name}</div>
+                                <div class="user-login">👤 ${user.login}</div>
+                                <div class="user-password">🔑 ${user.password}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                ` : ''}
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="loginAsAdmin()">🎯 ورود به عنوان مدیر</button>
+                    ${data.demoUsers && data.demoUsers.length > 0 ? `
+                        <button class="btn btn-primary" onclick="showUserSelector()">👥 ورود با کاربر دیگر</button>
+                    ` : ''}
+                </div>
+            `;
+            
+            document.getElementById('profileContent').innerHTML = content;
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('✅ کپی شد!');
+            });
+        }
+
+        function loginAsAdmin() {
+            const data = JSON.parse(localStorage.getItem('tenantData'));
+            const url = `/auto_login.html?db=${encodeURIComponent(data.database)}&email=${encodeURIComponent(data.email)}&password=${encodeURIComponent(data.password)}`;
+            window.open(url, '_blank');
+        }
+
+        function showUserSelector() {
+            const data = JSON.parse(localStorage.getItem('tenantData'));
+            if (!data.demoUsers || data.demoUsers.length === 0) return;
+            
+            const userList = data.demoUsers.map((user, idx) => 
+                `<button class="btn btn-primary" style="width: 100%; margin-bottom: 10px;" 
+                    onclick="loginAsUser(${idx})">${user.name} (${user.login})</button>`
+            ).join('');
+            
+            document.getElementById('profileContent').innerHTML += `
+                <div class="info-card" style="margin-top: 20px;">
+                    <h2>👥 انتخاب کاربر</h2>
+                    ${userList}
+                </div>
+            `;
+        }
+
+        function loginAsUser(index) {
+            const data = JSON.parse(localStorage.getItem('tenantData'));
+            const user = data.demoUsers[index];
+            const url = `/auto_login.html?db=${encodeURIComponent(data.database)}&email=${encodeURIComponent(user.login)}&password=${encodeURIComponent(user.password)}`;
+            window.open(url, '_blank');
+        }
+
+        // Load on page load
+        loadProfile();
+
+        // Check user status for navigation
+        async function checkUserStatus() {
+            try {
+                const response = await fetch('/api/user-status');
+                const result = await response.json();
+                
+                const container = document.getElementById('userMenuContainer');
+                
+                if (result.logged_in) {
+                    container.innerHTML = `
+                        <div class="dropdown">
+                            <div class="user-button">
+                                <div class="user-avatar">${result.user.name ? result.user.name[0].toUpperCase() : '👤'}</div>
+                                <span>${result.user.name || 'کاربر'}</span>
+                                <span style="font-size:10px">▼</span>
+                            </div>
+                            <div class="dropdown-menu">
+                                <a href="/profile.html" class="dropdown-item">👤 حساب کاربری</a>
+                                <a href="/dashboard.html" class="dropdown-item">📊 داشبورد</a>
+                                ${result.user.is_admin ? `
+                                <div class="dropdown-divider"></div>
+                                <a href="/admin_panel.html" class="dropdown-item">⚙️ پنل مدیریت</a>
+                                <a href="/admin_customers.html" class="dropdown-item">👥 مدیریت کاربران</a>
+                                ` : ''}
+                                <div class="dropdown-divider"></div>
+                                <a href="#" onclick="logout(); return false;" class="dropdown-item" style="color:#ef4444">🚪 خروج</a>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <a href="/user-login.html" class="nav-link" style="background:rgba(255,255,255,0.15)">🔐 ورود</a>
+                        <a href="/user-register.html" class="nav-link" style="background:white;color:#667eea">📝 ثبت‌نام</a>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function logout() {
+            const response = await fetch('/api/logout', { method: 'POST' });
+            if (response.ok) window.location.href = '/';
+        }
+
+        checkUserStatus();
+    </script>
+    <script src="/js/global-nav.js"></script>
+</body>
+</html>

@@ -142,6 +142,16 @@
                 <i class="fas fa-info-circle"></i> اطلاعات ورود شما
             </h3>
             
+            <!-- User Role Selector -->
+            <div id="userRoleSelector" style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: none;">
+                <div style="margin-bottom: 10px;">
+                    <strong style="color: #667eea;">👤 انتخاب نقش:</strong>
+                </div>
+                <select id="roleSelect" style="width: 100%; padding: 12px; border: 2px solid #667eea; border-radius: 6px; font-size: 16px; text-align: center; background: white; cursor: pointer;">
+                    <option value="">-- انتخاب کنید --</option>
+                </select>
+            </div>
+            
             <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                     <strong style="color: #667eea;">نام کاربری (ایمیل):</strong>
@@ -188,15 +198,90 @@
     <script>
         // Get URL parameters
         const urlParams = new URLSearchParams(window.location.search);
-        const db = urlParams.get('db');
-        const email = urlParams.get('email');
-        const password = urlParams.get('password');
+        let db = urlParams.get('db');
+        let email = urlParams.get('email');
+        let password = urlParams.get('password');
         const odooUrl = 'https://odoo-online.liara.run';
+        
+        let demoUsers = [];
+        let currentUser = null;
+
+        // Load demo users from localStorage
+        function loadDemoUsers() {
+            try {
+                const tenantDataStr = localStorage.getItem('tenantData');
+                if (tenantDataStr) {
+                    const tenantData = JSON.parse(tenantDataStr);
+                    
+                    // Set default values from tenant data if URL params are missing
+                    if (!db && tenantData.database) db = tenantData.database;
+                    if (!email && tenantData.email) email = tenantData.email;
+                    if (!password && tenantData.password) password = tenantData.password;
+                    
+                    if (tenantData.demoUsers && tenantData.demoUsers.length > 0) {
+                        demoUsers = tenantData.demoUsers;
+                        
+                        // Add admin as first option
+                        const adminUser = {
+                            name: 'مدیر کل (Admin)',
+                            login: tenantData.email,
+                            password: tenantData.password,
+                            role: 'admin'
+                        };
+                        
+                        populateRoleSelector([adminUser, ...demoUsers]);
+                        document.getElementById('userRoleSelector').style.display = 'block';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading demo users:', error);
+            }
+        }
+
+        function populateRoleSelector(users) {
+            const select = document.getElementById('roleSelect');
+            select.innerHTML = '<option value="">-- انتخاب کنید --</option>';
+            
+            users.forEach((user, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.text = user.name;
+                select.appendChild(option);
+            });
+            
+            // Add change event
+            select.addEventListener('change', function() {
+                if (this.value !== '') {
+                    const selectedIndex = parseInt(this.value);
+                    if (selectedIndex === 0) {
+                        // Admin
+                        const tenantData = JSON.parse(localStorage.getItem('tenantData'));
+                        currentUser = {
+                            name: 'مدیر کل',
+                            login: tenantData.email,
+                            password: tenantData.password
+                        };
+                    } else {
+                        // Demo user
+                        currentUser = demoUsers[selectedIndex - 1];
+                    }
+                    
+                    // Update displayed credentials
+                    document.getElementById('emailInput').value = currentUser.login;
+                    document.getElementById('passwordInput').value = currentUser.password;
+                    email = currentUser.login;
+                    password = currentUser.password;
+                }
+            });
+        }
 
         if (!db || !email || !password) {
             document.getElementById('message').innerHTML = '❌ اطلاعات ورود ناقص است!<br>لطفاً دوباره از صفحه ثبت نام تلاش کنید.';
             document.getElementById('spinner').style.display = 'none';
         } else {
+            // Load demo users
+            loadDemoUsers();
+            
             // Show credentials
             setTimeout(() => {
                 document.getElementById('spinner').style.display = 'none';

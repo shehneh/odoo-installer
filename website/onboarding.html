@@ -12,6 +12,8 @@
             box-sizing: border-box;
         }
 
+        .hidden { display: none !important; }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -241,6 +243,21 @@
             justify-content: center;
             font-size: 14px;
             font-weight: 700;
+        }
+
+        .optional-badge {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 500;
+            margin-right: 8px;
+        }
+
+        .conditional-question {
+            border-right: 4px solid #667eea;
+            background: linear-gradient(135deg, #667eea05 0%, #764ba205 100%);
         }
 
         .quiz-options {
@@ -498,6 +515,17 @@
             color: #4a5568;
         }
 
+        .btn-outline {
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
+        }
+
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
@@ -709,6 +737,237 @@
             color: #065f46;
             border-right: 4px solid #10b981;
         }
+
+        /* Demo Data Styles */
+        .demo-data-options {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .demo-section {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .demo-section:hover {
+            border-color: #667eea;
+        }
+
+        .demo-section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            cursor: pointer;
+        }
+
+        .demo-checkbox {
+            width: 22px;
+            height: 22px;
+            accent-color: #667eea;
+        }
+
+        .demo-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .demo-icon {
+            font-size: 20px;
+        }
+
+        .demo-section-content {
+            padding: 15px 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .demo-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+
+        .demo-item:last-child {
+            border-bottom: none;
+        }
+
+        .demo-item-check {
+            width: 18px;
+            height: 18px;
+            accent-color: #48bb78;
+        }
+
+        .demo-item label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .role-badge.warehouse {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .role-badge.accountant {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .role-badge.sales {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .role-badge.manager {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .role-badge.hr {
+            background: #fce7f3;
+            color: #9d174d;
+        }
+
+        .user-details {
+            color: #718096;
+            font-size: 13px;
+        }
+
+        .demo-hint {
+            color: #718096;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .product-preview, .customer-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .product-tag, .customer-tag {
+            background: #edf2f7;
+            color: #4a5568;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+        }
+
+        /* Deployment Status */
+        .deployment-status {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .deployment-step {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 20px;
+            background: #f8fafc;
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .deployment-step.active {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+        }
+
+        .deployment-step.completed {
+            border-color: #48bb78;
+            background: #d1fae5;
+        }
+
+        .deployment-step.error {
+            border-color: #e53e3e;
+            background: #fed7d7;
+        }
+
+        .dep-icon {
+            font-size: 24px;
+        }
+
+        .dep-text {
+            font-weight: 500;
+            color: #2d3748;
+        }
+
+        .deployment-complete {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .deployment-complete h3 {
+            color: #48bb78;
+            margin: 15px 0 10px;
+        }
+
+        .deployment-complete p {
+            color: #718096;
+            margin-bottom: 20px;
+        }
+
+        .demo-users-info {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: right;
+        }
+
+        .demo-users-info h4 {
+            margin-bottom: 15px;
+            color: #2d3748;
+        }
+
+        .demo-user-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+
+        .demo-user-row:last-child {
+            border-bottom: none;
+        }
+
+        .demo-user-role {
+            font-weight: 600;
+        }
+
+        .demo-user-login {
+            font-family: monospace;
+            color: #667eea;
+        }
     </style>
 </head>
 <body>
@@ -729,11 +988,15 @@
                 </div>
                 <div class="step" data-step="3">
                     <div class="step-circle">3</div>
-                    <div class="step-label">انتخاب ماژول‌ها</div>
+                    <div class="step-label">انتخاب ماژول</div>
                 </div>
                 <div class="step" data-step="4">
                     <div class="step-circle">4</div>
                     <div class="step-label">راه‌اندازی</div>
+                </div>
+                <div class="step" data-step="5">
+                    <div class="step-circle">5</div>
+                    <div class="step-label">داده نمونه</div>
                 </div>
             </div>
         </div>
@@ -750,13 +1013,15 @@
                     <input type="text" class="form-input" id="companyName" placeholder="مثال: شرکت فناوری پارس" required>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">ایمیل مدیر (Admin) <span class="required">*</span></label>
-                    <input type="email" class="form-input" id="adminEmail" placeholder="admin@company.com" required>
+                <!-- Email field - shows based on auth method -->
+                <div class="form-group" id="emailGroup">
+                    <label class="form-label">ایمیل مدیر (Admin) <span class="required" id="emailRequired">*</span></label>
+                    <input type="email" class="form-input" id="adminEmail" placeholder="admin@company.com">
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">شماره تماس</label>
+                <!-- Phone field - shows based on auth method -->
+                <div class="form-group" id="phoneGroup">
+                    <label class="form-label">شماره تماس <span class="required hidden" id="phoneRequired">*</span></label>
                     <input type="tel" class="form-input" id="phoneNumber" placeholder="09123456789" dir="ltr">
                 </div>
 
@@ -779,6 +1044,7 @@
 
                 <div class="action-buttons">
                     <button class="btn btn-secondary" onclick="previousStep()">← قبلی</button>
+                    <button class="btn btn-outline" onclick="skipQuiz()">⏭️ رد کردن</button>
                     <button class="btn btn-primary" onclick="nextStep()">مرحله بعد →</button>
                 </div>
             </div>
@@ -797,20 +1063,167 @@
 
                 <div class="action-buttons">
                     <button class="btn btn-secondary" onclick="previousStep()">← قبلی</button>
+                    <button class="btn btn-outline" onclick="skipModules()">⏭️ رد کردن (دیتابیس خام)</button>
                     <button class="btn btn-primary" onclick="startDeployment()">🚀 شروع راه‌اندازی</button>
                 </div>
             </div>
 
             <!-- Step 4: Deployment Progress -->
             <div class="step-content" data-step="4">
+                <h2 class="step-title">🚀 راه‌اندازی سیستم</h2>
+                <p class="step-description">در حال ایجاد دیتابیس و نصب ماژول‌ها...</p>
+                
+                <div id="deploymentProgress" class="deployment-status">
+                    <div class="deployment-step pending" id="depStep1">
+                        <span class="dep-icon">⏳</span>
+                        <span class="dep-text">ایجاد دیتابیس</span>
+                    </div>
+                    <div class="deployment-step pending" id="depStep2">
+                        <span class="dep-icon">⏳</span>
+                        <span class="dep-text">نصب ماژول‌های پایه</span>
+                    </div>
+                    <div class="deployment-step pending" id="depStep3">
+                        <span class="dep-icon">⏳</span>
+                        <span class="dep-text">نصب ماژول‌های انتخابی</span>
+                    </div>
+                </div>
+
+                <div id="deploymentComplete" style="display:none;" class="deployment-complete">
+                    <div class="success-icon">✅</div>
+                    <h3>سیستم با موفقیت راه‌اندازی شد!</h3>
+                    <p>حالا می‌توانید داده‌های نمونه اضافه کنید.</p>
+                    <button class="btn btn-primary" onclick="nextStep()">ادامه: افزودن داده نمونه →</button>
+                </div>
+            </div>
+
+            <!-- Step 5: Demo Data -->
+            <div class="step-content" data-step="5">
+                <h2 class="step-title">📊 داده‌های نمونه</h2>
+                <p class="step-description">برای آشنایی سریع‌تر با سیستم، داده‌های نمونه اضافه کنید.</p>
+
+                <div class="demo-data-options">
+                    <!-- Users Section -->
+                    <div class="demo-section">
+                        <div class="demo-section-header">
+                            <input type="checkbox" id="createUsers" class="demo-checkbox" checked>
+                            <label for="createUsers" class="demo-section-title">
+                                <span class="demo-icon">👥</span>
+                                ایجاد کاربران نمونه
+                            </label>
+                        </div>
+                        <div class="demo-section-content" id="usersContent">
+                            <div class="demo-item">
+                                <input type="checkbox" id="userWarehouse" class="demo-item-check" checked>
+                                <label for="userWarehouse">
+                                    <span class="role-badge warehouse">📦 انباردار</span>
+                                    <span class="user-details">کاربر: warehouse@ | دسترسی: انبار</span>
+                                </label>
+                            </div>
+                            <div class="demo-item">
+                                <input type="checkbox" id="userAccountant" class="demo-item-check" checked>
+                                <label for="userAccountant">
+                                    <span class="role-badge accountant">💼 حسابدار</span>
+                                    <span class="user-details">کاربر: accountant@ | دسترسی: حسابداری</span>
+                                </label>
+                            </div>
+                            <div class="demo-item">
+                                <input type="checkbox" id="userSales" class="demo-item-check" checked>
+                                <label for="userSales">
+                                    <span class="role-badge sales">💰 فروشنده</span>
+                                    <span class="user-details">کاربر: sales@ | دسترسی: فروش</span>
+                                </label>
+                            </div>
+                            <div class="demo-item">
+                                <input type="checkbox" id="userManager" class="demo-item-check" checked>
+                                <label for="userManager">
+                                    <span class="role-badge manager">👔 مدیر شرکت</span>
+                                    <span class="user-details">کاربر: manager@ | دسترسی: مدیریت کامل</span>
+                                </label>
+                            </div>
+                            <div class="demo-item">
+                                <input type="checkbox" id="userHR" class="demo-item-check">
+                                <label for="userHR">
+                                    <span class="role-badge hr">👥 منابع انسانی</span>
+                                    <span class="user-details">کاربر: hr@ | دسترسی: کارکنان</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Products Section -->
+                    <div class="demo-section">
+                        <div class="demo-section-header">
+                            <input type="checkbox" id="createProducts" class="demo-checkbox" checked>
+                            <label for="createProducts" class="demo-section-title">
+                                <span class="demo-icon">📦</span>
+                                کالاهای نمونه
+                            </label>
+                        </div>
+                        <div class="demo-section-content" id="productsContent">
+                            <p class="demo-hint">5 کالای نمونه با قیمت و موجودی</p>
+                            <div class="product-preview">
+                                <span class="product-tag">لپ‌تاپ</span>
+                                <span class="product-tag">موبایل</span>
+                                <span class="product-tag">کیبورد</span>
+                                <span class="product-tag">ماوس</span>
+                                <span class="product-tag">هدفون</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Customers Section -->
+                    <div class="demo-section">
+                        <div class="demo-section-header">
+                            <input type="checkbox" id="createCustomers" class="demo-checkbox" checked>
+                            <label for="createCustomers" class="demo-section-title">
+                                <span class="demo-icon">🤝</span>
+                                مشتریان نمونه
+                            </label>
+                        </div>
+                        <div class="demo-section-content" id="customersContent">
+                            <p class="demo-hint">3 مشتری نمونه با اطلاعات تماس</p>
+                            <div class="customer-preview">
+                                <span class="customer-tag">شرکت فناوری پارس</span>
+                                <span class="customer-tag">آقای محمدی</span>
+                                <span class="customer-tag">خانم رضایی</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Suppliers Section -->
+                    <div class="demo-section">
+                        <div class="demo-section-header">
+                            <input type="checkbox" id="createSuppliers" class="demo-checkbox">
+                            <label for="createSuppliers" class="demo-section-title">
+                                <span class="demo-icon">🏭</span>
+                                تأمین‌کنندگان نمونه
+                            </label>
+                        </div>
+                        <div class="demo-section-content" id="suppliersContent">
+                            <p class="demo-hint">2 تأمین‌کننده نمونه</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" onclick="skipDemoData()">رد کردن ←</button>
+                    <button class="btn btn-primary" onclick="createDemoData()">✨ ایجاد داده‌های نمونه</button>
+                </div>
+
+                <!-- Success Screen -->
                 <div class="success-screen" id="successScreen" style="display:none;">
                     <div class="success-icon">🎉</div>
                     <h2 class="success-title">سیستم شما آماده است!</h2>
-                    <p class="success-description">دیتابیس و ماژول‌های شما با موفقیت نصب شدند.</p>
+                    <p class="success-description">دیتابیس، ماژول‌ها و داده‌های نمونه با موفقیت ایجاد شدند.</p>
 
                     <div class="info-box" id="successInfo"></div>
 
-                    <button class="btn btn-primary" onclick="loginToOdoo()">🎯 ورود به سیستم Odoo</button>
+                    <div class="demo-users-info" id="demoUsersInfo" style="display:none;"></div>
+
+                    <div class="action-buttons">
+                        <a href="/profile.html" class="btn btn-primary" target="_blank">📋 مشاهده حساب کاربری</a>
+                        <button class="btn btn-primary" onclick="loginToOdoo()">🎯 ورود به سیستم Odoo</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -833,8 +1246,55 @@
         let quizAnswers = {};
         let selectedModules = new Set(['l10n_ir', 'web_responsive', 'home_menu_fullscreen', 'base_setup']);
         let tenantData = null;
+        let userAuthMethod = 'email';  // Track user's auth method
 
-        // Quiz Questions
+        // Load user info from session on page load
+        async function loadUserInfo() {
+            try {
+                const response = await fetch('/api/user-status');
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success && result.user) {
+                        userAuthMethod = result.user.auth_method || 'email';
+                        
+                        // Fill form fields with user data
+                        document.getElementById('adminEmail').value = result.user.email || '';
+                        document.getElementById('adminName').value = result.user.name || '';
+                        document.getElementById('phoneNumber').value = result.user.phone || '';
+                        
+                        // Configure form based on auth method
+                        if (userAuthMethod === 'phone') {
+                            // Phone auth - phone is required, email is optional
+                            document.getElementById('emailRequired').classList.add('hidden');
+                            document.getElementById('phoneRequired').classList.remove('hidden');
+                            
+                            // Make phone readonly if verified
+                            if (result.user.phone) {
+                                document.getElementById('phoneNumber').setAttribute('readonly', 'readonly');
+                                document.getElementById('phoneNumber').style.backgroundColor = '#f7fafc';
+                            }
+                        } else {
+                            // Email auth - email is required, phone is optional
+                            document.getElementById('emailRequired').classList.remove('hidden');
+                            document.getElementById('phoneRequired').classList.add('hidden');
+                            
+                            // Make email readonly if verified (or from Google)
+                            if (result.user.email) {
+                                document.getElementById('adminEmail').setAttribute('readonly', 'readonly');
+                                document.getElementById('adminEmail').style.backgroundColor = '#f7fafc';
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading user info:', error);
+            }
+        }
+
+        // Call loadUserInfo when page loads
+        window.addEventListener('DOMContentLoaded', loadUserInfo);
+
+        // Quiz Questions with conditional logic
         const quizQuestions = [
             {
                 id: 'business_type',
@@ -843,6 +1303,7 @@
                     { value: 'retail', label: 'خرده‌فروشی', icon: '🛍️' },
                     { value: 'manufacturing', label: 'تولیدی', icon: '🏭' },
                     { value: 'services', label: 'خدماتی', icon: '💼' },
+                    { value: 'wholesale', label: 'عمده‌فروشی', icon: '📦' },
                     { value: 'other', label: 'سایر', icon: '🌟' }
                 ]
             },
@@ -855,18 +1316,83 @@
                 ]
             },
             {
-                id: 'has_purchase',
-                question: 'آیا خرید کالا یا خدمات دارید؟',
+                id: 'has_physical_store',
+                question: 'آیا فروشگاه فیزیکی دارید؟',
+                showIf: { has_sales: 'yes' },
                 options: [
-                    { value: 'yes', label: 'بله', icon: '✅', modules: ['purchase'] },
+                    { value: 'yes', label: 'بله', icon: '🏪', modules: ['point_of_sale'] },
+                    { value: 'no', label: 'خیر', icon: '❌' }
+                ]
+            },
+            {
+                id: 'has_online_store',
+                question: 'آیا فروشگاه آنلاین می‌خواهید؟',
+                showIf: { has_sales: 'yes' },
+                options: [
+                    { value: 'yes', label: 'بله', icon: '🌐', modules: ['website', 'website_sale'] },
+                    { value: 'no', label: 'خیر', icon: '❌' }
+                ]
+            },
+            {
+                id: 'has_subscriptions',
+                question: 'آیا اشتراک/خدمات دوره‌ای می‌فروشید؟',
+                showIf: { has_sales: 'yes' },
+                options: [
+                    { value: 'yes', label: 'بله', icon: '🔄', modules: ['sale_subscription'] },
+                    { value: 'no', label: 'خیر', icon: '❌' }
+                ]
+            },
+            {
+                id: 'has_purchase',
+                question: 'آیا خرید کالا یا مواد اولیه دارید؟',
+                options: [
+                    { value: 'yes', label: 'بله', icon: '🛒', modules: ['purchase'] },
                     { value: 'no', label: 'خیر', icon: '❌' }
                 ]
             },
             {
                 id: 'has_inventory',
                 question: 'آیا انبارداری دارید؟',
+                showIf: [{ has_sales: 'yes' }, { has_purchase: 'yes' }],
+                matchAny: true,
                 options: [
-                    { value: 'yes', label: 'بله', icon: '✅', modules: ['stock'] },
+                    { value: 'yes', label: 'بله', icon: '📦', modules: ['stock'] },
+                    { value: 'no', label: 'خیر', icon: '❌' }
+                ]
+            },
+            {
+                id: 'needs_barcode',
+                question: 'آیا به بارکدخوان نیاز دارید؟',
+                showIf: { has_inventory: 'yes' },
+                options: [
+                    { value: 'yes', label: 'بله', icon: '📱', modules: ['stock_barcode'] },
+                    { value: 'no', label: 'خیر', icon: '❌' }
+                ]
+            },
+            {
+                id: 'has_manufacturing',
+                question: 'آیا تولید محصول دارید؟',
+                showIf: { business_type: 'manufacturing' },
+                options: [
+                    { value: 'yes', label: 'بله', icon: '🏭', modules: ['mrp'] },
+                    { value: 'no', label: 'خیر', icon: '❌' }
+                ]
+            },
+            {
+                id: 'needs_quality',
+                question: 'آیا کنترل کیفیت می‌خواهید؟',
+                showIf: { has_manufacturing: 'yes' },
+                options: [
+                    { value: 'yes', label: 'بله', icon: '✓', modules: ['quality_control'] },
+                    { value: 'no', label: 'خیر', icon: '❌' }
+                ]
+            },
+            {
+                id: 'needs_maintenance',
+                question: 'آیا نگهداری تجهیزات دارید؟',
+                showIf: { has_manufacturing: 'yes' },
+                options: [
+                    { value: 'yes', label: 'بله', icon: '🔧', modules: ['maintenance'] },
                     { value: 'no', label: 'خیر', icon: '❌' }
                 ]
             },
@@ -874,15 +1400,24 @@
                 id: 'has_accounting',
                 question: 'آیا به حسابداری نیاز دارید؟',
                 options: [
-                    { value: 'yes', label: 'بله', icon: '✅', modules: ['account'] },
+                    { value: 'yes', label: 'بله', icon: '💼', modules: ['account'] },
                     { value: 'no', label: 'خیر', icon: '❌' }
                 ]
             },
             {
                 id: 'has_crm',
-                question: 'آیا مدیریت مشتریان (CRM) می‌خواهید؟',
+                question: 'آیا مدیریت سرنخ و مشتری (CRM) می‌خواهید؟',
                 options: [
-                    { value: 'yes', label: 'بله', icon: '✅', modules: ['crm'] },
+                    { value: 'yes', label: 'بله', icon: '👥', modules: ['crm'] },
+                    { value: 'no', label: 'خیر', icon: '❌' }
+                ]
+            },
+            {
+                id: 'needs_marketing',
+                question: 'آیا ایمیل مارکتینگ می‌خواهید؟',
+                showIf: { has_crm: 'yes' },
+                options: [
+                    { value: 'yes', label: 'بله', icon: '📧', modules: ['mass_mailing'] },
                     { value: 'no', label: 'خیر', icon: '❌' }
                 ]
             },
@@ -890,7 +1425,43 @@
                 id: 'has_employees',
                 question: 'آیا کارمند دارید؟',
                 options: [
-                    { value: 'yes', label: 'بله', icon: '✅', modules: ['hr', 'hr_holidays'] },
+                    { value: 'yes', label: 'بله', icon: '👔', modules: ['hr'] },
+                    { value: 'no', label: 'خیر', icon: '❌' }
+                ]
+            },
+            {
+                id: 'needs_timeoff',
+                question: 'آیا مدیریت مرخصی می‌خواهید؟',
+                showIf: { has_employees: 'yes' },
+                options: [
+                    { value: 'yes', label: 'بله', icon: '🏖️', modules: ['hr_holidays'] },
+                    { value: 'no', label: 'خیر', icon: '❌' }
+                ]
+            },
+            {
+                id: 'needs_attendance',
+                question: 'آیا حضور و غیاب می‌خواهید؟',
+                showIf: { has_employees: 'yes' },
+                options: [
+                    { value: 'yes', label: 'بله', icon: '⏰', modules: ['hr_attendance'] },
+                    { value: 'no', label: 'خیر', icon: '❌' }
+                ]
+            },
+            {
+                id: 'needs_expenses',
+                question: 'آیا مدیریت هزینه کارمندان می‌خواهید؟',
+                showIf: { has_employees: 'yes' },
+                options: [
+                    { value: 'yes', label: 'بله', icon: '💵', modules: ['hr_expense'] },
+                    { value: 'no', label: 'خیر', icon: '❌' }
+                ]
+            },
+            {
+                id: 'needs_recruitment',
+                question: 'آیا استخدام و کاریابی می‌خواهید؟',
+                showIf: { has_employees: 'yes' },
+                options: [
+                    { value: 'yes', label: 'بله', icon: '📋', modules: ['hr_recruitment'] },
                     { value: 'no', label: 'خیر', icon: '❌' }
                 ]
             },
@@ -898,15 +1469,48 @@
                 id: 'has_projects',
                 question: 'آیا مدیریت پروژه نیاز دارید؟',
                 options: [
-                    { value: 'yes', label: 'بله', icon: '✅', modules: ['project'] },
+                    { value: 'yes', label: 'بله', icon: '📊', modules: ['project'] },
                     { value: 'no', label: 'خیر', icon: '❌' }
                 ]
             },
             {
-                id: 'has_website',
-                question: 'آیا وب‌سایت می‌خواهید؟',
+                id: 'needs_timesheet',
+                question: 'آیا ثبت زمان کار روی پروژه می‌خواهید؟',
+                showIf: { has_projects: 'yes' },
                 options: [
-                    { value: 'yes', label: 'بله', icon: '✅', modules: ['website', 'website_sale'] },
+                    { value: 'yes', label: 'بله', icon: '⏱️', modules: ['hr_timesheet'] },
+                    { value: 'no', label: 'خیر', icon: '❌' }
+                ]
+            },
+            {
+                id: 'needs_helpdesk',
+                question: 'آیا پشتیبانی مشتری (Helpdesk) می‌خواهید؟',
+                options: [
+                    { value: 'yes', label: 'بله', icon: '🎫', modules: ['helpdesk'] },
+                    { value: 'no', label: 'خیر', icon: '❌' }
+                ]
+            },
+            {
+                id: 'needs_appointments',
+                question: 'آیا سیستم نوبت‌دهی آنلاین می‌خواهید؟',
+                options: [
+                    { value: 'yes', label: 'بله', icon: '📅', modules: ['appointment'] },
+                    { value: 'no', label: 'خیر', icon: '❌' }
+                ]
+            },
+            {
+                id: 'has_fleet',
+                question: 'آیا ناوگان خودرو دارید؟',
+                options: [
+                    { value: 'yes', label: 'بله', icon: '🚗', modules: ['fleet'] },
+                    { value: 'no', label: 'خیر', icon: '❌' }
+                ]
+            },
+            {
+                id: 'needs_documents',
+                question: 'آیا مدیریت اسناد و فایل می‌خواهید؟',
+                options: [
+                    { value: 'yes', label: 'بله', icon: '📄', modules: ['documents'] },
                     { value: 'no', label: 'خیر', icon: '❌' }
                 ]
             }
@@ -949,6 +1553,20 @@
                 fullDescription: 'ثبت پیش‌فاکتور، فاکتور فروش، مدیریت مشتریان، قیمت‌گذاری، تخفیف، گزارش فروش و پیگیری سفارشات',
                 category: 'sales' 
             },
+            'point_of_sale': {
+                name: 'صندوق فروش (POS)',
+                icon: '🏪',
+                description: 'فروش حضوری در فروشگاه',
+                fullDescription: 'سیستم صندوق فروش برای فروشگاه‌های فیزیکی با صفحه لمسی، چاپ رسید، مدیریت کشو و گزارش‌گیری',
+                category: 'sales'
+            },
+            'sale_subscription': {
+                name: 'اشتراک و خدمات دوره‌ای',
+                icon: '🔄',
+                description: 'فروش اشتراک ماهانه/سالانه',
+                fullDescription: 'مدیریت اشتراک‌های دوره‌ای، تمدید خودکار، صدور فاکتور خودکار و پیگیری درآمد دوره‌ای',
+                category: 'sales'
+            },
             'purchase': { 
                 name: 'خرید', 
                 icon: '🛒', 
@@ -962,6 +1580,34 @@
                 description: 'مدیریت موجودی و انبار',
                 fullDescription: 'حواله انبار، رسید انبار، انتقال بین انبارها، موجودی لحظه‌ای، بارکد و مدیریت کامل انبار',
                 category: 'inventory' 
+            },
+            'stock_barcode': {
+                name: 'بارکدخوان',
+                icon: '📱',
+                description: 'اسکن بارکد برای انبار',
+                fullDescription: 'استفاده از بارکدخوان موبایل یا دستی برای رسید، حواله، انتقال و شمارش موجودی انبار',
+                category: 'inventory'
+            },
+            'mrp': {
+                name: 'تولید (MRP)',
+                icon: '🏭',
+                description: 'برنامه‌ریزی تولید',
+                fullDescription: 'مدیریت فرآیند تولید، فرمول محصول (BOM)، دستور تولید، مصرف مواد و ردیابی کامل تولید',
+                category: 'manufacturing'
+            },
+            'quality_control': {
+                name: 'کنترل کیفیت',
+                icon: '✓',
+                description: 'بازرسی و تست کیفی',
+                fullDescription: 'تعریف نقاط کنترل کیفیت، چک‌لیست بازرسی، ثبت عدم انطباق و پیگیری اقدامات اصلاحی',
+                category: 'manufacturing'
+            },
+            'maintenance': {
+                name: 'نگهداری تجهیزات',
+                icon: '🔧',
+                description: 'تعمیر و نگهداری',
+                fullDescription: 'برنامه نگهداری پیشگیرانه، ثبت خرابی، درخواست تعمیر و پیگیری تاریخچه دستگاه‌ها',
+                category: 'manufacturing'
             },
             'account': { 
                 name: 'حسابداری', 
@@ -977,6 +1623,13 @@
                 fullDescription: 'ثبت سرنخ، مدیریت فرصت فروش، pipeline فروش، یادداشت تماس، تاریخچه ارتباط با مشتری',
                 category: 'crm' 
             },
+            'mass_mailing': {
+                name: 'ایمیل مارکتینگ',
+                icon: '📧',
+                description: 'ارسال ایمیل انبوه',
+                fullDescription: 'طراحی و ارسال کمپین ایمیلی، segmentation مخاطبان، پیگیری باز شدن و کلیک',
+                category: 'marketing'
+            },
             'hr': { 
                 name: 'کارکنان', 
                 icon: '👔', 
@@ -991,12 +1644,68 @@
                 fullDescription: 'درخواست مرخصی، تأیید/رد مرخصی، محاسبه سهمیه، تقویم مرخصی‌ها و انواع مرخصی',
                 category: 'hr' 
             },
+            'hr_attendance': {
+                name: 'حضور و غیاب',
+                icon: '⏰',
+                description: 'ثبت ورود و خروج',
+                fullDescription: 'ثبت زمان ورود و خروج، محاسبه ساعت کار، کارکرد اضافه‌کاری و گزارش حضور',
+                category: 'hr'
+            },
+            'hr_expense': {
+                name: 'هزینه کارمندان',
+                icon: '💵',
+                description: 'مدیریت هزینه‌ها',
+                fullDescription: 'ثبت هزینه توسط کارمند، تأیید هزینه، بازپرداخت و گزارش هزینه‌های سفر و اداری',
+                category: 'hr'
+            },
+            'hr_recruitment': {
+                name: 'استخدام',
+                icon: '📋',
+                description: 'کاریابی و استخدام',
+                fullDescription: 'ثبت آگهی شغلی، دریافت رزومه، مصاحبه، ارزیابی و فرآیند استخدام کامل',
+                category: 'hr'
+            },
             'project': { 
                 name: 'پروژه', 
                 icon: '📊', 
                 description: 'مدیریت پروژه و وظایف',
                 fullDescription: 'ساخت پروژه، وظایف، زیروظایف، تخصیص به کارمندان، پیگیری پیشرفت، Gantt Chart',
                 category: 'project' 
+            },
+            'hr_timesheet': {
+                name: 'ثبت زمان کار',
+                icon: '⏱️',
+                description: 'Timesheet پروژه',
+                fullDescription: 'ثبت ساعات کار روی پروژه، محاسبه هزینه، گزارش کارکرد و صورتحساب بر اساس زمان',
+                category: 'project'
+            },
+            'helpdesk': {
+                name: 'پشتیبانی (Helpdesk)',
+                icon: '🎫',
+                description: 'تیکت پشتیبانی',
+                fullDescription: 'سیستم تیکتینگ، اولویت‌بندی، تخصیص به تیم، SLA و پیگیری رضایت مشتری',
+                category: 'service'
+            },
+            'appointment': {
+                name: 'نوبت‌دهی',
+                icon: '📅',
+                description: 'رزرو آنلاین نوبت',
+                fullDescription: 'سیستم رزرو آنلاین، تقویم خدمات، تأیید خودکار، یادآوری SMS/Email',
+                category: 'service'
+            },
+            'fleet': {
+                name: 'ناوگان خودرو',
+                icon: '🚗',
+                description: 'مدیریت خودروها',
+                fullDescription: 'ثبت اطلاعات خودرو، قرارداد اجاره، سرویس و تعمیر، سوخت و هزینه‌های نگهداری',
+                category: 'operations'
+            },
+            'documents': {
+                name: 'مدیریت اسناد',
+                icon: '📄',
+                description: 'آرشیو فایل‌ها',
+                fullDescription: 'آپلود و مدیریت فایل‌ها، دسته‌بندی، تگ‌گذاری، جستجو و اشتراک‌گذاری اسناد',
+                category: 'operations'
             },
             'website': { 
                 name: 'وب‌سایت', 
@@ -1020,19 +1729,57 @@
             updateStepper();
         });
 
+        function shouldShowQuestion(question) {
+            // If no showIf condition, always show
+            if (!question.showIf) return true;
+
+            // Check if showIf is array (multiple conditions)
+            const conditions = Array.isArray(question.showIf) ? question.showIf : [question.showIf];
+            
+            // matchAny: true means OR logic (any condition matches)
+            // matchAny: false or undefined means AND logic (all conditions must match)
+            const matchAny = question.matchAny === true;
+
+            if (matchAny) {
+                // OR: Return true if ANY condition matches
+                return conditions.some(condition => {
+                    const [key, value] = Object.entries(condition)[0];
+                    return quizAnswers[key] === value;
+                });
+            } else {
+                // AND: Return true only if ALL conditions match
+                return conditions.every(condition => {
+                    const [key, value] = Object.entries(condition)[0];
+                    return quizAnswers[key] === value;
+                });
+            }
+        }
+
         function renderQuiz() {
             const container = document.getElementById('quizContainer');
             container.innerHTML = '';
 
+            let visibleIndex = 0;
             quizQuestions.forEach((q, index) => {
+                // Check if question should be shown based on previous answers
+                if (!shouldShowQuestion(q)) {
+                    return; // Skip this question
+                }
+
+                visibleIndex++;
                 const questionCard = document.createElement('div');
                 questionCard.className = 'quiz-question-card';
+                if (q.showIf) {
+                    questionCard.classList.add('conditional-question');
+                }
 
                 const questionTitle = document.createElement('div');
                 questionTitle.className = 'quiz-question-title';
+                const optionalBadge = q.showIf ? '<span class="optional-badge">اختیاری</span>' : '';
                 questionTitle.innerHTML = `
-                    <span class="question-number">${index + 1}</span>
+                    <span class="question-number">${visibleIndex}</span>
                     <span>${q.question}</span>
+                    ${optionalBadge}
                 `;
 
                 const optionsDiv = document.createElement('div');
@@ -1041,6 +1788,12 @@
                 q.options.forEach(opt => {
                     const optionDiv = document.createElement('div');
                     optionDiv.className = 'quiz-option';
+                    
+                    // Check if this option is selected
+                    if (quizAnswers[q.id] === opt.value) {
+                        optionDiv.classList.add('selected');
+                    }
+                    
                     optionDiv.innerHTML = `
                         <div class="quiz-option-icon">${opt.icon}</div>
                         <div class="quiz-option-text">${opt.label}</div>
@@ -1064,6 +1817,9 @@
             if (modules && value === 'yes') {
                 modules.forEach(m => selectedModules.add(m));
             }
+
+            // Re-render quiz to show/hide conditional questions
+            renderQuiz();
         }
 
         function renderModules() {
@@ -1153,19 +1909,29 @@
                 const companyName = document.getElementById('companyName').value.trim();
                 const adminEmail = document.getElementById('adminEmail').value.trim();
                 const adminName = document.getElementById('adminName').value.trim();
+                const phoneNumber = document.getElementById('phoneNumber').value.trim();
 
-                if (!companyName || !adminEmail || !adminName) {
-                    alert('لطفاً تمام فیلدهای ضروری را پر کنید.');
+                if (!companyName || !adminName) {
+                    alert('لطفاً نام شرکت و نام مدیر را وارد کنید.');
                     return;
+                }
+                
+                // Validate based on auth method
+                if (userAuthMethod === 'phone') {
+                    if (!phoneNumber) {
+                        alert('لطفاً شماره موبایل را وارد کنید.');
+                        return;
+                    }
+                } else {
+                    if (!adminEmail) {
+                        alert('لطفاً ایمیل مدیر را وارد کنید.');
+                        return;
+                    }
                 }
             }
 
             if (currentStep === 2) {
-                // Check if all questions answered
-                if (Object.keys(quizAnswers).length < quizQuestions.length) {
-                    alert('لطفاً به همه سوالات پاسخ دهید.');
-                    return;
-                }
+                // No validation - quiz is optional
                 renderModules();
             }
 
@@ -1207,7 +1973,36 @@
             document.querySelector(`.step-content[data-step="${step}"]`).classList.add('active');
         }
 
+        let deploymentStarted = false;
+
+        function skipQuiz() {
+            // Clear all quiz answers and go to next step
+            quizAnswers = {};
+            selectedModules.clear();
+            selectedModules.add('l10n_ir');
+            selectedModules.add('web_responsive');
+            selectedModules.add('home_menu_fullscreen');
+            selectedModules.add('base_setup');
+            nextStep();
+        }
+
+        async function skipModules() {
+            // Clear selected modules (only keep essential)
+            selectedModules.clear();
+            selectedModules.add('base_setup');
+            
+            // Start deployment with minimal modules
+            await startDeployment();
+        }
+
         async function startDeployment() {
+            // Prevent double-click
+            if (deploymentStarted) {
+                console.log('Deployment already in progress');
+                return;
+            }
+            deploymentStarted = true;
+
             const overlay = document.getElementById('progressOverlay');
             const progressBar = document.getElementById('progressBar');
             const progressLog = document.getElementById('progressLog');
@@ -1313,15 +2108,179 @@
                 progressBar.style.width = '100%';
                 addLog('🎉 همه ماژول‌ها نصب شدند', 'success');
 
-                // Show success screen
+                // Close overlay and move to step 5 (Demo Data)
                 setTimeout(() => {
                     overlay.classList.remove('active');
-                    showSuccessScreen();
+                    currentStep = 5;
+                    updateStepper();
+                    showStep(5);
                 }, 1500);
 
             } catch (error) {
                 addLog('❌ خطا: ' + error.message, 'error');
+                // Keep overlay open on error so user can see what happened
             }
+        }
+
+        // Demo Data Functions
+        let createdDemoUsers = [];
+
+        function skipDemoData() {
+            showFinalSuccess();
+        }
+
+        async function createDemoData() {
+            const btn = document.querySelector('.demo-data-options + .action-buttons .btn-primary');
+            btn.disabled = true;
+            btn.innerHTML = '⏳ در حال ایجاد...';
+
+            const usersToCreate = [];
+            const domain = tenantData?.database || 'company';
+
+            // Check which demo items are selected
+            if (document.getElementById('createUsers')?.checked) {
+                if (document.getElementById('userWarehouse')?.checked) {
+                    usersToCreate.push({
+                        name: 'انباردار',
+                        login: `warehouse@${domain}.ir`,
+                        password: 'warehouse123',
+                        groups: ['stock.group_stock_user'],  // Will fallback to base.group_user if not available
+                        role: 'warehouse'
+                    });
+                }
+                if (document.getElementById('userAccountant')?.checked) {
+                    usersToCreate.push({
+                        name: 'حسابدار',
+                        login: `accountant@${domain}.ir`,
+                        password: 'accountant123',
+                        groups: ['account.group_account_user'],  // Will fallback to base.group_user if not available
+                        role: 'accountant'
+                    });
+                }
+                if (document.getElementById('userSales')?.checked) {
+                    usersToCreate.push({
+                        name: 'فروشنده',
+                        login: `sales@${domain}.ir`,
+                        password: 'sales123',
+                        groups: ['sales_team.group_sale_salesman'],  // Will fallback to base.group_user if not available
+                        role: 'sales'
+                    });
+                }
+                if (document.getElementById('userManager')?.checked) {
+                    usersToCreate.push({
+                        name: 'مدیر شرکت',
+                        login: `manager@${domain}.ir`,
+                        password: 'manager123',
+                        groups: ['base.group_system'],  // Full system access
+                        role: 'manager'
+                    });
+                }
+                if (document.getElementById('userHR')?.checked) {
+                    usersToCreate.push({
+                        name: 'مدیر منابع انسانی',
+                        login: `hr@${domain}.ir`,
+                        password: 'hr123',
+                        groups: ['hr.group_hr_manager'],  // Will fallback to base.group_user if not available
+                        role: 'hr'
+                    });
+                }
+            }
+
+            const products = document.getElementById('createProducts')?.checked ? [
+                { name: 'لپ‌تاپ ایسوس', price: 45000000, qty: 10 },
+                { name: 'موبایل سامسونگ', price: 25000000, qty: 20 },
+                { name: 'کیبورد بی‌سیم', price: 2500000, qty: 50 },
+                { name: 'ماوس گیمینگ', price: 1500000, qty: 100 },
+                { name: 'هدفون بلوتوثی', price: 3500000, qty: 30 }
+            ] : [];
+
+            const customers = document.getElementById('createCustomers')?.checked ? [
+                { name: 'شرکت فناوری پارس', phone: '02188001122', email: 'info@parstech.ir', is_company: true },
+                { name: 'آقای محمد رضایی', phone: '09121234567', email: 'rezaei@gmail.com', is_company: false },
+                { name: 'خانم زهرا احمدی', phone: '09351234567', email: 'ahmadi@yahoo.com', is_company: false }
+            ] : [];
+
+            const suppliers = document.getElementById('createSuppliers')?.checked ? [
+                { name: 'شرکت واردات تجهیزات آسیا', phone: '02144556677', email: 'info@asiatech.ir', is_company: true, supplier: true },
+                { name: 'پخش عمده الکترونیک', phone: '02133445566', email: 'wholesale@elec.ir', is_company: true, supplier: true }
+            ] : [];
+
+            try {
+                const response = await fetch('/api/create-demo-data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        db_name: tenantData.database,
+                        admin_email: tenantData.email,
+                        admin_password: tenantData.password,
+                        users: usersToCreate,
+                        products: products,
+                        customers: customers,
+                        suppliers: suppliers
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    createdDemoUsers = usersToCreate;
+                    showFinalSuccess();
+                } else {
+                    throw new Error(result.message || 'خطا در ایجاد داده‌ها');
+                }
+
+            } catch (error) {
+                console.error('Demo data error:', error);
+                alert('خطا در ایجاد داده‌های نمونه: ' + error.message);
+                btn.disabled = false;
+                btn.innerHTML = '✨ ایجاد داده‌های نمونه';
+            }
+        }
+
+        function showFinalSuccess() {
+            // Hide demo options, show success
+            document.querySelector('.demo-data-options').style.display = 'none';
+            document.querySelector('.demo-data-options + .action-buttons').style.display = 'none';
+
+            const successInfo = document.getElementById('successInfo');
+            successInfo.innerHTML = `
+                <div class="info-row">
+                    <span class="info-label">نام دیتابیس:</span>
+                    <span class="info-value">${tenantData?.database || 'نامشخص'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">ایمیل مدیر:</span>
+                    <span class="info-value">${tenantData?.email || 'نامشخص'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">رمز عبور:</span>
+                    <span class="info-value">${tenantData?.password || 'نامشخص'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">تعداد ماژول نصب‌شده:</span>
+                    <span class="info-value">${selectedModules.size} ماژول</span>
+                </div>
+            `;
+
+            // Show demo users info if any were created
+            if (createdDemoUsers.length > 0) {
+                const demoUsersInfo = document.getElementById('demoUsersInfo');
+                let usersHtml = '<h4>👥 کاربران نمونه ایجاد شده:</h4>';
+                
+                createdDemoUsers.forEach(user => {
+                    usersHtml += `
+                        <div class="demo-user-row">
+                            <span class="demo-user-role">${user.name}</span>
+                            <span class="demo-user-login">${user.login} / ${user.password}</span>
+                        </div>
+                    `;
+                });
+                
+                demoUsersInfo.innerHTML = usersHtml;
+                demoUsersInfo.style.display = 'block';
+            }
+
+            document.getElementById('successScreen').style.display = 'block';
         }
 
         function addLog(message, type) {
@@ -1349,42 +2308,25 @@
             log.scrollTop = log.scrollHeight;
         }
 
-        function showSuccessScreen() {
-            currentStep = 4;
-            updateStepper();
-            showStep(4);
-
-            const successInfo = document.getElementById('successInfo');
-            successInfo.innerHTML = `
-                <div class="info-row">
-                    <span class="info-label">نام دیتابیس:</span>
-                    <span class="info-value">${tenantData?.database || 'نامشخص'}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">ایمیل مدیر:</span>
-                    <span class="info-value">${tenantData?.email || 'نامشخص'}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">رمز عبور:</span>
-                    <span class="info-value">${tenantData?.password || 'نامشخص'}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">تعداد ماژول نصب‌شده:</span>
-                    <span class="info-value">${selectedModules.size} ماژول</span>
-                </div>
-            `;
-
-            document.getElementById('successScreen').style.display = 'block';
-        }
-
         function loginToOdoo() {
             if (!tenantData) {
                 alert('خطا: اطلاعات دیتابیس موجود نیست');
                 return;
             }
+            
+            // Save to localStorage for profile page
+            localStorage.setItem('tenantData', JSON.stringify({
+                ...tenantData,
+                demoUsers: createdDemoUsers
+            }));
+            
             const url = `/auto_login.html?db=${encodeURIComponent(tenantData.database)}&email=${encodeURIComponent(tenantData.email)}&password=${encodeURIComponent(tenantData.password)}`;
-            window.location.href = url;
+            window.open(url, '_blank');  // Open in new tab
         }
     </script>
+    
+    <!-- Navigation -->
+    <script src="/js/nav-loader.js"></script>
+    <script src="/js/global-nav.js"></script>
 </body>
 </html>

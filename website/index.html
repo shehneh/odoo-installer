@@ -15,49 +15,14 @@
     <link rel="stylesheet" href="css/unified-nav.css?v=4">
 </head>
 <body>
+    <!-- Navigation -->
+    <div id="mainNav"></div>
+    
     <!-- Particle Background -->
     <div id="particles-js"></div>
     
     <!-- Cursor Glow Effect -->
     <div class="cursor-glow"></div>
-    
-    <!-- Navigation -->
-    <nav class="navbar glass">
-        <div class="container">
-            <a href="index.html" class="logo">
-                <div class="logo-icon">
-                    <i class="fas fa-cube"></i>
-                    <div class="logo-pulse"></div>
-                </div>
-                <span>Odoo<strong>Master</strong></span>
-            </a>
-            <ul class="nav-links">
-                <li><a href="#features" class="nav-link" data-i18n="nav.features">ویژگی‌ها</a></li>
-                <li><a href="#pricing" class="nav-link" data-i18n="nav.pricing">قیمت‌گذاری</a></li>
-                <li><a href="demo.html" class="nav-link" data-i18n="nav.demo">دمو</a></li>
-                <li><a href="install.html" class="nav-link"><i class="fas fa-rocket"></i> نصب آنلاین</a></li>
-                <li><a href="#support" class="nav-link" data-i18n="nav.support">پشتیبانی</a></li>
-            </ul>
-            <div class="nav-actions">
-                <button class="theme-toggle" id="themeToggle" title="تغییر تم" data-i18n-title="theme.toggle">
-                    <i class="fas fa-moon"></i>
-                </button>
-                <a href="login.html" class="btn btn-ghost">
-                    <i class="fas fa-sign-in-alt"></i>
-                    <span data-i18n="nav.login">ورود</span>
-                </a>
-                <a href="register.html" class="btn btn-primary btn-glow">
-                    <i class="fas fa-rocket"></i>
-                    <span data-i18n="nav.register">شروع رایگان</span>
-                </a>
-            </div>
-            <button class="mobile-menu-btn" id="mobileMenuBtn">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-        </div>
-    </nav>
 
     <!-- Hero Section -->
     <section class="hero">
@@ -384,18 +349,7 @@
     <script src="js/particles.min.js"></script>
     <script src="js/i18n.js"></script>
     <script src="js/main.js"></script>
-    <script src="js/compass-nav.js?v=1"></script>
-    <script>
-        // Force create compass after page load
-        setTimeout(() => {
-            console.log('🧭 Checking compass...');
-            if (!document.getElementById('quickActions')) {
-                console.log('⚠️ Compass not found, creating manually...');
-                createQuickActions();
-            } else {
-                console.log('✅ Compass already exists');
-            }
-        }, 500);
-    </script>
+    <script src="/js/nav-loader.js"></script>
+    <script src="/js/global-nav.js"></script>
 </body>
 </html>

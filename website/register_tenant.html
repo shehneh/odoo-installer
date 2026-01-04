@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>راه‌اندازی اودوی اختصاصی شما</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/unified-nav.css?v=4">
     <style>
         * {
             margin: 0;
@@ -15,18 +14,114 @@
 
         body {
             font-family: 'Vazir', 'Tahoma', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f7fafc;
             min-height: 100vh;
+        }
+
+        /* Navigation */
+        .top-nav {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            height: 70px;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            text-decoration: none;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            list-style: none;
+        }
+
+        .nav-link {
+            padding: 10px 16px;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            min-width: 220px;
+            padding: 8px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            color: #2d3748;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background: #f7fafc;
+            color: #667eea;
+        }
+
+        .user-menu {
+            display: flex;
+            gap: 15px;
+        }
+
+        /* Main Container */
+        .main-content {
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 40px 20px;
+            min-height: calc(100vh - 70px);
         }
 
         .container {
             background: white;
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             max-width: 600px;
             width: 100%;
             padding: 40px;
@@ -389,7 +484,39 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- Navigation -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">
+                <span>🚀</span>
+                <span>OdooMaster</span>
+            </a>
+
+            <ul class="nav-menu">
+                <li><a href="/" class="nav-link">🏠 خانه</a></li>
+                <li class="dropdown">
+                    <a href="#" class="nav-link">✨ امکانات ▼</a>
+                    <div class="dropdown-menu">
+                        <a href="/apps.html" class="dropdown-item">📦 اپلیکیشن‌ها</a>
+                        <a href="/docs.html" class="dropdown-item">📚 مستندات</a>
+                        <a href="/demo.html" class="dropdown-item">🎮 دمو آنلاین</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#" class="nav-link">🛠️ خدمات ▼</a>
+                    <div class="dropdown-menu">
+                        <a href="/install.html" class="dropdown-item">💻 نصب Odoo</a>
+                        <a href="/register_tenant.html" class="dropdown-item">🌐 ساخت سرور</a>
+                    </div>
+                </li>
+            </ul>
+
+            <div class="user-menu" id="userMenuContainer"></div>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="container">
         <h1>🚀 راه‌اندازی اودوی اختصاصی</h1>
         <p class="subtitle">دیتابیس و سرور Odoo شما در کمتر از 2 دقیقه آماده می‌شود</p>
 
@@ -849,6 +976,145 @@
                 console.log('✅ Compass already exists');
             }
         }, 500);
+
+        // Load user menu
+        async function loadUserMenu() {
+            try {
+                const response = await fetch('/api/user-status');
+                const result = await response.json();
+                const container = document.getElementById('userMenuContainer');
+                
+                if (result.logged_in) {
+                    container.innerHTML = `
+                        <div class="dropdown">
+                            <div class="nav-link" style="cursor:pointer;background:rgba(255,255,255,0.15)">
+                                ${result.user.name || 'کاربر'} ▼
+                            </div>
+                            <div class="dropdown-menu">
+                                <a href="/profile.html" class="dropdown-item">👤 حساب کاربری</a>
+                                <a href="/dashboard.html" class="dropdown-item">📊 داشبورد</a>
+                                <a href="#" onclick="logout()" class="dropdown-item" style="color:#ef4444">🚪 خروج</a>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <a href="#" onclick="openLoginModal(); return false;" class="nav-link" style="background:rgba(255,255,255,0.15)">🔐 ورود</a>
+                        <a href="/user-register.html" class="nav-link" style="background:white;color:#667eea">📝 ثبت‌نام</a>
+                    `;
+                }
+            } catch (e) {}
+        }
+        
+        async function logout() {
+            await fetch('/api/logout', { method: 'POST' });
+            window.location.href = '/';
+        }
+
+        loadUserMenu();
+
+        // Auto-fill logged-in user data
+        async function fillUserData() {
+            try {
+                const response = await fetch('/api/user-status');
+                const result = await response.json();
+                
+                console.log('User status:', result); // Debug
+                
+                if (result.logged_in && result.user) {
+                    const user = result.user;
+                    const authMethod = user.auth_method;
+                    
+                    console.log('Auth method:', authMethod); // Debug
+                    console.log('User email:', user.email); // Debug
+                    console.log('User phone:', user.phone); // Debug
+                    
+                    // Fill name if available
+                    if (user.name && !document.getElementById('adminName').value) {
+                        document.getElementById('adminName').value = user.name;
+                    }
+                    
+                    // ONLY lock the field used for authentication
+                    if (authMethod === 'email' && user.email) {
+                        // Logged in with email - lock email, allow phone editing
+                        const emailField = document.getElementById('adminEmail');
+                        emailField.value = user.email;
+                        emailField.disabled = true;
+                        emailField.style.backgroundColor = '#f0f0f0';
+                        emailField.style.cursor = 'not-allowed';
+                        
+                        // Fill phone but DON'T lock it
+                        if (user.phone) {
+                            document.getElementById('phone').value = user.phone;
+                        }
+                    } else if (authMethod === 'phone' && user.phone) {
+                        // Logged in with phone - lock phone, allow email editing
+                        const phoneField = document.getElementById('phone');
+                        phoneField.value = user.phone;
+                        phoneField.disabled = true;
+                        phoneField.style.backgroundColor = '#f0f0f0';
+                        phoneField.style.cursor = 'not-allowed';
+                        
+                        // Fill email but DON'T lock it
+                        if (user.email) {
+                            document.getElementById('adminEmail').value = user.email;
+                        }
+                    } else {
+                        // No specific auth method or other method - just fill data
+                        if (user.email) {
+                            document.getElementById('adminEmail').value = user.email;
+                        }
+                        if (user.phone) {
+                            document.getElementById('phone').value = user.phone;
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        fillUserData();
+
+        // Login Modal
+        function openLoginModal() {
+            const modal = document.getElementById('loginModal');
+            if (modal) {
+                modal.style.display = 'flex';
+            } else {
+                createLoginModal();
+            }
+        }
+
+        function closeLoginModal() {
+            const modal = document.getElementById('loginModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        function createLoginModal() {
+            const modalHTML = `
+                <div id="loginModal" style="display:flex;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:10000;align-items:center;justify-content:center;padding:20px">
+                    <div style="background:white;border-radius:20px;padding:40px;max-width:450px;width:100%;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+                        <button onclick="closeLoginModal()" style="position:absolute;top:15px;left:15px;background:none;border:none;font-size:24px;cursor:pointer;color:#999">×</button>
+                        <h2 style="text-align:center;margin-bottom:10px;color:#667eea">🔐 ورود</h2>
+                        <p style="text-align:center;color:#718096;margin-bottom:30px;font-size:14px">برای ادامه وارد شوید</p>
+                        <iframe src="/user-login.html?popup=1" style="width:100%;height:500px;border:none;border-radius:10px"></iframe>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            // Listen for login success
+            window.addEventListener('message', (event) => {
+                if (event.data === 'login_success') {
+                    closeLoginModal();
+                    location.reload();
+                }
+            });
+        }
     </script>
+    <script src="/js/global-nav.js"></script>
 </body>
 </html>

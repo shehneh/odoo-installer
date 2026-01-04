@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تایید حساب - OdooMaster</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .verify-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 550px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .verify-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .verify-header h1 {
+            font-size: 32px;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .verify-header p {
+            color: #718096;
+            font-size: 16px;
+        }
+
+        .verification-step {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .verification-step.verified {
+            background: #c6f6d5;
+            border-color: #9ae6b4;
+        }
+
+        .verification-step.hidden {
+            display: none;
+        }
+
+        .step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .step-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .step-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fed7aa;
+            color: #7c2d12;
+        }
+
+        .status-verified {
+            background: #9ae6b4;
+            color: #22543d;
+        }
+
+        .step-content {
+            color: #718096;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            text-align: center;
+            letter-spacing: 5px;
+            font-weight: 600;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover { background: #5a67d8; }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .btn-success {
+            background: #48bb78;
+            color: white;
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .btn-success:hover { background: #38a169; }
+
+        .alert {
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .alert-info { background: #bee3f8; color: #2c5282; }
+        .alert-success { background: #c6f6d5; color: #22543d; }
+        .alert-error { background: #fed7d7; color: #742a2a; }
+
+        .info-box {
+            background: #ebf4ff;
+            border: 1px solid #bee3f8;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #2c5282;
+        }
+    </style>
+</head>
+<body>
+    <div class="verify-container">
+        <div class="verify-header">
+            <h1>✅ تایید حساب کاربری</h1>
+            <p id="verifyDescription">لطفاً حساب کاربری خود را تایید کنید</p>
+        </div>
+
+        <div id="alertBox"></div>
+
+        <!-- Info Box - Shows auth method -->
+        <div class="info-box" id="authMethodInfo"></div>
+
+        <!-- Email Verification (Only shown for email auth) -->
+        <div class="verification-step hidden" id="emailStep">
+            <div class="step-header">
+                <span class="step-title">📧 تایید ایمیل</span>
+                <span class="step-status status-pending" id="emailStatus">در انتظار تایید</span>
+            </div>
+            <div class="step-content" id="emailContent">
+                لینک تایید به ایمیل شما ارسال شده است. لطفاً ایمیل خود را بررسی کنید و روی لینک کلیک کنید.
+                <br><br>
+                <small>ایمیل را دریافت نکردید؟ پوشه spam را بررسی کنید.</small>
+            </div>
+        </div>
+
+        <!-- Phone Verification (Only shown for phone auth) -->
+        <div class="verification-step hidden" id="phoneStep">
+            <div class="step-header">
+                <span class="step-title">📱 تایید شماره تلفن</span>
+                <span class="step-status status-pending" id="phoneStatus">در انتظار تایید</span>
+            </div>
+            <div class="step-content">
+                <!-- Step 1: Enter Phone Number -->
+                <div id="phoneInputSection">
+                    <div class="form-group">
+                        <label>شماره موبایل:</label>
+                        <input type="tel" id="phoneNumber" placeholder="09123456789" pattern="09\d{9}" style="direction: ltr; text-align: center;">
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%;" id="sendCodeBtn" onclick="sendSMSCode()">
+                        📤 ارسال کد تایید
+                    </button>
+                </div>
+                
+                <!-- Step 2: Enter Code -->
+                <div id="codeInputSection" style="display: none; margin-top: 15px;">
+                    <p style="margin-bottom: 10px; color: #48bb78; font-weight: 600;" id="sentToPhone"></p>
+                    <div class="form-group">
+                        <label>کد 6 رقمی دریافتی:</label>
+                        <input type="text" id="smsCode" maxlength="6" placeholder="000000">
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%;" onclick="verifySMSCode()">
+                        ✅ تایید کد
+                    </button>
+                    <button class="btn" style="width: 100%; margin-top: 10px; background: #e2e8f0;" onclick="changePhone()">
+                        🔄 تغییر شماره
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn btn-success" id="continueBtn" style="display: none;" onclick="goToOnboarding()">
+            🚀 ادامه
+        </button>
+    </div>
+
+    <script>
+        const alertBox = document.getElementById('alertBox');
+        let userAuthMethod = null;
+        
+        function showAlert(message, type) {
+            alertBox.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => { alertBox.innerHTML = ''; }, 5000);
+        }
+
+        // Check verification status on load
+        async function checkStatus() {
+            try {
+                const response = await fetch('/api/user-status');
+                const result = await response.json();
+                
+                if (result.success) {
+                    const user = result.user;
+                    userAuthMethod = user.auth_method || 'email';
+                    
+                    // Update info box
+                    const infoBox = document.getElementById('authMethodInfo');
+                    if (userAuthMethod === 'email') {
+                        infoBox.innerHTML = `📧 روش ورود شما: <strong>ایمیل</strong> (${user.email || ''})`;
+                        document.getElementById('verifyDescription').textContent = 'لطفاً ایمیل خود را تایید کنید';
+                    } else {
+                        infoBox.innerHTML = `📱 روش ورود شما: <strong>موبایل</strong> (${user.phone || ''})`;
+                        document.getElementById('verifyDescription').textContent = 'لطفاً شماره موبایل خود را تایید کنید';
+                        // Pre-fill phone if exists
+                        if (user.phone) {
+                            document.getElementById('phoneNumber').value = user.phone;
+                        }
+                    }
+                    
+                    // Show/hide steps based on auth method
+                    document.getElementById('emailStep').classList.toggle('hidden', userAuthMethod !== 'email');
+                    document.getElementById('phoneStep').classList.toggle('hidden', userAuthMethod !== 'phone');
+                    
+                    // Update email status (for email auth)
+                    if (userAuthMethod === 'email') {
+                        if (user.email_verified) {
+                            document.getElementById('emailStep').classList.add('verified');
+                            document.getElementById('emailStatus').textContent = 'تایید شده ✓';
+                            document.getElementById('emailStatus').className = 'step-status status-verified';
+                            document.getElementById('emailContent').innerHTML = '✅ ایمیل شما با موفقیت تایید شد';
+                            document.getElementById('continueBtn').style.display = 'block';
+                        }
+                    }
+                    
+                    // Update phone status (for phone auth)
+                    if (userAuthMethod === 'phone') {
+                        if (user.phone_verified) {
+                            document.getElementById('phoneStep').classList.add('verified');
+                            document.getElementById('phoneStatus').textContent = 'تایید شده ✓';
+                            document.getElementById('phoneStatus').className = 'step-status status-verified';
+                            document.querySelector('#phoneStep .step-content').innerHTML = '✅ شماره تلفن شما با موفقیت تایید شد';
+                            document.getElementById('continueBtn').style.display = 'block';
+                        } else if (user.phone) {
+                            // Phone exists but not verified - check if code was just sent (from login)
+                            // Auto-show the code input section
+                            document.getElementById('phoneNumber').value = user.phone;
+                            document.getElementById('phoneInputSection').style.display = 'none';
+                            document.getElementById('codeInputSection').style.display = 'block';
+                            document.getElementById('sentToPhone').textContent = 'کد به شماره ' + user.phone + ' ارسال شد';
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking status:', error);
+            }
+        }
+
+        async function sendSMSCode() {
+            const phoneInput = document.getElementById('phoneNumber');
+            const phone = phoneInput.value.trim();
+            
+            // Validate phone
+            if (!phone || !/^09\d{9}$/.test(phone)) {
+                showAlert('شماره موبایل باید با 09 شروع شود و 11 رقم باشد', 'error');
+                return;
+            }
+            
+            const btn = document.getElementById('sendCodeBtn');
+            btn.disabled = true;
+            btn.innerHTML = '⏳ در حال ارسال...';
+
+            try {
+                const response = await fetch('/api/send-phone-verification', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: phone })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert('✅ کد تایید ارسال شد', 'success');
+                    document.getElementById('phoneInputSection').style.display = 'none';
+                    document.getElementById('codeInputSection').style.display = 'block';
+                    document.getElementById('sentToPhone').textContent = 'کد به شماره ' + phone + ' ارسال شد';
+                } else {
+                    showAlert('❌ ' + result.error, 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = '📤 ارسال کد تایید';
+                }
+            } catch (error) {
+                showAlert('خطا در ارسال کد', 'error');
+                btn.disabled = false;
+                btn.innerHTML = '📤 ارسال کد تایید';
+            }
+        }
+        
+        function changePhone() {
+            document.getElementById('phoneInputSection').style.display = 'block';
+            document.getElementById('codeInputSection').style.display = 'none';
+            document.getElementById('sendCodeBtn').disabled = false;
+            document.getElementById('sendCodeBtn').innerHTML = '📤 ارسال کد تایید';
+        }
+
+        async function verifySMSCode() {
+            const code = document.getElementById('smsCode').value.trim();
+            
+            if (code.length !== 6) {
+                showAlert('کد باید 6 رقم باشد', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/verify-phone', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert('✅ ' + result.message, 'success');
+                    checkStatus();
+                } else {
+                    showAlert('❌ ' + result.error, 'error');
+                }
+            } catch (error) {
+                showAlert('خطا در تایید کد', 'error');
+            }
+        }
+
+        function goToOnboarding() {
+            // بررسی کن آیا از صفحه خاصی اومده
+            const urlParams = new URLSearchParams(window.location.search);
+            const nextPage = urlParams.get('next');
+            if (nextPage && !nextPage.includes('login') && !nextPage.includes('register') && !nextPage.includes('verify')) {
+                window.location.href = nextPage;
+            } else {
+                window.location.href = '/';
+            }
+        }
+
+        // Check status every 3 seconds
+        setInterval(checkStatus, 3000);
+        checkStatus();
+    </script>
+</body>
+</html>

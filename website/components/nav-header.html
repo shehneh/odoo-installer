@@ -1,0 +1,524 @@
+<!-- Modern Navigation Header Component -->
+<style>
+    .top-nav {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 0;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+    }
+
+    .nav-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 30px;
+        height: 70px;
+    }
+
+    /* Logo */
+    .nav-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: white;
+        text-decoration: none;
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    .nav-logo:hover {
+        opacity: 0.9;
+    }
+
+    /* Main Navigation */
+    .nav-menu {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .nav-item {
+        position: relative;
+    }
+
+    .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 16px;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.3s;
+        font-size: 15px;
+    }
+
+    .nav-link:hover {
+        background: rgba(255,255,255,0.15);
+    }
+
+    .nav-link.active {
+        background: rgba(255,255,255,0.2);
+    }
+
+    /* Dropdown Menu */
+    .dropdown {
+        position: relative;
+    }
+
+    .dropdown-toggle {
+        cursor: pointer;
+    }
+
+    .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        min-width: 220px;
+        padding: 8px;
+        margin-top: 2px;
+        display: none;
+        animation: fadeInDown 0.3s;
+        z-index: 1000;
+    }
+
+    .dropdown:hover .dropdown-menu,
+    .dropdown.active .dropdown-menu {
+        display: block;
+    }
+
+    .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        color: #2d3748;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.2s;
+        font-size: 14px;
+    }
+
+    .dropdown-item:hover {
+        background: #f7fafc;
+        color: #667eea;
+    }
+
+    .dropdown-divider {
+        height: 1px;
+        background: #e2e8f0;
+        margin: 8px 0;
+    }
+
+    /* User Menu */
+    .user-menu {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .user-dropdown {
+        position: relative;
+    }
+
+    .user-button {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255,255,255,0.15);
+        border: 2px solid rgba(255,255,255,0.3);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 30px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .user-button:hover {
+        background: rgba(255,255,255,0.25);
+        border-color: rgba(255,255,255,0.5);
+    }
+
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    .user-name {
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    /* Compass Navigation */
+    .compass-nav {
+        position: fixed;
+        bottom: 30px;
+        left: 30px;
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4);
+        cursor: pointer;
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+    }
+
+    .compass-nav:hover {
+        transform: scale(1.1);
+        box-shadow: 0 12px 40px rgba(102, 126, 234, 0.6);
+    }
+
+    .compass-icon {
+        color: white;
+        font-size: 28px;
+    }
+
+    .compass-menu {
+        position: absolute;
+        bottom: 70px;
+        left: 0;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 15px 50px rgba(0,0,0,0.25);
+        padding: 12px;
+        min-width: 250px;
+        display: none;
+        animation: fadeInUp 0.3s;
+        z-index: 10001;
+    }
+
+    .compass-nav:hover .compass-menu,
+    .compass-nav.active .compass-menu {
+        display: block;
+    }
+
+    .compass-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        color: #2d3748;
+        text-decoration: none;
+        border-radius: 10px;
+        transition: all 0.2s;
+        font-size: 14px;
+    }
+
+    .compass-item:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .compass-item-icon {
+        font-size: 20px;
+        width: 32px;
+        text-align: center;
+    }
+
+    /* Mobile Menu */
+    .mobile-menu-btn {
+        display: none;
+        background: rgba(255,255,255,0.15);
+        border: 2px solid rgba(255,255,255,0.3);
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        cursor: pointer;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+
+    /* Animations */
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .nav-menu {
+            display: none;
+        }
+
+        .mobile-menu-btn {
+            display: flex;
+        }
+
+        .compass-nav {
+            bottom: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+        }
+
+        .compass-icon {
+            font-size: 24px;
+        }
+    }
+
+    /* Badge */
+    .nav-badge {
+        background: #ef4444;
+        color: white;
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 10px;
+        margin-right: 5px;
+    }
+</style>
+
+<!-- Navigation Header -->
+<nav class="top-nav">
+    <div class="nav-container">
+        <!-- Logo -->
+        <a href="/" class="nav-logo">
+            <span>🚀</span>
+            <span>OdooMaster</span>
+        </a>
+
+        <!-- Main Menu -->
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="/" class="nav-link">
+                    🏠 خانه
+                </a>
+            </li>
+
+            <!-- Features Dropdown -->
+            <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle">
+                    ✨ امکانات
+                    <span style="font-size: 10px;">▼</span>
+                </a>
+                <div class="dropdown-menu">
+                    <a href="/apps.html" class="dropdown-item">
+                        � اپلیکیشن‌ها
+                    </a>
+                    <a href="/docs.html" class="dropdown-item">
+                        📚 مستندات
+                    </a>
+                    <a href="/comparison.html" class="dropdown-item">
+                        ⚖️ مقایسه نسخه‌ها
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a href="/demo.html" class="dropdown-item">
+                        🎮 دمو آنلاین
+                    </a>
+                </div>
+            </li>
+
+            <!-- Services Dropdown -->
+            <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle">
+                    🛠️ خدمات
+                    <span style="font-size: 10px;">▼</span>
+                </a>
+                <div class="dropdown-menu">
+                    <a href="/install.html" class="dropdown-item">
+                        � نصب Odoo
+                    </a>
+                    <a href="/register_tenant.html" class="dropdown-item">
+                        🌐 ساخت سرور
+                    </a>
+                    <a href="/support.html" class="dropdown-item">
+                        � پشتیبانی
+                    </a>
+                </div>
+            </li>
+
+            <!-- Downloads Dropdown -->
+            <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle">
+                    📥 دانلودها
+                    <span style="font-size: 10px;">▼</span>
+                </a>
+                <div class="dropdown-menu">
+                    <a href="/downloads.html" class="dropdown-item">
+                        📂 فایل‌های نصب
+                    </a>
+                    <a href="/licenses.html" class="dropdown-item">
+                        🔑 لایسنس‌ها
+                    </a>
+                </div>
+            </li>
+        </ul>
+
+        <!-- User Menu -->
+        <div class="user-menu" id="userMenuContainer">
+            <!-- Will be populated by JS -->
+        </div>
+
+        <!-- Mobile Menu Button -->
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+            ☰
+        </button>
+    </div>
+</nav>
+
+<!-- Compass Navigation -->
+<div class="compass-nav" id="compassNav">
+    <div class="compass-icon">🧭</div>
+    <div class="compass-menu">
+        <a href="/" class="compass-item">
+            <span class="compass-item-icon">🏠</span>
+            <span>خانه</span>
+        </a>
+        <a href="/dashboard.html" class="compass-item">
+            <span class="compass-item-icon">📊</span>
+            <span>داشبورد</span>
+        </a>
+        <a href="/onboarding.html" class="compass-item">
+            <span class="compass-item-icon">🚀</span>
+            <span>نصب دیتابیس</span>
+        </a>
+        <a href="/install_modules.html" class="compass-item">
+            <span class="compass-item-icon">📦</span>
+            <span>نصب ماژول‌ها</span>
+        </a>
+        <a href="/profile.html" class="compass-item">
+            <span class="compass-item-icon">👤</span>
+            <span>حساب کاربری</span>
+        </a>
+        <a href="/apps.html" class="compass-item">
+            <span class="compass-item-icon">�</span>
+            <span>اپلیکیشن‌ها</span>
+        </a>
+        <a href="/docs.html" class="compass-item">
+            <span class="compass-item-icon">📚</span>
+            <span>مستندات</span>
+        </a>
+        <a href="/support.html" class="compass-item">
+            <span class="compass-item-icon">💬</span>
+            <span>پشتیبانی</span>
+        </a>
+    </div>
+</div>
+
+<script>
+// Check user login status and render user menu
+async function checkUserStatus() {
+    try {
+        const response = await fetch('/api/user-status');
+        const result = await response.json();
+        
+        const container = document.getElementById('userMenuContainer');
+        
+        if (result.logged_in) {
+            // User is logged in - show user dropdown
+            container.innerHTML = `
+                <div class="user-dropdown dropdown">
+                    <div class="user-button dropdown-toggle">
+                        <div class="user-avatar">${result.user.name ? result.user.name[0].toUpperCase() : '👤'}</div>
+                        <span class="user-name">${result.user.name || 'کاربر'}</span>
+                        <span style="font-size: 10px;">▼</span>
+                    </div>
+                    <div class="dropdown-menu">
+                        <a href="/profile.html" class="dropdown-item">
+                            👤 حساب کاربری
+                        </a>
+                        <a href="/dashboard.html" class="dropdown-item">
+                            📊 داشبورد
+                        </a>
+                        ${result.user.is_admin ? `
+                        <div class="dropdown-divider"></div>
+                        <a href="/admin_panel.html" class="dropdown-item">
+                            ⚙️ پنل مدیریت
+                        </a>
+                        <a href="/admin_customers.html" class="dropdown-item">
+                            👥 مدیریت کاربران
+                        </a>
+                        ` : ''}
+                        <div class="dropdown-divider"></div>
+                        <a href="#" onclick="logout(); return false;" class="dropdown-item" style="color: #ef4444;">
+                            🚪 خروج
+                        </a>
+                    </div>
+                </div>
+            `;
+        } else {
+            // User is not logged in - show login/register buttons
+            container.innerHTML = `
+                <a href="/user-login.html" class="nav-link" style="background: rgba(255,255,255,0.15); border-radius: 8px;">
+                    🔐 ورود
+                </a>
+                <a href="/user-register.html" class="nav-link" style="background: white; color: #667eea; border-radius: 8px;">
+                    📝 ثبت‌نام
+                </a>
+            `;
+        }
+    } catch (error) {
+        console.error('Error checking user status:', error);
+    }
+}
+
+// Logout function
+async function logout() {
+    try {
+        const response = await fetch('/api/logout', {
+            method: 'POST'
+        });
+        
+        if (response.ok) {
+            window.location.href = '/';
+        }
+    } catch (error) {
+        console.error('Logout error:', error);
+    }
+}
+
+// Highlight active page
+function highlightActivePage() {
+    const currentPath = window.location.pathname;
+    document.querySelectorAll('.nav-link, .compass-item').forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+            link.classList.add('active');
+        }
+    });
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    checkUserStatus();
+    highlightActivePage();
+});
+</script>

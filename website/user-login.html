@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ورود - OdooMaster</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h1 {
+            font-size: 32px;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            color: #718096;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* Auth Method Toggle */
+        .auth-method-toggle {
+            display: flex;
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 5px;
+            margin-bottom: 25px;
+        }
+
+        .auth-method-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #718096;
+            transition: all 0.3s;
+        }
+
+        .auth-method-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .auth-method-btn:hover:not(.active) {
+            background: #edf2f7;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-primary:hover { transform: translateY(-2px); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        .btn-secondary {
+            width: 100%;
+            padding: 12px;
+            background: #edf2f7;
+            color: #4a5568;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover { background: #e2e8f0; }
+
+        .register-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #718096;
+        }
+
+        .register-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .alert {
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .alert-success { background: #c6f6d5; color: #22543d; }
+        .alert-error { background: #fed7d7; color: #742a2a; }
+        .alert-info { background: #bee3f8; color: #2c5282; }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 25px 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e2e8f0;
+        }
+
+        .divider span {
+            padding: 0 15px;
+            color: #a0aec0;
+            font-size: 14px;
+        }
+
+        .btn-google {
+            width: 100%;
+            padding: 15px;
+            background: white;
+            color: #333;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-google:hover {
+            background: #f7fafc;
+            border-color: #4285f4;
+        }
+
+        .hidden { display: none !important; }
+
+        /* OTP Input Styles */
+        .otp-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+            direction: ltr;
+        }
+
+        .otp-input {
+            width: 50px !important;
+            height: 55px;
+            text-align: center;
+            font-size: 24px !important;
+            font-weight: bold;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 0 !important;
+        }
+
+        .otp-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        .timer-text {
+            text-align: center;
+            color: #718096;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+
+        .timer-text span {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .step-indicator {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f7fafc;
+            border-radius: 10px;
+        }
+
+        .step-indicator .step-num {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            line-height: 28px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+
+        .phone-display {
+            text-align: center;
+            font-size: 18px;
+            color: #2d3748;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f7fafc;
+            border-radius: 8px;
+            direction: ltr;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>🔐 ورود</h1>
+            <p>ورود به حساب کاربری شما</p>
+        </div>
+
+        <div id="alertBox"></div>
+
+        <!-- Google Login Button -->
+        <a href="/auth/google" class="btn-google">
+            <svg width="24" height="24" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            ورود با حساب گوگل
+        </a>
+
+        <div class="divider">
+            <span>یا</span>
+        </div>
+
+        <!-- Auth Method Toggle -->
+        <div class="auth-method-toggle">
+            <button type="button" class="auth-method-btn active" onclick="setAuthMethod('email')" id="emailMethodBtn">
+                📧 ایمیل
+            </button>
+            <button type="button" class="auth-method-btn" onclick="setAuthMethod('phone')" id="phoneMethodBtn">
+                📱 موبایل
+            </button>
+        </div>
+
+        <!-- ========== EMAIL LOGIN SECTION ========== -->
+        <div id="emailLoginSection">
+            <form id="emailLoginForm" autocomplete="off">
+                <div class="form-group">
+                    <label>ایمیل</label>
+                    <input type="email" id="email" placeholder="example@gmail.com" required>
+                </div>
+                <div class="form-group">
+                    <label>رمز عبور</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn-primary" id="emailLoginBtn">ورود</button>
+            </form>
+        </div>
+
+        <!-- ========== PHONE LOGIN SECTION (OTP) ========== -->
+        <div id="phoneLoginSection" class="hidden">
+            
+            <!-- Step 1: Enter Phone -->
+            <div id="phoneStep1">
+                <div class="step-indicator">
+                    <span class="step-num">۱</span>
+                    شماره موبایل خود را وارد کنید
+                </div>
+                <div class="form-group">
+                    <label>شماره موبایل</label>
+                    <input type="tel" id="phone" placeholder="09123456789" dir="ltr" maxlength="11">
+                </div>
+                <button type="button" class="btn-primary" id="sendOtpBtn" onclick="sendOTP()">
+                    📱 ارسال کد ورود
+                </button>
+            </div>
+
+            <!-- Step 2: Enter OTP Code -->
+            <div id="phoneStep2" class="hidden">
+                <div class="step-indicator">
+                    <span class="step-num">۲</span>
+                    کد ارسال شده را وارد کنید
+                </div>
+                
+                <div class="phone-display" id="phoneDisplay">09123456789</div>
+                
+                <div class="otp-container">
+                    <input type="text" class="otp-input" maxlength="1" id="otp1" oninput="otpInput(this, 'otp2')" onkeydown="otpKeydown(event, this, null, 'otp2')">
+                    <input type="text" class="otp-input" maxlength="1" id="otp2" oninput="otpInput(this, 'otp3')" onkeydown="otpKeydown(event, this, 'otp1', 'otp3')">
+                    <input type="text" class="otp-input" maxlength="1" id="otp3" oninput="otpInput(this, 'otp4')" onkeydown="otpKeydown(event, this, 'otp2', 'otp4')">
+                    <input type="text" class="otp-input" maxlength="1" id="otp4" oninput="otpInput(this, 'otp5')" onkeydown="otpKeydown(event, this, 'otp3', 'otp5')">
+                    <input type="text" class="otp-input" maxlength="1" id="otp5" oninput="otpInput(this, 'otp6')" onkeydown="otpKeydown(event, this, 'otp4', 'otp6')">
+                    <input type="text" class="otp-input" maxlength="1" id="otp6" oninput="otpInput(this, null)" onkeydown="otpKeydown(event, this, 'otp5', null)">
+                </div>
+
+                <div class="timer-text" id="timerText">
+                    ارسال مجدد کد تا <span id="timerCount">5:00</span>
+                </div>
+
+                <button type="button" class="btn-primary" id="verifyOtpBtn" onclick="verifyOTP()">
+                    ✅ تأیید و ورود
+                </button>
+
+                <button type="button" class="btn-secondary" id="resendOtpBtn" onclick="sendOTP()" disabled>
+                    ارسال مجدد کد
+                </button>
+
+                <button type="button" class="btn-secondary" onclick="changePhone()">
+                    ✏️ تغییر شماره موبایل
+                </button>
+            </div>
+        </div>
+
+        <div class="register-link">
+            حساب کاربری ندارید؟ <a href="/user-register.html">ثبت‌نام</a>
+        </div>
+    </div>
+
+    <script>
+        let currentAuthMethod = 'email';
+        let currentPhone = '';
+        let otpTimer = null;
+        let otpTimeLeft = 300; // 5 minutes
+        
+        const alertBox = document.getElementById('alertBox');
+        
+        // Check if just registered
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('registered')) {
+            showAlert('✅ ثبت‌نام موفق! لطفاً وارد شوید', 'success');
+        }
+
+        function showAlert(message, type) {
+            alertBox.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+        }
+
+        function setAuthMethod(method) {
+            currentAuthMethod = method;
+            
+            document.getElementById('emailMethodBtn').classList.toggle('active', method === 'email');
+            document.getElementById('phoneMethodBtn').classList.toggle('active', method === 'phone');
+            
+            document.getElementById('emailLoginSection').classList.toggle('hidden', method !== 'email');
+            document.getElementById('phoneLoginSection').classList.toggle('hidden', method !== 'phone');
+            
+            alertBox.innerHTML = '';
+        }
+
+        // ========== EMAIL LOGIN ==========
+        document.getElementById('emailLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('emailLoginBtn');
+            
+            if (!email || !password) {
+                showAlert('لطفاً ایمیل و رمز عبور را وارد کنید', 'error');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.innerHTML = '⏳ در حال ورود...';
+            
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password,
+                        auth_method: 'email'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    if (result.needs_verification) {
+                        window.location.href = '/verify-account.html';
+                    } else {
+                        redirectAfterLogin();
+                    }
+                } else {
+                    showAlert('❌ ' + result.error, 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = 'ورود';
+                }
+            } catch (error) {
+                showAlert('خطا در اتصال به سرور', 'error');
+                btn.disabled = false;
+                btn.innerHTML = 'ورود';
+            }
+        });
+
+        // ========== PHONE OTP LOGIN ==========
+        async function sendOTP() {
+            const phone = document.getElementById('phone').value.trim();
+            const btn = document.getElementById('sendOtpBtn');
+            
+            if (!phone || phone.length < 10) {
+                showAlert('لطفاً شماره موبایل صحیح وارد کنید', 'error');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.innerHTML = '⏳ در حال ارسال...';
+            
+            try {
+                const response = await fetch('/api/send-login-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: phone })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentPhone = phone;
+                    showAlert('✅ کد ورود به ' + phone + ' ارسال شد', 'success');
+                    
+                    // Show step 2
+                    document.getElementById('phoneStep1').classList.add('hidden');
+                    document.getElementById('phoneStep2').classList.remove('hidden');
+                    document.getElementById('phoneDisplay').textContent = phone;
+                    
+                    // Clear OTP inputs
+                    for (let i = 1; i <= 6; i++) {
+                        document.getElementById('otp' + i).value = '';
+                    }
+                    document.getElementById('otp1').focus();
+                    
+                    // Start timer
+                    startOtpTimer(result.expires_in || 300);
+                } else {
+                    showAlert('❌ ' + result.error, 'error');
+                }
+            } catch (error) {
+                showAlert('خطا در اتصال به سرور', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '📱 ارسال کد ورود';
+            }
+        }
+
+        async function verifyOTP() {
+            const code = getOtpCode();
+            const btn = document.getElementById('verifyOtpBtn');
+            
+            if (code.length !== 6) {
+                showAlert('لطفاً کد ۶ رقمی را کامل وارد کنید', 'error');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.innerHTML = '⏳ در حال تأیید...';
+            
+            try {
+                const response = await fetch('/api/login-with-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phone: currentPhone,
+                        code: code
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('✅ ورود موفق!', 'success');
+                    clearInterval(otpTimer);
+                    setTimeout(() => redirectAfterLogin(), 500);
+                } else {
+                    showAlert('❌ ' + result.error, 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = '✅ تأیید و ورود';
+                }
+            } catch (error) {
+                showAlert('خطا در اتصال به سرور', 'error');
+                btn.disabled = false;
+                btn.innerHTML = '✅ تأیید و ورود';
+            }
+        }
+
+        function changePhone() {
+            clearInterval(otpTimer);
+            document.getElementById('phoneStep1').classList.remove('hidden');
+            document.getElementById('phoneStep2').classList.add('hidden');
+            document.getElementById('phone').focus();
+            alertBox.innerHTML = '';
+        }
+
+        function startOtpTimer(seconds) {
+            otpTimeLeft = seconds;
+            clearInterval(otpTimer);
+            
+            const timerCount = document.getElementById('timerCount');
+            const timerText = document.getElementById('timerText');
+            const resendBtn = document.getElementById('resendOtpBtn');
+            
+            resendBtn.disabled = true;
+            timerText.style.display = 'block';
+            
+            updateTimerDisplay();
+            
+            otpTimer = setInterval(() => {
+                otpTimeLeft--;
+                updateTimerDisplay();
+                
+                if (otpTimeLeft <= 0) {
+                    clearInterval(otpTimer);
+                    timerText.style.display = 'none';
+                    resendBtn.disabled = false;
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(otpTimeLeft / 60);
+            const seconds = otpTimeLeft % 60;
+            document.getElementById('timerCount').textContent = 
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function getOtpCode() {
+            let code = '';
+            for (let i = 1; i <= 6; i++) {
+                code += document.getElementById('otp' + i).value;
+            }
+            return code;
+        }
+
+        function otpInput(current, nextId) {
+            // Only allow digits
+            current.value = current.value.replace(/[^0-9]/g, '');
+            
+            if (current.value.length === 1 && nextId) {
+                document.getElementById(nextId).focus();
+            }
+            
+            // Auto submit when all 6 digits entered
+            if (getOtpCode().length === 6) {
+                verifyOTP();
+            }
+        }
+
+        function otpKeydown(event, current, prevId, nextId) {
+            if (event.key === 'Backspace' && current.value === '' && prevId) {
+                document.getElementById(prevId).focus();
+            }
+            if (event.key === 'ArrowLeft' && prevId) {
+                document.getElementById(prevId).focus();
+            }
+            if (event.key === 'ArrowRight' && nextId) {
+                document.getElementById(nextId).focus();
+            }
+        }
+
+        function redirectAfterLogin() {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // If opened in popup mode, notify parent and close
+            if (urlParams.get('popup') === '1') {
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage('login_success', '*');
+                }
+                return;
+            }
+            
+            // Normal redirect
+            const nextPage = urlParams.get('next');
+            if (nextPage && !nextPage.includes('login') && !nextPage.includes('register')) {
+                window.location.href = nextPage;
+            } else {
+                window.location.href = '/';
+            }
+        }
+    </script>
+</body>
+</html>

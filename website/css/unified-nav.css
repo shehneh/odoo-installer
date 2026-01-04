@@ -500,3 +500,44 @@ input:checked + .toggle-slider {
 input:checked + .toggle-slider:before {
     transform: translateX(24px);
 }
+
+/* User Status in Nav */
+.user-status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 12px;
+    background: rgba(72, 187, 120, 0.15);
+    border: 1px solid rgba(72, 187, 120, 0.3);
+    border-radius: 25px;
+    margin-left: 16px;
+}
+
+.user-name {
+    color: #48bb78;
+    font-size: 0.85rem;
+    font-weight: 600;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.logout-btn {
+    padding: 6px 10px !important;
+    background: rgba(245, 101, 101, 0.2) !important;
+    border: 1px solid rgba(245, 101, 101, 0.3) !important;
+    color: #fc8181 !important;
+    cursor: pointer;
+}
+
+.logout-btn:hover {
+    background: rgba(245, 101, 101, 0.4) !important;
+    color: #fff !important;
+}
+
+@media (max-width: 768px) {
+    .user-status {
+        display: none;
+    }
+}

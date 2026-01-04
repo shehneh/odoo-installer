@@ -1,76 +1,172 @@
 /**
- * Unified Navigation System for OdooMaster
- * یک منوی یکپارچه برای تمام صفحات
+ * OdooMaster Unified Navigation System v2
+ * سیستم ناوبری یکپارچه با پشتیبانی از لاگین
  */
 
-// Navigation structure
-const navStructure = {
-    main: [
-        { title: 'صفحه اصلی', url: 'index.html', icon: 'fa-home' },
-        { title: 'دمو رایگان', url: 'demo.html', icon: 'fa-eye' },
-        { title: 'نصب آنلاین', url: 'install.html', icon: 'fa-download' }
-    ],
-    account: [
-        { title: 'ثبت نام', url: 'register_tenant.html', icon: 'fa-user-plus', highlight: true },
-        { title: 'ورود', url: 'login.html', icon: 'fa-sign-in-alt' },
-        { title: 'نصب ماژول‌ها', url: 'install_modules.html', icon: 'fa-puzzle-piece' },
-        { title: 'پنل ادمین', url: 'admin_customers.html', icon: 'fa-shield-alt' }
-    ],
-    resources: [
-        { title: 'مستندات', url: 'docs.html', icon: 'fa-book' },
-        { title: 'پشتیبانی', url: 'support.html', icon: 'fa-headset' },
-        { title: 'دانلودها', url: 'downloads.html', icon: 'fa-cloud-download-alt' }
-    ]
-};
+// Check if user is logged in
+let isLoggedIn = false;
+let currentUser = null;
+
+async function checkLoginStatus() {
+    try {
+        const response = await fetch('/api/user-status');
+        if (response.ok) {
+            const result = await response.json();
+            if (result.success && result.user) {
+                isLoggedIn = true;
+                currentUser = result.user;
+                return true;
+            }
+        }
+    } catch (error) {
+        console.log('Not logged in');
+    }
+    isLoggedIn = false;
+    currentUser = null;
+    return false;
+}
+
+// Navigation structure based on login status
+function getNavStructure() {
+    if (isLoggedIn) {
+        return {
+            main: [
+                { title: 'صفحه اصلی', url: '/index.html', icon: 'fa-home' },
+                { title: 'دمو رایگان', url: '/demo.html', icon: 'fa-eye' }
+            ],
+            user: [
+                { title: 'ساخت دیتابیس', url: '/onboarding.html', icon: 'fa-rocket', highlight: true },
+                { title: 'حساب کاربری', url: '/profile.html', icon: 'fa-user' },
+                { title: 'نصب ماژول‌ها', url: '/install_modules.html', icon: 'fa-puzzle-piece' }
+            ],
+            resources: [
+                { title: 'نصب آفلاین', url: '/install.html', icon: 'fa-download' },
+                { title: 'مستندات', url: '/docs.html', icon: 'fa-book' }
+            ],
+            admin: [
+                { title: 'پنل ادمین', url: '/admin_customers.html', icon: 'fa-shield-alt' }
+            ]
+        };
+    } else {
+        return {
+            main: [
+                { title: 'صفحه اصلی', url: '/index.html', icon: 'fa-home' },
+                { title: 'دمو رایگان', url: '/demo.html', icon: 'fa-eye' }
+            ],
+            account: [
+                { title: 'ثبت نام', url: '/user-register.html', icon: 'fa-user-plus', highlight: true },
+                { title: 'ورود', url: '/user-login.html', icon: 'fa-sign-in-alt' }
+            ],
+            resources: [
+                { title: 'نصب آفلاین', url: '/install.html', icon: 'fa-download' },
+                { title: 'مستندات', url: '/docs.html', icon: 'fa-book' }
+            ]
+        };
+    }
+}
 
 // Create unified navigation bar
 function createUnifiedNav() {
-    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    const currentPath = window.location.pathname;
+    const currentPage = currentPath.split('/').pop() || 'index.html';
+    const navStructure = getNavStructure();
+    
+    let groupsHTML = '';
+    
+    // Main group
+    groupsHTML += `
+        <div class="nav-group">
+            <span class="nav-group-title">اصلی</span>
+            ${navStructure.main.map(item => `
+                <a href="${item.url}" class="nav-item ${currentPage === item.url.split('/').pop() ? 'active' : ''} ${item.highlight ? 'highlight' : ''}">
+                    <i class="fas ${item.icon}"></i>
+                    <span>${item.title}</span>
+                </a>
+            `).join('')}
+        </div>
+    `;
+    
+    // User/Account group
+    if (isLoggedIn && navStructure.user) {
+        groupsHTML += `
+            <div class="nav-group">
+                <span class="nav-group-title">کاربری</span>
+                ${navStructure.user.map(item => `
+                    <a href="${item.url}" class="nav-item ${currentPage === item.url.split('/').pop() ? 'active' : ''} ${item.highlight ? 'highlight' : ''}">
+                        <i class="fas ${item.icon}"></i>
+                        <span>${item.title}</span>
+                    </a>
+                `).join('')}
+            </div>
+        `;
+    } else if (navStructure.account) {
+        groupsHTML += `
+            <div class="nav-group">
+                <span class="nav-group-title">حساب کاربری</span>
+                ${navStructure.account.map(item => `
+                    <a href="${item.url}" class="nav-item ${currentPage === item.url.split('/').pop() ? 'active' : ''} ${item.highlight ? 'highlight' : ''}">
+                        <i class="fas ${item.icon}"></i>
+                        <span>${item.title}</span>
+                    </a>
+                `).join('')}
+            </div>
+        `;
+    }
+    
+    // Resources group
+    groupsHTML += `
+        <div class="nav-group">
+            <span class="nav-group-title">منابع</span>
+            ${navStructure.resources.map(item => `
+                <a href="${item.url}" class="nav-item ${currentPage === item.url.split('/').pop() ? 'active' : ''}">
+                    <i class="fas ${item.icon}"></i>
+                    <span>${item.title}</span>
+                </a>
+            `).join('')}
+        </div>
+    `;
+    
+    // Admin group (only for logged in)
+    if (isLoggedIn && navStructure.admin) {
+        groupsHTML += `
+            <div class="nav-group">
+                ${navStructure.admin.map(item => `
+                    <a href="${item.url}" class="nav-item ${currentPage === item.url.split('/').pop() ? 'active' : ''}">
+                        <i class="fas ${item.icon}"></i>
+                        <span>${item.title}</span>
+                    </a>
+                `).join('')}
+            </div>
+        `;
+    }
+    
+    // User status display
+    let userStatusHTML = '';
+    if (isLoggedIn && currentUser) {
+        userStatusHTML = `
+            <div class="user-status">
+                <span class="user-name">${currentUser.name || currentUser.email || currentUser.phone}</span>
+                <button class="nav-item logout-btn" id="logoutBtn" title="خروج">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        `;
+    }
     
     const navHTML = `
         <nav class="unified-nav glass-effect" id="unifiedNav">
             <div class="nav-container">
-                <a href="index.html" class="unified-logo">
+                <a href="/index.html" class="unified-logo">
                     <i class="fas fa-cube"></i>
                     <span>Odoo<strong>Master</strong></span>
                 </a>
                 
                 <div class="nav-groups">
-                    <div class="nav-group">
-                        <span class="nav-group-title">اصلی</span>
-                        ${navStructure.main.map(item => `
-                            <a href="${item.url}" class="nav-item ${currentPage === item.url ? 'active' : ''} ${item.highlight ? 'highlight' : ''}">
-                                <i class="fas ${item.icon}"></i>
-                                <span>${item.title}</span>
-                            </a>
-                        `).join('')}
-                    </div>
-                    
-                    <div class="nav-group">
-                        <span class="nav-group-title">حساب کاربری</span>
-                        ${navStructure.account.map(item => `
-                            <a href="${item.url}" class="nav-item ${currentPage === item.url ? 'active' : ''} ${item.highlight ? 'highlight' : ''}">
-                                <i class="fas ${item.icon}"></i>
-                                <span>${item.title}</span>
-                            </a>
-                        `).join('')}
-                    </div>
-                    
-                    <div class="nav-group">
-                        <span class="nav-group-title">منابع</span>
-                        ${navStructure.resources.map(item => `
-                            <a href="${item.url}" class="nav-item ${currentPage === item.url ? 'active' : ''}">
-                                <i class="fas ${item.icon}"></i>
-                                <span>${item.title}</span>
-                            </a>
-                        `).join('')}
-                    </div>
+                    ${groupsHTML}
                 </div>
                 
                 <div class="nav-actions">
-                    <button class="nav-item" id="settingsBtn" title="تنظیمات" style="cursor: pointer;">
-                        <i class="fas fa-cog"></i>
-                    </button>
+                    ${userStatusHTML}
                     <button class="nav-toggle" id="navToggle">
                         <i class="fas fa-bars"></i>
                     </button>
@@ -79,11 +175,18 @@ function createUnifiedNav() {
         </nav>
     `;
     
+    // Remove existing nav if any
+    const existingNav = document.getElementById('unifiedNav');
+    if (existingNav) {
+        existingNav.remove();
+    }
+    
     document.body.insertAdjacentHTML('afterbegin', navHTML);
     
+    // Event listeners
     const navToggle = document.getElementById('navToggle');
     const unifiedNav = document.getElementById('unifiedNav');
-    const settingsBtn = document.getElementById('settingsBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
     
     if (navToggle) {
         navToggle.addEventListener('click', () => {
@@ -91,15 +194,18 @@ function createUnifiedNav() {
         });
     }
     
-    if (settingsBtn) {
-        settingsBtn.addEventListener('click', () => {
-            const settingsModal = document.getElementById('settingsModal');
-            if (settingsModal) {
-                settingsModal.style.display = 'flex';
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                window.location.href = '/index.html';
+            } catch (error) {
+                console.error('Logout error:', error);
             }
         });
     }
     
+    // Close mobile menu on outside click
     document.addEventListener('click', (e) => {
         if (unifiedNav && !unifiedNav.contains(e.target) && unifiedNav.classList.contains('mobile-open')) {
             unifiedNav.classList.remove('mobile-open');
@@ -109,78 +215,109 @@ function createUnifiedNav() {
 
 // Create breadcrumb navigation
 function createBreadcrumb() {
-    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-    let pageName = 'صفحه اصلی';
+    const currentPath = window.location.pathname;
+    const currentPage = currentPath.split('/').pop() || 'index.html';
     
-    for (const category of Object.values(navStructure)) {
-        const page = category.find(item => item.url === currentPage);
-        if (page) {
-            pageName = page.title;
-            break;
-        }
-    }
+    const pageNames = {
+        'index.html': 'صفحه اصلی',
+        'demo.html': 'دمو رایگان',
+        'user-login.html': 'ورود',
+        'user-register.html': 'ثبت نام',
+        'verify-account.html': 'تایید حساب',
+        'onboarding.html': 'ساخت دیتابیس',
+        'profile.html': 'حساب کاربری',
+        'install.html': 'نصب آفلاین',
+        'install_modules.html': 'نصب ماژول‌ها',
+        'docs.html': 'مستندات',
+        'downloads.html': 'دانلود',
+        'admin_customers.html': 'پنل ادمین'
+    };
+    
+    const pageName = pageNames[currentPage] || currentPage;
+    
+    if (currentPage === 'index.html') return; // No breadcrumb on home
     
     const breadcrumbHTML = `
         <div class="breadcrumb-nav">
-            <a href="index.html"><i class="fas fa-home"></i> خانه</a>
+            <a href="/index.html"><i class="fas fa-home"></i> خانه</a>
             <i class="fas fa-chevron-left"></i>
             <span>${pageName}</span>
         </div>
     `;
     
-    const mainContent = document.querySelector('main, .container, .demo-container, .installer-container');
+    const mainContent = document.querySelector('main, .container, .demo-container, .installer-container, .onboarding-container, .login-container, .register-container, .verify-container, .profile-container');
     if (mainContent) {
         mainContent.insertAdjacentHTML('afterbegin', breadcrumbHTML);
     }
 }
 
-// Add quick action floating button
+// Create quick action floating button (compass)
 function createQuickActions() {
     const compassDisabled = localStorage.getItem('compassDisabled') === 'true';
-    if (compassDisabled) {
-        return;
+    if (compassDisabled) return;
+    
+    const navStructure = getNavStructure();
+    
+    let quickItemsHTML = '';
+    
+    if (isLoggedIn) {
+        quickItemsHTML = `
+            <a href="/onboarding.html" class="quick-action-item" style="background: linear-gradient(135deg, rgba(72, 187, 120, 0.3), rgba(56, 161, 105, 0.3));">
+                <i class="fas fa-rocket"></i>
+                <span>ساخت دیتابیس</span>
+            </a>
+            <a href="/profile.html" class="quick-action-item">
+                <i class="fas fa-user"></i>
+                <span>حساب کاربری</span>
+            </a>
+            <a href="/install_modules.html" class="quick-action-item">
+                <i class="fas fa-puzzle-piece"></i>
+                <span>نصب ماژول‌ها</span>
+            </a>
+        `;
+    } else {
+        quickItemsHTML = `
+            <a href="/user-register.html" class="quick-action-item" style="background: linear-gradient(135deg, rgba(113, 75, 103, 0.3), rgba(147, 112, 219, 0.3));">
+                <i class="fas fa-user-plus"></i>
+                <span>ثبت نام</span>
+            </a>
+            <a href="/user-login.html" class="quick-action-item">
+                <i class="fas fa-sign-in-alt"></i>
+                <span>ورود</span>
+            </a>
+        `;
     }
+    
+    quickItemsHTML += `
+        <a href="/demo.html" class="quick-action-item">
+            <i class="fas fa-eye"></i>
+            <span>دمو رایگان</span>
+        </a>
+        <a href="/docs.html" class="quick-action-item">
+            <i class="fas fa-book"></i>
+            <span>مستندات</span>
+        </a>
+    `;
     
     const quickActionsHTML = `
         <div class="quick-actions" id="quickActions">
-            <button class="quick-action-trigger" id="quickActionTrigger">
+            <button class="quick-action-trigger" id="quickActionTrigger" title="منوی سریع">
                 <i class="fas fa-compass"></i>
             </button>
             <div class="quick-action-menu">
-                <a href="register_tenant.html" class="quick-action-item register" style="background: linear-gradient(135deg, rgba(113, 75, 103, 0.3), rgba(147, 112, 219, 0.3)); border-color: rgba(113, 75, 103, 0.5);">
-                    <i class="fas fa-user-plus"></i>
-                    <span>ثبت نام</span>
-                </a>
-                <a href="login.html" class="quick-action-item login">
-                    <i class="fas fa-sign-in-alt"></i>
-                    <span>ورود</span>
-                </a>
-                <a href="demo.html" class="quick-action-item demo">
-                    <i class="fas fa-eye"></i>
-                    <span>دمو رایگان</span>
-                </a>
-                <a href="docs.html" class="quick-action-item docs">
-                    <i class="fas fa-book"></i>
-                    <span>مستندات</span>
-                </a>
-                <a href="support.html" class="quick-action-item support">
-                    <i class="fas fa-headset"></i>
-                    <span>پشتیبانی</span>
-                </a>
-                <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 8px 0;"></div>
-                <button class="quick-action-item settings" id="compassSettings" style="background: rgba(113, 75, 103, 0.2); border-color: rgba(113, 75, 103, 0.3); cursor: pointer; width: 100%; border: 1px solid rgba(113, 75, 103, 0.3);">
-                    <i class="fas fa-cog"></i>
-                    <span>تنظیمات</span>
-                </button>
+                ${quickItemsHTML}
             </div>
         </div>
     `;
+    
+    // Remove existing
+    const existing = document.getElementById('quickActions');
+    if (existing) existing.remove();
     
     document.body.insertAdjacentHTML('beforeend', quickActionsHTML);
     
     const trigger = document.getElementById('quickActionTrigger');
     const quickActions = document.getElementById('quickActions');
-    const settingsBtn = document.getElementById('compassSettings');
     
     if (trigger) {
         trigger.addEventListener('click', () => {
@@ -188,84 +325,33 @@ function createQuickActions() {
         });
     }
     
-    if (settingsBtn) {
-        settingsBtn.addEventListener('click', () => {
+    // Close on outside click
+    document.addEventListener('click', (e) => {
+        if (quickActions && !quickActions.contains(e.target)) {
             quickActions.classList.remove('active');
-            const settingsModal = document.getElementById('settingsModal');
-            if (settingsModal) {
-                settingsModal.style.display = 'flex';
-            }
-        });
-    }
+        }
+    });
 }
 
-// Create settings modal
-function createSettingsModal() {
-    const compassDisabled = localStorage.getItem('compassDisabled') === 'true';
-    
-    const modalHTML = `
-        <div class="settings-modal" id="settingsModal" style="display: none;">
-            <div class="settings-modal-overlay"></div>
-            <div class="settings-modal-content">
-                <div class="settings-modal-header">
-                    <h3><i class="fas fa-cog"></i> تنظیمات</h3>
-                    <button class="settings-close" id="closeSettings">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="settings-modal-body">
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h4><i class="fas fa-compass"></i> قطب‌نمای ناوبری</h4>
-                            <p>دکمه شناور برای دسترسی سریع به صفحات</p>
-                        </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="compassToggle" ${compassDisabled ? '' : 'checked'}>
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
-    
-    const closeSettings = document.getElementById('closeSettings');
-    const settingsModal = document.getElementById('settingsModal');
-    const compassToggle = document.getElementById('compassToggle');
-    
-    if (closeSettings) {
-        closeSettings.addEventListener('click', () => {
-            settingsModal.style.display = 'none';
-        });
-    }
-    
-    if (settingsModal) {
-        settingsModal.querySelector('.settings-modal-overlay').addEventListener('click', () => {
-            settingsModal.style.display = 'none';
-        });
-    }
-    
-    if (compassToggle) {
-        compassToggle.addEventListener('change', (e) => {
-            if (e.target.checked) {
-                localStorage.removeItem('compassDisabled');
-            } else {
-                localStorage.setItem('compassDisabled', 'true');
-            }
-            location.reload();
-        });
-    }
-}
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', () => {
+// Initialize navigation
+async function initNavigation() {
+    await checkLoginStatus();
     createUnifiedNav();
     createBreadcrumb();
     createQuickActions();
-    createSettingsModal();
-    
-    console.log('✅ Navigation System loaded');
-    console.log('💡 Compass:', localStorage.getItem('compassDisabled') === 'true' ? 'Disabled' : 'Enabled');
-});
+}
+
+// Auto-initialize when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initNavigation);
+} else {
+    initNavigation();
+}
+
+// Export for manual use
+window.OdooMasterNav = {
+    init: initNavigation,
+    checkLogin: checkLoginStatus,
+    isLoggedIn: () => isLoggedIn,
+    getUser: () => currentUser
+};
