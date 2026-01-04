@@ -21,7 +21,6 @@
             display: flex;
             flex-direction: column;
             padding: 20px;
-            padding-top: 90px; /* Space for fixed navigation */
         }
 
         .onboarding-container {
@@ -969,11 +968,31 @@
             font-family: monospace;
             color: #667eea;
         }
+        
+        .back-home {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 25px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .back-home:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+        }
 </head>
 <body>
-    <!-- Navigation will be loaded here -->
-    <div id="mainNav"></div>
-
+    <a href="/" class="back-home">🏠 برگشت به خانه</a>
+    
     <div class="onboarding-container">
         <!-- Progress Stepper -->
         <div class="stepper-container">
@@ -2328,9 +2347,5 @@
             window.open(url, '_blank');  // Open in new tab
         }
     </script>
-    
-    <!-- Navigation -->
-    <script src="/js/nav-loader.js"></script>
-    <script src="/js/global-nav.js"></script>
 </body>
 </html>
