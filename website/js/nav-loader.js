@@ -4,20 +4,28 @@
 (function() {
     // Load Navigation Component
     function loadNavigation() {
+        console.log('🔄 Loading navigation...');
         fetch('/components/nav-header.html')
-            .then(response => response.text())
+            .then(response => {
+                console.log('✅ Navigation HTML fetched');
+                return response.text();
+            })
             .then(html => {
                 // Try both possible container IDs
                 let navContainer = document.getElementById('mainNav') || document.getElementById('navHeader');
+                console.log('📍 Nav container:', navContainer);
                 if (!navContainer) {
                     navContainer = document.createElement('div');
                     navContainer.id = 'navHeader';
                     document.body.insertBefore(navContainer, document.body.firstChild);
+                    console.log('➕ Created new nav container');
                 }
                 navContainer.innerHTML = html;
+                console.log('✅ Navigation loaded successfully');
                 
                 // Execute scripts in the loaded HTML
                 const scripts = navContainer.querySelectorAll('script');
+                console.log('📜 Found', scripts.length, 'scripts to execute');
                 scripts.forEach(script => {
                     const newScript = document.createElement('script');
                     newScript.textContent = script.textContent;
@@ -27,7 +35,7 @@
                 // Trigger event for other scripts
                 window.dispatchEvent(new Event('navigationLoaded'));
             })
-            .catch(error => console.error('Error loading navigation:', error));
+            .catch(error => console.error('❌ Error loading navigation:', error));
     }
 
     // Auto-load on DOM ready
