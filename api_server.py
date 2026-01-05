@@ -12,7 +12,7 @@ Usage:
     Server will run on: http://localhost:5001
 """
 
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, make_response, redirect, session
 from flask_cors import CORS
 from datetime import datetime, timedelta
 import json
@@ -32,6 +32,7 @@ app = Flask(
     template_folder='website',
 )
 CORS(app)  # Enable CORS for all routes
+app.secret_key = os.environ.get('SECRET_KEY', 'odoomaster-super-secret-key-2025')
 
 # ============================================
 # Multi-tenant SaaS configuration (Liara)
@@ -42,6 +43,7 @@ ODOO_MASTER_PASSWORD = os.environ.get('ODOO_MASTER_PASSWORD', 'admin')
 
 # Local SQLite database for customer management
 CUSTOMERS_DB = 'customers.db'
+WEBSITE_DB = 'website_users.db'  # Database for website users and tickets
 
 
 def init_customers_db():
@@ -417,102 +419,433 @@ def delete_demo(demo_id):
 # TICKET SYSTEM APIs
 # ============================================
 
-@app.route('/api/tickets/list', methods=['GET'])
-def list_tickets():
-    """لیست تیکت‌های کاربر"""
-    tickets = load_json(TICKETS_FILE, [])
+def init_tickets_db():
+    """Initialize tickets database tables"""
+    conn = sqlite3.connect(WEBSITE_DB)
+    cursor = conn.cursor()
     
-    return jsonify({
-        'success': True,
-        'tickets': tickets,
-        'count': len(tickets)
-    })
+    # Create tickets table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS tickets (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            ticket_number TEXT UNIQUE NOT NULL,
+            subject TEXT NOT NULL,
+            category TEXT NOT NULL,
+            priority TEXT NOT NULL DEFAULT 'medium',
+            status TEXT NOT NULL DEFAULT 'open',
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES website_users (id)
+        )
+    ''')
+    
+    # Create ticket_messages table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS ticket_messages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ticket_id INTEGER NOT NULL,
+            user_id INTEGER,
+            message TEXT NOT NULL,
+            is_admin INTEGER DEFAULT 0,
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (ticket_id) REFERENCES tickets (id),
+            FOREIGN KEY (user_id) REFERENCES website_users (id)
+        )
+    ''')
+    
+    conn.commit()
+    conn.close()
+
+# Initialize tickets DB
+try:
+    init_tickets_db()
+except Exception as e:
+    print(f"Warning: Could not initialize tickets DB: {e}")
 
 
-@app.route('/api/tickets/create', methods=['POST'])
+@app.route('/api/tickets', methods=['GET'])
+def get_tickets():
+    """Get user's tickets or all tickets for admin"""
+    try:
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({
+                'success': False,
+                'error': 'لطفاً وارد سیستم شوید'
+            }), 401
+        
+        conn = sqlite3.connect(WEBSITE_DB)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        # Check if user is admin
+        cursor.execute('SELECT is_admin FROM website_users WHERE id = ?', (user_id,))
+        user_row = cursor.fetchone()
+        is_admin = user_row['is_admin'] if user_row else False
+        
+        # Get tickets
+        if is_admin:
+            cursor.execute('''
+                SELECT t.*, u.name as user_name, u.email as user_email,
+                    (SELECT COUNT(*) FROM ticket_messages WHERE ticket_id = t.id) as message_count
+                FROM tickets t
+                LEFT JOIN website_users u ON t.user_id = u.id
+                ORDER BY t.updated_at DESC
+            ''')
+        else:
+            cursor.execute('''
+                SELECT t.*,
+                    (SELECT COUNT(*) FROM ticket_messages WHERE ticket_id = t.id) as message_count
+                FROM tickets t
+                WHERE t.user_id = ?
+                ORDER BY t.updated_at DESC
+            ''', (user_id,))
+        
+        tickets = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'tickets': tickets,
+            'is_admin': is_admin
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'خطا در دریافت تیکت‌ها: {str(e)}'
+        }), 500
+
+
+@app.route('/api/tickets', methods=['POST'])
 def create_ticket():
-    """ثبت تیکت جدید"""
-    data = request.get_json()
-    
-    subject = data.get('subject', '')
-    category = data.get('category', 'general')
-    message = data.get('message', '')
-    urgent = data.get('urgent', False)
-    
-    if not subject or not message:
+    """Create new ticket"""
+    try:
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({
+                'success': False,
+                'error': 'لطفاً وارد سیستم شوید'
+            }), 401
+        
+        data = request.get_json()
+        subject = data.get('subject', '').strip()
+        category = data.get('category', 'general')
+        priority = data.get('priority', 'medium')
+        message = data.get('message', '').strip()
+        
+        if not subject or not message:
+            return jsonify({
+                'success': False,
+                'error': 'موضوع و پیام الزامی است'
+            }), 400
+        
+        conn = sqlite3.connect(WEBSITE_DB)
+        cursor = conn.cursor()
+        
+        # Generate ticket number
+        ticket_number = f'TKT-{datetime.now().strftime("%Y%m%d")}-{uuid.uuid4().hex[:6].upper()}'
+        
+        # Create ticket
+        now = datetime.now().isoformat()
+        cursor.execute('''
+            INSERT INTO tickets (user_id, ticket_number, subject, category, priority, status, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, 'open', ?, ?)
+        ''', (user_id, ticket_number, subject, category, priority, now, now))
+        
+        ticket_id = cursor.lastrowid
+        
+        # Add first message
+        cursor.execute('''
+            INSERT INTO ticket_messages (ticket_id, user_id, message, is_admin, created_at)
+            VALUES (?, ?, ?, 0, ?)
+        ''', (ticket_id, user_id, message, now))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'message': 'تیکت با موفقیت ثبت شد',
+            'ticket_number': ticket_number,
+            'ticket_id': ticket_id
+        })
+        
+    except Exception as e:
         return jsonify({
             'success': False,
-            'error': 'موضوع و پیام الزامی است'
-        }), 400
-    
-    # Load existing tickets
-    tickets = load_json(TICKETS_FILE, [])
-    
-    # Create new ticket
-    ticket_id = len(tickets) + 1234  # Simple ID
-    created_at = datetime.now()
-    
-    ticket = {
-        'id': ticket_id,
-        'subject': subject,
-        'category': category,
-        'message': message,
-        'urgent': urgent,
-        'status': 'open',
-        'replies': [],
-        'createdAt': created_at.isoformat(),
-        'updatedAt': created_at.isoformat()
-    }
-    
-    tickets.append(ticket)
-    save_json(TICKETS_FILE, tickets)
-    
-    return jsonify({
-        'success': True,
-        'message': 'تیکت با موفقیت ثبت شد',
-        'ticket': ticket
-    })
+            'error': f'خطا در ثبت تیکت: {str(e)}'
+        }), 500
 
 
-@app.route('/api/tickets/<int:ticket_id>/reply', methods=['POST'])
-def reply_ticket(ticket_id):
-    """پاسخ به تیکت"""
-    data = request.get_json()
-    message = data.get('message', '')
-    
-    if not message:
+@app.route('/api/tickets/<int:ticket_id>', methods=['GET'])
+def get_ticket_detail(ticket_id):
+    """Get ticket details with messages"""
+    try:
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({
+                'success': False,
+                'error': 'لطفاً وارد سیستم شوید'
+            }), 401
+        
+        conn = sqlite3.connect(WEBSITE_DB)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        # Check if user is admin
+        cursor.execute('SELECT is_admin FROM website_users WHERE id = ?', (user_id,))
+        user_row = cursor.fetchone()
+        is_admin = user_row['is_admin'] if user_row else False
+        
+        # Get ticket
+        cursor.execute('''
+            SELECT t.*, u.name as user_name, u.email as user_email
+            FROM tickets t
+            LEFT JOIN website_users u ON t.user_id = u.id
+            WHERE t.id = ?
+        ''', (ticket_id,))
+        
+        ticket_row = cursor.fetchone()
+        if not ticket_row:
+            conn.close()
+            return jsonify({
+                'success': False,
+                'error': 'تیکت یافت نشد'
+            }), 404
+        
+        ticket = dict(ticket_row)
+        
+        # Check permission
+        if not is_admin and ticket['user_id'] != user_id:
+            conn.close()
+            return jsonify({
+                'success': False,
+                'error': 'دسترسی غیرمجاز'
+            }), 403
+        
+        # Get messages
+        cursor.execute('''
+            SELECT m.*, u.name as sender_name, u.email as sender_email
+            FROM ticket_messages m
+            LEFT JOIN website_users u ON m.user_id = u.id
+            WHERE m.ticket_id = ?
+            ORDER BY m.created_at ASC
+        ''', (ticket_id,))
+        
+        messages = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'ticket': ticket,
+            'messages': messages,
+            'is_admin': is_admin
+        })
+        
+    except Exception as e:
         return jsonify({
             'success': False,
-            'error': 'پیام نمی‌تواند خالی باشد'
-        }), 400
-    
-    tickets = load_json(TICKETS_FILE, [])
-    
-    # Find ticket
-    ticket = next((t for t in tickets if t['id'] == ticket_id), None)
-    if not ticket:
+            'error': f'خطا در دریافت جزئیات تیکت: {str(e)}'
+        }), 500
+
+
+@app.route('/api/tickets/<int:ticket_id>/messages', methods=['POST'])
+def add_ticket_message(ticket_id):
+    """Add message to ticket"""
+    try:
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({
+                'success': False,
+                'error': 'لطفاً وارد سیستم شوید'
+            }), 401
+        
+        data = request.get_json()
+        message = data.get('message', '').strip()
+        
+        if not message:
+            return jsonify({
+                'success': False,
+                'error': 'پیام نمی‌تواند خالی باشد'
+            }), 400
+        
+        conn = sqlite3.connect(WEBSITE_DB)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        # Check if user is admin
+        cursor.execute('SELECT is_admin FROM website_users WHERE id = ?', (user_id,))
+        user_row = cursor.fetchone()
+        is_admin = user_row['is_admin'] if user_row else False
+        
+        # Get ticket
+        cursor.execute('SELECT user_id, status FROM tickets WHERE id = ?', (ticket_id,))
+        ticket_row = cursor.fetchone()
+        
+        if not ticket_row:
+            conn.close()
+            return jsonify({
+                'success': False,
+                'error': 'تیکت یافت نشد'
+            }), 404
+        
+        # Check permission
+        if not is_admin and ticket_row['user_id'] != user_id:
+            conn.close()
+            return jsonify({
+                'success': False,
+                'error': 'دسترسی غیرمجاز'
+            }), 403
+        
+        # Add message
+        now = datetime.now().isoformat()
+        cursor.execute('''
+            INSERT INTO ticket_messages (ticket_id, user_id, message, is_admin, created_at)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (ticket_id, user_id, message, 1 if is_admin else 0, now))
+        
+        # Update ticket timestamp and status if needed
+        new_status = ticket_row['status']
+        if is_admin and new_status == 'open':
+            new_status = 'in_progress'
+        elif not is_admin and new_status == 'waiting':
+            new_status = 'in_progress'
+        
+        cursor.execute('''
+            UPDATE tickets
+            SET updated_at = ?, status = ?
+            WHERE id = ?
+        ''', (now, new_status, ticket_id))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'message': 'پیام ارسال شد'
+        })
+        
+    except Exception as e:
         return jsonify({
             'success': False,
-            'error': 'تیکت یافت نشد'
-        }), 404
-    
-    # Add reply
-    reply = {
-        'message': message,
-        'author': 'user',
-        'createdAt': datetime.now().isoformat()
-    }
-    
-    ticket['replies'].append(reply)
-    ticket['updatedAt'] = datetime.now().isoformat()
-    
-    save_json(TICKETS_FILE, tickets)
-    
-    return jsonify({
-        'success': True,
-        'message': 'پاسخ ارسال شد',
-        'reply': reply
-    })
+            'error': f'خطا در ارسال پیام: {str(e)}'
+        }), 500
+
+
+@app.route('/api/tickets/<int:ticket_id>/status', methods=['PUT'])
+def update_ticket_status(ticket_id):
+    """Update ticket status (admin only)"""
+    try:
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({
+                'success': False,
+                'error': 'لطفاً وارد سیستم شوید'
+            }), 401
+        
+        conn = sqlite3.connect(WEBSITE_DB)
+        cursor = conn.cursor()
+        
+        # Check if user is admin
+        cursor.execute('SELECT is_admin FROM website_users WHERE id = ?', (user_id,))
+        user_row = cursor.fetchone()
+        
+        if not user_row or not user_row[0]:
+            conn.close()
+            return jsonify({
+                'success': False,
+                'error': 'دسترسی غیرمجاز'
+            }), 403
+        
+        data = request.get_json()
+        status = data.get('status', '')
+        
+        if status not in ['open', 'in_progress', 'waiting', 'closed']:
+            conn.close()
+            return jsonify({
+                'success': False,
+                'error': 'وضعیت نامعتبر است'
+            }), 400
+        
+        # Update status
+        cursor.execute('''
+            UPDATE tickets
+            SET status = ?, updated_at = ?
+            WHERE id = ?
+        ''', (status, datetime.now().isoformat(), ticket_id))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'message': 'وضعیت تیکت به‌روزرسانی شد'
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'خطا در به‌روزرسانی وضعیت: {str(e)}'
+        }), 500
+
+
+@app.route('/api/tickets/<int:ticket_id>/priority', methods=['PUT'])
+def update_ticket_priority(ticket_id):
+    """Update ticket priority (admin only)"""
+    try:
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({
+                'success': False,
+                'error': 'لطفاً وارد سیستم شوید'
+            }), 401
+        
+        conn = sqlite3.connect(WEBSITE_DB)
+        cursor = conn.cursor()
+        
+        # Check if user is admin
+        cursor.execute('SELECT is_admin FROM website_users WHERE id = ?', (user_id,))
+        user_row = cursor.fetchone()
+        
+        if not user_row or not user_row[0]:
+            conn.close()
+            return jsonify({
+                'success': False,
+                'error': 'دسترسی غیرمجاز'
+            }), 403
+        
+        data = request.get_json()
+        priority = data.get('priority', '')
+        
+        if priority not in ['low', 'medium', 'high', 'urgent']:
+            conn.close()
+            return jsonify({
+                'success': False,
+                'error': 'اولویت نامعتبر است'
+            }), 400
+        
+        # Update priority
+        cursor.execute('''
+            UPDATE tickets
+            SET priority = ?, updated_at = ?
+            WHERE id = ?
+        ''', (priority, datetime.now().isoformat(), ticket_id))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'message': 'اولویت تیکت به‌روزرسانی شد'
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'خطا در به‌روزرسانی اولویت: {str(e)}'
+        }), 500
 
 
 # ============================================
@@ -708,6 +1041,124 @@ def auth_admin_login():
 @app.route('/api/test', methods=['GET'])
 def api_test():
     """Test endpoint to verify API is working"""
+    return jsonify({'status': 'ok', 'message': 'API is working'})
+
+
+@app.route('/auth/google')
+def google_login():
+    """Redirect to Google OAuth login"""
+    try:
+        from requests_oauthlib import OAuth2Session
+    except ImportError:
+        return '''
+        <html><body style="font-family: Arial; text-align: center; padding: 50px;">
+        <h2>خطا: ماژول OAuth نصب نیست</h2>
+        <p>لطفاً دستور زیر را اجرا کنید:</p>
+        <code style="background: #f0f0f0; padding: 10px; display: inline-block;">
+        pip install requests-oauthlib
+        </code>
+        <br><br>
+        <a href="/user-login.html">بازگشت به صفحه ورود</a>
+        </body></html>
+        '''
+    
+    # Dynamic redirect URI
+    redirect_uri = os.environ.get('GOOGLE_REDIRECT_URI')
+    if not redirect_uri:
+        redirect_uri = request.url_root.rstrip('/') + '/callback/google'
+    
+    # Google OAuth configuration
+    GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '585648476029-bo40kh24la1k4b3bu62rhmhrjncbpiu9.apps.googleusercontent.com')
+    
+    google = OAuth2Session(
+        GOOGLE_CLIENT_ID,
+        redirect_uri=redirect_uri,
+        scope=['openid', 'email', 'profile']
+    )
+    
+    authorization_url, state = google.authorization_url(
+        'https://accounts.google.com/o/oauth2/auth',
+        access_type='offline',
+        prompt='select_account'
+    )
+    
+    # Store state in session
+    from flask import session
+    session['oauth_state'] = state
+    session['redirect_after_login'] = request.args.get('redirect', '/onboarding.html')
+    
+    return redirect(authorization_url)
+
+
+@app.route('/callback/google')
+def google_callback():
+    """Handle Google OAuth callback"""
+    try:
+        from requests_oauthlib import OAuth2Session
+        from flask import session
+    except ImportError:
+        return "خطا: requests-oauthlib نصب نیست", 500
+    
+    try:
+        # Dynamic redirect URI
+        redirect_uri = os.environ.get('GOOGLE_REDIRECT_URI')
+        if not redirect_uri:
+            redirect_uri = request.url_root.rstrip('/') + '/callback/google'
+        
+        # Google OAuth configuration
+        GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '585648476029-bo40kh24la1k4b3bu62rhmhrjncbpiu9.apps.googleusercontent.com')
+        GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', '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')
+        
+        google = OAuth2Session(
+            GOOGLE_CLIENT_ID,
+            redirect_uri=redirect_uri,
+            state=session.get('oauth_state')
+        )
+        
+        # Get token
+        token = google.fetch_token(
+            'https://oauth2.googleapis.com/token',
+            client_secret=GOOGLE_CLIENT_SECRET,
+            authorization_response=request.url
+        )
+        
+        # Get user info
+        resp = google.get('https://www.googleapis.com/oauth2/v3/userinfo')
+        user_info = resp.json()
+        
+        email = user_info.get('email', '')
+        name = user_info.get('name', '')
+        picture = user_info.get('picture', '')
+        
+        if not email:
+            return redirect('/user-login.html?error=no_email')
+        
+        # Check if user exists in database
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        cursor.execute('SELECT admin_name, admin_email, company_name FROM customers WHERE admin_email = ?', (email.lower(),))
+        existing = cursor.fetchone()
+        conn.close()
+        
+        # Set cookies for session
+        redirect_url = session.get('redirect_after_login', '/onboarding.html')
+        response = make_response(redirect(redirect_url))
+        response.set_cookie('user_email', email.lower(), max_age=30*24*60*60)
+        response.set_cookie('user_name', name, max_age=30*24*60*60)
+        response.set_cookie('auth_method', 'google', max_age=30*24*60*60)
+        
+        return response
+        
+    except Exception as e:
+        print(f"Error in Google callback: {str(e)}")
+        return redirect(f'/user-login.html?error=oauth_failed')
+
+
+# Remove the old mock endpoints
+@app.route('/api/auth/google-callback', methods=['POST'])
+def auth_google_callback_old():
+    """Deprecated - use /callback/google instead"""
+    return jsonify({'error': 'This endpoint is deprecated. Use /callback/google instead'}), 410
     return jsonify({
         'success': True,
         'message': 'API is working!',
@@ -833,6 +1284,81 @@ def auth_me():
 # ============================================
 # USER & STATS APIs
 # ============================================
+
+@app.route('/api/user-status', methods=['GET'])
+def get_user_status():
+    """وضعیت کاربر و اطلاعات session"""
+    try:
+        # Check if user has session or token
+        token = request.headers.get('Authorization')
+        session_email = request.cookies.get('user_email')
+        session_name = request.cookies.get('user_name')
+        auth_method = request.cookies.get('auth_method', 'email')
+        
+        if not token and not session_email:
+            return jsonify({
+                'success': True,
+                'logged_in': False,
+                'user': None
+            })
+        
+        # Try to get user from database
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        
+        if session_email:
+            cursor.execute(
+                'SELECT admin_name, admin_email, phone, company_name FROM customers WHERE admin_email = ? LIMIT 1',
+                (session_email,)
+            )
+            user_data = cursor.fetchone()
+            
+            if user_data:
+                conn.close()
+                return jsonify({
+                    'success': True,
+                    'logged_in': True,
+                    'user': {
+                        'name': user_data[0],
+                        'email': user_data[1],
+                        'phone': user_data[2] or '',
+                        'company': user_data[3],
+                        'auth_method': auth_method
+                    }
+                })
+            else:
+                # User logged in but not in database yet (new Google user)
+                conn.close()
+                return jsonify({
+                    'success': True,
+                    'logged_in': True,
+                    'user': {
+                        'name': session_name or 'کاربر',
+                        'email': session_email,
+                        'phone': '',
+                        'company': None,
+                        'auth_method': auth_method
+                    }
+                })
+        
+        conn.close()
+        
+        # If no user found, return not logged in
+        return jsonify({
+            'success': True,
+            'logged_in': False,
+            'user': None
+        })
+        
+    except Exception as e:
+        print(f"Error in user-status: {str(e)}")
+        return jsonify({
+            'success': False,
+            'logged_in': False,
+            'user': None,
+            'error': str(e)
+        })
+
 
 @app.route('/api/user/me', methods=['GET'])
 def get_user():
@@ -1106,28 +1632,40 @@ def create_tenant():
         # Check if customer already exists in our database
         conn = sqlite3.connect(CUSTOMERS_DB)
         cursor = conn.cursor()
-        cursor.execute('SELECT database_name, created_at FROM customers WHERE admin_email = ?', (admin_email,))
+        cursor.execute('SELECT database_name, created_at, admin_password, company_name, admin_name FROM customers WHERE admin_email = ?', (admin_email,))
         existing = cursor.fetchone()
         
         if existing:
-            db_name, created_at = existing
+            db_name, created_at, admin_password, company_name_db, admin_name_db = existing
             
             # Check if the database actually exists in Odoo
             db_exists_in_odoo = check_database_exists_in_odoo(db_name)
             
             if db_exists_in_odoo:
-                # Database still exists in Odoo - return existing info
+                # Database still exists in Odoo - return existing info including password
                 conn.close()
-                return jsonify({
-                    'success': False,
+                
+                # Create response with cookie
+                response_data = {
+                    'success': True,
                     'existing': True,
+                    'redirect_to_profile': True,
                     'message': 'این ایمیل قبلاً ثبت شده است',
                     'data': {
                         'database_name': db_name,
+                        'admin_email': admin_email,
+                        'admin_password': admin_password,
+                        'company_name': company_name_db,
+                        'admin_name': admin_name_db,
                         'created_at': created_at,
                         'login_url': f"{ODOO_URL}/web/login?db={db_name}",
                     }
-                }), 409
+                }
+                
+                response = make_response(jsonify(response_data), 200)
+                # Set cookie for user session
+                response.set_cookie('user_email', admin_email, max_age=30*24*60*60)  # 30 days
+                return response
             else:
                 # Database was deleted from Odoo - remove old record and create new one
                 print(f"Database {db_name} was deleted from Odoo. Removing old record and creating new one.")
@@ -1182,21 +1720,26 @@ def create_tenant():
 
         save_customer(company_name, admin_email, admin_name, phone, db_name, admin_password)
 
-        return jsonify(
-            {
-                'success': True,
-                'message': 'سرور Odoo شما با موفقیت ساخته شد' + modules_installed_msg,
-                'data': {
-                    'company_name': company_name,
-                    'database_name': db_name,
-                    'admin_email': admin_email,
-                    'admin_password': admin_password,
-                    'url': f"{ODOO_URL}/web?db={db_name}",
-                    'login_url': f"{ODOO_URL}/web/login?db={db_name}",
-                    'modules_installed': install_modules,
-                },
-            }
-        ), 201
+        response_data = {
+            'success': True,
+            'message': 'سرور Odoo شما با موفقیت ساخته شد' + modules_installed_msg,
+            'data': {
+                'company_name': company_name,
+                'database_name': db_name,
+                'admin_email': admin_email,
+                'admin_name': admin_name,
+                'admin_password': admin_password,
+                'url': f"{ODOO_URL}/web?db={db_name}",
+                'login_url': f"{ODOO_URL}/web/login?db={db_name}",
+                'modules_installed': install_modules,
+            },
+        }
+        
+        response = make_response(jsonify(response_data), 201)
+        # Set cookie for user session
+        response.set_cookie('user_email', admin_email, max_age=30*24*60*60)  # 30 days
+        return response
+        
     except Exception as e:
         import traceback
         traceback.print_exc()

@@ -323,6 +323,229 @@
         border-radius: 10px;
         margin-right: 5px;
     }
+
+    /* ========================================
+       User Menu Styles (Like GitHub/Numberland)
+       ======================================== */
+    
+    /* Login Button */
+    .login-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255,255,255,0.15);
+        border: 2px solid rgba(255,255,255,0.3);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.3s;
+    }
+    
+    .login-btn:hover {
+        background: rgba(255,255,255,0.25);
+        border-color: rgba(255,255,255,0.5);
+        transform: translateY(-2px);
+    }
+
+    /* User Dropdown Container */
+    .user-dropdown {
+        position: relative;
+    }
+
+    /* User Trigger (Avatar + Name) */
+    .user-trigger {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        padding: 6px 12px 6px 8px;
+        border-radius: 25px;
+        background: rgba(255,255,255,0.1);
+        border: 2px solid rgba(255,255,255,0.2);
+        transition: all 0.3s;
+    }
+
+    .user-trigger:hover {
+        background: rgba(255,255,255,0.2);
+        border-color: rgba(255,255,255,0.4);
+    }
+
+    .user-dropdown.active .user-trigger {
+        background: rgba(255,255,255,0.25);
+        border-color: rgba(255,255,255,0.5);
+    }
+
+    /* Avatar Circle */
+    .user-avatar-circle {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 16px;
+        color: white;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+
+    /* Display Name */
+    .user-display-name {
+        color: white;
+        font-weight: 600;
+        font-size: 14px;
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Chevron */
+    .user-chevron {
+        color: rgba(255,255,255,0.7);
+        font-size: 10px;
+        transition: transform 0.3s;
+    }
+
+    .user-dropdown.active .user-chevron {
+        transform: rotate(180deg);
+    }
+
+    /* Dropdown Menu */
+    .user-dropdown-menu {
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 0;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+        min-width: 280px;
+        padding: 0;
+        display: none;
+        animation: dropdownFadeIn 0.2s ease;
+        z-index: 10001;
+        overflow: hidden;
+    }
+
+    .user-dropdown.active .user-dropdown-menu {
+        display: block;
+    }
+
+    @keyframes dropdownFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Dropdown Header */
+    .user-dropdown-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 20px;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .user-avatar-large {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 22px;
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .user-info {
+        flex: 1;
+        overflow: hidden;
+    }
+
+    .user-full-name {
+        font-weight: 700;
+        font-size: 16px;
+        color: #1f2937;
+        margin-bottom: 2px;
+    }
+
+    .user-email {
+        font-size: 13px;
+        color: #6b7280;
+        direction: ltr;
+        text-align: right;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Dropdown Divider */
+    .user-dropdown-divider {
+        height: 1px;
+        background: #e5e7eb;
+        margin: 8px 0;
+    }
+
+    /* Dropdown Items */
+    .user-dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 20px;
+        color: #374151;
+        text-decoration: none;
+        font-size: 14px;
+        transition: all 0.2s;
+    }
+
+    .user-dropdown-item:hover {
+        background: #f3f4f6;
+        color: #667eea;
+    }
+
+    .user-dropdown-item i {
+        width: 20px;
+        text-align: center;
+        font-size: 15px;
+        color: #9ca3af;
+    }
+
+    .user-dropdown-item:hover i {
+        color: #667eea;
+    }
+
+    /* Logout Item */
+    .logout-item {
+        color: #ef4444;
+        margin-top: 4px;
+        padding-bottom: 16px;
+    }
+
+    .logout-item i {
+        color: #ef4444;
+    }
+
+    .logout-item:hover {
+        background: #fef2f2;
+        color: #dc2626;
+    }
+
+    .logout-item:hover i {
+        color: #dc2626;
+    }
 </style>
 
 <!-- Navigation Header -->
@@ -371,20 +594,31 @@
                     🛠️ خدمات
                     <span style="font-size: 10px;">▼</span>
                 </a>
-                <div class="dropdown-menu">                    <a href="/onboarding.html" class="dropdown-item" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; font-weight: 600; border-radius: 8px; margin-bottom: 8px;">
-                        ☁️ Odoo آنلاین ✨
+                <div class="dropdown-menu">
+                    <!-- نصب هوشمند آنلاین (Wizard + میزبانی) -->
+                    <a href="/onboarding.html" class="dropdown-item" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; font-weight: 600; border-radius: 8px; margin-bottom: 8px;">
+                        ☁️ Odoo آنلاین (میزبانی + نصب هوشمند) ✨
                     </a>
-                    <a href="/onboarding.html" class="dropdown-item">
-                        🚀 نصب دیتابیس
+                    
+                    <!-- نصب آنلاین روی کامپیوتر -->
+                    <a href="/install.html" class="dropdown-item">
+                        ⚡ نصب آنلاین روی کامپیوتر (رایگان)
                     </a>
-                    <div class="dropdown-divider"></div>                    <a href="/install.html" class="dropdown-item">
-                        � نصب Odoo
+                    
+                    <!-- نصب آفلاین کامل -->
+                    <a href="/downloads.html" class="dropdown-item">
+                        💾 نصب آفلاین کامل
                     </a>
-                    <a href="/register_tenant.html" class="dropdown-item">
-                        🌐 ساخت سرور
+                    
+                    <div class="dropdown-divider"></div>
+                    
+                    <!-- فروشگاه ماژول‌ها -->
+                    <a href="/apps.html" class="dropdown-item">
+                        🛒 فروشگاه ماژول‌ها
                     </a>
+                    
                     <a href="/support.html" class="dropdown-item">
-                        � پشتیبانی
+                        💬 پشتیبانی
                     </a>
                 </div>
             </li>
@@ -406,38 +640,13 @@
             </li>
         </ul>
 
-        <!-- Odoo Online Button (Prominent) -->
-        <a href="/onboarding.html" 
-           style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 10px 24px; border-radius: 12px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); transition: all 0.3s ease; font-size: 15px;"
-           onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(16, 185, 129, 0.6)'"
-           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(16, 185, 129, 0.4)'">
-            <span style="font-size: 18px;">☁️</span>
-            <span>Odoo آنلاین</span>
-            <span style="font-size: 10px; background: rgba(255,255,255,0.3); padding: 2px 8px; border-radius: 8px;">آسان</span>
-        </a>
-
-        <!-- Login to Odoo Button -->
-        <a href="https://odoo-online.liara.run/web/login" target="_blank"
-           style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 20px; border-radius: 12px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); transition: all 0.3s ease; font-size: 14px; margin-left: 12px;"
-           onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.6)'"
-           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.4)'">
-            <span style="font-size: 16px;">🔐</span>
-            <span>ورود به Odoo</span>
-        </a>
-
         <!-- User Menu -->
         <div class="user-menu" id="userMenuContainer">
-            <!-- Will be populated by JS -->
+            <!-- Loading state -->
+            <div class="user-loading" style="display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,0.7);">
+                <i class="fas fa-spinner fa-spin"></i>
+            </div>
         </div>
-        
-        <!-- Language Switcher -->
-        <button id="langSwitcherNav" onclick="if(typeof I18N !== 'undefined') { I18N.toggle(); } else { alert('i18n not loaded'); }" 
-                style="background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; transition: all 0.3s;"
-                onmouseover="this.style.background='rgba(255,255,255,0.25)'"
-                onmouseout="this.style.background='rgba(255,255,255,0.15)'">
-            <i class="fas fa-language"></i>
-            <span id="langNameNav">English</span>
-        </button>
 
         <!-- Mobile Menu Button -->
         <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
@@ -499,61 +708,103 @@ document.addEventListener('click', function(event) {
     if (compass && !compass.contains(event.target)) {
         compass.classList.remove('active');
     }
+    
+    // Close user dropdown too
+    const userDropdown = document.querySelector('.user-dropdown');
+    if (userDropdown && !userDropdown.contains(event.target)) {
+        userDropdown.classList.remove('active');
+    }
 });
 
 // Check user login status and render user menu
 async function checkUserStatus() {
+    const container = document.getElementById('userMenuContainer');
+    if (!container) return;
+    
     try {
-        const response = await fetch('/api/user-status');
+        const response = await fetch('/api/user-status', {
+            credentials: 'same-origin'
+        });
+        
         const result = await response.json();
         
-        const container = document.getElementById('userMenuContainer');
-        
-        if (result.logged_in) {
-            // User is logged in - show user dropdown
+        if (response.ok && result.logged_in) {
+            // Get user initials for avatar
+            const userName = result.user.name || result.user.phone || 'کاربر';
+            const initials = userName.charAt(0).toUpperCase();
+            const displayName = userName.length > 12 ? userName.substring(0, 12) + '...' : userName;
+            
+            // User is logged in - show user dropdown like GitHub/Numberland
             container.innerHTML = `
-                <div class="user-dropdown dropdown">
-                    <div class="user-button dropdown-toggle">
-                        <div class="user-avatar">${result.user.name ? result.user.name[0].toUpperCase() : '👤'}</div>
-                        <span class="user-name">${result.user.name || 'کاربر'}</span>
-                        <span style="font-size: 10px;">▼</span>
+                <div class="user-dropdown" onclick="this.classList.toggle('active')">
+                    <div class="user-trigger">
+                        <div class="user-avatar-circle">${initials}</div>
+                        <span class="user-display-name">${displayName}</span>
+                        <i class="fas fa-chevron-down user-chevron"></i>
                     </div>
-                    <div class="dropdown-menu">
-                        <a href="/profile.html" class="dropdown-item">
-                            👤 حساب کاربری
+                    <div class="user-dropdown-menu" onclick="event.stopPropagation()">
+                        <div class="user-dropdown-header">
+                            <div class="user-avatar-large">${initials}</div>
+                            <div class="user-info">
+                                <div class="user-full-name">${userName}</div>
+                                <div class="user-email">${result.user.email || result.user.phone || ''}</div>
+                            </div>
+                        </div>
+                        <div class="user-dropdown-divider"></div>
+                        <a href="/profile.html" class="user-dropdown-item">
+                            <i class="fas fa-user"></i>
+                            <span>حساب کاربری</span>
                         </a>
-                        <a href="/dashboard.html" class="dropdown-item">
-                            📊 داشبورد
+                        <a href="/dashboard.html" class="user-dropdown-item">
+                            <i class="fas fa-chart-line"></i>
+                            <span>داشبورد</span>
+                        </a>
+                        <a href="/licenses.html" class="user-dropdown-item">
+                            <i class="fas fa-key"></i>
+                            <span>لایسنس‌ها</span>
+                        </a>
+                        <div class="user-dropdown-divider"></div>
+                        <a href="#" onclick="if(typeof I18N !== 'undefined') { I18N.toggle(); } else { alert('i18n not loaded'); } return false;" class="user-dropdown-item">
+                            <i class="fas fa-language"></i>
+                            <span>تغییر زبان</span>
                         </a>
                         ${result.user.is_admin ? `
-                        <div class="dropdown-divider"></div>
-                        <a href="/admin_panel.html" class="dropdown-item">
-                            ⚙️ پنل مدیریت
+                        <div class="user-dropdown-divider"></div>
+                        <a href="/dashboard-unified.html" class="user-dropdown-item">
+                            <i class="fas fa-cog"></i>
+                            <span>پنل مدیریت</span>
                         </a>
-                        <a href="/admin_customers.html" class="dropdown-item">
-                            👥 مدیریت کاربران
+                        <a href="/dashboard-unified.html#users" class="user-dropdown-item" onclick="localStorage.setItem('dashboardSection','users')">
+                            <i class="fas fa-users"></i>
+                            <span>مدیریت کاربران</span>
                         </a>
                         ` : ''}
-                        <div class="dropdown-divider"></div>
-                        <a href="#" onclick="logout(); return false;" class="dropdown-item" style="color: #ef4444;">
-                            🚪 خروج
+                        <div class="user-dropdown-divider"></div>
+                        <a href="#" onclick="logout(); return false;" class="user-dropdown-item logout-item">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>خروج</span>
                         </a>
                     </div>
                 </div>
             `;
         } else {
-            // User is not logged in - show login/register buttons
+            // User is not logged in - show login button
             container.innerHTML = `
-                <a href="/user-login.html" class="nav-link" style="background: rgba(255,255,255,0.15); border-radius: 8px;">
-                    🔐 ورود
-                </a>
-                <a href="/user-register.html" class="nav-link" style="background: white; color: #667eea; border-radius: 8px;">
-                    📝 ثبت‌نام
+                <a href="/user-login.html" class="login-btn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>ورود | ثبت‌نام</span>
                 </a>
             `;
         }
     } catch (error) {
         console.error('Error checking user status:', error);
+        // Show login button on error
+        container.innerHTML = `
+            <a href="/user-login.html" class="login-btn">
+                <i class="fas fa-sign-in-alt"></i>
+                <span>ورود | ثبت‌نام</span>
+            </a>
+        `;
     }
 }
 
@@ -561,7 +812,8 @@ async function checkUserStatus() {
 async function logout() {
     try {
         const response = await fetch('/api/logout', {
-            method: 'POST'
+            method: 'POST',
+            credentials: 'same-origin'
         });
         
         if (response.ok) {
@@ -582,9 +834,10 @@ function highlightActivePage() {
     });
 }
 
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
+// Initialize immediately (since this runs after DOM is loaded via nav-loader)
+(function initNavHeader() {
+    console.log('🔐 Checking user status...');
     checkUserStatus();
     highlightActivePage();
-});
+})();
 </script>

@@ -77,7 +77,7 @@ TEMP_DIR = Path(tempfile.gettempdir()) / 'odoo_setup_scripts'
 CONFIG_FILE = BASE / 'installer_config.json'
 LICENSE_DB_FILE = BASE / '.license_db.json'
 
-PORT = int(os.environ.get('PORT', 5000))
+PORT = int(os.environ.get('PORT', 5001))
 
 
 # ============ ADMIN AUTH ============

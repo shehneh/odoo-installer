@@ -1,0 +1,2178 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پنل کاربری - OdooMaster</title>
+    <link rel="stylesheet" href="/css/unified-nav.css?v=8">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f6f8fa;
+            min-height: 100vh;
+            padding-top: 70px;
+        }
+
+        .dashboard-layout {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            gap: 24px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            flex-shrink: 0;
+        }
+
+        .user-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .user-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .user-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #24292f;
+            margin-bottom: 5px;
+        }
+
+        .user-email {
+            font-size: 14px;
+            color: #57606a;
+        }
+
+        .sidebar-nav {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .nav-section {
+            padding: 12px 0;
+            border-bottom: 1px solid #d0d7de;
+        }
+
+        .nav-section:last-child {
+            border-bottom: none;
+        }
+
+        .nav-section-title {
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #57606a;
+            text-transform: uppercase;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            color: #24292f;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border-right: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: #f6f8fa;
+        }
+
+        .nav-item.active {
+            background: #f6f8fa;
+            border-right-color: #667eea;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .nav-item i, .nav-item .icon {
+            width: 20px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .nav-item .badge {
+            margin-right: auto;
+            background: #667eea;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .content-header {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .content-header h1 {
+            font-size: 24px;
+            color: #24292f;
+            margin-bottom: 8px;
+        }
+
+        .content-header p {
+            color: #57606a;
+            font-size: 14px;
+        }
+
+        .content-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .content-section h2 {
+            font-size: 18px;
+            color: #24292f;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #d0d7de;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        /* Table Styles */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            background: #f6f8fa;
+            padding: 12px 16px;
+            text-align: right;
+            font-weight: 600;
+            color: #24292f;
+            border-bottom: 1px solid #d0d7de;
+        }
+
+        .data-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #d0d7de;
+            color: #24292f;
+        }
+
+        .data-table tr:hover {
+            background: #f6f8fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge.active { background: #dafbe1; color: #1a7f37; }
+        .badge.pending { background: #fff8c5; color: #9a6700; }
+        .badge.inactive { background: #ffebe9; color: #cf222e; }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #24292f;
+            margin-bottom: 8px;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #d0d7de;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: #57606a;
+            margin-top: 6px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f6f8fa;
+            color: #24292f;
+            border: 1px solid #d0d7de;
+        }
+
+        .btn-secondary:hover {
+            background: #f3f4f6;
+        }
+
+        .btn-danger {
+            background: #cf222e;
+            color: white;
+        }
+
+        /* Action Buttons for Tables */
+        .btn-icon {
+            background: #f6f8fa;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 16px;
+        }
+
+        .btn-icon:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-icon.success {
+            color: #1a7f37;
+            border-color: #1a7f37;
+        }
+
+        .btn-icon.success:hover {
+            background: #dafbe1;
+        }
+
+        .btn-icon.primary {
+            color: #0969da;
+            border-color: #0969da;
+        }
+
+        .btn-icon.primary:hover {
+            background: #ddf4ff;
+        }
+
+        .btn-icon.warning {
+            color: #9a6700;
+            border-color: #9a6700;
+        }
+
+        .btn-icon.warning:hover {
+            background: #fff8c5;
+        }
+
+        .btn-icon.danger {
+            color: #cf222e;
+            border-color: #cf222e;
+        }
+
+        .btn-icon.danger:hover {
+            background: #ffebe9;
+        }
+
+        /* Info Cards */
+        .info-card {
+            background: #f6f8fa;
+            border: 1px solid #d0d7de;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .info-card h3 {
+            font-size: 14px;
+            color: #57606a;
+            margin-bottom: 8px;
+        }
+
+        .info-card .value {
+            font-size: 16px;
+            color: #24292f;
+            font-family: monospace;
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow: auto;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            max-width: 500px;
+            position: relative;
+        }
+
+        .modal-content h3 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #24292f;
+        }
+
+        .close {
+            position: absolute;
+            left: 15px;
+            top: 15px;
+            color: #57606a;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #24292f;
+        }
+
+        /* Ticket Styles */
+        .ticket-card {
+            background: white;
+            border: 1px solid #d0d7de;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .ticket-card:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+
+        .ticket-number {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 14px;
+        }
+
+        .ticket-subject {
+            font-size: 16px;
+            font-weight: 600;
+            color: #24292f;
+            margin: 8px 0;
+        }
+
+        .ticket-meta {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            font-size: 13px;
+            color: #57606a;
+        }
+
+        .ticket-status {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .ticket-status.open { background: #dafbe1; color: #1a7f37; }
+        .ticket-status.in_progress { background: #ddf4ff; color: #0969da; }
+        .ticket-status.waiting { background: #fff8c5; color: #9a6700; }
+        .ticket-status.closed { background: #e5e7eb; color: #57606a; }
+
+        .ticket-priority {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .ticket-priority.low { background: #e5e7eb; color: #57606a; }
+        .ticket-priority.medium { background: #ddf4ff; color: #0969da; }
+        .ticket-priority.high { background: #fff8c5; color: #9a6700; }
+        .ticket-priority.urgent { background: #ffebe9; color: #cf222e; }
+
+        .ticket-category {
+            padding: 4px 10px;
+            background: #f6f8fa;
+            border-radius: 12px;
+            font-size: 12px;
+            color: #24292f;
+        }
+
+        .message-thread {
+            background: #f6f8fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .message-item {
+            background: white;
+            border: 1px solid #d0d7de;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .message-item.admin {
+            background: #ddf4ff;
+            border-color: #0969da;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .message-sender {
+            font-weight: 600;
+            color: #24292f;
+        }
+
+        .message-time {
+            color: #57606a;
+        }
+
+        .message-body {
+            color: #24292f;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .reply-box {
+            background: white;
+            border: 1px solid #d0d7de;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #57606a;
+        }
+
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-layout {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <div id="navHeader"></div>
+
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="user-card">
+                <div class="user-avatar" id="userAvatar">م</div>
+                <div class="user-name" id="userName">کاربر</div>
+                <div class="user-email" id="userEmail">email@example.com</div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">حساب کاربری</div>
+                    <a class="nav-item active" data-section="overview">
+                        <span class="icon">📊</span>
+                        <span>نمای کلی</span>
+                    </a>
+                    <a class="nav-item" data-section="profile">
+                        <span class="icon">👤</span>
+                        <span>اطلاعات پروفایل</span>
+                    </a>
+                    <a class="nav-item" data-section="databases">
+                        <span class="icon">🗄️</span>
+                        <span>دیتابیس‌ها</span>
+                        <span class="badge" id="dbCount">0</span>
+                    </a>
+                    <a class="nav-item" data-section="licenses">
+                        <span class="icon">🔑</span>
+                        <span>لایسنس‌ها</span>
+                    </a>
+                    <a class="nav-item" data-section="tickets">
+                        <span class="icon">🎫</span>
+                        <span>تیکت‌های من</span>
+                        <span class="badge" id="myTicketsCount">0</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">تنظیمات</div>
+                    <a class="nav-item" data-section="security">
+                        <span class="icon">🔒</span>
+                        <span>امنیت و رمز عبور</span>
+                    </a>
+                    <a class="nav-item" data-section="notifications">
+                        <span class="icon">🔔</span>
+                        <span>اعلان‌ها</span>
+                    </a>
+                </div>
+
+                <!-- Admin Section -->
+                <div class="nav-section" id="adminSection" style="display: none;">
+                    <div class="nav-section-title">مدیریت سایت</div>
+                    <a class="nav-item" data-section="users">
+                        <span class="icon">👤</span>
+                        <span>کاربران سایت</span>
+                        <span class="badge" id="usersCount">0</span>
+                    </a>
+                    <a class="nav-item" data-section="customers">
+                        <span class="icon">🏢</span>
+                        <span>مشتریان (Tenants)</span>
+                    </a>
+                    <a class="nav-item" data-section="all-licenses">
+                        <span class="icon">📋</span>
+                        <span>همه لایسنس‌ها</span>
+                    </a>
+                    <a class="nav-item" data-section="plans">
+                        <span class="icon">💎</span>
+                        <span>مدیریت پلن‌ها</span>
+                    </a>
+                    <a class="nav-item" data-section="admin-tickets">
+                        <span class="icon">🎫</span>
+                        <span>مدیریت تیکت‌ها</span>
+                        <span class="badge" id="adminTicketsCount">0</span>
+                    </a>
+                    <a class="nav-item" data-section="settings">
+                        <span class="icon">⚙️</span>
+                        <span>تنظیمات سیستم</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Overview Section -->
+            <section class="content-section active" id="section-overview">
+                <div class="content-header">
+                    <h1>👋 خوش آمدید!</h1>
+                    <p>نمای کلی حساب کاربری شما</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>دیتابیس‌های فعال</h3>
+                        <div class="number" id="statDatabases">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>لایسنس‌های فعال</h3>
+                        <div class="number" id="statLicenses">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>روز باقیمانده</h3>
+                        <div class="number" id="statDays">∞</div>
+                    </div>
+                </div>
+
+                <div id="quickActions">
+                    <h2>🚀 دسترسی سریع</h2>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <a href="/onboarding.html" class="btn btn-primary">➕ ایجاد دیتابیس جدید</a>
+                        <a href="/apps.html" class="btn btn-secondary">📦 نصب اپلیکیشن</a>
+                        <a href="/docs.html" class="btn btn-secondary">📚 مستندات</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Profile Section -->
+            <section class="content-section" id="section-profile">
+                <h2>👤 اطلاعات پروفایل</h2>
+                <form id="profileForm">
+                    <div class="form-group">
+                        <label>نام و نام خانوادگی</label>
+                        <input type="text" id="profileName" placeholder="نام شما">
+                    </div>
+                    <div class="form-group">
+                        <label>ایمیل</label>
+                        <input type="email" id="profileEmail" placeholder="email@example.com" readonly>
+                        <div class="form-hint">ایمیل قابل تغییر نیست</div>
+                    </div>
+                    <div class="form-group">
+                        <label>شماره تلفن</label>
+                        <input type="tel" id="profilePhone" placeholder="09123456789">
+                    </div>
+                    <div class="form-group">
+                        <label>نام شرکت</label>
+                        <input type="text" id="profileCompany" placeholder="نام شرکت شما">
+                    </div>
+                    <button type="submit" class="btn btn-primary">💾 ذخیره تغییرات</button>
+                </form>
+            </section>
+
+            <!-- Databases Section -->
+            <section class="content-section" id="section-databases">
+                <h2>🗄️ دیتابیس‌های شما</h2>
+                <div id="databasesList">
+                    <div class="empty-state">
+                        <div class="icon">📭</div>
+                        <p>هنوز دیتابیسی ایجاد نکرده‌اید</p>
+                        <a href="/onboarding.html" class="btn btn-primary" style="margin-top: 16px;">➕ ایجاد دیتابیس جدید</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Licenses Section -->
+            <section class="content-section" id="section-licenses">
+                <h2>🔑 لایسنس‌های شما</h2>
+                <div id="licensesList">
+                    <div class="empty-state">
+                        <div class="icon">🔐</div>
+                        <p>هنوز لایسنسی خریداری نکرده‌اید</p>
+                        <a href="/payment.html" class="btn btn-primary" style="margin-top: 16px;">🛒 خرید لایسنس</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- User Tickets Section -->
+            <section class="content-section" id="section-tickets">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2>🎫 تیکت‌های پشتیبانی</h2>
+                    <button class="btn btn-primary" onclick="openNewTicketModal()">➕ تیکت جدید</button>
+                </div>
+                
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <div style="display: flex; gap: 10px;">
+                        <select id="ticketStatusFilter" onchange="filterMyTickets()" style="flex: 1; padding: 10px; border: 1px solid #d0d7de; border-radius: 6px;">
+                            <option value="">همه وضعیت‌ها</option>
+                            <option value="open">باز</option>
+                            <option value="in_progress">در حال بررسی</option>
+                            <option value="waiting">در انتظار پاسخ</option>
+                            <option value="closed">بسته شده</option>
+                        </select>
+                        <select id="ticketCategoryFilter" onchange="filterMyTickets()" style="flex: 1; padding: 10px; border: 1px solid #d0d7de; border-radius: 6px;">
+                            <option value="">همه دسته‌ها</option>
+                            <option value="technical">فنی</option>
+                            <option value="billing">مالی</option>
+                            <option value="general">عمومی</option>
+                            <option value="feature">درخواست ویژگی</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="myTicketsList">
+                    <div class="empty-state">
+                        <div class="icon">📭</div>
+                        <p>در حال بارگذاری...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Security Section -->
+            <section class="content-section" id="section-security">
+                <h2>🔒 امنیت و رمز عبور</h2>
+                <form id="passwordForm">
+                    <div class="form-group">
+                        <label>رمز عبور فعلی</label>
+                        <input type="password" id="currentPassword" placeholder="••••••••">
+                    </div>
+                    <div class="form-group">
+                        <label>رمز عبور جدید</label>
+                        <input type="password" id="newPassword" placeholder="••••••••">
+                        <div class="form-hint">حداقل ۸ کاراکتر</div>
+                    </div>
+                    <div class="form-group">
+                        <label>تکرار رمز عبور جدید</label>
+                        <input type="password" id="confirmPassword" placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn btn-primary">🔐 تغییر رمز عبور</button>
+                </form>
+            </section>
+
+            <!-- Notifications Section -->
+            <section class="content-section" id="section-notifications">
+                <h2>🔔 تنظیمات اعلان‌ها</h2>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="notifyEmail" checked> دریافت ایمیل برای اعلان‌های مهم
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="notifyExpiry" checked> هشدار انقضای لایسنس
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="notifyNews"> دریافت خبرنامه و آموزش‌ها
+                    </label>
+                </div>
+                <button class="btn btn-primary">💾 ذخیره تنظیمات</button>
+            </section>
+
+            <!-- Admin: Users Section -->
+            <section class="content-section" id="section-users">
+                <h2>👤 کاربران سایت</h2>
+                <p style="color: #57606a; margin-bottom: 20px;">کاربرانی که در سایت ثبت‌نام کرده‌اند یا با گوگل وارد شده‌اند</p>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>کل کاربران</h3>
+                        <div class="number" id="totalUsers">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>کاربران تایید شده</h3>
+                        <div class="number" id="verifiedUsers">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>ادمین‌ها</h3>
+                        <div class="number" id="adminUsers">0</div>
+                    </div>
+                </div>
+
+                <div id="usersTableContainer">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>نام</th>
+                                <th>ایمیل</th>
+                                <th>تلفن</th>
+                                <th>نوع ورود</th>
+                                <th>وضعیت</th>
+                                <th>ادمین</th>
+                                <th>تاریخ عضویت</th>
+                                <th>عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Admin: Customers Section -->
+            <section class="content-section" id="section-customers">
+                <h2>🏢 مشتریان (Tenants)</h2>
+                <p style="color: #57606a; margin-bottom: 20px;">شرکت‌هایی که دیتابیس Odoo خریده‌اند</p>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>کل مشتریان</h3>
+                        <div class="number" id="totalCustomers">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>مشتریان فعال</h3>
+                        <div class="number" id="activeCustomers">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>امروز عضو شده</h3>
+                        <div class="number" id="todayCustomers">0</div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 16px; display: flex; gap: 10px; align-items: center;">
+                    <button class="btn btn-secondary" onclick="selectAllDatabases()">
+                        ✓ انتخاب همه
+                    </button>
+                    <button class="btn btn-secondary" onclick="deselectAllDatabases()">
+                        ✗ لغو انتخاب
+                    </button>
+                    <button class="btn btn-danger" onclick="deleteSelectedDatabases()" style="margin-left: auto;">
+                        🗑️ حذف انتخاب شده‌ها
+                    </button>
+                </div>
+
+                <div id="customersTableContainer">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;">
+                                    <input type="checkbox" id="selectAllCheckbox" onchange="toggleAllDatabases(this)">
+                                </th>
+                                <th>#</th>
+                                <th>نام شرکت</th>
+                                <th>ایمیل</th>
+                                <th>دیتابیس</th>
+                                <th>وضعیت</th>
+                                <th>تاریخ</th>
+                                <th>عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customersBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Admin: All Licenses Section -->
+            <section class="content-section" id="section-all-licenses">
+                <h2>📋 مدیریت لایسنس‌ها</h2>
+                <p style="color: #57606a; margin-bottom: 20px;">لیست تمام لایسنس‌های صادر شده</p>
+                <div id="allLicensesContainer">
+                    <p>در حال بارگذاری...</p>
+                </div>
+            </section>
+
+            <!-- Admin: Plans Management Section -->
+            <section class="content-section" id="section-plans">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2>💎 مدیریت پلن‌ها</h2>
+                    <button class="btn btn-primary" onclick="openPlanModal()">➕ افزودن پلن جدید</button>
+                </div>
+                
+                <div id="plansTableContainer">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>شناسه</th>
+                                <th>نام (فارسی)</th>
+                                <th>نام (انگلیسی)</th>
+                                <th>قیمت (تومان)</th>
+                                <th>مدت</th>
+                                <th>تخفیف (%)</th>
+                                <th>محبوب</th>
+                                <th>وضعیت</th>
+                                <th>ترتیب نمایش</th>
+                                <th>عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="plansTableBody">
+                            <tr>
+                                <td colspan="10">در حال بارگذاری...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Admin: Tickets Management Section -->
+            <section class="content-section" id="section-admin-tickets">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2>🎫 مدیریت تیکت‌ها</h2>
+                    <div style="display: flex; gap: 10px;">
+                        <select id="adminTicketStatusFilter" onchange="filterAdminTickets()" style="padding: 8px 12px; border: 1px solid #d0d7de; border-radius: 6px;">
+                            <option value="">همه وضعیت‌ها</option>
+                            <option value="open">باز</option>
+                            <option value="in_progress">در حال بررسی</option>
+                            <option value="waiting">در انتظار پاسخ</option>
+                            <option value="closed">بسته شده</option>
+                        </select>
+                        <select id="adminTicketPriorityFilter" onchange="filterAdminTickets()" style="padding: 8px 12px; border: 1px solid #d0d7de; border-radius: 6px;">
+                            <option value="">همه اولویت‌ها</option>
+                            <option value="urgent">فوری</option>
+                            <option value="high">بالا</option>
+                            <option value="medium">متوسط</option>
+                            <option value="low">پایین</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="adminTicketsList">
+                    <div class="empty-state">
+                        <div class="icon">📭</div>
+                        <p>در حال بارگذاری...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Admin: Settings Section -->
+            <section class="content-section" id="section-settings">
+                <h2>⚙️ تنظیمات سیستم</h2>
+                <div class="form-group">
+                    <label>آدرس سرور Odoo</label>
+                    <input type="text" value="https://odoo-online.liara.run" readonly>
+                </div>
+                <div class="form-group">
+                    <label>پلن پیش‌فرض</label>
+                    <select>
+                        <option>Starter</option>
+                        <option>Professional</option>
+                        <option>Enterprise</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" checked> ارسال ایمیل خوش‌آمدگویی به مشتریان جدید
+                    </label>
+                </div>
+                <button class="btn btn-primary">💾 ذخیره تنظیمات</button>
+            </section>
+        </main>
+    </div>
+
+    <!-- Plan Modal -->
+    <div id="planModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <span class="close" onclick="closePlanModal()">&times;</span>
+            <h3 id="planModalTitle">افزودن پلن جدید</h3>
+            
+            <form id="planForm" onsubmit="savePlan(event)">
+                <input type="hidden" id="planEditId" value="">
+                
+                <div class="form-group">
+                    <label>شناسه پلن (یکتا) *</label>
+                    <input type="text" id="planId" required placeholder="مثال: monthly, yearly">
+                </div>
+                
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>نام فارسی *</label>
+                        <input type="text" id="planNameFa" required placeholder="مثال: ماهانه">
+                    </div>
+                    <div class="form-group">
+                        <label>نام انگلیسی *</label>
+                        <input type="text" id="planNameEn" required placeholder="e.g: Monthly">
+                    </div>
+                </div>
+                
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>قیمت (تومان) *</label>
+                        <input type="number" id="planPrice" required min="0" placeholder="500000">
+                    </div>
+                    <div class="form-group">
+                        <label>مدت *</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <input type="number" id="planDurationValue" required min="1" placeholder="1" style="text-align: center;">
+                            <select id="planDurationUnit" required style="padding: 10px; border: 1px solid #d0d7de; border-radius: 6px; font-size: 14px;">
+                                <option value="hour">ساعت</option>
+                                <option value="day">روز</option>
+                                <option value="month" selected>ماه</option>
+                                <option value="year">سال</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>نمایش مدت (فارسی)</label>
+                        <input type="text" id="planDurationFa" placeholder="مثال: یک ماه">
+                    </div>
+                    <div class="form-group">
+                        <label>نمایش مدت (انگلیسی)</label>
+                        <input type="text" id="planDurationEn" placeholder="e.g: One Month">
+                    </div>
+                </div>
+                
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>درصد تخفیف</label>
+                        <input type="number" id="planDiscount" min="0" max="100" value="0" placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label>ترتیب نمایش</label>
+                        <input type="number" id="planOrder" min="0" value="0" placeholder="0">
+                    </div>
+                    <div class="form-group" style="padding-top: 28px;">
+                        <label>
+                            <input type="checkbox" id="planPopular"> محبوب
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>امکانات (هر خط یک امکانات)</label>
+                    <textarea id="planFeatures" rows="5" placeholder="دسترسی به همه ماژول‌های اودو&#10;پشتیبانی 24 ساعته&#10;آپدیت خودکار"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="planActive" checked> فعال
+                    </label>
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                    <button type="button" class="btn" onclick="closePlanModal()">انصراف</button>
+                    <button type="submit" class="btn btn-primary">💾 ذخیره</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- New Ticket Modal -->
+    <div id="ticketModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <span class="close" onclick="closeTicketModal()">&times;</span>
+            <h3>🎫 ایجاد تیکت جدید</h3>
+            
+            <form id="newTicketForm" onsubmit="createNewTicket(event)">
+                <div class="form-group">
+                    <label>موضوع تیکت *</label>
+                    <input type="text" id="ticketSubject" required placeholder="عنوان کوتاه مشکل یا سوال خود">
+                </div>
+                
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>دسته‌بندی *</label>
+                        <select id="ticketCategory" required>
+                            <option value="technical">فنی</option>
+                            <option value="billing">مالی</option>
+                            <option value="general">عمومی</option>
+                            <option value="feature">درخواست ویژگی</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>اولویت</label>
+                        <select id="ticketPriority">
+                            <option value="low">پایین</option>
+                            <option value="medium" selected>متوسط</option>
+                            <option value="high">بالا</option>
+                            <option value="urgent">فوری</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>توضیحات *</label>
+                    <textarea id="ticketMessage" required rows="6" placeholder="لطفاً توضیحات کامل مشکل یا سوال خود را بنویسید..."></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                    <button type="button" class="btn" onclick="closeTicketModal()">انصراف</button>
+                    <button type="submit" class="btn btn-primary">📨 ارسال تیکت</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Ticket Detail Modal -->
+    <div id="ticketDetailModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 900px;">
+            <span class="close" onclick="closeTicketDetail()">&times;</span>
+            
+            <div style="margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                    <div>
+                        <div style="font-size: 14px; color: #667eea; font-weight: 600;" id="detailTicketNumber"></div>
+                        <h3 style="margin: 8px 0;" id="detailTicketSubject"></h3>
+                        <div style="font-size: 13px; color: #57606a;">
+                            📅 <span id="detailTicketCreated"></span>
+                        </div>
+                    </div>
+                    <span id="detailTicketStatus" class="ticket-status"></span>
+                </div>
+                
+                <div style="display: flex; gap: 10px;">
+                    <span id="detailTicketCategory" class="ticket-category"></span>
+                    <span id="detailTicketPriority" class="ticket-priority"></span>
+                </div>
+                
+                <!-- Admin Controls -->
+                <div id="adminControls" style="display: none; margin-top: 15px; padding: 15px; background: #f6f8fa; border-radius: 8px;">
+                    <div style="display: flex; gap: 15px;">
+                        <div style="flex: 1;">
+                            <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px;">تغییر وضعیت:</label>
+                            <select id="adminStatusSelect" onchange="updateTicketStatus()" style="width: 100%; padding: 8px; border: 1px solid #d0d7de; border-radius: 6px;">
+                                <option value="open">باز</option>
+                                <option value="in_progress">در حال بررسی</option>
+                                <option value="waiting">در انتظار پاسخ</option>
+                                <option value="closed">بسته شده</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1;">
+                            <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px;">تغییر اولویت:</label>
+                            <select id="adminPrioritySelect" onchange="updateTicketPriority()" style="width: 100%; padding: 8px; border: 1px solid #d0d7de; border-radius: 6px;">
+                                <option value="low">پایین</option>
+                                <option value="medium">متوسط</option>
+                                <option value="high">بالا</option>
+                                <option value="urgent">فوری</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Messages Thread -->
+            <div class="message-thread">
+                <h4 style="margin-bottom: 15px;">💬 گفتگو</h4>
+                <div id="ticketMessages"></div>
+            </div>
+            
+            <!-- Reply Box -->
+            <div class="reply-box">
+                <h4 style="margin-bottom: 10px;">پاسخ شما</h4>
+                <textarea id="replyMessage" rows="4" placeholder="پیام خود را بنویسید..." style="width: 100%; padding: 10px; border: 1px solid #d0d7de; border-radius: 6px; font-family: inherit;"></textarea>
+                <button class="btn btn-primary" onclick="sendTicketReply()" style="margin-top: 10px;">📤 ارسال پاسخ</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/nav-loader.js"></script>
+    <script src="/js/tickets.js"></script>
+    <script>
+        // Navigation between sections
+        document.querySelectorAll('.nav-item[data-section]').forEach(item => {
+            item.addEventListener('click', () => {
+                const section = item.dataset.section;
+                
+                // Update nav active state
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                item.classList.add('active');
+                
+                // Show corresponding section
+                document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+                document.getElementById(`section-${section}`).classList.add('active');
+                
+                // Load section data if needed
+                loadSectionData(section);
+            });
+        });
+
+        // Load section data
+        async function loadSectionData(section) {
+            switch(section) {
+                case 'customers':
+                    await loadCustomers();
+                    break;
+                case 'databases':
+                    await loadDatabases();
+                    break;
+                case 'users':
+                    await loadUsers();
+                    break;
+                case 'plans':
+                    await loadPlans();
+                    break;
+                case 'tickets':
+                    await loadMyTickets();
+                    break;
+                case 'admin-tickets':
+                    await loadAdminTickets();
+                    break;
+            }
+        }
+
+        // Check user status and load data
+        async function initDashboard() {
+            try {
+                const response = await fetch('/api/user-status');
+                const result = await response.json();
+                
+                if (!result.logged_in) {
+                    window.location.href = '/user-login.html';
+                    return;
+                }
+
+                const user = result.user;
+                
+                // Update user info
+                document.getElementById('userName').textContent = user.name || 'کاربر';
+                document.getElementById('userEmail').textContent = user.email || '';
+                document.getElementById('userAvatar').textContent = user.name ? user.name[0].toUpperCase() : '👤';
+                
+                // Profile form
+                document.getElementById('profileName').value = user.name || '';
+                document.getElementById('profileEmail').value = user.email || '';
+                document.getElementById('profilePhone').value = user.phone || '';
+                document.getElementById('profileCompany').value = user.company || '';
+
+                // Show admin section if admin
+                if (user.is_admin) {
+                    document.getElementById('adminSection').style.display = 'block';
+                }
+
+                // Load initial data
+                await loadDatabases();
+                
+                // Load tickets if section is visible
+                if (document.getElementById('section-tickets').classList.contains('active')) {
+                    await loadMyTickets();
+                }
+                
+            } catch (error) {
+                console.error('Error initializing dashboard:', error);
+            }
+        }
+
+        // Load customers (admin only)
+        async function loadCustomers() {
+            try {
+                const response = await fetch('/api/list-customers');
+                const data = await response.json();
+
+                if (data.success && data.customers.length > 0) {
+                    document.getElementById('totalCustomers').textContent = data.count;
+                    
+                    const activeCount = data.customers.filter(c => c.status === 'active').length;
+                    document.getElementById('activeCustomers').textContent = activeCount;
+                    
+                    const today = new Date().toDateString();
+                    const todayCount = data.customers.filter(c => 
+                        new Date(c.created_at).toDateString() === today
+                    ).length;
+                    document.getElementById('todayCustomers').textContent = todayCount;
+
+                    const tbody = document.getElementById('customersBody');
+                    tbody.innerHTML = '';
+
+                    data.customers.forEach((customer, index) => {
+                        const row = document.createElement('tr');
+                        const createdDate = new Date(customer.created_at).toLocaleDateString('fa-IR');
+                        
+                        row.innerHTML = `
+                            <td><input type="checkbox" class="db-checkbox" value="${customer.database_name}" data-company="${customer.company_name}"></td>
+                            <td>${index + 1}</td>
+                            <td><strong>${customer.company_name}</strong></td>
+                            <td>${customer.admin_email}</td>
+                            <td><code>${customer.database_name}</code></td>
+                            <td><span class="badge active">${customer.status}</span></td>
+                            <td>${createdDate}</td>
+                            <td>
+                                <a href="/web/login?db=${customer.database_name}" 
+                                   target="_blank" class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;">ورود</a>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading customers:', error);
+            }
+        }
+
+        // Load user databases
+        async function loadDatabases() {
+            try {
+                // Fetch user's databases (backend filters by user_id)
+                const response = await fetch('/api/list-customers');
+                const data = await response.json();
+                
+                if (!data.success) {
+                    if (data.error && data.error.includes('وارد شوید')) {
+                        document.getElementById('databasesList').innerHTML = `
+                            <div class="empty-state">
+                                <div class="icon">🔐</div>
+                                <p>لطفاً ابتدا وارد سیستم شوید</p>
+                                <a href="/user-login.html" class="btn btn-primary" style="margin-top: 16px;">ورود</a>
+                            </div>
+                        `;
+                    }
+                    return;
+                }
+                
+                const userDatabases = data.customers || [];
+                const isAdmin = data.is_admin || false;
+                
+                if (userDatabases.length > 0) {
+                    // Verify each database exists in Odoo
+                    const verifiedDatabases = [];
+                    for (const db of userDatabases) {
+                        try {
+                            const verifyResponse = await fetch('/api/verify-database', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ database: db.database_name })
+                            });
+                            const verifyData = await verifyResponse.json();
+                            
+                            if (verifyData.exists) {
+                                verifiedDatabases.push(db);
+                            }
+                        } catch (err) {
+                            console.error('Error verifying database:', db.database_name, err);
+                        }
+                    }
+                    
+                    document.getElementById('statDatabases').textContent = verifiedDatabases.length;
+                    document.getElementById('dbCount').textContent = verifiedDatabases.length;
+                    
+                    if (verifiedDatabases.length > 0) {
+                        // Display verified databases
+                        let htmlContent = '';
+                        verifiedDatabases.forEach((db, index) => {
+                            htmlContent += `
+                                <div style="background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 8px; padding: 20px; margin-bottom: 16px;">
+                                    <h3 style="color: #24292f; margin-bottom: 16px;">
+                                        🗄️ دیتابیس ${index + 1}: ${db.company_name}
+                                    </h3>
+                                    <div class="info-card">
+                                        <h4>نام دیتابیس</h4>
+                                        <div class="value"><code>${db.database_name}</code></div>
+                                    </div>
+                                    <div class="info-card">
+                                        <h4>ایمیل مدیر</h4>
+                                        <div class="value">${db.admin_email}</div>
+                                    </div>
+                                    <div class="info-card">
+                                        <h4>نام مدیر</h4>
+                                        <div class="value">${db.admin_name}</div>
+                                    </div>
+                                    <div class="info-card">
+                                        <h4>وضعیت</h4>
+                                        <div class="value"><span class="badge ${db.status === 'active' ? 'active' : 'pending'}">${db.status}</span></div>
+                                    </div>
+                                    <div class="info-card">
+                                        <h4>تاریخ ایجاد</h4>
+                                        <div class="value">${new Date(db.created_at).toLocaleDateString('fa-IR')}</div>
+                                    </div>
+                                    <div style="margin-top: 20px; display: flex; gap: 10px;">
+                                        <button class="btn btn-primary" onclick="loginToOdooDb('${db.database_name}', '${db.admin_email}', '${db.admin_password}')">
+                                            🎯 ورود به Odoo
+                                        </button>
+                                        <button class="btn btn-secondary" onclick="showDatabaseInfo('${db.database_name}')">
+                                            ℹ️ جزئیات
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        
+                        document.getElementById('databasesList').innerHTML = htmlContent;
+                    } else {
+                        // No verified databases found
+                        document.getElementById('databasesList').innerHTML = `
+                            <div class="empty-state">
+                                <div class="icon">📦</div>
+                                <p>هنوز دیتابیسی ایجاد نکرده‌اید</p>
+                                <a href="/onboarding.html" class="btn btn-primary" style="margin-top: 16px;">➕ ایجاد دیتابیس جدید</a>
+                            </div>
+                        `;
+                    }
+                } else {
+                    // No databases found
+                    document.getElementById('statDatabases').textContent = '0';
+                    document.getElementById('dbCount').textContent = '0';
+                    document.getElementById('databasesList').innerHTML = `
+                        <div class="empty-state">
+                            <div class="icon">📭</div>
+                            <p>هنوز دیتابیسی ایجاد نکرده‌اید</p>
+                            <a href="/onboarding.html" class="btn btn-primary" style="margin-top: 16px;">➕ ایجاد دیتابیس جدید</a>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading databases:', error);
+                document.getElementById('databasesList').innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">⚠️</div>
+                        <p>خطا در بارگذاری دیتابیس‌ها</p>
+                        <button class="btn btn-primary" onclick="loadDatabases()" style="margin-top: 16px;">🔄 تلاش مجدد</button>
+                    </div>
+                `;
+            }
+        }
+
+        // Login to Odoo database
+
+        // Login to Odoo database
+        function loginToOdooDb(database, email, password) {
+            const url = `/auto_login.html?db=${encodeURIComponent(database)}&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
+            window.open(url, '_blank');
+        }
+
+        // Show database details
+        function showDatabaseInfo(database) {
+            alert(`اطلاعات دیتابیس:\n\n📦 نام: ${database}\n\nبرای مشاهده اطلاعات کامل، لطفاً وارد Odoo شوید.`);
+        }
+
+        // Toggle all databases selection
+        function toggleAllDatabases(checkbox) {
+            const checkboxes = document.querySelectorAll('.db-checkbox');
+            checkboxes.forEach(cb => cb.checked = checkbox.checked);
+        }
+
+        // Select all databases
+        function selectAllDatabases() {
+            document.getElementById('selectAllCheckbox').checked = true;
+            toggleAllDatabases(document.getElementById('selectAllCheckbox'));
+        }
+
+        // Deselect all databases
+        function deselectAllDatabases() {
+            document.getElementById('selectAllCheckbox').checked = false;
+            toggleAllDatabases(document.getElementById('selectAllCheckbox'));
+        }
+
+        // Delete selected databases
+        async function deleteSelectedDatabases() {
+            const checkboxes = document.querySelectorAll('.db-checkbox:checked');
+            
+            if (checkboxes.length === 0) {
+                alert('❌ هیچ دیتابیسی انتخاب نشده است!');
+                return;
+            }
+
+            const databases = Array.from(checkboxes).map(cb => ({
+                name: cb.value,
+                company: cb.dataset.company
+            }));
+
+            // Step 1: Show severe warning
+            const dbList = databases.map((db, i) => `${i+1}. ${db.company} (${db.name})`).join('\n');
+            const warningMsg = `⚠️⚠️⚠️ هشدار جدی ⚠️⚠️⚠️\n\n` +
+                `شما در حال حذف ${databases.length} دیتابیس هستید:\n\n${dbList}\n\n` +
+                `❌ این عملیات غیرقابل بازگشت است!\n` +
+                `❌ تمام اطلاعات، کاربران، محصولات و داده‌ها از بین خواهند رفت!\n\n` +
+                `آیا واقعاً می‌خواهید ادامه دهید؟`;
+            
+            if (!confirm(warningMsg)) {
+                return;
+            }
+
+            // Step 2: Final confirmation with password
+            const deletePassword = prompt(
+                `🔐 برای تأیید نهایی، رمز حذف را وارد کنید:\n\n` +
+                `(برای دریافت رمز، با مدیر سیستم تماس بگیرید)\n\n` +
+                `در حال حذف ${databases.length} دیتابیس...`
+            );
+
+            if (!deletePassword) {
+                alert('❌ عملیات لغو شد.');
+                return;
+            }
+
+            // Step 3: Send delete request
+            try {
+                console.log('🗑️ Sending delete request for databases:', databases.map(db => db.name));
+                console.log('🔐 Master password length:', deletePassword.length);
+                
+                const response = await fetch('/api/admin/delete-databases', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        databases: databases.map(db => db.name),
+                        master_password: deletePassword
+                    })
+                });
+
+                console.log('📡 Response status:', response.status);
+                const result = await response.json();
+                console.log('📦 Response data:', result);
+
+                if (result.success) {
+                    alert(`✅ ${result.deleted_count} دیتابیس با موفقیت حذف شد!\n\n${result.message}`);
+                    // Reload customers list
+                    await loadCustomers();
+                    deselectAllDatabases();
+                } else {
+                    alert(`❌ خطا: ${result.error}`);
+                }
+            } catch (error) {
+                console.error('❌ Delete error:', error);
+                alert(`❌ خطا در حذف دیتابیس‌ها: ${error.message}`);
+            }
+        }
+
+        // Load site users (admin only)
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/admin/users');
+                const data = await response.json();
+
+                if (data.success && data.users && data.users.length > 0) {
+                    const users = data.users;
+                    
+                    // Update stats
+                    document.getElementById('totalUsers').textContent = users.length;
+                    document.getElementById('usersCount').textContent = users.length;
+                    
+                    const verifiedCount = users.filter(u => u.verified).length;
+                    document.getElementById('verifiedUsers').textContent = verifiedCount;
+                    
+                    const adminCount = users.filter(u => u.is_admin).length;
+                    document.getElementById('adminUsers').textContent = adminCount;
+
+                    // Populate table
+                    const tbody = document.getElementById('usersBody');
+                    tbody.innerHTML = '';
+
+                    users.forEach((user, index) => {
+                        const row = document.createElement('tr');
+                        const createdDate = user.created_at ? new Date(user.created_at).toLocaleDateString('fa-IR') : '-';
+                        const authMethod = user.auth_method === 'google' ? 'گوگل' : 'ایمیل';
+                        const statusBadge = user.status === 'active' ? 'active' : 'pending';
+                        const statusText = user.status === 'active' ? 'فعال' : 'در انتظار';
+                        
+                        row.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td><strong>${user.name || '-'}</strong></td>
+                            <td>${user.email}</td>
+                            <td>${user.phone || '-'}</td>
+                            <td><span class="badge ${user.auth_method === 'google' ? 'active' : 'pending'}">${authMethod}</span></td>
+                            <td><span class="badge ${statusBadge}">${statusText}</span></td>
+                            <td>${user.is_admin ? '👑' : '-'}</td>
+                            <td>${createdDate}</td>
+                            <td>
+                                <div style="display: flex; gap: 8px; justify-content: center;">
+                                    ${user.status === 'pending' || user.status === 'inactive' ? 
+                                        `<button class="btn-icon success" onclick="approveUser(${user.id}, '${user.email}')" title="تأیید کاربر">
+                                            ✓
+                                        </button>` : 
+                                        `<button class="btn-icon warning" onclick="deactivateUser(${user.id}, '${user.email}')" title="غیرفعال کردن">
+                                            ⊗
+                                        </button>`
+                                    }
+                                    <button class="btn-icon ${user.is_admin ? 'warning' : 'primary'}" 
+                                            onclick="toggleAdmin(${user.id}, '${user.email}', ${user.is_admin})" 
+                                            title="${user.is_admin ? 'حذف دسترسی ادمین' : 'دادن دسترسی ادمین'}">
+                                        👤
+                                    </button>
+                                    <button class="btn-icon danger" onclick="deleteUser(${user.id}, '${user.email}')" title="حذف کاربر">
+                                        🗑
+                                    </button>
+                                </div>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                } else {
+                    document.getElementById('usersBody').innerHTML = `
+                        <tr><td colspan="9" style="text-align: center; padding: 40px; color: #57606a;">
+                            هیچ کاربری یافت نشد
+                        </td></tr>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+                document.getElementById('usersBody').innerHTML = `
+                    <tr><td colspan="9" style="text-align: center; padding: 40px; color: #cf222e;">
+                        خطا در بارگذاری کاربران: ${error.message}
+                    </td></tr>
+                `;
+            }
+        }
+
+        // User management functions
+        async function approveUser(userId, email) {
+            if (!confirm(`آیا می‌خواهید کاربر "${email}" را تأیید کنید?`)) return;
+            
+            try {
+                const response = await fetch('/api/admin/users/status', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, status: 'active' })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    alert('✅ کاربر با موفقیت تأیید شد');
+                    await loadUsers();
+                } else {
+                    alert('❌ خطا: ' + data.error);
+                }
+            } catch (error) {
+                alert('❌ خطا در تأیید کاربر: ' + error.message);
+            }
+        }
+
+        async function deactivateUser(userId, email) {
+            if (!confirm(`آیا می‌خواهید کاربر "${email}" را غیرفعال کنید?`)) return;
+            
+            try {
+                const response = await fetch('/api/admin/users/status', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, status: 'inactive' })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    alert('✅ کاربر با موفقیت غیرفعال شد');
+                    await loadUsers();
+                } else {
+                    alert('❌ خطا: ' + data.error);
+                }
+            } catch (error) {
+                alert('❌ خطا در غیرفعال کردن کاربر: ' + error.message);
+            }
+        }
+
+        async function toggleAdmin(userId, email, isCurrentlyAdmin) {
+            const action = isCurrentlyAdmin ? 'حذف دسترسی ادمین' : 'دادن دسترسی ادمین';
+            if (!confirm(`آیا می‌خواهید برای کاربر "${email}" ${action} انجام دهید?\n\n⚠️ توجه: این تغییر دسترسی‌های کاربر را تغییر می‌دهد.`)) return;
+            
+            try {
+                const response = await fetch('/api/admin/users/admin-status', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, is_admin: !isCurrentlyAdmin })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    alert(isCurrentlyAdmin ? '✅ دسترسی ادمین با موفقیت حذف شد' : '✅ دسترسی ادمین با موفقیت اعطا شد');
+                    await loadUsers();
+                } else {
+                    alert('❌ خطا: ' + data.error);
+                }
+            } catch (error) {
+                alert('❌ خطا در تغییر دسترسی: ' + error.message);
+            }
+        }
+
+        async function deleteUser(userId, email) {
+            if (!confirm(`⚠️ هشدار: آیا مطمئن هستید که می‌خواهید کاربر "${email}" را حذف کنید?\n\nاین عملیات غیرقابل بازگشت است!`)) return;
+            
+            // Double confirmation for critical action
+            if (!confirm('آیا کاملاً مطمئن هستید? این کاربر برای همیشه حذف خواهد شد.')) return;
+            
+            try {
+                const response = await fetch('/api/admin/users/' + userId, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    alert('✅ کاربر با موفقیت حذف شد');
+                    await loadUsers();
+                } else {
+                    alert('❌ خطا: ' + data.error);
+                }
+            } catch (error) {
+                alert('❌ خطا در حذف کاربر: ' + error.message);
+            }
+        }
+
+        // Profile form submit
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            alert('✅ اطلاعات با موفقیت ذخیره شد');
+        });
+
+        // Password form submit
+        document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newPass = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+            
+            if (newPass !== confirm) {
+                alert('❌ رمز عبور و تکرار آن یکسان نیستند');
+                return;
+            }
+            
+            alert('✅ رمز عبور با موفقیت تغییر کرد');
+        });
+
+        // Handle URL hash and localStorage for direct section access
+        function handleDirectSection() {
+            // Check localStorage first
+            const savedSection = localStorage.getItem('dashboardSection');
+            if (savedSection) {
+                localStorage.removeItem('dashboardSection');
+                switchToSection(savedSection);
+                return;
+            }
+            
+            // Check URL hash
+            const hash = window.location.hash.replace('#', '');
+            if (hash) {
+                switchToSection(hash);
+            }
+        }
+
+        function switchToSection(section) {
+            const navItem = document.querySelector(`.nav-item[data-section="${section}"]`);
+            if (navItem) {
+                navItem.click();
+            }
+        }
+
+        // =============== PLANS MANAGEMENT ===============
+        
+        // Convert value + unit to months
+        function convertToMonths(value, unit) {
+            switch(unit) {
+                case 'hour':
+                    return Math.ceil(value / 720); // ~720 hours per month
+                case 'day':
+                    return Math.ceil(value / 30); // ~30 days per month
+                case 'month':
+                    return value;
+                case 'year':
+                    return value * 12;
+                default:
+                    return value;
+            }
+        }
+        
+        // Convert months back to best unit
+        function monthsToUnit(months) {
+            if (months % 12 === 0) {
+                return { value: months / 12, unit: 'year' };
+            } else if (months >= 1) {
+                return { value: months, unit: 'month' };
+            } else {
+                // Less than a month, convert to days
+                return { value: months * 30, unit: 'day' };
+            }
+        }
+        
+        // Format duration for display
+        function formatDuration(months) {
+            const unitNames = {
+                'hour': 'ساعت',
+                'day': 'روز',
+                'month': 'ماه',
+                'year': 'سال'
+            };
+            
+            const {value, unit} = monthsToUnit(months);
+            return `${value} ${unitNames[unit]}`;
+        }
+        
+        // Load all plans (admin only)
+        async function loadPlans() {
+            try {
+                const response = await fetch('/api/admin/plans');
+                const data = await response.json();
+
+                const tbody = document.getElementById('plansTableBody');
+                
+                if (!data.success) {
+                    tbody.innerHTML = `<tr><td colspan="10" style="color: red;">خطا: ${data.error}</td></tr>`;
+                    return;
+                }
+
+                if (data.plans.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="10">هیچ پلنی یافت نشد</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = data.plans.map(plan => `
+                    <tr>
+                        <td>${plan.plan_id}</td>
+                        <td>${plan.name_fa}</td>
+                        <td>${plan.name_en}</td>
+                        <td>${plan.price.toLocaleString()}</td>
+                        <td>${formatDuration(plan.duration_months)}</td>
+                        <td>${plan.discount_percent}%</td>
+                        <td>${plan.is_popular ? '⭐ بله' : 'خیر'}</td>
+                        <td><span class="badge ${plan.is_active ? 'active' : 'inactive'}">${plan.is_active ? 'فعال' : 'غیرفعال'}</span></td>
+                        <td>${plan.display_order}</td>
+                        <td style="display: flex; gap: 5px;">
+                            <button class="btn-icon primary" onclick="editPlan(${plan.id})" title="ویرایش">✏️</button>
+                            <button class="btn-icon ${plan.is_active ? 'danger' : 'success'}" onclick="togglePlanActive(${plan.id}, ${plan.is_active})" title="${plan.is_active ? 'غیرفعال کردن' : 'فعال کردن'}">${plan.is_active ? '🚫' : '✅'}</button>
+                            <button class="btn-icon danger" onclick="deletePlan(${plan.id})" title="حذف">🗑️</button>
+                        </td>
+                    </tr>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error loading plans:', error);
+                document.getElementById('plansTableBody').innerHTML = 
+                    `<tr><td colspan="10" style="color: red;">خطا در بارگذاری پلن‌ها</td></tr>`;
+            }
+        }
+
+        // Open modal for creating/editing plan
+        let editingPlanId = null;
+        let allPlansData = [];
+
+        function openPlanModal(planId = null) {
+            editingPlanId = planId;
+            const modal = document.getElementById('planModal');
+            const title = document.getElementById('planModalTitle');
+            
+            if (planId) {
+                // Edit mode
+                title.textContent = 'ویرایش پلن';
+                loadPlanData(planId);
+            } else {
+                // Create mode
+                title.textContent = 'افزودن پلن جدید';
+                document.getElementById('planForm').reset();
+                document.getElementById('planActive').checked = true;
+            }
+            
+            modal.style.display = 'block';
+            
+            // Setup auto-translation after modal is visible
+            setTimeout(setupAutoTranslation, 100);
+        }
+
+        function closePlanModal() {
+            document.getElementById('planModal').style.display = 'none';
+            editingPlanId = null;
+        }
+
+        // Persian to English translation dictionary
+        const persianToEnglishDict = {
+            // Plan names
+            'ماهانه': 'Monthly',
+            'سه‌ماهه': 'Quarterly',
+            'سه ماهه': 'Quarterly',
+            'سالانه': 'Yearly',
+            'شش‌ماهه': 'Semi-Annually',
+            'شش ماهه': 'Semi-Annually',
+            'دوماهه': 'Bi-Monthly',
+            'دو ماهه': 'Bi-Monthly',
+            'هفتگی': 'Weekly',
+            'روزانه': 'Daily',
+            'رایگان': 'Free',
+            'پایه': 'Basic',
+            'استاندارد': 'Standard',
+            'حرفه‌ای': 'Professional',
+            'حرفه ای': 'Professional',
+            'پیشرفته': 'Advanced',
+            'سازمانی': 'Enterprise',
+            'ویژه': 'Premium',
+            'طلایی': 'Gold',
+            'نقره‌ای': 'Silver',
+            'برنزی': 'Bronze',
+            
+            // Duration displays
+            'یک روز': 'One Day',
+            'یک هفته': 'One Week',
+            'دو هفته': 'Two Weeks',
+            'یک ماه': 'One Month',
+            'دو ماه': 'Two Months',
+            'سه ماه': 'Three Months',
+            'شش ماه': 'Six Months',
+            'یک سال': 'One Year',
+            'دو سال': 'Two Years',
+            'سه سال': 'Three Years',
+            
+            // Common words
+            'ماه': 'Month',
+            'سال': 'Year',
+            'هفته': 'Week',
+            'روز': 'Day'
+        };
+
+        // Auto-translate function
+        function autoTranslate(persianText) {
+            if (!persianText || !persianText.trim()) return '';
+            
+            const text = persianText.trim();
+            
+            // Check exact match first
+            if (persianToEnglishDict[text]) {
+                return persianToEnglishDict[text];
+            }
+            
+            // Check if text contains any known words
+            for (const [persian, english] of Object.entries(persianToEnglishDict)) {
+                if (text.includes(persian)) {
+                    return text.replace(persian, english);
+                }
+            }
+            
+            // If no match found, return empty (user can fill manually)
+            return '';
+        }
+
+        // Setup auto-translation listeners
+        function setupAutoTranslation() {
+            // Name FA -> Name EN
+            const nameFaInput = document.getElementById('planNameFa');
+            const nameEnInput = document.getElementById('planNameEn');
+            
+            nameFaInput.addEventListener('input', function() {
+                const translated = autoTranslate(this.value);
+                if (translated && !nameEnInput.value) {
+                    nameEnInput.value = translated;
+                }
+            });
+            
+            nameFaInput.addEventListener('blur', function() {
+                const translated = autoTranslate(this.value);
+                if (translated) {
+                    nameEnInput.value = translated;
+                }
+            });
+            
+            // Duration Display FA -> Duration Display EN
+            const durationFaInput = document.getElementById('planDurationFa');
+            const durationEnInput = document.getElementById('planDurationEn');
+            
+            durationFaInput.addEventListener('input', function() {
+                const translated = autoTranslate(this.value);
+                if (translated && !durationEnInput.value) {
+                    durationEnInput.value = translated;
+                }
+            });
+            
+            durationFaInput.addEventListener('blur', function() {
+                const translated = autoTranslate(this.value);
+                if (translated) {
+                    durationEnInput.value = translated;
+                }
+            });
+        }
+
+        function closePlanModal() {
+            document.getElementById('planModal').style.display = 'none';
+            editingPlanId = null;
+        }
+
+        // Load plan data for editing
+        async function loadPlanData(planId) {
+            try {
+                const response = await fetch('/api/admin/plans');
+                const data = await response.json();
+                
+                if (data.success) {
+                    allPlansData = data.plans;
+                    const plan = allPlansData.find(p => p.id === planId);
+                    
+                    if (plan) {
+                        document.getElementById('planId').value = plan.plan_id;
+                        document.getElementById('planNameFa').value = plan.name_fa;
+                        document.getElementById('planNameEn').value = plan.name_en;
+                        document.getElementById('planPrice').value = plan.price;
+                        
+                        // Convert months back to value + unit
+                        const {value, unit} = monthsToUnit(plan.duration_months);
+                        document.getElementById('planDurationValue').value = value;
+                        document.getElementById('planDurationUnit').value = unit;
+                        
+                        document.getElementById('planDurationFa').value = plan.duration_display_fa || '';
+                        document.getElementById('planDurationEn').value = plan.duration_display_en || '';
+                        document.getElementById('planDiscount').value = plan.discount_percent;
+                        document.getElementById('planOrder').value = plan.display_order;
+                        document.getElementById('planPopular').checked = plan.is_popular;
+                        document.getElementById('planActive').checked = plan.is_active;
+                        document.getElementById('planFeatures').value = plan.features.join('\n');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading plan data:', error);
+                alert('خطا در بارگذاری اطلاعات پلن');
+            }
+        }
+
+        // Save plan (create or update)
+        async function savePlan(event) {
+            event.preventDefault();
+            
+            const durationValue = parseInt(document.getElementById('planDurationValue').value);
+            const durationUnit = document.getElementById('planDurationUnit').value;
+            const durationInMonths = convertToMonths(durationValue, durationUnit);
+            
+            const planData = {
+                plan_id: document.getElementById('planId').value.trim(),
+                name_fa: document.getElementById('planNameFa').value.trim(),
+                name_en: document.getElementById('planNameEn').value.trim(),
+                price: parseInt(document.getElementById('planPrice').value),
+                duration_months: durationInMonths,
+                duration_display_fa: document.getElementById('planDurationFa').value.trim(),
+                duration_display_en: document.getElementById('planDurationEn').value.trim(),
+                discount_percent: parseInt(document.getElementById('planDiscount').value) || 0,
+                display_order: parseInt(document.getElementById('planOrder').value) || 0,
+                is_popular: document.getElementById('planPopular').checked,
+                is_active: document.getElementById('planActive').checked,
+                features: document.getElementById('planFeatures').value.split('\n').filter(f => f.trim())
+            };
+
+            try {
+                let url, method;
+                if (editingPlanId) {
+                    url = `/api/admin/plans/${editingPlanId}`;
+                    method = 'PUT';
+                } else {
+                    url = '/api/admin/plans';
+                    method = 'POST';
+                }
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(planData)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(result.message);
+                    closePlanModal();
+                    loadPlans();
+                } else {
+                    alert('خطا: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error saving plan:', error);
+                alert('خطا در ذخیره پلن');
+            }
+        }
+
+        // Edit plan
+        function editPlan(planId) {
+            openPlanModal(planId);
+        }
+
+        // Toggle plan active status
+        async function togglePlanActive(planId, currentStatus) {
+            if (!confirm(`آیا مطمئن هستید که می‌خواهید این پلن را ${currentStatus ? 'غیرفعال' : 'فعال'} کنید؟`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/plans');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const plan = data.plans.find(p => p.id === planId);
+                    if (plan) {
+                        plan.is_active = currentStatus ? 0 : 1;
+                        
+                        const updateResponse = await fetch(`/api/admin/plans/${planId}`, {
+                            method: 'PUT',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify(plan)
+                        });
+
+                        const result = await updateResponse.json();
+                        if (result.success) {
+                            loadPlans();
+                        } else {
+                            alert('خطا: ' + result.error);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error toggling plan status:', error);
+                alert('خطا در تغییر وضعیت پلن');
+            }
+        }
+
+        // Delete plan
+        async function deletePlan(planId) {
+            if (!confirm('آیا مطمئن هستید که می‌خواهید این پلن را حذف کنید؟ این عملیات قابل بازگشت نیست.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/plans/${planId}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(result.message);
+                    loadPlans();
+                } else {
+                    alert('خطا: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error deleting plan:', error);
+                alert('خطا در حذف پلن');
+            }
+        }
+
+        // =============== END PLANS MANAGEMENT ===============
+
+        // Initialize
+        initDashboard();
+        
+        // Handle direct section access after dashboard loads
+        setTimeout(handleDirectSection, 100);
+    </script>
+</body>
+</html>

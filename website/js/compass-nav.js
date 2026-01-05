@@ -9,7 +9,7 @@ let currentUser = null;
 
 async function checkLoginStatus() {
     try {
-        const response = await fetch('/api/user-status');
+        const response = await fetch('/api/user-status', { credentials: 'same-origin' });
         if (response.ok) {
             const result = await response.json();
             if (result.success && result.user) {
@@ -143,8 +143,13 @@ function createUnifiedNav() {
     // User status display
     let userStatusHTML = '';
     if (isLoggedIn && currentUser) {
+        const profilePictureHTML = currentUser.profile_picture 
+            ? `<img src="${currentUser.profile_picture}" alt="${currentUser.name}" class="user-avatar" />`
+            : '';
+        
         userStatusHTML = `
             <div class="user-status">
+                ${profilePictureHTML}
                 <span class="user-name">${currentUser.name || currentUser.email || currentUser.phone}</span>
                 <button class="nav-item logout-btn" id="logoutBtn" title="خروج">
                     <i class="fas fa-sign-out-alt"></i>

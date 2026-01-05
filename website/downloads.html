@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/animations.css">
     <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/unified-nav.css?v=4">
+    <link rel="stylesheet" href="css/unified-nav.css?v=8">
     <style>
         .downloads-page {
             padding-top: 100px;
@@ -319,41 +319,8 @@
     <!-- Particle Background -->
     <div id="particles-js"></div>
     
-    <!-- Navigation -->
-    <nav class="navbar glass">
-        <div class="container">
-            <a href="index.html" class="logo">
-                <div class="logo-icon">
-                    <i class="fas fa-cube"></i>
-                </div>
-                <span>Odoo<strong>Master</strong></span>
-            </a>
-            <ul class="nav-links">
-                <li><a href="index.html#features" class="nav-link">ویژگی‌ها</a></li>
-                <li><a href="index.html#pricing" class="nav-link">قیمت‌گذاری</a></li>
-                <li><a href="downloads.html" class="nav-link active">دانلود</a></li>
-                <li><a href="docs.html" class="nav-link">مستندات</a></li>
-            </ul>
-            <div class="nav-actions">
-                <button class="theme-toggle" id="themeToggle" title="تغییر تم">
-                    <i class="fas fa-moon"></i>
-                </button>
-                <a href="login.html" class="btn btn-ghost">
-                    <i class="fas fa-sign-in-alt"></i>
-                    ورود
-                </a>
-                <a href="register.html" class="btn btn-primary">
-                    <i class="fas fa-rocket"></i>
-                    شروع رایگان
-                </a>
-            </div>
-            <button class="mobile-menu-btn">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-        </div>
-    </nav>
+    <!-- Navigation - Loaded Dynamically -->
+    <div id="nav-container"></div>
 
     <!-- Downloads Page -->
     <main class="downloads-page">

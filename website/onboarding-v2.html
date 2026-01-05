@@ -278,8 +278,18 @@
                         database: result.data.database_name,
                         email: result.data.admin_email,
                         password: result.data.admin_password,
-                        company: result.data.company_name
+                        company: result.data.company_name,
+                        admin_name: result.data.admin_name || adminName,
+                        created_at: result.data.created_at
                     };
+
+                    // اگر این ایمیل قبلاً ثبت شده بود، redirect به پروفایل
+                    if (result.existing && result.redirect_to_profile) {
+                        // Redirect to profile page with data
+                        const profileUrl = `/profile.html?db=${encodeURIComponent(tenantData.database)}&email=${encodeURIComponent(tenantData.email)}&password=${encodeURIComponent(tenantData.password)}&company=${encodeURIComponent(tenantData.company)}&admin_name=${encodeURIComponent(tenantData.admin_name)}&created_at=${encodeURIComponent(tenantData.created_at)}&existing=true`;
+                        window.location.href = profileUrl;
+                        return;
+                    }
 
                     // Show success
                     loading.style.display = 'none';

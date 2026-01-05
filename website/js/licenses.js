@@ -16,9 +16,22 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function init() {
-    if (!API.isLoggedIn()) {
+    // Check authentication with backend session
+    try {
+        const response = await fetch('/api/user-status');
+        const result = await response.json();
+        
+        if (!result.logged_in) {
+            localStorage.setItem('after_login_redirect', window.location.pathname.split('/').pop());
+            window.location.href = 'user-login.html';
+            return;
+        }
+        
+        console.log('✓ User authenticated:', result.user.email);
+    } catch (error) {
+        console.error('Authentication check failed:', error);
         localStorage.setItem('after_login_redirect', window.location.pathname.split('/').pop());
-        window.location.href = 'login.html?redirect=licenses.html';
+        window.location.href = 'user-login.html';
         return;
     }
 

@@ -13,6 +13,11 @@
     function qsa(sel, root = document) { return Array.from(root.querySelectorAll(sel)); }
 
     function getToken() {
+        // Use global AUTH system if available, fallback to localStorage
+        if (window.AUTH && !window.AUTH.isLoading) {
+            return window.AUTH.isLoggedIn ? 'session' : null;
+        }
+        // Legacy fallback
         const raw = localStorage.getItem('authToken');
         if (raw === null || raw === undefined) return null;
         let t = String(raw).trim();
@@ -20,6 +25,17 @@
         if (t === 'null' || t === 'undefined') return null;
         if (/^bearer\s+/i.test(t)) t = t.replace(/^bearer\s+/i, '').trim();
         return t || null;
+    }
+    
+    // Check login using session API
+    async function isLoggedIn() {
+        if (window.AUTH) {
+            if (window.AUTH.isLoading) {
+                await window.AUTH.check();
+            }
+            return window.AUTH.isLoggedIn;
+        }
+        return !!getToken();
     }
 
     async function validateSession() {
@@ -172,9 +188,18 @@
                     ${features.map(f => `<li><i class=\"fas fa-check\"></i> ${escapeHtml(f)}</li>`).join('')}
                 </ul>
                 ${sha ? `
-                <div class="code-block" style="margin: 0 0 16px;">
-                    <button class="code-copy" data-copy="${sha}"><i class="fas fa-copy"></i> کپی</button>
-                    <pre style="direction:ltr; text-align:left; margin:0; font-family:Consolas, monospace; font-size: 0.85rem; color: var(--gray-light);">${sha}</pre>
+                <div class="sha-info" style="margin: 0 0 16px; padding: 12px; background: rgba(113, 75, 103, 0.1); border-radius: 8px; border: 1px solid rgba(113, 75, 103, 0.2);">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                        <i class="fas fa-fingerprint" style="color: var(--primary);"></i>
+                        <span style="font-weight: 600; font-size: 0.9rem;">کد امنیتی SHA256</span>
+                        <button class="btn btn-sm btn-ghost code-copy" data-copy="${sha}" style="margin-right: auto; padding: 4px 12px; font-size: 0.85rem;">
+                            <i class="fas fa-copy"></i> کپی
+                        </button>
+                    </div>
+                    <details style="cursor: pointer;">
+                        <summary style="font-size: 0.85rem; color: var(--text-secondary); user-select: none;">نمایش کد</summary>
+                        <pre style="direction:ltr; text-align:left; margin:8px 0 0; font-family:Consolas, monospace; font-size: 0.75rem; color: var(--gray-light); word-break: break-all; white-space: pre-wrap;">${sha}</pre>
+                    </details>
                 </div>` : ''}
                 <div class="download-actions">
                     <a href="#" class="btn btn-primary btn-download ${downloadDisabled}" data-id="${escapeHtml(item.id)}" aria-disabled="${downloadDisabled ? 'true' : 'false'}">
@@ -234,7 +259,7 @@
 
                 if (item.requires_login && !getToken()) {
                     if (confirm('برای دانلود این فایل باید وارد شوید. انتقال به صفحه ورود؟')) {
-                        window.location.href = 'login.html?redirect=downloads.html';
+                        window.location.href = '/user-login.html?redirect=/downloads.html';
                     }
                     return;
                 }
@@ -275,7 +300,7 @@
                             localStorage.removeItem('authToken');
                             localStorage.removeItem('user');
                             if (confirm('برای دانلود باید دوباره وارد شوید. انتقال به صفحه ورود؟')) {
-                                window.location.href = 'login.html?redirect=downloads.html';
+                                window.location.href = '/user-login.html?redirect=/downloads.html';
                                 return;
                             }
                         }

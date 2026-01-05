@@ -3,13 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ورود - OdooMaster</title>
+    <title>ورود | OdooMaster</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a67d8;
+            --secondary: #764ba2;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --bg-dark: #1a1a2e;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --border-color: #e5e7eb;
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            --radius: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Vazirmatn', sans-serif;
+            background: var(--bg-gradient);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -17,147 +41,208 @@
             padding: 20px;
         }
 
-        .login-container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
+        /* Modal Container */
+        .auth-modal {
+            background: var(--glass-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
             width: 100%;
-            max-width: 450px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 420px;
+            overflow: hidden;
+            animation: slideUp 0.4s ease;
         }
 
-        .login-header {
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Header */
+        .auth-header {
+            padding: 32px 32px 24px;
             text-align: center;
-            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
         }
 
-        .login-header h1 {
-            font-size: 32px;
-            color: #2d3748;
-            margin-bottom: 10px;
-        }
-
-        .login-header p {
-            color: #718096;
-            font-size: 16px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
+        .auth-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
             margin-bottom: 8px;
-            color: #2d3748;
-            font-weight: 600;
         }
 
-        .form-group input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: all 0.3s;
+        .auth-subtitle {
+            color: var(--text-light);
+            font-size: 0.9rem;
         }
 
-        .form-group input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        /* Auth Method Toggle */
-        .auth-method-toggle {
-            display: flex;
-            background: #f7fafc;
-            border-radius: 12px;
-            padding: 5px;
-            margin-bottom: 25px;
-        }
-
-        .auth-method-btn {
-            flex: 1;
-            padding: 12px 20px;
+        /* Close Button */
+        .close-btn {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            width: 36px;
+            height: 36px;
             border: none;
             background: transparent;
             cursor: pointer;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: 600;
-            color: #718096;
+            font-size: 1.5rem;
+            color: var(--text-light);
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .close-btn:hover {
+            background: var(--border-color);
+            color: var(--text-dark);
+        }
+
+        /* Body */
+        .auth-body {
+            padding: 24px 32px 32px;
+        }
+
+        /* Input Group */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            background: #f9fafb;
             transition: all 0.3s;
         }
 
-        .auth-method-btn.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        .input-wrapper:focus-within {
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
         }
 
-        .auth-method-btn:hover:not(.active) {
-            background: #edf2f7;
+        .input-wrapper.error {
+            border-color: var(--error);
         }
 
-        .btn-primary {
+        .input-wrapper.success {
+            border-color: var(--success);
+        }
+
+        .input-icon {
+            padding: 0 16px;
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        .input-wrapper input {
+            flex: 1;
+            padding: 16px 16px 16px 0;
+            border: none;
+            background: transparent;
+            font-family: inherit;
+            font-size: 1rem;
+            color: var(--text-dark);
+            outline: none;
+            direction: ltr;
+            text-align: right;
+        }
+
+        .input-wrapper input::placeholder {
+            color: var(--text-light);
+            direction: rtl;
+        }
+
+        .input-toggle {
+            padding: 0 16px;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        .input-toggle:hover {
+            color: var(--text-dark);
+        }
+
+        /* Error Message */
+        .error-message {
+            color: var(--error);
+            font-size: 0.85rem;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* Submit Button */
+        .submit-btn {
             width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 16px;
+            background: var(--primary);
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 18px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
-        .btn-primary:hover { transform: translateY(-2px); }
-        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
-        .btn-secondary {
-            width: 100%;
-            padding: 12px;
-            background: #edf2f7;
-            color: #4a5568;
-            border: none;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 10px;
+        .submit-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
         }
 
-        .btn-secondary:hover { background: #e2e8f0; }
-
-        .register-link {
-            text-align: center;
-            margin-top: 20px;
-            color: #718096;
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
 
-        .register-link a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
+        .submit-btn .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
         }
 
-        .alert {
-            padding: 12px 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            text-align: center;
+        .submit-btn.loading .spinner {
+            display: block;
         }
 
-        .alert-success { background: #c6f6d5; color: #22543d; }
-        .alert-error { background: #fed7d7; color: #742a2a; }
-        .alert-info { background: #bee3f8; color: #2c5282; }
+        .submit-btn.loading .btn-text {
+            display: none;
+        }
 
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Divider */
         .divider {
             display: flex;
             align-items: center;
-            margin: 25px 0;
+            margin: 24px 0;
+            color: var(--text-light);
+            font-size: 0.85rem;
         }
 
         .divider::before,
@@ -165,477 +250,682 @@
             content: '';
             flex: 1;
             height: 1px;
-            background: #e2e8f0;
+            background: var(--border-color);
         }
 
         .divider span {
-            padding: 0 15px;
-            color: #a0aec0;
-            font-size: 14px;
+            padding: 0 16px;
         }
 
-        .btn-google {
+        /* Social Buttons */
+        .social-btn {
             width: 100%;
-            padding: 15px;
+            padding: 14px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
             background: white;
-            color: #333;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-dark);
             cursor: pointer;
+            transition: all 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            transition: all 0.2s;
-            text-decoration: none;
+            gap: 12px;
+            margin-bottom: 12px;
         }
 
-        .btn-google:hover {
-            background: #f7fafc;
-            border-color: #4285f4;
+        .social-btn:hover {
+            background: #f9fafb;
+            border-color: var(--text-light);
         }
 
-        .hidden { display: none !important; }
+        .social-btn img {
+            width: 20px;
+            height: 20px;
+        }
 
-        /* OTP Input Styles */
-        .otp-container {
+        /* OTP Section */
+        .otp-section {
+            display: none;
+        }
+
+        .otp-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .otp-info {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .otp-info p {
+            color: #0369a1;
+            font-size: 0.9rem;
+        }
+
+        .otp-info strong {
+            color: var(--text-dark);
+            direction: ltr;
+            unicode-bidi: embed;
+        }
+
+        .otp-inputs {
             display: flex;
             gap: 10px;
             justify-content: center;
-            margin: 20px 0;
+            margin-bottom: 20px;
             direction: ltr;
         }
 
         .otp-input {
-            width: 50px !important;
-            height: 55px;
+            width: 50px;
+            height: 56px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1.5rem;
+            font-weight: 600;
             text-align: center;
-            font-size: 24px !important;
-            font-weight: bold;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 0 !important;
+            outline: none;
+            transition: all 0.3s;
         }
 
         .otp-input:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
         }
 
-        .timer-text {
+        .resend-timer {
             text-align: center;
-            color: #718096;
-            margin: 15px 0;
-            font-size: 14px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-top: 16px;
         }
 
-        .timer-text span {
-            color: #667eea;
-            font-weight: bold;
+        .resend-btn {
+            color: var(--primary);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 500;
         }
 
-        .step-indicator {
+        .resend-btn:disabled {
+            color: var(--text-light);
+            cursor: not-allowed;
+        }
+
+        /* Password Section */
+        .password-section {
+            display: none;
+        }
+
+        .password-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Links */
+        .auth-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 16px;
+            font-size: 0.9rem;
+        }
+
+        .auth-links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .auth-links a:hover {
+            text-decoration: underline;
+        }
+
+        /* Footer */
+        .auth-footer {
+            text-align: center;
+            padding: 20px 32px;
+            background: #f9fafb;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .auth-footer p {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .auth-footer a {
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Back Button */
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-light);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            padding: 0;
+        }
+
+        .back-btn:hover {
+            color: var(--text-dark);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--text-dark);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: var(--success);
+        }
+
+        .toast.error {
+            background: var(--error);
+        }
+
+        /* Logo link */
+        .logo-link {
+            display: block;
             text-align: center;
             margin-bottom: 20px;
-            padding: 10px;
-            background: #f7fafc;
-            border-radius: 10px;
         }
 
-        .step-indicator .step-num {
-            display: inline-block;
-            width: 28px;
-            height: 28px;
-            line-height: 28px;
-            background: #667eea;
-            color: white;
-            border-radius: 50%;
-            font-weight: bold;
-            margin-left: 8px;
+        .logo-link img {
+            height: 48px;
         }
 
-        .phone-display {
-            text-align: center;
-            font-size: 18px;
-            color: #2d3748;
-            margin-bottom: 15px;
-            padding: 10px;
-            background: #f7fafc;
-            border-radius: 8px;
-            direction: ltr;
+        .logo-text {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: var(--bg-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-header">
-            <h1>🔐 ورود</h1>
-            <p>ورود به حساب کاربری شما</p>
-        </div>
-
-        <div id="alertBox"></div>
-
-        <!-- Google Login Button -->
-        <a href="/auth/google" class="btn-google">
-            <svg width="24" height="24" viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-            </svg>
-            ورود با حساب گوگل
-        </a>
-
-        <div class="divider">
-            <span>یا</span>
-        </div>
-
-        <!-- Auth Method Toggle -->
-        <div class="auth-method-toggle">
-            <button type="button" class="auth-method-btn active" onclick="setAuthMethod('email')" id="emailMethodBtn">
-                📧 ایمیل
-            </button>
-            <button type="button" class="auth-method-btn" onclick="setAuthMethod('phone')" id="phoneMethodBtn">
-                📱 موبایل
-            </button>
-        </div>
-
-        <!-- ========== EMAIL LOGIN SECTION ========== -->
-        <div id="emailLoginSection">
-            <form id="emailLoginForm" autocomplete="off">
-                <div class="form-group">
-                    <label>ایمیل</label>
-                    <input type="email" id="email" placeholder="example@gmail.com" required>
-                </div>
-                <div class="form-group">
-                    <label>رمز عبور</label>
-                    <input type="password" id="password" required>
-                </div>
-                <button type="submit" class="btn-primary" id="emailLoginBtn">ورود</button>
-            </form>
-        </div>
-
-        <!-- ========== PHONE LOGIN SECTION (OTP) ========== -->
-        <div id="phoneLoginSection" class="hidden">
+    <div class="auth-modal">
+        <!-- Step 1: Enter Email/Phone -->
+        <div id="step1" class="auth-step active">
+            <div class="auth-header">
+                <a href="/" class="logo-link">
+                    <span class="logo-text">🚀 OdooMaster</span>
+                </a>
+                <h1 class="auth-title">ورود / ثبت‌نام</h1>
+                <p class="auth-subtitle">شماره موبایل یا ایمیل خود را وارد کنید</p>
+            </div>
             
-            <!-- Step 1: Enter Phone -->
-            <div id="phoneStep1">
-                <div class="step-indicator">
-                    <span class="step-num">۱</span>
-                    شماره موبایل خود را وارد کنید
+            <div class="auth-body">
+                <!-- Input -->
+                <div class="input-group">
+                    <div class="input-wrapper" id="identifierWrapper">
+                        <span class="input-icon"><i class="fas fa-user"></i></span>
+                        <input type="text" id="identifier" placeholder="شماره موبایل یا ایمیل" autocomplete="username">
+                    </div>
+                    <div class="error-message" id="identifierError"></div>
                 </div>
-                <div class="form-group">
-                    <label>شماره موبایل</label>
-                    <input type="tel" id="phone" placeholder="09123456789" dir="ltr" maxlength="11">
-                </div>
-                <button type="button" class="btn-primary" id="sendOtpBtn" onclick="sendOTP()">
-                    📱 ارسال کد ورود
+
+                <button class="submit-btn" id="continueBtn" onclick="handleContinue()">
+                    <span class="spinner"></span>
+                    <span class="btn-text">ادامه</span>
+                </button>
+
+                <div class="divider"><span>یا</span></div>
+
+                <!-- Google Login -->
+                <button class="social-btn" onclick="loginWithGoogle()">
+                    <img src="https://www.google.com/favicon.ico" alt="Google">
+                    ورود با حساب گوگل
                 </button>
             </div>
 
-            <!-- Step 2: Enter OTP Code -->
-            <div id="phoneStep2" class="hidden">
-                <div class="step-indicator">
-                    <span class="step-num">۲</span>
-                    کد ارسال شده را وارد کنید
-                </div>
-                
-                <div class="phone-display" id="phoneDisplay">09123456789</div>
-                
-                <div class="otp-container">
-                    <input type="text" class="otp-input" maxlength="1" id="otp1" oninput="otpInput(this, 'otp2')" onkeydown="otpKeydown(event, this, null, 'otp2')">
-                    <input type="text" class="otp-input" maxlength="1" id="otp2" oninput="otpInput(this, 'otp3')" onkeydown="otpKeydown(event, this, 'otp1', 'otp3')">
-                    <input type="text" class="otp-input" maxlength="1" id="otp3" oninput="otpInput(this, 'otp4')" onkeydown="otpKeydown(event, this, 'otp2', 'otp4')">
-                    <input type="text" class="otp-input" maxlength="1" id="otp4" oninput="otpInput(this, 'otp5')" onkeydown="otpKeydown(event, this, 'otp3', 'otp5')">
-                    <input type="text" class="otp-input" maxlength="1" id="otp5" oninput="otpInput(this, 'otp6')" onkeydown="otpKeydown(event, this, 'otp4', 'otp6')">
-                    <input type="text" class="otp-input" maxlength="1" id="otp6" oninput="otpInput(this, null)" onkeydown="otpKeydown(event, this, 'otp5', null)">
-                </div>
-
-                <div class="timer-text" id="timerText">
-                    ارسال مجدد کد تا <span id="timerCount">5:00</span>
-                </div>
-
-                <button type="button" class="btn-primary" id="verifyOtpBtn" onclick="verifyOTP()">
-                    ✅ تأیید و ورود
-                </button>
-
-                <button type="button" class="btn-secondary" id="resendOtpBtn" onclick="sendOTP()" disabled>
-                    ارسال مجدد کد
-                </button>
-
-                <button type="button" class="btn-secondary" onclick="changePhone()">
-                    ✏️ تغییر شماره موبایل
-                </button>
+            <div class="auth-footer">
+                <p>با ورود، <a href="/terms.html">شرایط استفاده</a> را می‌پذیرید</p>
             </div>
         </div>
 
-        <div class="register-link">
-            حساب کاربری ندارید؟ <a href="/user-register.html">ثبت‌نام</a>
+        <!-- Step 2: OTP Verification -->
+        <div id="step2" class="auth-step" style="display: none;">
+            <div class="auth-header">
+                <h1 class="auth-title">تایید شماره موبایل</h1>
+                <p class="auth-subtitle">کد ارسال شده را وارد کنید</p>
+            </div>
+
+            <div class="auth-body">
+                <button class="back-btn" onclick="goToStep(1)">
+                    <i class="fas fa-arrow-right"></i>
+                    بازگشت
+                </button>
+
+                <div class="otp-info">
+                    <p>کد تایید به شماره <strong id="sentPhone"></strong> ارسال شد</p>
+                </div>
+
+                <div class="otp-inputs">
+                    <input type="text" class="otp-input" maxlength="1" data-index="0">
+                    <input type="text" class="otp-input" maxlength="1" data-index="1">
+                    <input type="text" class="otp-input" maxlength="1" data-index="2">
+                    <input type="text" class="otp-input" maxlength="1" data-index="3">
+                    <input type="text" class="otp-input" maxlength="1" data-index="4">
+                </div>
+
+                <button class="submit-btn" id="verifyOtpBtn" onclick="verifyOtp()">
+                    <span class="spinner"></span>
+                    <span class="btn-text">تایید و ورود</span>
+                </button>
+
+                <div class="resend-timer">
+                    <span id="timerText">ارسال مجدد کد تا <span id="countdown">60</span> ثانیه</span>
+                    <button class="resend-btn" id="resendBtn" onclick="resendCode()" disabled>ارسال مجدد</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Password Login (for email) -->
+        <div id="step3" class="auth-step" style="display: none;">
+            <div class="auth-header">
+                <h1 class="auth-title">ورود با رمز عبور</h1>
+                <p class="auth-subtitle">رمز عبور خود را وارد کنید</p>
+            </div>
+
+            <div class="auth-body">
+                <button class="back-btn" onclick="goToStep(1)">
+                    <i class="fas fa-arrow-right"></i>
+                    بازگشت
+                </button>
+
+                <div class="otp-info">
+                    <p>ورود با ایمیل <strong id="sentEmail"></strong></p>
+                </div>
+
+                <div class="input-group">
+                    <div class="input-wrapper" id="passwordWrapper">
+                        <span class="input-icon"><i class="fas fa-lock"></i></span>
+                        <input type="password" id="password" placeholder="رمز عبور">
+                        <span class="input-toggle" onclick="togglePassword()">
+                            <i class="fas fa-eye" id="eyeIcon"></i>
+                        </span>
+                    </div>
+                    <div class="error-message" id="passwordError"></div>
+                </div>
+
+                <button class="submit-btn" id="loginBtn" onclick="loginWithPassword()">
+                    <span class="spinner"></span>
+                    <span class="btn-text">ورود</span>
+                </button>
+
+                <div class="auth-links">
+                    <a href="/forgot-password.html">فراموشی رمز عبور</a>
+                    <a href="#" onclick="sendEmailOtp(); return false;">ورود با کد یکبار مصرف</a>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
     <script>
-        let currentAuthMethod = 'email';
-        let currentPhone = '';
-        let otpTimer = null;
-        let otpTimeLeft = 300; // 5 minutes
-        
-        const alertBox = document.getElementById('alertBox');
-        
-        // Check if just registered
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('registered')) {
-            showAlert('✅ ثبت‌نام موفق! لطفاً وارد شوید', 'success');
+        // State
+        let currentStep = 1;
+        let identifier = '';
+        let identifierType = ''; // 'phone' or 'email'
+        let countdownTimer = null;
+
+        // Helper functions
+        function isPhone(value) {
+            // Iranian phone formats
+            return /^(09\d{9}|۰۹[۰-۹]{9}|\+98\d{10}|98\d{10})$/.test(value.replace(/\s/g, ''));
         }
 
-        function showAlert(message, type) {
-            alertBox.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+        function isEmail(value) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
         }
 
-        function setAuthMethod(method) {
-            currentAuthMethod = method;
-            
-            document.getElementById('emailMethodBtn').classList.toggle('active', method === 'email');
-            document.getElementById('phoneMethodBtn').classList.toggle('active', method === 'phone');
-            
-            document.getElementById('emailLoginSection').classList.toggle('hidden', method !== 'email');
-            document.getElementById('phoneLoginSection').classList.toggle('hidden', method !== 'phone');
-            
-            alertBox.innerHTML = '';
+        function normalizePhone(phone) {
+            // Convert Persian digits to English
+            phone = phone.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+            phone = phone.replace(/\s/g, '');
+            if (phone.startsWith('+98')) phone = '0' + phone.slice(3);
+            if (phone.startsWith('98')) phone = '0' + phone.slice(2);
+            return phone;
         }
 
-        // ========== EMAIL LOGIN ==========
-        document.getElementById('emailLoginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast show ' + type;
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function setLoading(btnId, loading) {
+            const btn = document.getElementById(btnId);
+            if (loading) {
+                btn.classList.add('loading');
+                btn.disabled = true;
+            } else {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        }
+
+        function goToStep(step) {
+            document.querySelectorAll('.auth-step').forEach(s => s.style.display = 'none');
+            document.getElementById('step' + step).style.display = 'block';
+            currentStep = step;
+        }
+
+        // Step 1: Handle Continue
+        async function handleContinue() {
+            const input = document.getElementById('identifier');
+            const wrapper = document.getElementById('identifierWrapper');
+            const error = document.getElementById('identifierError');
             
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            const btn = document.getElementById('emailLoginBtn');
+            identifier = input.value.trim();
             
-            if (!email || !password) {
-                showAlert('لطفاً ایمیل و رمز عبور را وارد کنید', 'error');
+            if (!identifier) {
+                wrapper.classList.add('error');
+                error.textContent = 'لطفاً شماره موبایل یا ایمیل را وارد کنید';
+                error.classList.add('show');
                 return;
             }
+
+            wrapper.classList.remove('error');
+            error.classList.remove('show');
+
+            if (isPhone(identifier)) {
+                identifierType = 'phone';
+                identifier = normalizePhone(identifier);
+                await sendPhoneOtp();
+            } else if (isEmail(identifier)) {
+                identifierType = 'email';
+                // Check if user exists
+                await checkEmailUser();
+            } else {
+                wrapper.classList.add('error');
+                error.textContent = 'فرمت شماره موبایل یا ایمیل صحیح نیست';
+                error.classList.add('show');
+            }
+        }
+
+        // Send OTP to phone
+        async function sendPhoneOtp() {
+            setLoading('continueBtn', true);
             
-            btn.disabled = true;
-            btn.innerHTML = '⏳ در حال ورود...';
-            
+            try {
+                const response = await fetch('/api/send-otp-unified', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ phone: identifier })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById('sentPhone').textContent = identifier;
+                    goToStep(2);
+                    startCountdown();
+                    showToast(result.is_new_user ? 'کد ثبت‌نام ارسال شد' : 'کد ورود ارسال شد', 'success');
+                } else {
+                    showToast(result.error || 'خطا در ارسال کد', 'error');
+                }
+            } catch (error) {
+                showToast('خطا در ارتباط با سرور', 'error');
+            }
+
+            setLoading('continueBtn', false);
+        }
+
+        // Check if email user exists
+        async function checkEmailUser() {
+            setLoading('continueBtn', true);
+
+            try {
+                const response = await fetch('/api/check-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ email: identifier })
+                });
+
+                const result = await response.json();
+
+                document.getElementById('sentEmail').textContent = identifier;
+                goToStep(3);
+
+            } catch (error) {
+                showToast('خطا در ارتباط با سرور', 'error');
+            }
+
+            setLoading('continueBtn', false);
+        }
+
+        // Verify OTP
+        async function verifyOtp() {
+            const inputs = document.querySelectorAll('.otp-input');
+            let otp = '';
+            inputs.forEach(input => otp += input.value);
+
+            if (otp.length !== 5) {
+                showToast('لطفاً کد 5 رقمی را کامل وارد کنید', 'error');
+                return;
+            }
+
+            setLoading('verifyOtpBtn', true);
+
+            try {
+                const response = await fetch('/api/verify-otp-unified', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ 
+                        phone: identifier,
+                        code: otp 
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('ورود موفق!', 'success');
+                    // Redirect to return_to or default
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const returnTo = urlParams.get('return_to') || '/onboarding.html';
+                    setTimeout(() => window.location.href = returnTo, 1000);
+                } else {
+                    showToast(result.error || 'کد نادرست است', 'error');
+                }
+            } catch (error) {
+                showToast('خطا در ارتباط با سرور', 'error');
+            }
+
+            setLoading('verifyOtpBtn', false);
+        }
+
+        // Login with password
+        async function loginWithPassword() {
+            const password = document.getElementById('password').value;
+            const wrapper = document.getElementById('passwordWrapper');
+            const error = document.getElementById('passwordError');
+
+            if (!password) {
+                wrapper.classList.add('error');
+                error.textContent = 'لطفاً رمز عبور را وارد کنید';
+                error.classList.add('show');
+                return;
+            }
+
+            wrapper.classList.remove('error');
+            error.classList.remove('show');
+
+            setLoading('loginBtn', true);
+
             try {
                 const response = await fetch('/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email: email,
-                        password: password,
-                        auth_method: 'email'
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ 
+                        email: identifier,
+                        password: password 
                     })
                 });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    if (result.needs_verification) {
-                        window.location.href = '/verify-account.html';
-                    } else {
-                        redirectAfterLogin();
-                    }
-                } else {
-                    showAlert('❌ ' + result.error, 'error');
-                    btn.disabled = false;
-                    btn.innerHTML = 'ورود';
-                }
-            } catch (error) {
-                showAlert('خطا در اتصال به سرور', 'error');
-                btn.disabled = false;
-                btn.innerHTML = 'ورود';
-            }
-        });
 
-        // ========== PHONE OTP LOGIN ==========
-        async function sendOTP() {
-            const phone = document.getElementById('phone').value.trim();
-            const btn = document.getElementById('sendOtpBtn');
-            
-            if (!phone || phone.length < 10) {
-                showAlert('لطفاً شماره موبایل صحیح وارد کنید', 'error');
-                return;
-            }
-            
-            btn.disabled = true;
-            btn.innerHTML = '⏳ در حال ارسال...';
-            
-            try {
-                const response = await fetch('/api/send-login-otp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone: phone })
-                });
-                
                 const result = await response.json();
-                
+
                 if (result.success) {
-                    currentPhone = phone;
-                    showAlert('✅ کد ورود به ' + phone + ' ارسال شد', 'success');
-                    
-                    // Show step 2
-                    document.getElementById('phoneStep1').classList.add('hidden');
-                    document.getElementById('phoneStep2').classList.remove('hidden');
-                    document.getElementById('phoneDisplay').textContent = phone;
-                    
-                    // Clear OTP inputs
-                    for (let i = 1; i <= 6; i++) {
-                        document.getElementById('otp' + i).value = '';
-                    }
-                    document.getElementById('otp1').focus();
-                    
-                    // Start timer
-                    startOtpTimer(result.expires_in || 300);
+                    showToast('ورود موفق!', 'success');
+                    // Redirect to return_to or default
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const returnTo = urlParams.get('return_to') || '/onboarding.html';
+                    setTimeout(() => window.location.href = returnTo, 1000);
                 } else {
-                    showAlert('❌ ' + result.error, 'error');
+                    showToast(result.error || 'ایمیل یا رمز عبور اشتباه است', 'error');
                 }
             } catch (error) {
-                showAlert('خطا در اتصال به سرور', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '📱 ارسال کد ورود';
+                showToast('خطا در ارتباط با سرور', 'error');
+            }
+
+            setLoading('loginBtn', false);
+        }
+
+        // Google login
+        function loginWithGoogle() {
+            // Get return_to from URL query parameter or referrer
+            const urlParams = new URLSearchParams(window.location.search);
+            const returnTo = urlParams.get('return_to') || document.referrer || '/onboarding.html';
+            window.location.href = '/auth/google?return_to=' + encodeURIComponent(returnTo);
+        }
+
+        // Toggle password visibility
+        function togglePassword() {
+            const input = document.getElementById('password');
+            const icon = document.getElementById('eyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
             }
         }
 
-        async function verifyOTP() {
-            const code = getOtpCode();
-            const btn = document.getElementById('verifyOtpBtn');
-            
-            if (code.length !== 6) {
-                showAlert('لطفاً کد ۶ رقمی را کامل وارد کنید', 'error');
-                return;
-            }
-            
-            btn.disabled = true;
-            btn.innerHTML = '⏳ در حال تأیید...';
-            
-            try {
-                const response = await fetch('/api/login-with-otp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        phone: currentPhone,
-                        code: code
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    showAlert('✅ ورود موفق!', 'success');
-                    clearInterval(otpTimer);
-                    setTimeout(() => redirectAfterLogin(), 500);
-                } else {
-                    showAlert('❌ ' + result.error, 'error');
-                    btn.disabled = false;
-                    btn.innerHTML = '✅ تأیید و ورود';
-                }
-            } catch (error) {
-                showAlert('خطا در اتصال به سرور', 'error');
-                btn.disabled = false;
-                btn.innerHTML = '✅ تأیید و ورود';
-            }
-        }
-
-        function changePhone() {
-            clearInterval(otpTimer);
-            document.getElementById('phoneStep1').classList.remove('hidden');
-            document.getElementById('phoneStep2').classList.add('hidden');
-            document.getElementById('phone').focus();
-            alertBox.innerHTML = '';
-        }
-
-        function startOtpTimer(seconds) {
-            otpTimeLeft = seconds;
-            clearInterval(otpTimer);
-            
-            const timerCount = document.getElementById('timerCount');
+        // Countdown timer
+        function startCountdown() {
+            let seconds = 60;
+            const countdownEl = document.getElementById('countdown');
             const timerText = document.getElementById('timerText');
-            const resendBtn = document.getElementById('resendOtpBtn');
-            
+            const resendBtn = document.getElementById('resendBtn');
+
+            timerText.style.display = 'inline';
+            resendBtn.style.display = 'none';
             resendBtn.disabled = true;
-            timerText.style.display = 'block';
-            
-            updateTimerDisplay();
-            
-            otpTimer = setInterval(() => {
-                otpTimeLeft--;
-                updateTimerDisplay();
+
+            countdownTimer = setInterval(() => {
+                seconds--;
+                countdownEl.textContent = seconds;
                 
-                if (otpTimeLeft <= 0) {
-                    clearInterval(otpTimer);
+                if (seconds <= 0) {
+                    clearInterval(countdownTimer);
                     timerText.style.display = 'none';
+                    resendBtn.style.display = 'inline';
                     resendBtn.disabled = false;
                 }
             }, 1000);
         }
 
-        function updateTimerDisplay() {
-            const minutes = Math.floor(otpTimeLeft / 60);
-            const seconds = otpTimeLeft % 60;
-            document.getElementById('timerCount').textContent = 
-                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        // Resend code
+        async function resendCode() {
+            await sendPhoneOtp();
         }
 
-        function getOtpCode() {
-            let code = '';
-            for (let i = 1; i <= 6; i++) {
-                code += document.getElementById('otp' + i).value;
-            }
-            return code;
-        }
-
-        function otpInput(current, nextId) {
-            // Only allow digits
-            current.value = current.value.replace(/[^0-9]/g, '');
-            
-            if (current.value.length === 1 && nextId) {
-                document.getElementById(nextId).focus();
-            }
-            
-            // Auto submit when all 6 digits entered
-            if (getOtpCode().length === 6) {
-                verifyOTP();
-            }
-        }
-
-        function otpKeydown(event, current, prevId, nextId) {
-            if (event.key === 'Backspace' && current.value === '' && prevId) {
-                document.getElementById(prevId).focus();
-            }
-            if (event.key === 'ArrowLeft' && prevId) {
-                document.getElementById(prevId).focus();
-            }
-            if (event.key === 'ArrowRight' && nextId) {
-                document.getElementById(nextId).focus();
-            }
-        }
-
-        function redirectAfterLogin() {
-            const urlParams = new URLSearchParams(window.location.search);
-            
-            // If opened in popup mode, notify parent and close
-            if (urlParams.get('popup') === '1') {
-                if (window.parent && window.parent !== window) {
-                    window.parent.postMessage('login_success', '*');
+        // OTP input handling
+        document.querySelectorAll('.otp-input').forEach((input, index, inputs) => {
+            input.addEventListener('input', (e) => {
+                const value = e.target.value;
+                if (value && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
                 }
-                return;
-            }
-            
-            // Normal redirect
-            const nextPage = urlParams.get('next');
-            if (nextPage && !nextPage.includes('login') && !nextPage.includes('register')) {
-                window.location.href = nextPage;
-            } else {
-                window.location.href = '/';
-            }
-        }
+                // Auto-submit when all filled
+                let otp = '';
+                inputs.forEach(i => otp += i.value);
+                if (otp.length === 5) {
+                    verifyOtp();
+                }
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !input.value && index > 0) {
+                    inputs[index - 1].focus();
+                }
+            });
+
+            // Paste handling
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const paste = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 5);
+                paste.split('').forEach((char, i) => {
+                    if (inputs[i]) inputs[i].value = char;
+                });
+                if (paste.length === 5) verifyOtp();
+            });
+        });
+
+        // Enter key handling
+        document.getElementById('identifier').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleContinue();
+        });
+
+        document.getElementById('password').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') loginWithPassword();
+        });
     </script>
 </body>
 </html>

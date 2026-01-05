@@ -513,6 +513,14 @@ input:checked + .toggle-slider:before {
     margin-left: 16px;
 }
 
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(72, 187, 120, 0.5);
+}
+
 .user-name {
     color: #48bb78;
     font-size: 0.85rem;

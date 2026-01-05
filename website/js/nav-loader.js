@@ -1,5 +1,74 @@
-// Navigation Loader Helper
+// Navigation Loader & Global Auth System
 // این فایل رو در همه صفحات include کنید
+
+// =====================================
+// Global Auth State (مثل GitHub)
+// =====================================
+window.AUTH = {
+    isLoggedIn: false,
+    user: null,
+    isLoading: true,
+    listeners: [],
+    
+    // Subscribe to auth changes
+    onAuthChange: function(callback) {
+        this.listeners.push(callback);
+        // Call immediately with current state
+        if (!this.isLoading) {
+            callback(this.isLoggedIn, this.user);
+        }
+    },
+    
+    // Notify all listeners
+    notifyListeners: function() {
+        this.listeners.forEach(cb => cb(this.isLoggedIn, this.user));
+    },
+    
+    // Check auth status from server
+    check: async function() {
+        this.isLoading = true;
+        try {
+            const response = await fetch('/api/user-status', {
+                credentials: 'same-origin'
+            });
+            const result = await response.json();
+            
+            if (result.success && result.logged_in && result.user) {
+                this.isLoggedIn = true;
+                this.user = result.user;
+            } else {
+                this.isLoggedIn = false;
+                this.user = null;
+            }
+        } catch (error) {
+            console.error('Auth check failed:', error);
+            this.isLoggedIn = false;
+            this.user = null;
+        }
+        this.isLoading = false;
+        this.notifyListeners();
+        return this.isLoggedIn;
+    },
+    
+    // Logout
+    logout: async function() {
+        try {
+            await fetch('/api/logout', { 
+                method: 'POST',
+                credentials: 'same-origin'
+            });
+        } catch (e) {}
+        this.isLoggedIn = false;
+        this.user = null;
+        this.notifyListeners();
+        window.location.href = '/';
+    }
+};
+
+// Legacy support for old code
+window.getAuthToken = function() {
+    return window.AUTH.isLoggedIn ? 'session' : null;
+};
 
 (function() {
     // Load Navigation Component
@@ -12,7 +81,7 @@
             })
             .then(html => {
                 // Try both possible container IDs
-                let navContainer = document.getElementById('mainNav') || document.getElementById('navHeader');
+                let navContainer = document.getElementById('mainNav') || document.getElementById('navHeader') || document.getElementById('nav-container');
                 console.log('📍 Nav container:', navContainer);
                 if (!navContainer) {
                     navContainer = document.createElement('div');
@@ -37,6 +106,9 @@
             })
             .catch(error => console.error('❌ Error loading navigation:', error));
     }
+
+    // Check auth on page load
+    window.AUTH.check();
 
     // Auto-load on DOM ready
     if (document.readyState === 'loading') {

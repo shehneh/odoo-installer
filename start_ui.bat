@@ -165,13 +165,13 @@ timeout /t 2 /nobreak >nul
 
 rem Open browser
 echo [*] Opening browser...
-start "" "http://127.0.0.1:5000"
+start "" "http://127.0.0.1:5001"
 
 echo.
 echo ═══════════════════════════════════════════════════════════
 echo   Odoo 19 Installer UI is now running!
 echo   
-echo   Browser: http://127.0.0.1:5000
+echo   Browser: http://127.0.0.1:5001
 echo   
 echo   Close the "Odoo UI Server" window to stop the server.
 echo ═══════════════════════════════════════════════════════════

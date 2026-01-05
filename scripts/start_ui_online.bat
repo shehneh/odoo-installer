@@ -23,20 +23,20 @@ if exist "%~dp0ui_server.exe" (
     echo [2/3] Starting local UI server...
     start "OdooMaster UI Server" "%~dp0ui_server.exe"
     echo [3/3] Opening browser...
-    rem The server may fall back to another port if 5000 is busy.
-    rem Probe 5000-5020 and open the first listening port.
+    rem The server may fall back to another port if 5001 is busy.
+    rem Probe 5001-5020 and open the first listening port.
     timeout /t 2 /nobreak >nul
     set "FOUND_PORT="
-    for /f "usebackq delims=" %%P in (`powershell -NoProfile -ExecutionPolicy Bypass -Command "$found=$null; for($p=5000; $p -le 5020; $p++){ try { $c=New-Object Net.Sockets.TcpClient; $iar=$c.BeginConnect('127.0.0.1',$p,$null,$null); if($iar.AsyncWaitHandle.WaitOne(250)){ $c.EndConnect($iar); $c.Close(); $found=$p; break } } catch {} }; if($found){ Write-Output $found }"`) do set "FOUND_PORT=%%P"
+    for /f "usebackq delims=" %%P in (`powershell -NoProfile -ExecutionPolicy Bypass -Command "$found=$null; for($p=5001; $p -le 5020; $p++){ try { $c=New-Object Net.Sockets.TcpClient; $iar=$c.BeginConnect('127.0.0.1',$p,$null,$null); if($iar.AsyncWaitHandle.WaitOne(250)){ $c.EndConnect($iar); $c.Close(); $found=$p; break } } catch {} }; if($found){ Write-Output $found }"`) do set "FOUND_PORT=%%P"
     if not "%FOUND_PORT%"=="" (
         start "" "http://127.0.0.1:%FOUND_PORT%"
     ) else (
-        start "" "http://127.0.0.1:5000"
+        start "" "http://127.0.0.1:5001"
     )
     echo.
     echo ═══════════════════════════════════════════════════════════
-    echo   Local Installer UI is running
-    echo   http://127.0.0.1:5000
+echo   Local Installer UI is running
+    echo   http://127.0.0.1:5001
     echo ═══════════════════════════════════════════════════════════
     echo.
     popd
@@ -197,17 +197,17 @@ echo [3/3] Opening browser...
 rem The server will also try to open the browser itself.
 timeout /t 2 /nobreak >nul
 set "FOUND_PORT="
-for /f "usebackq delims=" %%P in (`powershell -NoProfile -ExecutionPolicy Bypass -Command "$found=$null; for($p=5000; $p -le 5020; $p++){ try { $c=New-Object Net.Sockets.TcpClient; $iar=$c.BeginConnect('127.0.0.1',$p,$null,$null); if($iar.AsyncWaitHandle.WaitOne(250)){ $c.EndConnect($iar); $c.Close(); $found=$p; break } } catch {} }; if($found){ Write-Output $found }"`) do set "FOUND_PORT=%%P"
+for /f "usebackq delims=" %%P in (`powershell -NoProfile -ExecutionPolicy Bypass -Command "$found=$null; for($p=5001; $p -le 5020; $p++){ try { $c=New-Object Net.Sockets.TcpClient; $iar=$c.BeginConnect('127.0.0.1',$p,$null,$null); if($iar.AsyncWaitHandle.WaitOne(250)){ $c.EndConnect($iar); $c.Close(); $found=$p; break } } catch {} }; if($found){ Write-Output $found }"`) do set "FOUND_PORT=%%P"
 if not "%FOUND_PORT%"=="" (
     start "" "http://127.0.0.1:%FOUND_PORT%"
 ) else (
-    start "" "http://127.0.0.1:5000"
+    start "" "http://127.0.0.1:5001"
 )
 
 echo.
 echo ═══════════════════════════════════════════════════════════
 echo   Local Installer UI is running
-echo   http://127.0.0.1:5000
+echo   http://127.0.0.1:5001
 echo ═══════════════════════════════════════════════════════════
 echo.
 

@@ -95,10 +95,26 @@ function isValidHardwareIdFormat(hwid) {
 }
 
 async function init() {
-    // Enforce login
-    if (!API.isLoggedIn()) {
+    // Enforce login - Check with backend session
+    let userInfo = null;
+    try {
+        const response = await fetch('/api/user-status');
+        const result = await response.json();
+        
+        if (!result.logged_in) {
+            // Save current URL to redirect after login
+            localStorage.setItem('after_login_redirect', 'payment.html' + window.location.search);
+            window.location.href = 'user-login.html';
+            return;
+        }
+        
+        // User is logged in, continue with initialization
+        console.log('✓ User authenticated:', result.user.email);
+        userInfo = result.user; // Store user info for later use
+    } catch (error) {
+        console.error('Authentication check failed:', error);
         localStorage.setItem('after_login_redirect', 'payment.html' + window.location.search);
-        window.location.href = 'login.html?redirect=payment.html';
+        window.location.href = 'user-login.html';
         return;
     }
 
@@ -158,21 +174,21 @@ async function init() {
         });
     }
 
-    // Load user info to pre-fill customer details
-    try {
-        const me = await API.getMe();
-        const user = me?.user || me;
-        if (user) {
-            const nameEl = document.getElementById('customerName');
-            const emailEl = document.getElementById('customerEmail');
-            const phoneEl = document.getElementById('customerPhone');
-            
-            if (nameEl && user.name) nameEl.value = user.name;
-            if (emailEl && user.email) emailEl.value = user.email;
-            if (phoneEl && user.phone) phoneEl.value = user.phone;
-        }
-    } catch (e) {
-        console.warn('Could not load user info:', e);
+    // Pre-fill customer details from user info
+    if (userInfo) {
+        const nameEl = document.getElementById('customerName');
+        const emailEl = document.getElementById('customerEmail');
+        const phoneEl = document.getElementById('customerPhone');
+        
+        if (nameEl && userInfo.name) nameEl.value = userInfo.name;
+        if (emailEl && userInfo.email) emailEl.value = userInfo.email;
+        if (phoneEl && userInfo.phone) phoneEl.value = userInfo.phone;
+        
+        console.log('✓ Customer info pre-filled:', {
+            name: userInfo.name,
+            email: userInfo.email,
+            phone: userInfo.phone
+        });
     }
 
     // Load plans

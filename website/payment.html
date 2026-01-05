@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/animations.css">
     <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/unified-nav.css?v=4">
+    <link rel="stylesheet" href="css/unified-nav.css?v=8">
     <style>
         .plan-card {
             padding: 24px;
@@ -232,26 +232,14 @@
             }
         }
     </style>
+    <script src="/js/nav-loader.js"></script>
+    <script src="/js/global-nav.js"></script>
 </head>
 <body>
     <div id="particles-js"></div>
 
-    <nav class="navbar glass">
-        <div class="container">
-            <a href="index.html" class="logo">
-                <div class="logo-icon"><i class="fas fa-cube"></i></div>
-                <span>Odoo<strong>Master</strong></span>
-            </a>
-            <ul class="nav-links">
-                <li><a href="index.html" class="nav-link"><i class="fas fa-home"></i> <span data-i18n="nav.home">صفحه اصلی</span></a></li>
-                <li><a href="dashboard.html" class="nav-link"><i class="fas fa-user"></i> <span data-i18n="nav.dashboard">حساب کاربری</span></a></li>
-            </ul>
-            <div class="nav-actions">
-                <button class="theme-toggle" id="themeToggle" title="تغییر تم" data-i18n-title="theme.toggle"><i class="fas fa-moon"></i></button>
-                <a href="licenses.html" class="btn btn-ghost"><i class="fas fa-arrow-right"></i> <span data-i18n="payment.backToLicense">بازگشت به صفحه لایسنس</span></a>
-            </div>
-        </div>
-    </nav>
+    <!-- Navigation - Loaded Dynamically -->
+    <div id="nav-container"></div>
 
     <main style="padding-top: 110px; min-height: 100vh; padding-bottom: 60px;">
         <div class="container" style="max-width: 900px;">

@@ -4,7 +4,7 @@ OdooMaster Multi-Tenant SaaS Platform
 Flask server with auto-provisioning API for creating Odoo instances
 """
 
-from flask import Flask, render_template, request, jsonify, send_from_directory, Response, session, redirect, url_for
+from flask import Flask, render_template, request, jsonify, send_from_directory, Response, session, redirect, url_for, send_file
 from flask_cors import CORS
 import psycopg2
 import string
@@ -56,6 +56,7 @@ PUBLIC_PAGES = [
     '/', 'index.html', 
     'docs.html', 
     'downloads.html',
+    'install.html',  # Online installer page
     'user-login.html', 'user-register.html',
     'verify-account.html', 'email-verified.html',
     'app-details.html',  # App information pages
@@ -69,6 +70,7 @@ PROTECTED_PAGES = [
     'module_wizard.html',
     'auto_login.html',
     'dashboard.html',
+    'dashboard-unified.html',
     'onboarding.html'  # Require login for onboarding
 ]
 
@@ -76,8 +78,9 @@ PROTECTED_PAGES = [
 LEGACY_REDIRECTS = {
     'login.html': '/user-login.html',
     'register.html': '/user-register.html',
-    'register_tenant.html': '/user-register.html',
-    'dashboard.html': '/profile.html'
+    'dashboard.html': '/dashboard-unified.html',
+    'profile.html': '/dashboard-unified.html',
+    'admin_panel.html': '/dashboard-unified.html'
 }
 
 # Middleware to check authentication before serving protected pages
@@ -107,6 +110,7 @@ def check_authentication():
     
     # Check if it's explicitly a public page (exact match)
     if path == '' or path in ['', 'index.html', 'docs.html', 'downloads.html', 
+                               'install.html',
                                'user-login.html', 'user-register.html', 
                                'verify-account.html', 'email-verified.html']:
         return None  # Allow access
@@ -117,7 +121,8 @@ def check_authentication():
     if is_protected:
         # Check if user is logged in
         if 'user_id' not in session:
-            return redirect('/user-login.html?next=' + flask_request.path)
+            # Redirect to login with return_to parameter
+            return redirect(f'/user-login.html?return_to={flask_request.path}')
         
         # Check if user is verified based on auth method
         conn = sqlite3.connect(CUSTOMERS_DB)
@@ -158,6 +163,7 @@ EMAIL_FROM = os.environ.get('EMAIL_FROM', 'OdooMaster <noreply@odoomaster.ir>')
 # Admin Users - These emails have full admin access
 ADMIN_EMAILS = [
     'shehneh.m@gmail.com',
+    'shehneh@gmail.com',
     'admin@odoomaster.ir',
     'support@odoomaster.ir'
 ]
@@ -171,7 +177,7 @@ KAVENEGAR_SENDER = os.environ.get('KAVENEGAR_SENDER', '2000660110')  # شمار�
 GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '585648476029-bo40kh24la1k4b3bu62rhmhrjncbpiu9.apps.googleusercontent.com')
 GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', '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')
 # Auto-detect redirect URI from request or use environment variable
-GOOGLE_REDIRECT_URI = os.environ.get('GOOGLE_REDIRECT_URI', 'http://localhost:5000/callback/google')
+GOOGLE_REDIRECT_URI = os.environ.get('GOOGLE_REDIRECT_URI', 'http://localhost:5001/callback/google')
 
 # Configuration - همیشه از متغیر محیطی استفاده کن (امن‌تر)
 ODOO_URL = os.environ.get('ODOO_URL', 'https://odoo-online.liara.run')
@@ -182,14 +188,23 @@ DB_USER = os.environ.get('DB_USER', 'root')
 DB_PASSWORD = os.environ.get('DB_PASSWORD', 'lu46zbfKF1s8j04thKOUI24b')
 
 # Local SQLite database for customer management
-# Use /data for persistent storage on Liara (or /tmp for development)
-DATA_DIR = os.environ.get('DATA_DIR', '/data')
+# Use /app/data for persistent storage on Liara (disk mounted here)
+DATA_DIR = os.environ.get('DATA_DIR', '/app/data')
 CUSTOMERS_DB = os.path.join(DATA_DIR, 'customers.db')
 
 def init_customers_db():
     """Initialize SQLite database for customer management"""
+    global DATA_DIR, CUSTOMERS_DB
+    
     # Ensure directory exists
-    os.makedirs(os.path.dirname(CUSTOMERS_DB) if os.path.dirname(CUSTOMERS_DB) else '.', exist_ok=True)
+    try:
+        os.makedirs(DATA_DIR, exist_ok=True)
+    except OSError:
+        # If /app/data fails, fall back to current directory
+        print(f"⚠️  Could not create {DATA_DIR}, using current directory")
+        DATA_DIR = '.'
+        CUSTOMERS_DB = 'customers.db'
+    
     conn = sqlite3.connect(CUSTOMERS_DB)
     cursor = conn.cursor()
     
@@ -234,6 +249,7 @@ def init_customers_db():
             phone TEXT,
             password_hash TEXT NOT NULL,
             auth_method TEXT DEFAULT 'email',
+            profile_picture TEXT,
             email_verified INTEGER DEFAULT 0,
             email_verification_token TEXT,
             email_verification_expires TIMESTAMP,
@@ -250,7 +266,84 @@ def init_customers_db():
     try:
         cursor.execute('ALTER TABLE website_users ADD COLUMN auth_method TEXT DEFAULT "email"')
     except:
+        pass
+    
+    # Try to add profile_picture column if it doesn't exist
+    try:
+        cursor.execute('ALTER TABLE website_users ADD COLUMN profile_picture TEXT')
+    except:
         pass  # Column already exists
+    
+    # Plans table for dynamic plan management
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS plans (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            plan_id TEXT UNIQUE NOT NULL,
+            name_fa TEXT NOT NULL,
+            name_en TEXT NOT NULL,
+            price INTEGER NOT NULL,
+            duration_months INTEGER NOT NULL,
+            duration_display_fa TEXT,
+            duration_display_en TEXT,
+            discount_percent INTEGER DEFAULT 0,
+            features TEXT,
+            is_popular INTEGER DEFAULT 0,
+            is_active INTEGER DEFAULT 1,
+            display_order INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
+    # Insert default plans if table is empty
+    cursor.execute('SELECT COUNT(*) FROM plans')
+    if cursor.fetchone()[0] == 0:
+        default_plans = [
+            ('monthly', 'ماهانه', 'Monthly', 500000, 1, 'یک ماه', 'One Month', 0, 
+             'دسترسی کامل به اودو|پشتیبانی 24 ساعته|آپدیت خودکار|1GB فضای ذخیره‌سازی', 0, 1, 1),
+            ('quarterly', 'سه‌ماهه', 'Quarterly', 1350000, 3, 'سه ماه', 'Three Months', 10,
+             'دسترسی کامل به اودو|پشتیبانی 24 ساعته|آپدیت خودکار|3GB فضای ذخیره‌سازی|10% تخفیف', 1, 1, 2),
+            ('yearly', 'سالانه', 'Yearly', 4800000, 12, 'یک سال', 'One Year', 20,
+             'دسترسی کامل به اودو|پشتیبانی اختصاصی|آپدیت خودکار|10GB فضای ذخیره‌سازی|20% تخفیف|پشتیبان‌گیری روزانه', 0, 1, 3)
+        ]
+        cursor.executemany('''
+            INSERT INTO plans (plan_id, name_fa, name_en, price, duration_months, 
+                             duration_display_fa, duration_display_en, discount_percent, 
+                             features, is_popular, is_active, display_order)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', default_plans)
+    
+    # Tickets table for support system
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS tickets (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ticket_number TEXT UNIQUE NOT NULL,
+            user_id INTEGER NOT NULL,
+            subject TEXT NOT NULL,
+            category TEXT NOT NULL,
+            priority TEXT DEFAULT 'medium',
+            status TEXT DEFAULT 'open',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            closed_at TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES website_users(id)
+        )
+    ''')
+    
+    # Ticket messages table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS ticket_messages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ticket_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            is_admin INTEGER DEFAULT 0,
+            message TEXT NOT NULL,
+            attachments TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (ticket_id) REFERENCES tickets(id),
+            FOREIGN KEY (user_id) REFERENCES website_users(id)
+        )
+    ''')
     
     conn.commit()
     conn.close()
@@ -329,7 +422,7 @@ def generate_sms_code():
 def send_verification_email(email, token):
     """Send email verification link"""
     try:
-        verification_url = f"http://localhost:5000/verify-email?token={token}"
+        verification_url = f"http://localhost:5001/verify-email?token={token}"
         
         msg = MIMEMultipart('alternative')
         msg['Subject'] = 'تایید ایمیل - OdooMaster'
@@ -468,15 +561,15 @@ def check_customer_exists(admin_email):
         print(f"Error checking customer: {e}")
         return None
 
-def save_customer(company_name, admin_email, admin_name, phone, database_name, admin_password):
+def save_customer(company_name, admin_email, admin_name, phone, database_name, admin_password, user_id=None):
     """Save customer information to local database"""
     try:
         conn = sqlite3.connect(CUSTOMERS_DB)
         cursor = conn.cursor()
         cursor.execute('''
-            INSERT INTO customers (company_name, admin_email, admin_name, phone, database_name, admin_password)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (company_name, admin_email, admin_name, phone, database_name, admin_password))
+            INSERT INTO customers (company_name, admin_email, admin_name, phone, database_name, admin_password, user_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (company_name, admin_email, admin_name, phone, database_name, admin_password, user_id))
         conn.commit()
         conn.close()
         return True
@@ -960,6 +1053,11 @@ def api_install_modules():
 def create_tenant():
     """API endpoint to create new tenant (customer Odoo instance)"""
     try:
+        # Check if user is logged in
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({'success': False, 'message': 'لطفاً ابتدا وارد شوید'}), 401
+        
         data = request.json
         
         if not data:
@@ -997,7 +1095,8 @@ def create_tenant():
         if not success:
             return jsonify({'success': False, 'message': f'خطا در ساخت دیتابیس: {message}'}), 500
         
-        save_customer(company_name, admin_email, admin_name, phone, db_name, admin_password)
+        # Save customer with user_id
+        save_customer(company_name, admin_email, admin_name, phone, db_name, admin_password, user_id)
         
         return jsonify({
             'success': True,
@@ -1022,17 +1121,223 @@ def create_tenant():
 
 @app.route('/api/list-customers', methods=['GET'])
 def list_customers():
-    """List all customers"""
+    """List customers - filtered by user_id for regular users, all for admins"""
     try:
+        # Check if user is logged in
+        if 'user_id' not in session:
+            return jsonify({'success': False, 'error': 'لطفاً ابتدا وارد شوید'}), 401
+        
+        user_id = session['user_id']
+        
+        # Get user info to check if admin
         conn = sqlite3.connect(CUSTOMERS_DB)
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
-        cursor.execute('SELECT * FROM customers ORDER BY created_at DESC')
+        
+        cursor.execute('SELECT email FROM website_users WHERE id = ?', (user_id,))
+        user_result = cursor.fetchone()
+        
+        if not user_result:
+            conn.close()
+            return jsonify({'success': False, 'error': 'کاربر یافت نشد'}), 404
+        
+        user_email = user_result['email']
+        is_admin = user_email.lower() in [e.lower() for e in ADMIN_EMAILS]
+        
+        # Query customers based on user role
+        if is_admin:
+            # Admin sees all databases
+            cursor.execute('SELECT * FROM customers ORDER BY created_at DESC')
+        else:
+            # Regular user sees only their own databases
+            cursor.execute('SELECT * FROM customers WHERE user_id = ? ORDER BY created_at DESC', (user_id,))
+        
         customers = [dict(row) for row in cursor.fetchall()]
         conn.close()
-        return jsonify({'success': True, 'count': len(customers), 'customers': customers})
+        
+        return jsonify({
+            'success': True, 
+            'count': len(customers), 
+            'customers': customers,
+            'is_admin': is_admin
+        })
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/verify-database', methods=['POST'])
+def verify_database():
+    """Verify if database actually exists in Odoo"""
+    try:
+        data = request.get_json()
+        database = data.get('database')
+        
+        if not database:
+            return jsonify({'success': False, 'error': 'نام دیتابیس الزامی است'}), 400
+        
+        # Check if database exists in Odoo
+        set_socket_timeout(10)
+        db = xmlrpc.client.ServerProxy(f'{ODOO_URL}/xmlrpc/2/db', allow_none=True)
+        db_list = db.list()
+        
+        exists = database in db_list
+        
+        return jsonify({'success': True, 'exists': exists, 'database': database})
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/delete-customer-record', methods=['POST'])
+def delete_customer_record():
+    """Delete customer record from SQLite (for recreating database)"""
+    try:
+        data = request.get_json()
+        email = data.get('email', '').strip()
+        phone = data.get('phone', '').strip()
+        
+        if not email and not phone:
+            return jsonify({'success': False, 'error': 'ایمیل یا شماره تلفن الزامی است'}), 400
+        
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        
+        if email:
+            cursor.execute('DELETE FROM customers WHERE admin_email = ?', (email,))
+        elif phone:
+            cursor.execute('DELETE FROM customers WHERE phone = ?', (phone,))
+        
+        deleted_count = cursor.rowcount
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'success': True, 
+            'message': f'{deleted_count} رکورد حذف شد',
+            'deleted_count': deleted_count
+        })
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/admin/delete-databases', methods=['POST'])
+def admin_delete_databases():
+    """Delete multiple databases from Odoo (admin only with master password)"""
+    try:
+        print("=" * 60)
+        print("🗑️  DELETE DATABASES REQUEST RECEIVED")
+        print("=" * 60)
+        
+        # Check if user is admin
+        if 'user_id' not in session:
+            print("❌ No user_id in session - user not logged in")
+            return jsonify({'success': False, 'error': 'لطفاً ابتدا وارد شوید'}), 401
+        
+        user_id = session['user_id']
+        print(f"✓ User ID: {user_id}")
+        
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        cursor.execute('SELECT email FROM website_users WHERE id = ?', (user_id,))
+        result = cursor.fetchone()
+        conn.close()
+        
+        if not result:
+            print(f"❌ User {user_id} not found in database")
+            return jsonify({'success': False, 'error': 'کاربر یافت نشد'}), 404
+        
+        user_email = result[0]
+        print(f"✓ User email: {user_email}")
+        
+        is_admin = user_email.lower() in [e.lower() for e in ADMIN_EMAILS]
+        print(f"✓ Is admin: {is_admin}")
+        
+        if not is_admin:
+            print(f"❌ User {user_email} is not an admin")
+            return jsonify({'success': False, 'error': 'فقط ادمین‌ها اجازه حذف دیتابیس دارند'}), 403
+        
+        data = request.get_json()
+        databases = data.get('databases', [])
+        master_password = data.get('master_password', '')
+        
+        print(f"✓ Databases to delete: {databases}")
+        print(f"✓ Password provided: {'Yes' if master_password else 'No'}")
+        
+        if not databases:
+            print("❌ No databases specified")
+            return jsonify({'success': False, 'error': 'لیست دیتابیس‌ها خالی است'}), 400
+        
+        if not master_password:
+            print("❌ No master password provided")
+            return jsonify({'success': False, 'error': 'رمز حذف الزامی است'}), 400
+        
+        # Verify master password
+        CORRECT_MASTER_PASSWORD = 'OdooMaster2025!'
+        if master_password != CORRECT_MASTER_PASSWORD:
+            print(f"❌ Wrong password: {master_password}")
+            return jsonify({'success': False, 'error': '❌ رمز حذف اشتباه است! دسترسی رد شد.'}), 403
+        
+        print("✓ Master password verified!")
+        print(f"🗑️  Starting deletion of {len(databases)} database(s)...")
+        
+        # Delete databases from Odoo
+        set_socket_timeout(30)
+        db = xmlrpc.client.ServerProxy(f'{ODOO_URL}/xmlrpc/2/db', allow_none=True)
+        
+        deleted_count = 0
+        failed_databases = []
+        
+        for database in databases:
+            try:
+                print(f"   Deleting: {database}...")
+                db.drop(master_password, database)
+                deleted_count += 1
+                print(f"   ✓ Deleted from Odoo: {database}")
+                
+                # Also delete from SQLite
+                conn = sqlite3.connect(CUSTOMERS_DB)
+                cursor = conn.cursor()
+                cursor.execute('DELETE FROM customers WHERE database_name = ?', (database,))
+                conn.commit()
+                conn.close()
+                print(f"   ✓ Deleted from SQLite: {database}")
+                
+            except Exception as e:
+                error_msg = str(e)
+                print(f"   ❌ Failed to delete {database}: {error_msg}")
+                failed_databases.append(f"{database}: {error_msg}")
+        
+        message = f'✅ {deleted_count} دیتابیس حذف شد'
+        if failed_databases:
+            message += f'\n\n❌ {len(failed_databases)} دیتابیس حذف نشد:\n' + '\n'.join(failed_databases)
+        
+        print("=" * 60)
+        print(f"✅ DELETION COMPLETE")
+        print(f"   Deleted: {deleted_count}")
+        print(f"   Failed: {len(failed_databases)}")
+        print("=" * 60)
+        
+        return jsonify({
+            'success': True,
+            'deleted_count': deleted_count,
+            'failed_count': len(failed_databases),
+            'message': message
+        })
+        
+    except Exception as e:
+        import traceback
+        print("=" * 60)
+        print("❌ EXCEPTION IN DELETE API:")
+        traceback.print_exc()
+        print("=" * 60)
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 @app.route('/api/create-demo-data', methods=['POST', 'OPTIONS'])
@@ -1565,6 +1870,358 @@ def api_logout():
 
 
 # =====================================
+# Password Change API
+# =====================================
+
+@app.route('/api/change-password', methods=['POST'])
+def api_change_password():
+    """Change user password (site or Odoo)"""
+    try:
+        if 'user_id' not in session:
+            return jsonify({'success': False, 'error': 'لطفاً ابتدا وارد شوید'}), 401
+        
+        data = request.get_json()
+        password_type = data.get('type', 'site')  # 'site' or 'odoo'
+        current_password = data.get('current_password', '')
+        new_password = data.get('new_password', '')
+        
+        if not current_password or not new_password:
+            return jsonify({'success': False, 'error': 'رمز عبور فعلی و جدید الزامی است'}), 400
+        
+        if len(new_password) < 6:
+            return jsonify({'success': False, 'error': 'رمز عبور جدید باید حداقل 6 کاراکتر باشد'}), 400
+        
+        user_id = session['user_id']
+        user_email = session.get('user_email', '')
+        
+        if password_type == 'site':
+            # Change website password
+            conn = sqlite3.connect(CUSTOMERS_DB)
+            cursor = conn.cursor()
+            cursor.execute('SELECT password_hash FROM website_users WHERE id = ?', (user_id,))
+            result = cursor.fetchone()
+            
+            if not result:
+                conn.close()
+                return jsonify({'success': False, 'error': 'کاربر یافت نشد'}), 404
+            
+            # Check if user logged in with Google (no password set)
+            if not result[0]:
+                # No password set - allow setting new password
+                new_hash = hash_password(new_password)
+                cursor.execute('UPDATE website_users SET password_hash = ? WHERE id = ?', (new_hash, user_id))
+                conn.commit()
+                conn.close()
+                return jsonify({'success': True, 'message': 'رمز عبور با موفقیت تنظیم شد'})
+            
+            # Verify current password
+            if not verify_password(current_password, result[0]):
+                conn.close()
+                return jsonify({'success': False, 'error': 'رمز عبور فعلی اشتباه است'}), 401
+            
+            # Update password
+            new_hash = hash_password(new_password)
+            cursor.execute('UPDATE website_users SET password_hash = ? WHERE id = ?', (new_hash, user_id))
+            conn.commit()
+            conn.close()
+            
+            return jsonify({'success': True, 'message': 'رمز عبور سایت با موفقیت تغییر کرد'})
+            
+        elif password_type == 'odoo':
+            # Change Odoo password
+            conn = sqlite3.connect(CUSTOMERS_DB)
+            cursor = conn.cursor()
+            cursor.execute('SELECT database_name, admin_password FROM customers WHERE admin_email = ?', (user_email.lower(),))
+            result = cursor.fetchone()
+            
+            if not result:
+                conn.close()
+                return jsonify({'success': False, 'error': 'دیتابیس Odoo یافت نشد'}), 404
+            
+            db_name, stored_password = result
+            
+            # Verify current Odoo password
+            if current_password != stored_password:
+                conn.close()
+                return jsonify({'success': False, 'error': 'رمز عبور Odoo فعلی اشتباه است'}), 401
+            
+            # Try to change password in Odoo via XML-RPC
+            try:
+                common = xmlrpc.client.ServerProxy(f'{ODOO_URL}/xmlrpc/2/common', allow_none=True)
+                uid = common.authenticate(db_name, user_email, current_password, {})
+                
+                if uid:
+                    models = xmlrpc.client.ServerProxy(f'{ODOO_URL}/xmlrpc/2/object', allow_none=True)
+                    models.execute_kw(db_name, uid, current_password, 'res.users', 'write', [[uid], {'password': new_password}])
+            except Exception as odoo_error:
+                print(f"[WARN] Could not change Odoo password via XML-RPC: {odoo_error}")
+                # Continue anyway to update local database
+            
+            # Update password in local database
+            cursor.execute('UPDATE customers SET admin_password = ? WHERE admin_email = ?', (new_password, user_email.lower()))
+            conn.commit()
+            conn.close()
+            
+            return jsonify({'success': True, 'message': 'رمز عبور Odoo با موفقیت تغییر کرد'})
+        
+        else:
+            return jsonify({'success': False, 'error': 'نوع رمز عبور نامعتبر است'}), 400
+            
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/update-profile', methods=['POST'])
+def api_update_profile():
+    """Update user profile information"""
+    try:
+        if 'user_id' not in session:
+            return jsonify({'success': False, 'error': 'لطفاً ابتدا وارد شوید'}), 401
+        
+        data = request.get_json()
+        user_id = session['user_id']
+        
+        # Fields that can be updated
+        full_name = data.get('full_name', '').strip()
+        phone = data.get('phone', '').strip()
+        
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        
+        updates = []
+        params = []
+        
+        if full_name:
+            updates.append('full_name = ?')
+            params.append(full_name)
+            session['user_name'] = full_name
+        
+        if phone:
+            updates.append('phone = ?')
+            params.append(phone)
+        
+        if updates:
+            params.append(user_id)
+            cursor.execute(f'UPDATE website_users SET {", ".join(updates)} WHERE id = ?', params)
+            conn.commit()
+        
+        conn.close()
+        
+        return jsonify({'success': True, 'message': 'پروفایل با موفقیت به‌روزرسانی شد'})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+# =====================================
+# Unified OTP Login/Register (Like Numberland)
+# =====================================
+
+@app.route('/api/send-otp-unified', methods=['POST'])
+def api_send_otp_unified():
+    """ارسال کد OTP برای لاگین/ثبت‌نام یکپارچه - اگر کاربر وجود نداشت ثبت‌نام می‌شود"""
+    try:
+        data = request.json or {}
+        phone = data.get('phone', '').strip()
+        
+        if not phone:
+            return jsonify({'success': False, 'error': 'شماره موبایل الزامی است'}), 400
+        
+        # Normalize phone
+        if phone.startswith('+98'):
+            phone = '0' + phone[3:]
+        elif phone.startswith('98'):
+            phone = '0' + phone[2:]
+        
+        # Validate phone format
+        if not phone.startswith('09') or len(phone) != 11:
+            return jsonify({'success': False, 'error': 'فرمت شماره موبایل صحیح نیست'}), 400
+        
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        
+        # Check if user exists
+        cursor.execute('SELECT id, full_name, phone FROM website_users WHERE phone = ?', (phone,))
+        user = cursor.fetchone()
+        
+        is_new_user = False
+        
+        if user:
+            user_id = user[0]
+        else:
+            # Create new user with just phone number
+            is_new_user = True
+            cursor.execute('''
+                INSERT INTO website_users (phone, status, created_at, auth_method)
+                VALUES (?, 'pending', ?, 'phone')
+            ''', (phone, datetime.now()))
+            user_id = cursor.lastrowid
+            conn.commit()
+            print(f"[UNIFIED-OTP] New user created with phone: {phone}, id: {user_id}")
+        
+        # Generate 5-digit OTP code
+        otp_code = ''.join([str(random.randint(0, 9)) for _ in range(5)])
+        otp_expires = datetime.now() + timedelta(minutes=5)
+        
+        # Save OTP to database
+        cursor.execute('''
+            UPDATE website_users 
+            SET phone_verification_code = ?, phone_verification_expires = ?
+            WHERE id = ?
+        ''', (otp_code, otp_expires, user_id))
+        conn.commit()
+        conn.close()
+        
+        # Send SMS
+        sms_success, sms_message = send_sms_verification(phone, otp_code)
+        
+        if sms_success:
+            print(f"[UNIFIED-OTP] Code sent to {phone}: {otp_code}")
+            return jsonify({
+                'success': True,
+                'message': 'کد تایید ارسال شد',
+                'phone': phone,
+                'is_new_user': is_new_user,
+                'expires_in': 300
+            })
+        else:
+            print(f"[UNIFIED-OTP] Failed to send SMS: {sms_message}")
+            return jsonify({'success': False, 'error': sms_message}), 500
+            
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/verify-otp-unified', methods=['POST'])
+def api_verify_otp_unified():
+    """تایید کد OTP و لاگین/ثبت‌نام یکپارچه"""
+    try:
+        data = request.json or {}
+        phone = data.get('phone', '').strip()
+        code = data.get('code', '').strip()
+        
+        if not phone or not code:
+            return jsonify({'success': False, 'error': 'شماره موبایل و کد الزامی است'}), 400
+        
+        # Normalize phone
+        if phone.startswith('+98'):
+            phone = '0' + phone[3:]
+        elif phone.startswith('98'):
+            phone = '0' + phone[2:]
+        
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT id, full_name, email, phone, phone_verification_code, 
+                   phone_verification_expires, status
+            FROM website_users WHERE phone = ?
+        ''', (phone,))
+        user = cursor.fetchone()
+        
+        if not user:
+            conn.close()
+            return jsonify({'success': False, 'error': 'کاربر یافت نشد'}), 404
+        
+        user_id, full_name, user_email, user_phone, stored_code, code_expires, status = user
+        
+        # Verify OTP code
+        if not stored_code:
+            conn.close()
+            return jsonify({'success': False, 'error': 'ابتدا درخواست کد تایید کنید'}), 400
+        
+        if stored_code != code:
+            conn.close()
+            return jsonify({'success': False, 'error': 'کد تایید اشتباه است'}), 401
+        
+        # Check expiration
+        if code_expires:
+            if isinstance(code_expires, str):
+                code_expires = datetime.fromisoformat(code_expires)
+            if datetime.now() > code_expires:
+                conn.close()
+                return jsonify({'success': False, 'error': 'کد تایید منقضی شده است'}), 401
+        
+        # OTP verified - activate user and clear the code
+        cursor.execute('''
+            UPDATE website_users 
+            SET phone_verified = 1, 
+                status = 'active',
+                phone_verification_code = NULL, 
+                phone_verification_expires = NULL,
+                last_login = ?,
+                auth_method = 'phone'
+            WHERE id = ?
+        ''', (datetime.now(), user_id))
+        conn.commit()
+        conn.close()
+        
+        # Set session
+        session.permanent = True
+        session['user_id'] = user_id
+        session['user_email'] = user_email
+        session['user_phone'] = user_phone
+        session['user_name'] = full_name or f'کاربر {phone[-4:]}'
+        session['auth_method'] = 'phone'
+        
+        print(f"[UNIFIED-OTP] User {user_id} logged in with phone: {phone}")
+        
+        return jsonify({
+            'success': True,
+            'message': 'ورود موفق',
+            'user': {
+                'id': user_id,
+                'name': full_name or f'کاربر {phone[-4:]}',
+                'email': user_email,
+                'phone': user_phone
+            }
+        })
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/check-email', methods=['POST'])
+def api_check_email():
+    """بررسی وجود کاربر با ایمیل"""
+    try:
+        data = request.json or {}
+        email = data.get('email', '').strip().lower()
+        
+        if not email:
+            return jsonify({'success': False, 'error': 'ایمیل الزامی است'}), 400
+        
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        cursor.execute('SELECT id, full_name FROM website_users WHERE email = ?', (email,))
+        user = cursor.fetchone()
+        conn.close()
+        
+        if user:
+            return jsonify({
+                'success': True,
+                'exists': True,
+                'message': 'کاربر یافت شد'
+            })
+        else:
+            return jsonify({
+                'success': True,
+                'exists': False,
+                'message': 'کاربر یافت نشد - می‌توانید ثبت‌نام کنید'
+            })
+            
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+# =====================================
 # OTP Login Endpoints (Passwordless Phone Login)
 # =====================================
 
@@ -1736,6 +2393,13 @@ def google_login():
     except ImportError:
         return redirect('/user-login.html?error=oauth_not_available')
     
+    # Save the page user wants to return to
+    return_to = request.args.get('return_to', request.referrer or '/onboarding.html')
+    # Filter out login/register pages from return_to
+    if return_to and any(x in return_to for x in ['/user-login', '/user-register', '/auth/', '/callback/']):
+        return_to = '/onboarding.html'
+    session['return_to'] = return_to
+    
     # Use dynamic redirect URI if needed
     redirect_uri = os.environ.get('GOOGLE_REDIRECT_URI')
     if not redirect_uri:
@@ -1792,6 +2456,7 @@ def google_callback():
         
         email = user_info.get('email', '')
         name = user_info.get('name', '')
+        picture = user_info.get('picture', '')  # Google profile picture URL
         
         if not email:
             return redirect('/user-login.html?error=no_email')
@@ -1805,8 +2470,11 @@ def google_callback():
         if existing_user:
             # User exists - login
             user_id = existing_user[0]
-            cursor.execute('UPDATE website_users SET last_login = ?, email_verified = 1 WHERE id = ?',
-                          (datetime.now(), user_id))
+            cursor.execute('''
+                UPDATE website_users 
+                SET last_login = ?, email_verified = 1, profile_picture = ?, auth_method = 'google'
+                WHERE id = ?
+            ''', (datetime.now(), picture, user_id))
             conn.commit()
             conn.close()
             
@@ -1814,19 +2482,20 @@ def google_callback():
             session['user_id'] = user_id
             session['user_email'] = email.lower()
             session['user_name'] = name
-            session['auth_method'] = 'email'  # Google login is email-based
+            session['auth_method'] = 'google'  # Google OAuth login
             session['google_login'] = True
             
-            # Google OAuth users don't need phone verification for basic access
-            # Go directly to onboarding
-            return redirect('/onboarding.html')
+            # Redirect to the page user came from or onboarding
+            return_to = session.pop('return_to', '/onboarding.html')
+            return redirect(return_to)
         else:
             # New user - create account with active status
+            # Use 'google_oauth' as placeholder for password_hash since user logs in via Google
             cursor.execute('''
                 INSERT INTO website_users 
-                (full_name, email, phone, password_hash, email_verified, phone_verified, status)
-                VALUES (?, ?, '', '', 1, 0, 'active')
-            ''', (name, email.lower()))
+                (full_name, email, phone, password_hash, profile_picture, email_verified, phone_verified, status, auth_method)
+                VALUES (?, ?, '', 'google_oauth', ?, 1, 0, 'active', 'google')
+            ''', (name, email.lower(), picture))
             conn.commit()
             user_id = cursor.lastrowid
             conn.close()
@@ -1835,12 +2504,12 @@ def google_callback():
             session['user_id'] = user_id
             session['user_email'] = email.lower()
             session['user_name'] = name
-            session['auth_method'] = 'email'  # Google login is email-based
+            session['auth_method'] = 'google'  # Google OAuth login
             session['google_login'] = True
             
-            # New Google user - go directly to onboarding
-            # Phone verification is optional for Google OAuth users
-            return redirect('/onboarding.html')
+            # Redirect to the page user came from or onboarding
+            return_to = session.pop('return_to', '/onboarding.html')
+            return redirect(return_to)
             
     except Exception as e:
         import traceback
@@ -1982,7 +2651,7 @@ def api_user_status():
         conn = sqlite3.connect(CUSTOMERS_DB)
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT id, full_name, email, phone, auth_method, email_verified, phone_verified, status
+            SELECT id, full_name, email, phone, auth_method, profile_picture, email_verified, phone_verified, status
             FROM website_users WHERE id = ?
         ''', (user_id,))
         result = cursor.fetchone()
@@ -1991,7 +2660,7 @@ def api_user_status():
         if not result:
             return jsonify({'success': False, 'error': 'User not found'}), 404
         
-        user_id, full_name, email, phone, db_auth_method, email_verified, phone_verified, status = result
+        user_id, full_name, email, phone, db_auth_method, profile_picture, email_verified, phone_verified, status = result
         
         # Use session auth_method (current login method) instead of database value
         current_auth_method = session.get('auth_method', db_auth_method or 'email')
@@ -2008,6 +2677,7 @@ def api_user_status():
                 'email': email,
                 'phone': phone,
                 'auth_method': current_auth_method,  # روش فعلی لاگین از session
+                'profile_picture': profile_picture,
                 'email_verified': bool(email_verified),
                 'phone_verified': bool(phone_verified),
                 'status': status,
@@ -2016,6 +2686,810 @@ def api_user_status():
         })
         
     except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/plans', methods=['GET'])
+def api_get_plans():
+    """Get available license plans from database"""
+    try:
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        # Get active plans ordered by display_order
+        cursor.execute('''
+            SELECT id, plan_id, name_fa, name_en, price, duration_months,
+                   duration_display_fa, duration_display_en, discount_percent,
+                   features, is_popular, display_order
+            FROM plans
+            WHERE is_active = 1
+            ORDER BY display_order ASC, id ASC
+        ''')
+        
+        rows = cursor.fetchall()
+        conn.close()
+        
+        plans = []
+        for row in rows:
+            # Format price for display
+            price_formatted = f"{row['price']:,}".replace(',', ',')
+            price_display_fa = f"{price_formatted} تومان"
+            
+            # Parse features (stored as pipe-separated string)
+            features_str = row['features'] or ''
+            features_list = [f.strip() for f in features_str.split('|') if f.strip()]
+            
+            # Calculate discount message
+            discount_msg = None
+            if row['discount_percent'] and row['discount_percent'] > 0:
+                discount_msg = f"{row['discount_percent']}٪ تخفیف"
+            
+            plan = {
+                'id': row['plan_id'],
+                'name': row['name_fa'],
+                'name_en': row['name_en'],
+                'price': row['price'],
+                'price_display': price_display_fa,
+                'duration': row['duration_display_fa'],
+                'duration_en': row['duration_display_en'],
+                'duration_months': row['duration_months'],
+                'discount': discount_msg,
+                'features': features_list,
+                'popular': bool(row['is_popular'])
+            }
+            plans.append(plan)
+        
+        return jsonify({'success': True, 'plans': plans})
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/admin/plans', methods=['GET'])
+def api_admin_get_all_plans():
+    """Get all plans including inactive ones (admin only)"""
+    try:
+        # Check admin
+        if 'user_id' not in session:
+            return jsonify({'success': False, 'error': 'لطفاً ابتدا وارد شوید'}), 401
+        
+        user_id = session['user_id']
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        cursor.execute('SELECT email FROM website_users WHERE id = ?', (user_id,))
+        result = cursor.fetchone()
+        
+        if not result or result[0].lower() not in [e.lower() for e in ADMIN_EMAILS]:
+            conn.close()
+            return jsonify({'success': False, 'error': 'دسترسی غیرمجاز'}), 403
+        
+        # Get all plans
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT * FROM plans ORDER BY display_order ASC, id ASC
+        ''')
+        
+        rows = cursor.fetchall()
+        conn.close()
+        
+        plans = []
+        for row in rows:
+            plan = dict(row)
+            # Parse features
+            if plan['features']:
+                plan['features'] = [f.strip() for f in plan['features'].split('|') if f.strip()]
+            else:
+                plan['features'] = []
+            plans.append(plan)
+        
+        return jsonify({'success': True, 'plans': plans})
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/admin/plans', methods=['POST'])
+def api_admin_create_plan():
+    """Create new plan (admin only)"""
+    try:
+        # Check admin
+        if 'user_id' not in session:
+            return jsonify({'success': False, 'error': 'لطفاً ابتدا وارد شوید'}), 401
+        
+        user_id = session['user_id']
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        cursor.execute('SELECT email FROM website_users WHERE id = ?', (user_id,))
+        result = cursor.fetchone()
+        
+        if not result or result[0].lower() not in [e.lower() for e in ADMIN_EMAILS]:
+            conn.close()
+            return jsonify({'success': False, 'error': 'دسترسی غیرمجاز'}), 403
+        
+        data = request.get_json()
+        
+        # Validate required fields
+        required = ['plan_id', 'name_fa', 'name_en', 'price', 'duration_months']
+        for field in required:
+            if field not in data or not data[field]:
+                return jsonify({'success': False, 'error': f'فیلد {field} الزامی است'}), 400
+        
+        # Prepare features string
+        features = data.get('features', [])
+        features_str = '|'.join(features) if isinstance(features, list) else features
+        
+        # Insert plan
+        cursor.execute('''
+            INSERT INTO plans (plan_id, name_fa, name_en, price, duration_months, duration_display_fa,
+                             duration_display_en, discount_percent, features, is_popular, is_active, display_order)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            data['plan_id'],
+            data['name_fa'],
+            data['name_en'],
+            data['price'],
+            data['duration_months'],
+            data.get('duration_display_fa', ''),
+            data.get('duration_display_en', ''),
+            data.get('discount_percent', 0),
+            features_str,
+            1 if data.get('is_popular') else 0,
+            1 if data.get('is_active', True) else 0,
+            data.get('display_order', 0)
+        ))
+        
+        conn.commit()
+        plan_id = cursor.lastrowid
+        conn.close()
+        
+        return jsonify({'success': True, 'plan_id': plan_id, 'message': 'پلن با موفقیت ایجاد شد'})
+        
+    except sqlite3.IntegrityError:
+        return jsonify({'success': False, 'error': 'این شناسه پلن قبلاً استفاده شده است'}), 400
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/admin/plans/<int:plan_id>', methods=['PUT'])
+def api_admin_update_plan(plan_id):
+    """Update plan (admin only)"""
+    try:
+        # Check admin
+        if 'user_id' not in session:
+            return jsonify({'success': False, 'error': 'لطفاً ابتدا وارد شوید'}), 401
+        
+        user_id = session['user_id']
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        cursor.execute('SELECT email FROM website_users WHERE id = ?', (user_id,))
+        result = cursor.fetchone()
+        
+        if not result or result[0].lower() not in [e.lower() for e in ADMIN_EMAILS]:
+            conn.close()
+            return jsonify({'success': False, 'error': 'دسترسی غیرمجاز'}), 403
+        
+        data = request.get_json()
+        
+        # Prepare features string
+        features = data.get('features', [])
+        features_str = '|'.join(features) if isinstance(features, list) else features
+        
+        # Update plan
+        cursor.execute('''
+            UPDATE plans SET
+                name_fa = ?, name_en = ?, price = ?, duration_months = ?,
+                duration_display_fa = ?, duration_display_en = ?, discount_percent = ?,
+                features = ?, is_popular = ?, is_active = ?, display_order = ?,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        ''', (
+            data.get('name_fa'),
+            data.get('name_en'),
+            data.get('price'),
+            data.get('duration_months'),
+            data.get('duration_display_fa', ''),
+            data.get('duration_display_en', ''),
+            data.get('discount_percent', 0),
+            features_str,
+            1 if data.get('is_popular') else 0,
+            1 if data.get('is_active', True) else 0,
+            data.get('display_order', 0),
+            plan_id
+        ))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True, 'message': 'پلن با موفقیت به‌روزرسانی شد'})
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/admin/plans/<int:plan_id>', methods=['DELETE'])
+def api_admin_delete_plan(plan_id):
+    """Delete plan (admin only)"""
+    try:
+        # Check admin
+        if 'user_id' not in session:
+            return jsonify({'success': False, 'error': 'لطفاً ابتدا وارد شوید'}), 401
+        
+        user_id = session['user_id']
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        cursor.execute('SELECT email FROM website_users WHERE id = ?', (user_id,))
+        result = cursor.fetchone()
+        
+        if not result or result[0].lower() not in [e.lower() for e in ADMIN_EMAILS]:
+            conn.close()
+            return jsonify({'success': False, 'error': 'دسترسی غیرمجاز'}), 403
+        
+        # Delete plan
+        cursor.execute('DELETE FROM plans WHERE id = ?', (plan_id,))
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True, 'message': 'پلن با موفقیت حذف شد'})
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+# ========================================
+# TICKET SYSTEM APIS
+# ========================================
+
+@app.route('/api/tickets', methods=['GET'])
+def api_get_tickets():
+    """Get tickets - users see their own, admins see all"""
+    try:
+        if 'user_id' not in session:
+            return jsonify({'success': False, 'error': 'لطفاً ابتدا وارد شوید'}), 401
+        
+        user_id = session['user_id']
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        # Check if admin
+        cursor.execute('SELECT email FROM website_users WHERE id = ?', (user_id,))
+        user = cursor.fetchone()
+        is_admin = user and user['email'].lower() in [e.lower() for e in ADMIN_EMAILS]
+        
+        # Build query based on admin status
+        if is_admin:
+            cursor.execute('''
+                SELECT t.*, u.full_name as user_name, u.email as user_email,
+                       (SELECT COUNT(*) FROM ticket_messages WHERE ticket_id = t.id) as message_count
+                FROM tickets t
+                JOIN website_users u ON t.user_id = u.id
+                ORDER BY t.updated_at DESC
+            ''')
+        else:
+            cursor.execute('''
+                SELECT t.*, u.full_name as user_name, u.email as user_email,
+                       (SELECT COUNT(*) FROM ticket_messages WHERE ticket_id = t.id) as message_count
+                FROM tickets t
+                JOIN website_users u ON t.user_id = u.id
+                WHERE t.user_id = ?
+                ORDER BY t.updated_at DESC
+            ''', (user_id,))
+        
+        tickets = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        
+        return jsonify({'success': True, 'tickets': tickets, 'is_admin': is_admin})
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/tickets', methods=['POST'])
+def api_create_ticket():
+    """Create new ticket"""
+    try:
+        if 'user_id' not in session:
+            return jsonify({'success': False, 'error': 'لطفاً ابتدا وارد شوید'}), 401
+        
+        user_id = session['user_id']
+        data = request.get_json()
+        
+        # Validate required fields
+        if not data.get('subject') or not data.get('message') or not data.get('category'):
+            return jsonify({'success': False, 'error': 'لطفاً تمام فیلدها را پر کنید'}), 400
+        
+        # Generate ticket number
+        import time
+        ticket_number = f"TKT-{int(time.time())}"
+        
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        
+        # Create ticket
+        cursor.execute('''
+            INSERT INTO tickets (ticket_number, user_id, subject, category, priority, status)
+            VALUES (?, ?, ?, ?, ?, 'open')
+        ''', (ticket_number, user_id, data['subject'], data['category'], data.get('priority', 'medium')))
+        
+        ticket_id = cursor.lastrowid
+        
+        # Add first message
+        cursor.execute('''
+            INSERT INTO ticket_messages (ticket_id, user_id, is_admin, message)
+            VALUES (?, ?, 0, ?)
+        ''', (ticket_id, user_id, data['message']))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True, 'ticket_number': ticket_number, 'ticket_id': ticket_id})
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/tickets/<int:ticket_id>', methods=['GET'])
+def api_get_ticket_details(ticket_id):
+    """Get ticket details with all messages"""
+    try:
+        if 'user_id' not in session:
+            return jsonify({'success': False, 'error': 'لطفاً ابتدا وارد شوید'}), 401
+        
+        user_id = session['user_id']
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        # Check if admin
+        cursor.execute('SELECT email FROM website_users WHERE id = ?', (user_id,))
+        user = cursor.fetchone()
+        is_admin = user and user['email'].lower() in [e.lower() for e in ADMIN_EMAILS]
+        
+        # Get ticket
+        cursor.execute('''
+            SELECT t.*, u.full_name as user_name, u.email as user_email
+            FROM tickets t
+            JOIN website_users u ON t.user_id = u.id
+            WHERE t.id = ?
+        ''', (ticket_id,))
+        
+        ticket = cursor.fetchone()
+        
+        if not ticket:
+            conn.close()
+            return jsonify({'success': False, 'error': 'تیکت یافت نشد'}), 404
+        
+        # Check permission (admin or owner)
+        if not is_admin and ticket['user_id'] != user_id:
+            conn.close()
+            return jsonify({'success': False, 'error': 'دسترسی غیرمجاز'}), 403
+        
+        # Get messages
+        cursor.execute('''
+            SELECT m.*, u.full_name as sender_name, u.email as sender_email
+            FROM ticket_messages m
+            JOIN website_users u ON m.user_id = u.id
+            WHERE m.ticket_id = ?
+            ORDER BY m.created_at ASC
+        ''', (ticket_id,))
+        
+        messages = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'ticket': dict(ticket),
+            'messages': messages,
+            'is_admin': is_admin
+        })
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/tickets/<int:ticket_id>/messages', methods=['POST'])
+def api_add_ticket_message(ticket_id):
+    """Add message to ticket"""
+    try:
+        if 'user_id' not in session:
+            return jsonify({'success': False, 'error': 'لطفاً ابتدا وارد شوید'}), 401
+        
+        user_id = session['user_id']
+        data = request.get_json()
+        
+        if not data.get('message'):
+            return jsonify({'success': False, 'error': 'پیام نمی‌تواند خالی باشد'}), 400
+        
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        
+        # Check if admin
+        cursor.execute('SELECT email FROM website_users WHERE id = ?', (user_id,))
+        user = cursor.fetchone()
+        is_admin = user and user[0].lower() in [e.lower() for e in ADMIN_EMAILS]
+        
+        # Check ticket exists and user has permission
+        cursor.execute('SELECT user_id, status FROM tickets WHERE id = ?', (ticket_id,))
+        ticket = cursor.fetchone()
+        
+        if not ticket:
+            conn.close()
+            return jsonify({'success': False, 'error': 'تیکت یافت نشد'}), 404
+        
+        if not is_admin and ticket[0] != user_id:
+            conn.close()
+            return jsonify({'success': False, 'error': 'دسترسی غیرمجاز'}), 403
+        
+        # Add message
+        cursor.execute('''
+            INSERT INTO ticket_messages (ticket_id, user_id, is_admin, message)
+            VALUES (?, ?, ?, ?)
+        ''', (ticket_id, user_id, 1 if is_admin else 0, data['message']))
+        
+        # Update ticket timestamp and status if was closed
+        if ticket[1] == 'closed':
+            cursor.execute('''
+                UPDATE tickets SET status = 'open', updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            ''', (ticket_id,))
+        else:
+            cursor.execute('''
+                UPDATE tickets SET updated_at = CURRENT_TIMESTAMP WHERE id = ?
+            ''', (ticket_id,))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True, 'message': 'پیام با موفقیت ارسال شد'})
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/tickets/<int:ticket_id>/status', methods=['PUT'])
+def api_update_ticket_status(ticket_id):
+    """Update ticket status (admin only)"""
+    try:
+        if 'user_id' not in session:
+            return jsonify({'success': False, 'error': 'لطفاً ابتدا وارد شوید'}), 401
+        
+        user_id = session['user_id']
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        
+        # Check if admin
+        cursor.execute('SELECT email FROM website_users WHERE id = ?', (user_id,))
+        user = cursor.fetchone()
+        
+        if not user or user[0].lower() not in [e.lower() for e in ADMIN_EMAILS]:
+            conn.close()
+            return jsonify({'success': False, 'error': 'دسترسی غیرمجاز'}), 403
+        
+        data = request.get_json()
+        new_status = data.get('status')
+        
+        if new_status not in ['open', 'in_progress', 'waiting', 'closed']:
+            conn.close()
+            return jsonify({'success': False, 'error': 'وضعیت نامعتبر'}), 400
+        
+        # Update status
+        if new_status == 'closed':
+            cursor.execute('''
+                UPDATE tickets SET status = ?, closed_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            ''', (new_status, ticket_id))
+        else:
+            cursor.execute('''
+                UPDATE tickets SET status = ?, closed_at = NULL, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            ''', (new_status, ticket_id))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True, 'message': 'وضعیت تیکت به‌روزرسانی شد'})
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/tickets/<int:ticket_id>/priority', methods=['PUT'])
+def api_update_ticket_priority(ticket_id):
+    """Update ticket priority (admin only)"""
+    try:
+        if 'user_id' not in session:
+            return jsonify({'success': False, 'error': 'لطفاً ابتدا وارد شوید'}), 401
+        
+        user_id = session['user_id']
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        
+        # Check if admin
+        cursor.execute('SELECT email FROM website_users WHERE id = ?', (user_id,))
+        user = cursor.fetchone()
+        
+        if not user or user[0].lower() not in [e.lower() for e in ADMIN_EMAILS]:
+            conn.close()
+            return jsonify({'success': False, 'error': 'دسترسی غیرمجاز'}), 403
+        
+        data = request.get_json()
+        new_priority = data.get('priority')
+        
+        if new_priority not in ['low', 'medium', 'high', 'urgent']:
+            conn.close()
+            return jsonify({'success': False, 'error': 'اولویت نامعتبر'}), 400
+        
+        # Update priority
+        cursor.execute('''
+            UPDATE tickets SET priority = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?
+        ''', (new_priority, ticket_id))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True, 'message': 'اولویت تیکت به‌روزرسانی شد'})
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/admin/users', methods=['GET'])
+def api_admin_users():
+    """Get list of all site users (admin only)"""
+    try:
+        # Check if user is logged in
+        if 'user_id' not in session:
+            return jsonify({'success': False, 'error': 'لطفاً ابتدا وارد شوید'}), 401
+        
+        # Get current user's email to check admin status
+        user_id = session['user_id']
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        cursor.execute('SELECT email FROM website_users WHERE id = ?', (user_id,))
+        result = cursor.fetchone()
+        
+        if not result:
+            conn.close()
+            return jsonify({'success': False, 'error': 'کاربر یافت نشد'}), 404
+        
+        user_email = result[0]
+        is_admin = user_email.lower() in [e.lower() for e in ADMIN_EMAILS]
+        
+        if not is_admin:
+            conn.close()
+            return jsonify({'success': False, 'error': 'دسترسی مجاز نیست'}), 403
+        
+        # Get all users from website_users table
+        cursor.execute('''
+            SELECT id, full_name, email, phone, auth_method, profile_picture, 
+                   email_verified, phone_verified, status, created_at, last_login
+            FROM website_users
+            ORDER BY created_at DESC
+        ''')
+        users_data = cursor.fetchall()
+        conn.close()
+        
+        users = []
+        for user in users_data:
+            user_id, full_name, email, phone, auth_method, profile_picture, \
+                email_verified, phone_verified, status, created_at, last_login = user
+            
+            # Check if user is in admin list
+            check_is_admin = email and email.lower() in [e.lower() for e in ADMIN_EMAILS]
+            
+            users.append({
+                'id': user_id,
+                'name': full_name or '',
+                'email': email or '',
+                'phone': phone or '',
+                'auth_method': auth_method or 'email',
+                'profile_picture': profile_picture,
+                'email_verified': bool(email_verified),
+                'phone_verified': bool(phone_verified),
+                'status': status or 'active',
+                'created_at': created_at,
+                'last_login': last_login,
+                'is_admin': check_is_admin
+            })
+        
+        return jsonify({
+            'success': True,
+            'users': users,
+            'total': len(users)
+        })
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/admin/users/status', methods=['PATCH'])
+def api_admin_update_user_status():
+    """Update user status (admin only)"""
+    try:
+        # Check if user is logged in
+        if 'user_id' not in session:
+            return jsonify({'success': False, 'error': 'لطفاً ابتدا وارد شوید'}), 401
+        
+        # Get current user's email to check admin status
+        user_id = session['user_id']
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        cursor.execute('SELECT email FROM website_users WHERE id = ?', (user_id,))
+        result = cursor.fetchone()
+        
+        if not result:
+            conn.close()
+            return jsonify({'success': False, 'error': 'کاربر یافت نشد'}), 404
+        
+        user_email = result[0]
+        is_admin = user_email.lower() in [e.lower() for e in ADMIN_EMAILS]
+        
+        if not is_admin:
+            conn.close()
+            return jsonify({'success': False, 'error': 'دسترسی مجاز نیست'}), 403
+        
+        data = request.get_json()
+        target_user_id = data.get('user_id')
+        new_status = data.get('status')
+        
+        if not target_user_id or not new_status:
+            conn.close()
+            return jsonify({'success': False, 'error': 'پارامترهای لازم ارسال نشده است'}), 400
+        
+        if new_status not in ['active', 'inactive', 'pending']:
+            conn.close()
+            return jsonify({'success': False, 'error': 'وضعیت نامعتبر است'}), 400
+        
+        # Update user status
+        cursor.execute('UPDATE website_users SET status = ? WHERE id = ?', (new_status, target_user_id))
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True, 'message': f'وضعیت کاربر به {new_status} تغییر کرد'})
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/admin/users/admin-status', methods=['PATCH'])
+def api_admin_toggle_admin():
+    """Toggle admin status for user (admin only)"""
+    try:
+        # Check if user is logged in
+        if 'user_id' not in session:
+            return jsonify({'success': False, 'error': 'لطفاً ابتدا وارد شوید'}), 401
+        
+        # Get current user's email to check admin status
+        user_id = session['user_id']
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        cursor.execute('SELECT email FROM website_users WHERE id = ?', (user_id,))
+        result = cursor.fetchone()
+        
+        if not result:
+            conn.close()
+            return jsonify({'success': False, 'error': 'کاربر یافت نشد'}), 404
+        
+        user_email = result[0]
+        is_admin = user_email.lower() in [e.lower() for e in ADMIN_EMAILS]
+        
+        if not is_admin:
+            conn.close()
+            return jsonify({'success': False, 'error': 'دسترسی مجاز نیست'}), 403
+        
+        data = request.get_json()
+        target_user_id = data.get('user_id')
+        new_admin_status = data.get('is_admin')
+        
+        if target_user_id is None or new_admin_status is None:
+            conn.close()
+            return jsonify({'success': False, 'error': 'پارامترهای لازم ارسال نشده است'}), 400
+        
+        # Get target user email
+        cursor.execute('SELECT email FROM website_users WHERE id = ?', (target_user_id,))
+        target = cursor.fetchone()
+        
+        if not target:
+            conn.close()
+            return jsonify({'success': False, 'error': 'کاربر هدف یافت نشد'}), 404
+        
+        target_email = target[0]
+        
+        # Note: This updates the ADMIN_EMAILS list in memory only
+        # For production, you should store admin status in database
+        if new_admin_status:
+            if target_email.lower() not in [e.lower() for e in ADMIN_EMAILS]:
+                ADMIN_EMAILS.append(target_email)
+                message = f'دسترسی ادمین به {target_email} داده شد'
+            else:
+                message = 'این کاربر قبلاً ادمین بود'
+        else:
+            ADMIN_EMAILS[:] = [e for e in ADMIN_EMAILS if e.lower() != target_email.lower()]
+            message = f'دسترسی ادمین از {target_email} حذف شد'
+        
+        conn.close()
+        return jsonify({'success': True, 'message': message})
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/admin/users/<int:user_id>', methods=['DELETE'])
+def api_admin_delete_user(user_id):
+    """Delete user (admin only)"""
+    try:
+        # Check if user is logged in
+        if 'user_id' not in session:
+            return jsonify({'success': False, 'error': 'لطفاً ابتدا وارد شوید'}), 401
+        
+        # Get current user's email to check admin status
+        current_user_id = session['user_id']
+        
+        # Prevent self-deletion
+        if current_user_id == user_id:
+            return jsonify({'success': False, 'error': 'نمی‌توانید خودتان را حذف کنید'}), 400
+        
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        cursor.execute('SELECT email FROM website_users WHERE id = ?', (current_user_id,))
+        result = cursor.fetchone()
+        
+        if not result:
+            conn.close()
+            return jsonify({'success': False, 'error': 'کاربر یافت نشد'}), 404
+        
+        user_email = result[0]
+        is_admin = user_email.lower() in [e.lower() for e in ADMIN_EMAILS]
+        
+        if not is_admin:
+            conn.close()
+            return jsonify({'success': False, 'error': 'دسترسی مجاز نیست'}), 403
+        
+        # Delete user
+        cursor.execute('DELETE FROM website_users WHERE id = ?', (user_id,))
+        
+        if cursor.rowcount == 0:
+            conn.close()
+            return jsonify({'success': False, 'error': 'کاربر یافت نشد'}), 404
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True, 'message': 'کاربر با موفقیت حذف شد'})
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
@@ -2065,6 +3539,67 @@ def verify_email():
         return f"خطا: {str(e)}", 500
 
 
+@app.route('/api/odoo-login', methods=['POST'])
+def api_odoo_login():
+    """Login to Odoo and return session URL for redirection"""
+    try:
+        data = request.get_json()
+        db = data.get('db')
+        login = data.get('login')
+        password = data.get('password')
+        
+        if not db or not login or not password:
+            return jsonify({'success': False, 'error': 'اطلاعات ناقص است'}), 400
+        
+        # Create a session to maintain cookies
+        session_obj = requests.Session()
+        
+        # Step 1: Authenticate via Odoo JSON-RPC
+        auth_url = f"{ODOO_URL}/web/session/authenticate"
+        auth_payload = {
+            "jsonrpc": "2.0",
+            "method": "call",
+            "params": {
+                "db": db,
+                "login": login,
+                "password": password
+            }
+        }
+        
+        response = session_obj.post(auth_url, json=auth_payload, timeout=10)
+        result = response.json()
+        
+        if 'error' in result:
+            error_msg = result['error'].get('data', {}).get('message', 'خطای نامشخص')
+            return jsonify({'success': False, 'error': error_msg}), 401
+        
+        if not result.get('result', {}).get('uid'):
+            return jsonify({'success': False, 'error': 'نام کاربری یا رمز عبور اشتباه است'}), 401
+        
+        # Success! Get the session cookie
+        session_id = session_obj.cookies.get('session_id')
+        
+        if not session_id:
+            return jsonify({'success': False, 'error': 'دریافت session ناموفق بود'}), 500
+        
+        # Return the session_id so frontend can set it
+        return jsonify({
+            'success': True,
+            'session_id': session_id,
+            'odoo_url': ODOO_URL,
+            'message': 'ورود موفقیت‌آمیز بود'
+        })
+        
+    except requests.exceptions.Timeout:
+        return jsonify({'success': False, 'error': 'زمان اتصال به سرور تمام شد'}), 504
+    except requests.exceptions.ConnectionError:
+        return jsonify({'success': False, 'error': 'خطا در اتصال به سرور Odoo'}), 503
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 # HTML Pages for Authentication
 
 @app.route('/register')
@@ -2099,6 +3634,27 @@ def profile_protected():
     """Protected profile page - authentication checked in middleware"""
     return send_from_directory('website', 'profile.html')
 
+# Download lite-online installer ZIP
+@app.route('/downloads/odoo19-lite-online.zip')
+def download_lite_online_zip():
+    """
+    Serve the pre-built lite online installer ZIP file
+    """
+    try:
+        zip_path = Path('private_downloads/installers/odoo19-lite-online.zip')
+        if zip_path.exists():
+            return send_file(
+                zip_path,
+                mimetype='application/zip',
+                as_attachment=True,
+                download_name='odoo19-lite-online.zip'
+            )
+        else:
+            return jsonify({'error': 'Installer file not found'}), 404
+    except Exception as e:
+        print(f"Error serving ZIP: {e}")
+        return jsonify({'error': 'Failed to serve ZIP file', 'detail': str(e)}), 500
+
 # General route for serving static files (CSS, JS, HTML)
 @app.route('/<path:filename>')
 def serve_static(filename):
@@ -2112,8 +3668,8 @@ def serve_static(filename):
 init_customers_db()
 
 if __name__ == "__main__":
-    # Get port from environment variable (for Liara/Heroku) or default to 5000
-    port = int(os.environ.get('PORT', 5000))
+    # Get port from environment variable (for Liara/Heroku) or default to 5001
+    port = int(os.environ.get('PORT', 5001))
     
     # Set UTF-8 encoding for console output
     import sys

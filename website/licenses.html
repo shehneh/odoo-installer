@@ -11,28 +11,15 @@
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/animations.css">
     <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/unified-nav.css?v=4">
+    <link rel="stylesheet" href="css/unified-nav.css?v=8">
+    <script src="/js/nav-loader.js"></script>
+    <script src="/js/global-nav.js"></script>
 </head>
 <body>
     <div id="particles-js"></div>
 
-    <nav class="navbar glass">
-        <div class="container">
-            <a href="index.html" class="logo">
-                <div class="logo-icon"><i class="fas fa-cube"></i></div>
-                <span>Odoo<strong>Master</strong></span>
-            </a>
-            <ul class="nav-links">
-                <li><a href="downloads.html" class="nav-link" data-i18n="nav.downloads">دانلود</a></li>
-                <li><a href="docs.html" class="nav-link" data-i18n="nav.docs">مستندات</a></li>
-                <li><a href="support.html" class="nav-link" data-i18n="nav.support">پشتیبانی</a></li>
-            </ul>
-            <div class="nav-actions">
-                <button class="theme-toggle" id="themeToggle" title="تغییر تم" data-i18n-title="theme.toggle"><i class="fas fa-moon"></i></button>
-                <a href="dashboard.html" class="btn btn-ghost"><i class="fas fa-user"></i> <span data-i18n="licenses.panel">پنل</span></a>
-            </div>
-        </div>
-    </nav>
+    <!-- Navigation - Loaded Dynamically -->
+    <div id="nav-container"></div>
 
     <main style="padding-top: 110px; min-height: 100vh;">
         <div class="container" style="max-width: 1000px;">

@@ -208,7 +208,7 @@
 
         async function checkStatus() {
             try {
-                const response = await fetch('/api/user-status');
+                const response = await fetch('/api/user-status', { credentials: 'same-origin' });
                 const result = await response.json();
 
                 const statusEl = document.getElementById('loginStatus');

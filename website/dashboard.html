@@ -77,11 +77,11 @@
 
             <div class="nav-section">
                 <span class="nav-section-title" data-i18n="dashboard.account">حساب کاربری</span>
-                <a href="#" class="nav-item disabled-link" aria-disabled="true" tabindex="-1" title="به‌زودی فعال می‌شود">
+                <a href="#profile-section" class="nav-item">
                     <i class="fas fa-user"></i>
                     <span data-i18n="dashboard.profile">پروفایل</span>
                 </a>
-                <a href="#" class="nav-item disabled-link" aria-disabled="true" tabindex="-1" title="به‌زودی فعال می‌شود">
+                <a href="#settings-section" class="nav-item">
                     <i class="fas fa-cog"></i>
                     <span data-i18n="dashboard.settings">تنظیمات</span>
                 </a>
@@ -425,6 +425,116 @@
                                     <i class="fas fa-arrow-up"></i>
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Section -->
+                <div class="card glass" id="profile-section">
+                    <div class="card-header">
+                        <h3><i class="fas fa-user-circle"></i> پروفایل من</h3>
+                    </div>
+                    <div class="profile-content">
+                        <div class="profile-header">
+                            <div class="profile-avatar" id="profileAvatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="profile-info">
+                                <h2 id="profileName">در حال بارگذاری...</h2>
+                                <p id="profileEmail" style="color: var(--text-secondary);"></p>
+                                <div class="profile-badges" style="display: flex; gap: 8px; margin-top: 8px;">
+                                    <span class="status-badge" id="authMethodBadge" style="background: rgba(102, 126, 234, 0.2); color: #667eea;"></span>
+                                    <span class="status-badge active" id="emailVerifiedBadge" style="display: none;">ایمیل تایید شده</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-details" style="margin-top: 24px;">
+                            <div class="detail-row" style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);">
+                                <span style="color: var(--text-secondary);">شماره تماس</span>
+                                <span id="profilePhone">-</span>
+                            </div>
+                            <div class="detail-row" style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);">
+                                <span style="color: var(--text-secondary);">روش احراز هویت</span>
+                                <span id="profileAuthMethod">-</span>
+                            </div>
+                            <div class="detail-row" style="display: flex; justify-content: space-between; padding: 12px 0;">
+                                <span style="color: var(--text-secondary);">وضعیت حساب</span>
+                                <span class="status-badge active" id="profileStatus">فعال</span>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap;">
+                            <button class="btn btn-outline" onclick="openEditProfileModal()">
+                                <i class="fas fa-edit"></i>
+                                ویرایش اطلاعات
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Section -->
+                <div class="card glass" id="settings-section">
+                    <div class="card-header">
+                        <h3><i class="fas fa-cog"></i> تنظیمات حساب</h3>
+                    </div>
+                    <div class="settings-content">
+                        <!-- Change Site Password -->
+                        <div class="setting-item" style="display: flex; align-items: center; justify-content: space-between; padding: 18px; background: var(--bg-tertiary); border-radius: 12px; margin-bottom: 12px;">
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <div style="width: 45px; height: 45px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-key" style="color: white;"></i>
+                                </div>
+                                <div>
+                                    <strong>رمز عبور سایت</strong>
+                                    <p style="color: var(--text-secondary); font-size: 13px; margin-top: 4px;">تغییر رمز عبور ورود به سایت</p>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline btn-sm" onclick="openPasswordModal('site')">
+                                <i class="fas fa-edit"></i>
+                                تغییر
+                            </button>
+                        </div>
+                        
+                        <!-- Change Odoo Password -->
+                        <div class="setting-item" style="display: flex; align-items: center; justify-content: space-between; padding: 18px; background: var(--bg-tertiary); border-radius: 12px; margin-bottom: 12px;">
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <div style="width: 45px; height: 45px; background: linear-gradient(135deg, #48bb78, #38a169); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-database" style="color: white;"></i>
+                                </div>
+                                <div>
+                                    <strong>رمز عبور Odoo</strong>
+                                    <p style="color: var(--text-secondary); font-size: 13px; margin-top: 4px;">تغییر رمز عبور ورود به Odoo</p>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline btn-sm" onclick="openPasswordModal('odoo')">
+                                <i class="fas fa-edit"></i>
+                                تغییر
+                            </button>
+                        </div>
+                        
+                        <!-- Odoo Database Info -->
+                        <div class="setting-item" id="odooDbInfo" style="padding: 18px; background: var(--bg-tertiary); border-radius: 12px; margin-bottom: 12px;">
+                            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                                <div style="width: 45px; height: 45px; background: linear-gradient(135deg, #ed8936, #dd6b20); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-server" style="color: white;"></i>
+                                </div>
+                                <div>
+                                    <strong>اطلاعات دیتابیس Odoo</strong>
+                                    <p style="color: var(--text-secondary); font-size: 13px; margin-top: 4px;">مشاهده اطلاعات ورود به Odoo</p>
+                                </div>
+                            </div>
+                            <div id="odooDbDetails" style="background: var(--bg-secondary); padding: 16px; border-radius: 10px;">
+                                <p style="color: var(--text-secondary); text-align: center;">در حال بارگذاری...</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Login to Odoo -->
+                        <div style="margin-top: 20px;">
+                            <button class="btn btn-primary btn-block btn-glow" id="loginToOdooBtn" onclick="loginToOdoo()" style="display: none;">
+                                <i class="fas fa-sign-in-alt"></i>
+                                ورود به Odoo
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -972,8 +1082,339 @@
             return String(num).replace(/\d/g, d => persianDigits[d]);
         }
 
+        // ===== Profile & Settings Functions =====
+        
+        // Load profile data
+        async function loadProfileData() {
+            try {
+                const res = await fetch('/api/user-status', { credentials: 'same-origin' });
+                const data = await res.json();
+                
+                if (data.success && data.user) {
+                    const user = data.user;
+                    
+                    // Update profile card
+                    const profileAvatar = document.getElementById('profileAvatar');
+                    if (profileAvatar) {
+                        if (user.profile_picture) {
+                            profileAvatar.innerHTML = `<img src="${user.profile_picture}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+                        } else {
+                            profileAvatar.innerHTML = `<img src="https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=714B67&color=fff&size=128" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+                        }
+                    }
+                    
+                    document.getElementById('profileName').textContent = user.name || 'کاربر';
+                    document.getElementById('profileEmail').textContent = user.email || '';
+                    document.getElementById('profilePhone').textContent = user.phone || '-';
+                    
+                    // Auth method badge
+                    const authBadge = document.getElementById('authMethodBadge');
+                    if (user.auth_method === 'google') {
+                        authBadge.innerHTML = '<i class="fab fa-google"></i> گوگل';
+                        authBadge.style.background = 'rgba(66, 133, 244, 0.2)';
+                        authBadge.style.color = '#4285F4';
+                    } else if (user.auth_method === 'sms') {
+                        authBadge.innerHTML = '<i class="fas fa-sms"></i> پیامک';
+                        authBadge.style.background = 'rgba(40, 167, 69, 0.2)';
+                        authBadge.style.color = '#28a745';
+                    } else {
+                        authBadge.innerHTML = '<i class="fas fa-envelope"></i> ایمیل';
+                    }
+                    
+                    document.getElementById('profileAuthMethod').innerHTML = authBadge.innerHTML;
+                    
+                    if (user.email_verified) {
+                        document.getElementById('emailVerifiedBadge').style.display = 'inline-flex';
+                    }
+                    
+                    // Store user data for edit modal
+                    window.currentUser = user;
+                    
+                    // Load Odoo database info
+                    await loadOdooDbInfo(user.email);
+                }
+            } catch (err) {
+                console.error('Failed to load profile:', err);
+            }
+        }
+        
+        // Load Odoo database info
+        async function loadOdooDbInfo(email) {
+            const detailsEl = document.getElementById('odooDbDetails');
+            const loginBtn = document.getElementById('loginToOdooBtn');
+            
+            try {
+                const res = await fetch(`/api/profile/${encodeURIComponent(email)}`, { credentials: 'same-origin' });
+                const data = await res.json();
+                
+                if (data.success && data.profile && data.profile.odoo_db) {
+                    const odoo = data.profile;
+                    window.odooDbName = odoo.odoo_db;
+                    window.odooLogin = odoo.odoo_login;
+                    
+                    detailsEl.innerHTML = `
+                        <div style="display: grid; gap: 10px;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: var(--text-secondary);">نام دیتابیس:</span>
+                                <span style="font-family: monospace; direction: ltr;">${odoo.odoo_db}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: var(--text-secondary);">نام کاربری:</span>
+                                <span style="font-family: monospace; direction: ltr;">${odoo.odoo_login || email}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: var(--text-secondary);">آدرس سرور:</span>
+                                <span style="font-family: monospace; direction: ltr;">odoo-online.liara.run</span>
+                            </div>
+                        </div>
+                    `;
+                    
+                    loginBtn.style.display = 'flex';
+                } else {
+                    detailsEl.innerHTML = `
+                        <div style="text-align: center; padding: 10px;">
+                            <i class="fas fa-database" style="font-size: 32px; color: var(--text-secondary); margin-bottom: 10px;"></i>
+                            <p style="color: var(--text-secondary);">هنوز دیتابیس Odoo ندارید</p>
+                            <a href="onboarding.html" class="btn btn-primary btn-sm" style="margin-top: 12px;">
+                                <i class="fas fa-plus"></i> ساخت دیتابیس
+                            </a>
+                        </div>
+                    `;
+                    loginBtn.style.display = 'none';
+                }
+            } catch (err) {
+                console.error('Failed to load Odoo info:', err);
+                detailsEl.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">خطا در بارگذاری</p>';
+            }
+        }
+        
+        // Login to Odoo
+        function loginToOdoo() {
+            if (window.odooDbName) {
+                window.open(`https://odoo-online.liara.run/web/login?db=${window.odooDbName}`, '_blank');
+            }
+        }
+        
+        // Open password change modal
+        function openPasswordModal(type) {
+            const modal = document.getElementById('passwordModal');
+            const title = document.getElementById('passwordModalTitle');
+            const form = document.getElementById('passwordForm');
+            
+            if (type === 'site') {
+                title.textContent = 'تغییر رمز عبور سایت';
+                form.dataset.type = 'site';
+            } else {
+                title.textContent = 'تغییر رمز عبور Odoo';
+                form.dataset.type = 'odoo';
+            }
+            
+            form.reset();
+            modal.style.display = 'flex';
+            modal.offsetHeight; // Force reflow
+            modal.classList.add('show');
+        }
+        
+        // Close password modal
+        function closePasswordModal() {
+            const modal = document.getElementById('passwordModal');
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+        
+        // Handle password change
+        async function handlePasswordChange(e) {
+            e.preventDefault();
+            const form = e.target;
+            const type = form.dataset.type;
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const errorEl = document.getElementById('passwordError');
+            
+            // Validation
+            if (newPassword !== confirmPassword) {
+                errorEl.textContent = 'رمز عبور جدید با تکرار آن مطابقت ندارد';
+                errorEl.style.display = 'block';
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                errorEl.textContent = 'رمز عبور باید حداقل ۶ کاراکتر باشد';
+                errorEl.style.display = 'block';
+                return;
+            }
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال تغییر...';
+            errorEl.style.display = 'none';
+            
+            try {
+                const res = await fetch('/api/change-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({
+                        current_password: currentPassword,
+                        new_password: newPassword,
+                        password_type: type
+                    })
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    closePasswordModal();
+                    showNotification('رمز عبور با موفقیت تغییر کرد', 'success');
+                } else {
+                    errorEl.textContent = data.error || 'خطا در تغییر رمز عبور';
+                    errorEl.style.display = 'block';
+                }
+            } catch (err) {
+                errorEl.textContent = 'خطا در ارتباط با سرور';
+                errorEl.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-check"></i> تغییر رمز عبور';
+            }
+        }
+        
+        // Open edit profile modal
+        function openEditProfileModal() {
+            const modal = document.getElementById('editProfileModal');
+            const user = window.currentUser || {};
+            
+            document.getElementById('editName').value = user.name || '';
+            document.getElementById('editPhone').value = user.phone || '';
+            
+            modal.style.display = 'flex';
+            modal.offsetHeight;
+            modal.classList.add('show');
+        }
+        
+        // Close edit profile modal
+        function closeEditProfileModal() {
+            const modal = document.getElementById('editProfileModal');
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+        
+        // Handle profile update
+        async function handleProfileUpdate(e) {
+            e.preventDefault();
+            const form = e.target;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const errorEl = document.getElementById('profileError');
+            
+            const name = document.getElementById('editName').value.trim();
+            const phone = document.getElementById('editPhone').value.trim();
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال ذخیره...';
+            errorEl.style.display = 'none';
+            
+            try {
+                const res = await fetch('/api/update-profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ name, phone })
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    closeEditProfileModal();
+                    showNotification('پروفایل با موفقیت بروزرسانی شد', 'success');
+                    loadProfileData(); // Refresh profile data
+                } else {
+                    errorEl.textContent = data.error || 'خطا در بروزرسانی';
+                    errorEl.style.display = 'block';
+                }
+            } catch (err) {
+                errorEl.textContent = 'خطا در ارتباط با سرور';
+                errorEl.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-save"></i> ذخیره تغییرات';
+            }
+        }
+        
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const existingNotif = document.querySelector('.notification-toast');
+            if (existingNotif) existingNotif.remove();
+            
+            const colors = {
+                success: 'linear-gradient(135deg, #28ca42, #20a336)',
+                error: 'linear-gradient(135deg, #ff5f57, #e0433c)',
+                info: 'linear-gradient(135deg, #667eea, #764ba2)'
+            };
+            
+            const icons = {
+                success: 'fa-check-circle',
+                error: 'fa-times-circle',
+                info: 'fa-info-circle'
+            };
+            
+            const notif = document.createElement('div');
+            notif.className = 'notification-toast';
+            notif.innerHTML = `
+                <i class="fas ${icons[type]}"></i>
+                <span>${message}</span>
+            `;
+            notif.style.cssText = `
+                position: fixed;
+                bottom: 30px;
+                left: 50%;
+                transform: translateX(-50%) translateY(100px);
+                background: ${colors[type]};
+                color: white;
+                padding: 14px 24px;
+                border-radius: 50px;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-size: 14px;
+                z-index: 10000;
+                transition: transform 0.3s ease;
+            `;
+            
+            document.body.appendChild(notif);
+            
+            requestAnimationFrame(() => {
+                notif.style.transform = 'translateX(-50%) translateY(0)';
+            });
+            
+            setTimeout(() => {
+                notif.style.transform = 'translateX(-50%) translateY(100px)';
+                setTimeout(() => notif.remove(), 300);
+            }, 3000);
+        }
+        
+        // Toggle password visibility
+        function togglePasswordVisibility(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+        
+        // Load profile data on page load
+        loadProfileData();
+
         // Check user status and admin access on page load
-        fetch('/api/user-status')
+        fetch('/api/user-status', { credentials: 'same-origin' })
             .then(res => res.json())
             .then(data => {
                 if (data.success && data.user) {
@@ -1068,5 +1509,112 @@
             }
         });
     </script>
+
+    <!-- Password Change Modal -->
+    <div class="modal-overlay" id="passwordModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center;">
+        <div class="modal-content glass" style="width: 90%; max-width: 420px; padding: 28px; border-radius: 20px; animation: slideUp 0.3s ease;">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h3 id="passwordModalTitle" style="margin: 0; font-size: 1.25rem;">تغییر رمز عبور</h3>
+                <button onclick="closePasswordModal()" style="background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="passwordForm" onsubmit="handlePasswordChange(event)">
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-size: 14px;">رمز عبور فعلی</label>
+                    <div style="position: relative;">
+                        <input type="password" id="currentPassword" required style="width: 100%; padding: 14px 45px 14px 14px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-primary); font-size: 15px; direction: ltr; text-align: left;">
+                        <button type="button" onclick="togglePasswordVisibility('currentPassword', this)" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary); cursor: pointer;">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-size: 14px;">رمز عبور جدید</label>
+                    <div style="position: relative;">
+                        <input type="password" id="newPassword" required minlength="6" style="width: 100%; padding: 14px 45px 14px 14px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-primary); font-size: 15px; direction: ltr; text-align: left;">
+                        <button type="button" onclick="togglePasswordVisibility('newPassword', this)" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary); cursor: pointer;">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-size: 14px;">تکرار رمز عبور جدید</label>
+                    <div style="position: relative;">
+                        <input type="password" id="confirmPassword" required minlength="6" style="width: 100%; padding: 14px 45px 14px 14px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-primary); font-size: 15px; direction: ltr; text-align: left;">
+                        <button type="button" onclick="togglePasswordVisibility('confirmPassword', this)" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary); cursor: pointer;">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="passwordError" style="display: none; padding: 12px; background: rgba(255,95,87,0.1); border: 1px solid rgba(255,95,87,0.3); border-radius: 10px; color: #ff5f57; margin-bottom: 16px; font-size: 14px;"></div>
+                <button type="submit" class="btn btn-primary btn-block btn-glow" style="padding: 14px; font-size: 15px;">
+                    <i class="fas fa-check"></i>
+                    تغییر رمز عبور
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal-overlay" id="editProfileModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center;">
+        <div class="modal-content glass" style="width: 90%; max-width: 420px; padding: 28px; border-radius: 20px; animation: slideUp 0.3s ease;">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h3 style="margin: 0; font-size: 1.25rem;">ویرایش اطلاعات</h3>
+                <button onclick="closeEditProfileModal()" style="background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="editProfileForm" onsubmit="handleProfileUpdate(event)">
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-size: 14px;">نام و نام خانوادگی</label>
+                    <input type="text" id="editName" required style="width: 100%; padding: 14px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-primary); font-size: 15px;">
+                </div>
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-size: 14px;">شماره تماس</label>
+                    <input type="tel" id="editPhone" placeholder="09xxxxxxxxx" style="width: 100%; padding: 14px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-primary); font-size: 15px; direction: ltr; text-align: left;">
+                </div>
+                <div id="profileError" style="display: none; padding: 12px; background: rgba(255,95,87,0.1); border: 1px solid rgba(255,95,87,0.3); border-radius: 10px; color: #ff5f57; margin-bottom: 16px; font-size: 14px;"></div>
+                <button type="submit" class="btn btn-primary btn-block btn-glow" style="padding: 14px; font-size: 15px;">
+                    <i class="fas fa-save"></i>
+                    ذخیره تغییرات
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-overlay.show {
+            display: flex !important;
+        }
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+            border: 4px solid var(--border-color);
+            overflow: hidden;
+        }
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        @media (max-width: 600px) {
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
 </body>
 </html>

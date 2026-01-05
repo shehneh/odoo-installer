@@ -5,7 +5,7 @@ setlocal EnableDelayedExpansion
 rem ============================================================
 rem  Odoo Installer - Online (Lite) Startup Script
 rem  - Ensures Python exists (downloads from official if missing)
-rem  - Starts ui_server.py locally on http://127.0.0.1:5000
+rem  - Starts ui_server.py locally on http://127.0.0.1:5001
 rem ============================================================
 
 pushd "%~dp0"

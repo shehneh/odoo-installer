@@ -176,6 +176,28 @@
             margin-bottom: 30px;
             font-size: 15px;
         }
+        
+        /* Alert Styles */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+        
+        .alert-warning {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            color: #856404;
+        }
+        
+        .alert h3 {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .alert p {
+            margin-bottom: 15px;
+        }
 
         /* Form Styles */
         .form-group {
@@ -1010,6 +1032,20 @@
                 <h2 class="step-title">🏢 اطلاعات شرکت شما</h2>
                 <p class="step-description">لطفاً اطلاعات شرکت خود را وارد کنید تا دیتابیس اختصاصی شما ایجاد شود.</p>
 
+                <!-- Login Required Notice -->
+                <div id="loginRequiredNotice" class="alert alert-warning" style="display: none; background: #fff3cd; border: 2px solid #ffc107; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                    <h3 style="color: #856404; margin-bottom: 10px;">🔐 ورود الزامی است</h3>
+                    <p style="color: #856404; margin-bottom: 15px;">برای ایجاد دیتابیس، ابتدا باید وارد سیستم شوید:</p>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <a href="/user-login.html?redirect=/onboarding.html" class="btn btn-primary" style="flex: 1; min-width: 200px; text-decoration: none; display: block; text-align: center;">
+                            🔑 ورود با ایمیل / موبایل
+                        </a>
+                        <button onclick="loginWithGoogle()" class="btn" style="flex: 1; min-width: 200px; background: #db4437; color: white;">
+                            🌐 ورود با Google
+                        </button>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label class="form-label">نام شرکت <span class="required">*</span></label>
                     <input type="text" class="form-input" id="companyName" placeholder="مثال: شرکت فناوری پارس" required>
@@ -1018,13 +1054,19 @@
                 <!-- Email field - shows based on auth method -->
                 <div class="form-group" id="emailGroup">
                     <label class="form-label">ایمیل مدیر (Admin) <span class="required" id="emailRequired">*</span></label>
-                    <input type="email" class="form-input" id="adminEmail" placeholder="admin@company.com">
+                    <input type="email" class="form-input" id="adminEmail" placeholder="admin@company.com" readonly style="background: #f7fafc;">
+                    <small style="color: #718096; font-size: 12px; display: block; margin-top: 5px;">
+                        ✓ این فیلد از طریق ورود شما پر می‌شود
+                    </small>
                 </div>
 
                 <!-- Phone field - shows based on auth method -->
                 <div class="form-group" id="phoneGroup">
                     <label class="form-label">شماره تماس <span class="required hidden" id="phoneRequired">*</span></label>
-                    <input type="tel" class="form-input" id="phoneNumber" placeholder="09123456789" dir="ltr">
+                    <input type="tel" class="form-input" id="phoneNumber" placeholder="09123456789" dir="ltr" readonly style="background: #f7fafc;">
+                    <small style="color: #718096; font-size: 12px; display: block; margin-top: 5px;">
+                        ✓ این فیلد از طریق ورود شما پر می‌شود
+                    </small>
                 </div>
 
                 <div class="form-group">
@@ -1033,7 +1075,7 @@
                 </div>
 
                 <div class="action-buttons">
-                    <button class="btn btn-primary" onclick="nextStep()">مرحله بعد →</button>
+                    <button class="btn btn-primary" onclick="nextStep()" id="nextStepBtn">مرحله بعد →</button>
                 </div>
             </div>
 
@@ -1223,7 +1265,7 @@
                     <div class="demo-users-info" id="demoUsersInfo" style="display:none;"></div>
 
                     <div class="action-buttons">
-                        <a href="/profile.html" class="btn btn-primary" target="_blank">📋 مشاهده حساب کاربری</a>
+                        <a href="/dashboard-unified.html#databases" class="btn btn-primary" target="_blank">📋 مشاهده حساب کاربری</a>
                         <button class="btn btn-primary" onclick="loginToOdoo()">🎯 ورود به سیستم Odoo</button>
                     </div>
                 </div>
@@ -1252,44 +1294,76 @@
         // Load user info from session on page load
         async function loadUserInfo() {
             try {
-                const response = await fetch('/api/user-status');
+                const response = await fetch('/api/user-status', {
+                    credentials: 'same-origin'  // Include cookies with request
+                });
                 if (response.ok) {
                     const result = await response.json();
-                    if (result.success && result.user) {
+                    if (result.success && result.logged_in && result.user) {
+                        // User is logged in
                         userAuthMethod = result.user.auth_method || 'email';
+                        
+                        // Hide login notice
+                        document.getElementById('loginRequiredNotice').style.display = 'none';
                         
                         // Fill form fields with user data
                         document.getElementById('adminEmail').value = result.user.email || '';
                         document.getElementById('adminName').value = result.user.name || '';
                         document.getElementById('phoneNumber').value = result.user.phone || '';
                         
+                        // Enable fields and remove readonly
+                        // Keep email readonly for Google OAuth users
+                        if (userAuthMethod === 'google') {
+                            document.getElementById('adminEmail').setAttribute('readonly', 'readonly');
+                            document.getElementById('adminEmail').style.backgroundColor = '#f7fafc';
+                        } else {
+                            document.getElementById('adminEmail').removeAttribute('readonly');
+                            document.getElementById('adminEmail').style.backgroundColor = '#fff';
+                        }
+                        
+                        document.getElementById('phoneNumber').removeAttribute('readonly');
+                        document.getElementById('phoneNumber').style.backgroundColor = '#fff';
+                        
                         // Configure form based on auth method
                         if (userAuthMethod === 'phone') {
                             // Phone auth - phone is required, email is optional
                             document.getElementById('emailRequired').classList.add('hidden');
                             document.getElementById('phoneRequired').classList.remove('hidden');
-                            
-                            // Make phone readonly if verified
-                            if (result.user.phone) {
-                                document.getElementById('phoneNumber').setAttribute('readonly', 'readonly');
-                                document.getElementById('phoneNumber').style.backgroundColor = '#f7fafc';
-                            }
                         } else {
                             // Email auth - email is required, phone is optional
                             document.getElementById('emailRequired').classList.remove('hidden');
                             document.getElementById('phoneRequired').classList.add('hidden');
-                            
-                            // Make email readonly if verified (or from Google)
-                            if (result.user.email) {
-                                document.getElementById('adminEmail').setAttribute('readonly', 'readonly');
-                                document.getElementById('adminEmail').style.backgroundColor = '#f7fafc';
-                            }
                         }
+                        
+                        // Enable next button
+                        document.getElementById('nextStepBtn').disabled = false;
+                    } else {
+                        // User is NOT logged in - show login notice
+                        document.getElementById('loginRequiredNotice').style.display = 'block';
+                        
+                        // Keep fields readonly
+                        document.getElementById('adminEmail').setAttribute('readonly', 'readonly');
+                        document.getElementById('phoneNumber').setAttribute('readonly', 'readonly');
+                        document.getElementById('adminEmail').style.backgroundColor = '#f7fafc';
+                        document.getElementById('phoneNumber').style.backgroundColor = '#f7fafc';
+                        
+                        // Disable next button
+                        document.getElementById('nextStepBtn').disabled = true;
+                        document.getElementById('nextStepBtn').style.opacity = '0.5';
+                        document.getElementById('nextStepBtn').style.cursor = 'not-allowed';
                     }
                 }
             } catch (error) {
                 console.error('Error loading user info:', error);
+                // Show login notice on error
+                document.getElementById('loginRequiredNotice').style.display = 'block';
+                document.getElementById('nextStepBtn').disabled = true;
             }
+        }
+        
+        function loginWithGoogle() {
+            // Redirect to Google OAuth
+            window.location.href = '/auth/google?redirect=/onboarding.html';
         }
 
         // Call loadUserInfo when page loads
@@ -1929,6 +2003,10 @@
                         return;
                     }
                 }
+
+                // Check if user already has a database before proceeding
+                checkExistingDatabase();
+                return; // Don't proceed yet, let the check complete
             }
 
             if (currentStep === 2) {
@@ -1936,6 +2014,82 @@
                 renderModules();
             }
 
+            currentStep++;
+            updateStepper();
+            showStep(currentStep);
+        }
+
+        // Check if user already has a database
+        async function checkExistingDatabase() {
+            try {
+                const adminEmail = document.getElementById('adminEmail').value.trim();
+                const phoneNumber = document.getElementById('phoneNumber').value.trim();
+                
+                const response = await fetch('/api/list-customers');
+                const data = await response.json();
+                
+                if (data.success && data.customers) {
+                    // Check if current user has a database
+                    const userDatabase = data.customers.find(c => 
+                        (adminEmail && c.admin_email === adminEmail) ||
+                        (phoneNumber && c.phone === phoneNumber)
+                    );
+                    
+                    if (userDatabase) {
+                        // Verify if database actually exists in Odoo
+                        const verifyResponse = await fetch('/api/verify-database', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ database: userDatabase.database_name })
+                        });
+                        const verifyData = await verifyResponse.json();
+                        
+                        if (verifyData.exists) {
+                            // Database exists in both SQLite and Odoo - redirect to dashboard
+                            const confirmMessage = `شما قبلاً یک دیتابیس Odoo ایجاد کرده‌اید:\n\n` +
+                                `🏢 شرکت: ${userDatabase.company_name}\n` +
+                                `📧 ایمیل: ${userDatabase.admin_email}\n` +
+                                `🗄️ دیتابیس: ${userDatabase.database_name}\n\n` +
+                                `آیا می‌خواهید به داشبورد خود بروید?`;
+                            
+                            if (confirm(confirmMessage)) {
+                                window.location.href = '/dashboard-unified.html#databases';
+                            }
+                            return;
+                        } else {
+                            // Database record exists but not in Odoo - allow creating new one
+                            const recreateMsg = `رکورد دیتابیس در سیستم یافت شد، اما دیتابیس در Odoo وجود ندارد.\n\n` +
+                                `آیا می‌خواهید دیتابیس جدید ایجاد کنید?\n` +
+                                `(رکورد قبلی حذف و دیتابیس جدید ساخته خواهد شد)`;
+                            
+                            if (confirm(recreateMsg)) {
+                                // Delete old record and continue
+                                await fetch('/api/delete-customer-record', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ 
+                                        email: adminEmail,
+                                        phone: phoneNumber 
+                                    })
+                                });
+                                proceedToNextStep();
+                            }
+                            return;
+                        }
+                    }
+                }
+                
+                // No existing database, proceed to next step
+                proceedToNextStep();
+                
+            } catch (error) {
+                console.error('Error checking database:', error);
+                // On error, still allow proceeding
+                proceedToNextStep();
+            }
+        }
+
+        function proceedToNextStep() {
             currentStep++;
             updateStepper();
             showStep(currentStep);
@@ -2046,8 +2200,17 @@
                         database: responseData.data.database_name,
                         email: responseData.data.admin_email,
                         password: responseData.data.admin_password,
-                        company: responseData.data.company_name
+                        company: responseData.data.company_name,
+                        admin_name: responseData.data.admin_name || adminName,
+                        created_at: responseData.data.created_at
                     };
+                    
+                    // اگر این ایمیل قبلاً ثبت شده بود، redirect به پروفایل
+                    if (responseData.existing && responseData.redirect_to_profile) {
+                        const profileUrl = `/profile.html?db=${encodeURIComponent(tenantData.database)}&email=${encodeURIComponent(tenantData.email)}&password=${encodeURIComponent(tenantData.password)}&company=${encodeURIComponent(tenantData.company)}&admin_name=${encodeURIComponent(tenantData.admin_name)}&created_at=${encodeURIComponent(tenantData.created_at)}&existing=true`;
+                        window.location.href = profileUrl;
+                        return;
+                    }
                 } else {
                     throw new Error('ساختار پاسخ API نامعتبر است');
                 }
