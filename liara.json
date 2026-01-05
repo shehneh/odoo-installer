@@ -2,7 +2,7 @@
   "platform": "flask",
   "port": 5001,
   "app": "odoomaster",
-  "run": "gunicorn --bind 0.0.0.0:5001 --workers 2 app:app",
+  "run": "gunicorn --bind 0.0.0.0:5001 --workers 2 api_server:app",
   "disks": [
     {
       "name": "master-data",
