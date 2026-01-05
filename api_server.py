@@ -264,18 +264,15 @@ def delete_odoo_database(url, db_name):
 # DEMO MANAGEMENT APIs
 # ============================================
 
-# SPA ROUTES - All frontend routes go through app.html
-SPA_ROUTES = ['/', '/features', '/downloads', '/support', '/dashboard', '/login', '/register', '/onboarding', '/settings', '/profile', '/docs', '/faq', '/contact', '/about', '/privacy', '/terms', '/forgot-password']
-
 @app.route('/favicon.ico')
 def favicon():
     """Redirect favicon.ico to favicon.svg"""
     return send_from_directory('website', 'favicon.svg', mimetype='image/svg+xml')
 
 @app.route('/')
-def spa_index():
-    """Main SPA entry point"""
-    return send_from_directory('website', 'app.html')
+def site_index():
+    """Main entry point"""
+    return send_from_directory('website', 'index.html')
 
 @app.route('/install', methods=['GET'])
 def site_install():
@@ -285,14 +282,10 @@ def site_install():
 def site_installer():
     return send_from_directory('website', 'install.html')
 
-# SPA catch-all for client-side routing
+# Static files
 @app.route('/<path:path>', methods=['GET'])
 def site_static(path):
-    # Static files (css, js, images, etc.)
-    if '.' in path:
-        return send_from_directory('website', path)
-    # SPA routes - return app.html for client-side routing
-    return send_from_directory('website', 'app.html')
+    return send_from_directory('website', path)
 
 @app.route('/api/demo/list', methods=['GET'])
 def list_demos():
