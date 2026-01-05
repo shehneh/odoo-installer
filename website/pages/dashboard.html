@@ -1,0 +1,632 @@
+<!-- DASHBOARD PAGE PARTIAL -->
+<div class="dashboard-page">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="container">
+            <div class="welcome-section">
+                <div class="welcome-avatar" id="userAvatar">👤</div>
+                <div class="welcome-text">
+                    <span class="welcome-label">خوش آمدید</span>
+                    <h2 id="userName">کاربر</h2>
+                </div>
+            </div>
+            <div class="quick-stats">
+                <div class="stat-card">
+                    <span class="stat-icon">📥</span>
+                    <div>
+                        <div class="stat-value" id="totalDownloads">0</div>
+                        <div class="stat-label">دانلودها</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">🎫</span>
+                    <div>
+                        <div class="stat-value" id="openTickets">0</div>
+                        <div class="stat-label">تیکت‌های باز</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">📦</span>
+                    <div>
+                        <div class="stat-value" id="activePlan">رایگان</div>
+                        <div class="stat-label">پلن فعال</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-content">
+        <div class="container">
+            <div class="dashboard-grid">
+                <!-- Quick Actions -->
+                <div class="dashboard-card quick-actions-card">
+                    <div class="card-header">
+                        <h3>⚡ دسترسی سریع</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="actions-grid">
+                            <a href="/downloads" class="action-btn" data-link>
+                                <span class="action-icon">📥</span>
+                                <span>دانلود</span>
+                            </a>
+                            <a href="/support" class="action-btn" data-link>
+                                <span class="action-icon">💬</span>
+                                <span>پشتیبانی</span>
+                                <span class="badge" id="ticketBadge" style="display: none;">0</span>
+                            </a>
+                            <a href="/docs" class="action-btn" data-link>
+                                <span class="action-icon">📚</span>
+                                <span>مستندات</span>
+                            </a>
+                            <a href="/settings" class="action-btn" data-link>
+                                <span class="action-icon">⚙️</span>
+                                <span>تنظیمات</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="dashboard-card activity-card">
+                    <div class="card-header">
+                        <h3>📋 فعالیت‌های اخیر</h3>
+                        <a href="/activity" class="card-link" data-link>مشاهده همه</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="activity-list" id="activityList">
+                            <div class="activity-item">
+                                <div class="activity-icon">📥</div>
+                                <div class="activity-info">
+                                    <div class="activity-title">دانلود نصاب ویندوز</div>
+                                    <div class="activity-time">۲ ساعت پیش</div>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon">🔑</div>
+                                <div class="activity-info">
+                                    <div class="activity-title">ورود به حساب</div>
+                                    <div class="activity-time">امروز</div>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon">📝</div>
+                                <div class="activity-info">
+                                    <div class="activity-title">ثبت‌نام در سایت</div>
+                                    <div class="activity-time">۳ روز پیش</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Latest Tickets -->
+                <div class="dashboard-card tickets-card">
+                    <div class="card-header">
+                        <h3>🎫 آخرین تیکت‌ها</h3>
+                        <a href="/support" class="card-link" data-link>همه تیکت‌ها</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="tickets-preview" id="ticketsPreview">
+                            <div class="empty-state small">
+                                <span>📭</span>
+                                <p>تیکتی ندارید</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Downloads Card -->
+                <div class="dashboard-card downloads-card">
+                    <div class="card-header">
+                        <h3>📥 دانلودهای شما</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="download-history" id="downloadHistory">
+                            <div class="download-item">
+                                <div class="download-icon">🪟</div>
+                                <div class="download-info">
+                                    <div class="download-name">نصاب ویندوز v19.0</div>
+                                    <div class="download-meta">2.5GB • امروز</div>
+                                </div>
+                                <button class="btn btn-sm btn-primary">دانلود مجدد</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Card -->
+                <div class="dashboard-card profile-card">
+                    <div class="card-header">
+                        <h3>👤 پروفایل</h3>
+                        <a href="/settings" class="card-link" data-link>ویرایش</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="profile-info">
+                            <div class="profile-row">
+                                <span class="profile-label">نام</span>
+                                <span class="profile-value" id="profileName">-</span>
+                            </div>
+                            <div class="profile-row">
+                                <span class="profile-label">ایمیل</span>
+                                <span class="profile-value" id="profileEmail">-</span>
+                            </div>
+                            <div class="profile-row">
+                                <span class="profile-label">تاریخ عضویت</span>
+                                <span class="profile-value" id="profileDate">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Support CTA -->
+                <div class="dashboard-card cta-card">
+                    <div class="cta-content">
+                        <div class="cta-icon">🎯</div>
+                        <div class="cta-text">
+                            <h4>نیاز به کمک دارید؟</h4>
+                            <p>تیم پشتیبانی ۲۴ ساعته در خدمت شماست</p>
+                        </div>
+                        <a href="/support" class="btn btn-primary" data-link>ایجاد تیکت</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .dashboard-page {
+        min-height: 100vh;
+        padding-bottom: 100px;
+    }
+
+    /* Dashboard Header */
+    .dashboard-header {
+        padding: 100px 20px 40px;
+        background: linear-gradient(180deg, rgba(102, 126, 234, 0.2) 0%, transparent 100%);
+    }
+
+    .dashboard-header .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 24px;
+    }
+
+    .welcome-section {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .welcome-avatar {
+        width: 64px;
+        height: 64px;
+        background: var(--gradient);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+    }
+
+    .welcome-label {
+        font-size: 14px;
+        color: var(--gray);
+    }
+
+    .welcome-text h2 {
+        font-size: 24px;
+        margin-top: 4px;
+    }
+
+    .quick-stats {
+        display: flex;
+        gap: 16px;
+    }
+
+    .stat-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 24px;
+        background: var(--glass);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+    }
+
+    .stat-icon {
+        font-size: 28px;
+    }
+
+    .stat-value {
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .stat-label {
+        font-size: 12px;
+        color: var(--gray);
+    }
+
+    /* Dashboard Grid */
+    .dashboard-content {
+        padding: 20px;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+
+    .dashboard-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 24px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .card-header h3 {
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .card-link {
+        font-size: 13px;
+        color: var(--primary);
+        text-decoration: none;
+    }
+
+    .card-body {
+        padding: 20px 24px;
+    }
+
+    /* Quick Actions */
+    .quick-actions-card {
+        grid-column: span 1;
+    }
+
+    .actions-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .action-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 16px;
+        text-decoration: none;
+        color: white;
+        transition: var(--transition);
+        position: relative;
+    }
+
+    .action-btn:hover {
+        background: rgba(255, 255, 255, 0.08);
+        transform: translateY(-2px);
+    }
+
+    .action-icon {
+        font-size: 28px;
+    }
+
+    .action-btn .badge {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        background: var(--danger);
+        color: white;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 10px;
+        animation: pulse 2s infinite;
+    }
+
+    /* Activity */
+    .activity-card {
+        grid-column: span 2;
+    }
+
+    .activity-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 12px;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 12px;
+    }
+
+    .activity-icon {
+        font-size: 24px;
+    }
+
+    .activity-info {
+        flex: 1;
+    }
+
+    .activity-title {
+        font-weight: 500;
+    }
+
+    .activity-time {
+        font-size: 12px;
+        color: var(--gray);
+        margin-top: 2px;
+    }
+
+    /* Tickets Preview */
+    .tickets-card {
+        grid-column: span 2;
+    }
+
+    .ticket-preview-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 12px;
+        margin-bottom: 8px;
+    }
+
+    .ticket-preview-item:last-child {
+        margin-bottom: 0;
+    }
+
+    /* Downloads Card */
+    .downloads-card {
+        grid-column: span 1;
+    }
+
+    .download-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 12px;
+    }
+
+    .download-icon {
+        font-size: 32px;
+    }
+
+    .download-info {
+        flex: 1;
+    }
+
+    .download-name {
+        font-weight: 500;
+    }
+
+    .download-meta {
+        font-size: 12px;
+        color: var(--gray);
+        margin-top: 2px;
+    }
+
+    /* Profile Card */
+    .profile-card {
+        grid-column: span 1;
+    }
+
+    .profile-info {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .profile-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .profile-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .profile-label {
+        color: var(--gray);
+        font-size: 14px;
+    }
+
+    .profile-value {
+        font-weight: 500;
+    }
+
+    /* CTA Card */
+    .cta-card {
+        grid-column: span 1;
+        background: var(--gradient);
+        border: none;
+    }
+
+    .cta-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .cta-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+    }
+
+    .cta-text h4 {
+        font-size: 18px;
+        margin-bottom: 8px;
+    }
+
+    .cta-text p {
+        font-size: 14px;
+        opacity: 0.9;
+        margin-bottom: 20px;
+    }
+
+    .cta-card .btn {
+        background: white;
+        color: var(--primary);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: var(--gray);
+    }
+
+    .empty-state.small {
+        padding: 20px;
+    }
+
+    .empty-state span {
+        font-size: 48px;
+        display: block;
+        margin-bottom: 12px;
+    }
+
+    .empty-state.small span {
+        font-size: 32px;
+    }
+
+    @media (max-width: 1024px) {
+        .dashboard-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .activity-card,
+        .tickets-card {
+            grid-column: span 2;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-header .container {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .quick-stats {
+            flex-direction: column;
+        }
+
+        .stat-card {
+            justify-content: flex-start;
+        }
+
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .dashboard-card {
+            grid-column: span 1 !important;
+        }
+
+        .actions-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .action-btn {
+            padding: 16px 12px;
+        }
+
+        .action-btn span:last-of-type:not(.badge) {
+            font-size: 12px;
+        }
+    }
+</style>
+
+<script>
+(function() {
+    // Check auth
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    
+    if (!token) {
+        App.navigate('/login');
+        return;
+    }
+
+    // Set user info
+    document.getElementById('userName').textContent = user.name || 'کاربر';
+    document.getElementById('profileName').textContent = user.name || '-';
+    document.getElementById('profileEmail').textContent = user.email || '-';
+    document.getElementById('profileDate').textContent = user.created_at ? new Date(user.created_at).toLocaleDateString('fa-IR') : '-';
+
+    // Load dashboard data
+    loadDashboardData();
+
+    async function loadDashboardData() {
+        try {
+            // Load tickets
+            const ticketsRes = await fetch('/api/tickets', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const ticketsData = await ticketsRes.json();
+            
+            if (ticketsData.success) {
+                const openTickets = ticketsData.tickets.filter(t => t.status === 'open').length;
+                document.getElementById('openTickets').textContent = openTickets;
+
+                // Show badge if unread
+                const unreadCount = ticketsData.tickets.filter(t => t.has_new_reply).length;
+                const badge = document.getElementById('ticketBadge');
+                if (unreadCount > 0) {
+                    badge.textContent = unreadCount;
+                    badge.style.display = 'block';
+                }
+
+                // Show recent tickets
+                const preview = document.getElementById('ticketsPreview');
+                if (ticketsData.tickets.length > 0) {
+                    preview.innerHTML = ticketsData.tickets.slice(0, 3).map(t => `
+                        <div class="ticket-preview-item">
+                            <div class="activity-info">
+                                <div class="activity-title">${t.subject}</div>
+                                <div class="activity-time">${getStatusText(t.status)}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+        } catch (err) {
+            console.error('Error loading dashboard:', err);
+        }
+    }
+
+    function getStatusText(status) {
+        const map = { open: '🟢 باز', pending: '🟡 در انتظار', closed: '⚪ بسته' };
+        return map[status] || status;
+    }
+})();
+</script>

@@ -1,0 +1,172 @@
+<!-- 404 PAGE PARTIAL -->
+<div class="error-page">
+    <div class="error-content">
+        <div class="error-animation">
+            <div class="error-number">
+                <span class="num">4</span>
+                <span class="num zero">0</span>
+                <span class="num">4</span>
+            </div>
+            <div class="error-planet"></div>
+        </div>
+        
+        <h1>صفحه پیدا نشد!</h1>
+        <p>متأسفانه صفحه‌ای که دنبال آن هستید وجود ندارد یا منتقل شده است.</p>
+        
+        <div class="error-actions">
+            <a href="/" class="btn btn-primary btn-lg" data-link>
+                <span>🏠</span>
+                بازگشت به صفحه اصلی
+            </a>
+            <a href="/support" class="btn btn-secondary btn-lg" data-link>
+                <span>💬</span>
+                گزارش مشکل
+            </a>
+        </div>
+        
+        <div class="error-links">
+            <p>شاید این صفحات کمک‌تان کند:</p>
+            <div class="links-grid">
+                <a href="/downloads" data-link>📥 دانلود</a>
+                <a href="/features" data-link>✨ امکانات</a>
+                <a href="/docs" data-link>📚 مستندات</a>
+                <a href="/support" data-link>💬 پشتیبانی</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .error-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 80px 20px;
+        text-align: center;
+    }
+
+    .error-content {
+        max-width: 600px;
+    }
+
+    .error-animation {
+        position: relative;
+        margin-bottom: 40px;
+    }
+
+    .error-number {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+    }
+
+    .num {
+        font-size: clamp(80px, 20vw, 150px);
+        font-weight: 800;
+        background: var(--gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .num:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .num:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    .num.zero {
+        position: relative;
+    }
+
+    .num.zero::after {
+        content: '🚀';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 40px;
+        animation: rocket 2s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-20px); }
+    }
+
+    @keyframes rocket {
+        0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+        25% { transform: translate(-50%, -60%) rotate(15deg); }
+        75% { transform: translate(-50%, -40%) rotate(-15deg); }
+    }
+
+    .error-page h1 {
+        font-size: 32px;
+        margin-bottom: 16px;
+    }
+
+    .error-page > .error-content > p {
+        font-size: 18px;
+        color: var(--gray);
+        margin-bottom: 40px;
+        line-height: 1.6;
+    }
+
+    .error-actions {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 60px;
+    }
+
+    .error-links {
+        padding-top: 40px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .error-links p {
+        color: var(--gray);
+        margin-bottom: 20px;
+    }
+
+    .links-grid {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .links-grid a {
+        padding: 12px 20px;
+        background: var(--glass);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        color: white;
+        text-decoration: none;
+        transition: var(--transition);
+    }
+
+    .links-grid a:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: var(--primary);
+    }
+
+    @media (max-width: 480px) {
+        .error-actions {
+            flex-direction: column;
+        }
+
+        .error-actions .btn {
+            width: 100%;
+        }
+
+        .links-grid {
+            flex-direction: column;
+        }
+    }
+</style>

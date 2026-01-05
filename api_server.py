@@ -264,25 +264,30 @@ def delete_odoo_database(url, db_name):
 # DEMO MANAGEMENT APIs
 # ============================================
 
-# Site routes (frontend)
-@app.route('/', methods=['GET'])
-def site_index():
-    return send_from_directory('website', 'index.html')
+# SPA ROUTES - All frontend routes go through app.html
+SPA_ROUTES = ['/', '/features', '/downloads', '/support', '/dashboard', '/login', '/register', '/onboarding', '/settings', '/profile', '/docs', '/faq', '/contact', '/about', '/privacy', '/terms', '/forgot-password']
 
+@app.route('/')
+def spa_index():
+    """Main SPA entry point"""
+    return send_from_directory('website', 'app.html')
 
 @app.route('/install', methods=['GET'])
 def site_install():
     return send_from_directory('website', 'install.html')
 
-
 @app.route('/installer', methods=['GET'])
 def site_installer():
     return send_from_directory('website', 'install.html')
 
-
+# SPA catch-all for client-side routing
 @app.route('/<path:path>', methods=['GET'])
 def site_static(path):
-    return send_from_directory('website', path)
+    # Static files (css, js, images, etc.)
+    if '.' in path:
+        return send_from_directory('website', path)
+    # SPA routes - return app.html for client-side routing
+    return send_from_directory('website', 'app.html')
 
 @app.route('/api/demo/list', methods=['GET'])
 def list_demos():

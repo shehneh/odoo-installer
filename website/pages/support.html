@@ -1,0 +1,740 @@
+<!-- SUPPORT PAGE PARTIAL (Tickets) -->
+<div class="support-page">
+    <!-- Header -->
+    <section class="page-header">
+        <div class="container">
+            <span class="page-badge">💬 پشتیبانی</span>
+            <h1>سیستم تیکت</h1>
+            <p>با تیم پشتیبانی ما در ارتباط باشید</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="section">
+        <div class="container">
+            <!-- Auth Check -->
+            <div id="authCheck" class="auth-required">
+                <div class="auth-card">
+                    <div class="auth-icon">🔒</div>
+                    <h3>ابتدا وارد شوید</h3>
+                    <p>برای ارسال تیکت نیاز به حساب کاربری دارید</p>
+                    <div class="auth-actions">
+                        <a href="/login" class="btn btn-primary" data-link>ورود</a>
+                        <a href="/register" class="btn btn-secondary" data-link>ثبت‌نام</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tickets Container (When Logged In) -->
+            <div id="ticketsContainer" class="tickets-container" style="display: none;">
+                <!-- Ticket Actions -->
+                <div class="ticket-actions">
+                    <button id="newTicketBtn" class="btn btn-primary">
+                        <span>➕</span>
+                        تیکت جدید
+                    </button>
+                    <button id="refreshTickets" class="btn btn-secondary">
+                        <span>🔄</span>
+                        بروزرسانی
+                    </button>
+                </div>
+
+                <!-- Tickets List -->
+                <div id="ticketsList" class="tickets-list">
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                        <p>درحال بارگذاری...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- New Ticket Modal -->
+    <div id="newTicketModal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>تیکت جدید</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="newTicketForm" class="modal-body">
+                <div class="form-group">
+                    <label>موضوع</label>
+                    <input type="text" name="subject" required placeholder="موضوع تیکت را وارد کنید">
+                </div>
+                <div class="form-group">
+                    <label>دسته‌بندی</label>
+                    <select name="category" required>
+                        <option value="">انتخاب کنید</option>
+                        <option value="technical">فنی</option>
+                        <option value="sales">فروش</option>
+                        <option value="billing">مالی</option>
+                        <option value="other">سایر</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>اولویت</label>
+                    <select name="priority">
+                        <option value="low">کم</option>
+                        <option value="medium" selected>متوسط</option>
+                        <option value="high">بالا</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>توضیحات</label>
+                    <textarea name="message" rows="5" required placeholder="مشکل یا درخواست خود را شرح دهید"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary modal-close-btn">انصراف</button>
+                    <button type="submit" class="btn btn-primary">ارسال تیکت</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Ticket Detail Modal -->
+    <div id="ticketDetailModal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <div>
+                    <h3 id="ticketDetailTitle">جزئیات تیکت</h3>
+                    <div id="ticketDetailMeta" class="ticket-meta"></div>
+                </div>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="ticketMessages" class="ticket-messages">
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+                <form id="replyForm" class="reply-form">
+                    <textarea name="message" rows="3" placeholder="پاسخ خود را بنویسید..."></textarea>
+                    <button type="submit" class="btn btn-primary">
+                        <span>📤</span>
+                        ارسال
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .support-page {
+        min-height: 100vh;
+    }
+
+    /* Auth Required */
+    .auth-required {
+        display: flex;
+        justify-content: center;
+        padding: 40px 0;
+    }
+
+    .auth-card {
+        background: var(--glass);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 24px;
+        padding: 60px;
+        text-align: center;
+        max-width: 400px;
+    }
+
+    .auth-icon {
+        font-size: 64px;
+        margin-bottom: 24px;
+    }
+
+    .auth-card h3 {
+        font-size: 24px;
+        margin-bottom: 12px;
+    }
+
+    .auth-card p {
+        color: var(--gray);
+        margin-bottom: 32px;
+    }
+
+    .auth-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+    }
+
+    /* Tickets Container */
+    .tickets-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .ticket-actions {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+        justify-content: flex-end;
+    }
+
+    /* Tickets List */
+    .tickets-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .ticket-item {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 20px 24px;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .ticket-item:hover {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: var(--primary);
+    }
+
+    .ticket-item.unread {
+        border-color: var(--primary);
+        background: linear-gradient(90deg, rgba(102, 126, 234, 0.1) 0%, transparent 50%);
+    }
+
+    .ticket-item.unread::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        background: var(--primary);
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+
+    .ticket-info {
+        flex: 1;
+    }
+
+    .ticket-subject {
+        font-weight: 600;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .ticket-preview {
+        font-size: 14px;
+        color: var(--gray);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 400px;
+    }
+
+    .ticket-meta {
+        display: flex;
+        gap: 12px;
+        font-size: 12px;
+        color: var(--gray);
+    }
+
+    .ticket-status {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .ticket-status.open {
+        background: rgba(46, 204, 113, 0.2);
+        color: #2ecc71;
+    }
+
+    .ticket-status.pending {
+        background: rgba(241, 196, 15, 0.2);
+        color: #f1c40f;
+    }
+
+    .ticket-status.closed {
+        background: rgba(149, 165, 166, 0.2);
+        color: #95a5a6;
+    }
+
+    .ticket-priority {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+    }
+
+    .ticket-priority.high {
+        background: rgba(231, 76, 60, 0.2);
+        color: #e74c3c;
+    }
+
+    .ticket-priority.medium {
+        background: rgba(241, 196, 15, 0.2);
+        color: #f1c40f;
+    }
+
+    .ticket-priority.low {
+        background: rgba(46, 204, 113, 0.2);
+        color: #2ecc71;
+    }
+
+    .ticket-date {
+        font-size: 13px;
+        color: var(--gray);
+        white-space: nowrap;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--gray);
+    }
+
+    .empty-state span {
+        font-size: 64px;
+        display: block;
+        margin-bottom: 16px;
+    }
+
+    /* Modal Styles */
+    .modal {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .modal.active {
+        display: flex;
+    }
+
+    .modal-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(4px);
+    }
+
+    .modal-content {
+        position: relative;
+        background: var(--bg);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        width: 100%;
+        max-width: 500px;
+        max-height: 90vh;
+        overflow: hidden;
+        animation: modalIn 0.3s ease;
+    }
+
+    .modal-lg {
+        max-width: 700px;
+    }
+
+    @keyframes modalIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95) translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 24px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .modal-header h3 {
+        font-size: 20px;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 28px;
+        cursor: pointer;
+        opacity: 0.6;
+        transition: var(--transition);
+    }
+
+    .modal-close:hover {
+        opacity: 1;
+    }
+
+    .modal-body {
+        padding: 24px;
+        overflow-y: auto;
+        max-height: calc(90vh - 100px);
+    }
+
+    /* Form Styles */
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 14px 18px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        color: white;
+        font-family: inherit;
+        font-size: 15px;
+        transition: var(--transition);
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 24px;
+    }
+
+    /* Ticket Messages */
+    .ticket-messages {
+        max-height: 400px;
+        overflow-y: auto;
+        margin-bottom: 20px;
+        padding: 10px 0;
+    }
+
+    .message {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 16px;
+    }
+
+    .message.user {
+        align-items: flex-start;
+    }
+
+    .message.admin {
+        align-items: flex-end;
+    }
+
+    .message-bubble {
+        max-width: 80%;
+        padding: 14px 18px;
+        border-radius: 18px;
+        line-height: 1.5;
+    }
+
+    .message.user .message-bubble {
+        background: rgba(255, 255, 255, 0.08);
+        border-top-right-radius: 4px;
+    }
+
+    .message.admin .message-bubble {
+        background: var(--primary);
+        border-top-left-radius: 4px;
+    }
+
+    .message-time {
+        font-size: 11px;
+        color: var(--gray);
+        margin-top: 4px;
+        padding: 0 4px;
+    }
+
+    /* Reply Form */
+    .reply-form {
+        display: flex;
+        gap: 12px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .reply-form textarea {
+        flex: 1;
+        padding: 14px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        color: white;
+        font-family: inherit;
+        resize: none;
+    }
+
+    .reply-form textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+
+    .reply-form button {
+        align-self: flex-end;
+    }
+
+    /* Loading State */
+    .loading-state {
+        text-align: center;
+        padding: 40px;
+        color: var(--gray);
+    }
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        border-top-color: var(--primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 12px;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+        .ticket-actions {
+            flex-direction: column;
+        }
+
+        .ticket-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .ticket-preview {
+            max-width: 100%;
+        }
+
+        .modal-content {
+            max-height: 100vh;
+            border-radius: 20px 20px 0 0;
+            margin-top: auto;
+        }
+    }
+</style>
+
+<script>
+(function() {
+    // Check if user is logged in
+    const token = localStorage.getItem('token');
+    const authCheck = document.getElementById('authCheck');
+    const ticketsContainer = document.getElementById('ticketsContainer');
+    
+    if (token) {
+        authCheck.style.display = 'none';
+        ticketsContainer.style.display = 'block';
+        loadTickets();
+    }
+
+    // Modal handlers
+    const newTicketModal = document.getElementById('newTicketModal');
+    const ticketDetailModal = document.getElementById('ticketDetailModal');
+    
+    document.getElementById('newTicketBtn')?.addEventListener('click', () => {
+        newTicketModal.classList.add('active');
+    });
+
+    document.querySelectorAll('.modal-close, .modal-close-btn, .modal-overlay').forEach(el => {
+        el.addEventListener('click', () => {
+            newTicketModal.classList.remove('active');
+            ticketDetailModal.classList.remove('active');
+        });
+    });
+
+    document.getElementById('refreshTickets')?.addEventListener('click', loadTickets);
+
+    // New Ticket Form
+    document.getElementById('newTicketForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+        
+        try {
+            const res = await fetch('/api/tickets', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    subject: formData.get('subject'),
+                    category: formData.get('category'),
+                    priority: formData.get('priority'),
+                    message: formData.get('message')
+                })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                App.toast('تیکت با موفقیت ارسال شد', 'success');
+                newTicketModal.classList.remove('active');
+                form.reset();
+                loadTickets();
+            } else {
+                App.toast(data.message || 'خطا در ارسال تیکت', 'error');
+            }
+        } catch (err) {
+            App.toast('خطا در ارتباط با سرور', 'error');
+        }
+    });
+
+    // Reply Form
+    document.getElementById('replyForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const ticketId = form.dataset.ticketId;
+        const message = form.querySelector('textarea').value.trim();
+        
+        if (!message) return;
+
+        try {
+            const res = await fetch(`/api/tickets/${ticketId}/messages`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                form.querySelector('textarea').value = '';
+                loadTicketDetail(ticketId);
+            }
+        } catch (err) {
+            App.toast('خطا در ارسال پاسخ', 'error');
+        }
+    });
+
+    // Load Tickets
+    async function loadTickets() {
+        const ticketsList = document.getElementById('ticketsList');
+        if (!ticketsList) return;
+
+        ticketsList.innerHTML = '<div class="loading-state"><div class="spinner"></div><p>درحال بارگذاری...</p></div>';
+
+        try {
+            const res = await fetch('/api/tickets', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+
+            if (data.success && data.tickets.length > 0) {
+                ticketsList.innerHTML = data.tickets.map(ticket => `
+                    <div class="ticket-item ${ticket.has_new_reply ? 'unread' : ''}" data-id="${ticket.id}">
+                        <div class="ticket-info">
+                            <div class="ticket-subject">
+                                ${ticket.subject}
+                                <span class="ticket-status ${ticket.status}">${getStatusText(ticket.status)}</span>
+                                <span class="ticket-priority ${ticket.priority}">${getPriorityText(ticket.priority)}</span>
+                            </div>
+                            <div class="ticket-preview">${ticket.last_message || ''}</div>
+                        </div>
+                        <div class="ticket-date">${formatDate(ticket.updated_at)}</div>
+                    </div>
+                `).join('');
+
+                // Add click handlers
+                ticketsList.querySelectorAll('.ticket-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        loadTicketDetail(item.dataset.id);
+                    });
+                });
+            } else {
+                ticketsList.innerHTML = `
+                    <div class="empty-state">
+                        <span>📭</span>
+                        <p>هنوز تیکتی ندارید</p>
+                    </div>
+                `;
+            }
+        } catch (err) {
+            ticketsList.innerHTML = '<div class="empty-state"><p>خطا در بارگذاری</p></div>';
+        }
+    }
+
+    // Load Ticket Detail
+    async function loadTicketDetail(ticketId) {
+        const modal = document.getElementById('ticketDetailModal');
+        const messagesContainer = document.getElementById('ticketMessages');
+        const replyForm = document.getElementById('replyForm');
+        
+        modal.classList.add('active');
+        messagesContainer.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+        replyForm.dataset.ticketId = ticketId;
+
+        try {
+            const res = await fetch(`/api/tickets/${ticketId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                document.getElementById('ticketDetailTitle').textContent = data.ticket.subject;
+                document.getElementById('ticketDetailMeta').innerHTML = `
+                    <span class="ticket-status ${data.ticket.status}">${getStatusText(data.ticket.status)}</span>
+                    <span>${formatDate(data.ticket.created_at)}</span>
+                `;
+
+                messagesContainer.innerHTML = data.messages.map(msg => `
+                    <div class="message ${msg.is_admin ? 'admin' : 'user'}">
+                        <div class="message-bubble">${msg.message}</div>
+                        <div class="message-time">${formatDate(msg.created_at)}</div>
+                    </div>
+                `).join('');
+
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        } catch (err) {
+            messagesContainer.innerHTML = '<p>خطا در بارگذاری</p>';
+        }
+    }
+
+    // Helper functions
+    function getStatusText(status) {
+        const map = { open: 'باز', pending: 'در انتظار', closed: 'بسته' };
+        return map[status] || status;
+    }
+
+    function getPriorityText(priority) {
+        const map = { low: 'کم', medium: 'متوسط', high: 'بالا' };
+        return map[priority] || priority;
+    }
+
+    function formatDate(dateStr) {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('fa-IR');
+    }
+})();
+</script>

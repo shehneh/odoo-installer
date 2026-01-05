@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="OdooMaster">
+    <meta name="description" content="نصب هوشمند Odoo - سریع‌ترین راه راه‌اندازی سیستم سازمانی">
+    
+    <title>OdooMaster</title>
+    
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/images/icon-192.png">
+    
+    <style>
+        /* ========================================
+           ODOOMASTER SPA - CORE STYLES
+           ======================================== */
+        
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a67d8;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1a1a2e;
+            --darker: #16162a;
+            --bg: #1a1a2e;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            --glass: rgba(255, 255, 255, 0.05);
+            --shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            --radius: 16px;
+            --header-height: 70px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--dark);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .section {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            font-size: 36px;
+            margin-bottom: 16px;
+        }
+
+        .section-subtitle {
+            color: var(--gray);
+            font-size: 18px;
+        }
+
+        /* ========================================
+           LOADING SCREEN
+           ======================================== */
+        
+        #app-loader {
+            position: fixed;
+            inset: 0;
+            background: var(--dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+
+        #app-loader.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .loader-logo {
+            font-size: 64px;
+            margin-bottom: 24px;
+            animation: pulse 2s infinite;
+        }
+
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--glass);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loader-text {
+            margin-top: 20px;
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* ========================================
+           HEADER - FIXED
+           ======================================== */
+        
+        .app-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background: rgba(26, 26, 46, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            transition: var(--transition);
+        }
+
+        .app-header.scrolled {
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: white;
+            font-weight: 700;
+            font-size: 22px;
+        }
+
+        .logo-icon {
+            font-size: 32px;
+        }
+
+        /* Desktop Navigation */
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-link {
+            position: relative;
+            padding: 10px 18px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            border-radius: 10px;
+            transition: var(--transition);
+        }
+
+        .nav-link:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .nav-link.active {
+            color: var(--primary);
+            background: rgba(102, 126, 234, 0.15);
+        }
+
+        .nav-link .badge {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            min-width: 18px;
+            height: 18px;
+            background: var(--danger);
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: badgePulse 2s infinite;
+        }
+
+        @keyframes badgePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* User Menu */
+        #userMenu {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition);
+            text-decoration: none;
+            color: white;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.05);
+        }
+
+        .notification-dot {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 12px;
+            height: 12px;
+            background: var(--danger);
+            border-radius: 50%;
+            border: 2px solid var(--dark);
+        }
+
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        /* ========================================
+           BUTTONS
+           ======================================== */
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        /* ========================================
+           PAGE CONTAINER
+           ======================================== */
+        
+        #page-container {
+            min-height: 100vh;
+            padding-top: var(--header-height);
+        }
+
+        .page-content {
+            animation: pageIn 0.4s ease;
+        }
+
+        @keyframes pageIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .page-content.page-out {
+            animation: pageOut 0.3s ease forwards;
+        }
+
+        @keyframes pageOut {
+            to {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+        }
+
+        /* Page Loading */
+        .page-loading {
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--glass);
+            z-index: 999;
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .page-loading.active {
+            opacity: 1;
+        }
+
+        .page-loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient);
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            to { left: 100%; }
+        }
+
+        /* ========================================
+           OFFLINE BAR
+           ======================================== */
+        
+        #offlineBar {
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            right: 0;
+            background: var(--warning);
+            color: black;
+            text-align: center;
+            padding: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            transform: translateY(-100%);
+            transition: transform 0.3s;
+            z-index: 998;
+        }
+
+        #offlineBar.visible {
+            transform: translateY(0);
+        }
+
+        /* ========================================
+           BOTTOM NAVIGATION (Mobile)
+           ======================================== */
+        
+        .bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(26, 26, 46, 0.98);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+            padding: 8px 0;
+            padding-bottom: max(8px, env(safe-area-inset-bottom));
+        }
+
+        .bottom-nav-items {
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 16px;
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            font-size: 11px;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .bottom-nav-item .icon {
+            font-size: 22px;
+        }
+
+        .bottom-nav-item.active {
+            color: var(--primary);
+        }
+
+        .bottom-nav-item .badge {
+            position: absolute;
+            top: 2px;
+            right: 12px;
+            min-width: 16px;
+            height: 16px;
+            background: var(--danger);
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bottom-nav-item .badge.hidden {
+            display: none;
+        }
+
+        /* ========================================
+           TOAST NOTIFICATIONS
+           ======================================== */
+        
+        .toast-container {
+            position: fixed;
+            top: calc(var(--header-height) + 20px);
+            right: 20px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            min-width: 280px;
+            padding: 16px 20px;
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: toastIn 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .toast.success { border-color: var(--success); }
+        .toast.error { border-color: var(--danger); }
+        .toast.info { border-color: var(--primary); }
+        .toast.warning { border-color: var(--warning); }
+
+        .toast-icon { font-size: 20px; }
+        .toast-message { flex: 1; font-size: 14px; }
+        .toast-close {
+            background: none;
+            border: none;
+            color: var(--gray);
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(100px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* ========================================
+           PULL TO REFRESH
+           ======================================== */
+        
+        .ptr-indicator {
+            position: fixed;
+            top: var(--header-height);
+            left: 50%;
+            transform: translateX(-50%) translateY(-100%);
+            background: var(--gradient);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 0 0 12px 12px;
+            font-size: 14px;
+            transition: transform 0.3s;
+            z-index: 997;
+        }
+
+        .ptr-indicator.visible {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* ========================================
+           RESPONSIVE
+           ======================================== */
+        
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .bottom-nav {
+                display: block;
+            }
+
+            #page-container {
+                padding-bottom: 80px;
+            }
+
+            .toast-container {
+                left: 20px;
+                right: 20px;
+            }
+
+            .toast {
+                min-width: auto;
+            }
+        }
+
+        /* ========================================
+           UTILITIES
+           ======================================== */
+        
+        .hidden { display: none !important; }
+        .text-center { text-align: center; }
+        .text-gray { color: var(--gray); }
+    </style>
+</head>
+<body>
+    <!-- App Loader -->
+    <div id="app-loader">
+        <div class="loader-logo">🚀</div>
+        <div class="loader-spinner"></div>
+        <div class="loader-text">در حال بارگذاری...</div>
+    </div>
+
+    <!-- Header -->
+    <header class="app-header" id="appHeader">
+        <div class="header-content">
+            <a href="/" class="logo" data-link>
+                <span class="logo-icon">🚀</span>
+                <span>OdooMaster</span>
+            </a>
+
+            <nav class="nav-menu" id="navMenu">
+                <a href="/" class="nav-link active" data-link>خانه</a>
+                <a href="/features" class="nav-link" data-link>امکانات</a>
+                <a href="/downloads" class="nav-link" data-link>دانلود</a>
+                <a href="/support" class="nav-link" data-link>
+                    پشتیبانی
+                    <span class="badge hidden" id="supportBadgeDesktop">0</span>
+                </a>
+            </nav>
+
+            <div id="userMenu">
+                <a href="/login" class="btn btn-secondary" data-link>ورود</a>
+            </div>
+
+            <button class="menu-toggle" id="menuToggle">☰</button>
+        </div>
+    </header>
+
+    <!-- Page Loading Indicator -->
+    <div class="page-loading" id="pageLoading"></div>
+
+    <!-- Offline Bar -->
+    <div id="offlineBar">⚠️ شما آفلاین هستید</div>
+
+    <!-- Main Content Container -->
+    <main id="page-container"></main>
+
+    <!-- Bottom Navigation (Mobile) -->
+    <nav class="bottom-nav" id="bottomNav">
+        <div class="bottom-nav-items">
+            <a href="/" class="bottom-nav-item active" data-link>
+                <span class="icon">🏠</span>
+                <span>خانه</span>
+            </a>
+            <a href="/downloads" class="bottom-nav-item" data-link>
+                <span class="icon">📥</span>
+                <span>دانلود</span>
+            </a>
+            <a href="/support" class="bottom-nav-item" data-link>
+                <span class="icon">💬</span>
+                <span>پشتیبانی</span>
+                <span class="badge hidden" id="supportBadgeMobile">0</span>
+            </a>
+            <a href="/dashboard" class="bottom-nav-item" data-link>
+                <span class="icon">👤</span>
+                <span>حساب من</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Pull to Refresh Indicator -->
+    <div class="ptr-indicator" id="ptrIndicator">↻ رها کنید برای بروزرسانی</div>
+
+    <script>
+        // ========================================
+        // ODOOMASTER SPA - CORE APPLICATION
+        // ========================================
+
+        const App = {
+            currentPage: null,
+            user: null,
+            isOnline: navigator.onLine,
+            cache: new Map(),
+            
+            routes: {
+                '/': { title: 'خانه', component: 'home' },
+                '/features': { title: 'امکانات', component: 'features' },
+                '/downloads': { title: 'دانلود', component: 'downloads' },
+                '/support': { title: 'پشتیبانی', component: 'support' },
+                '/dashboard': { title: 'داشبورد', component: 'dashboard', auth: true },
+                '/login': { title: 'ورود', component: 'login' },
+                '/register': { title: 'ثبت‌نام', component: 'login' },
+                '/settings': { title: 'تنظیمات', component: 'settings', auth: true },
+                '/404': { title: 'یافت نشد', component: '404' }
+            },
+
+            async init() {
+                console.log('🚀 Initializing OdooMaster SPA...');
+                this.checkAuth();
+                this.setupEventListeners();
+                await this.handleRoute();
+                this.registerServiceWorker();
+                this.loadNotificationCounts();
+                setTimeout(() => {
+                    document.getElementById('app-loader').classList.add('hidden');
+                }, 300);
+                console.log('✅ App initialized');
+            },
+
+            checkAuth() {
+                const token = localStorage.getItem('token');
+                const userStr = localStorage.getItem('user');
+                if (token && userStr) {
+                    try {
+                        this.user = JSON.parse(userStr);
+                        this.updateAuthUI();
+                    } catch (e) {
+                        this.logout();
+                    }
+                }
+            },
+
+            updateAuthUI() {
+                const menu = document.getElementById('userMenu');
+                if (this.user) {
+                    const initial = this.user.name ? this.user.name[0].toUpperCase() : '👤';
+                    menu.innerHTML = `<a href="/dashboard" class="user-avatar" data-link title="${this.user.name}">${initial}</a>`;
+                } else {
+                    menu.innerHTML = `<a href="/login" class="btn btn-secondary" data-link>ورود</a>`;
+                }
+            },
+
+            logout() {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                this.user = null;
+                this.updateAuthUI();
+                this.navigate('/');
+            },
+
+            setupEventListeners() {
+                // Navigation links
+                document.addEventListener('click', (e) => {
+                    const link = e.target.closest('[data-link]');
+                    if (link) {
+                        e.preventDefault();
+                        this.navigate(link.getAttribute('href'));
+                    }
+                });
+
+                // Browser back/forward
+                window.addEventListener('popstate', () => this.handleRoute());
+
+                // Scroll handler
+                window.addEventListener('scroll', () => {
+                    const header = document.getElementById('appHeader');
+                    header.classList.toggle('scrolled', window.scrollY > 50);
+                });
+
+                // Online/Offline
+                window.addEventListener('online', () => {
+                    this.isOnline = true;
+                    document.getElementById('offlineBar').classList.remove('visible');
+                    this.toast('اتصال برقرار شد', 'success');
+                });
+
+                window.addEventListener('offline', () => {
+                    this.isOnline = false;
+                    document.getElementById('offlineBar').classList.add('visible');
+                });
+
+                // Pull to refresh
+                let touchStartY = 0, isPulling = false;
+                document.addEventListener('touchstart', (e) => {
+                    if (window.scrollY === 0) touchStartY = e.touches[0].clientY;
+                });
+                document.addEventListener('touchmove', (e) => {
+                    if (touchStartY && window.scrollY === 0) {
+                        if (e.touches[0].clientY - touchStartY > 80) {
+                            document.getElementById('ptrIndicator').classList.add('visible');
+                            isPulling = true;
+                        }
+                    }
+                });
+                document.addEventListener('touchend', () => {
+                    if (isPulling) {
+                        document.getElementById('ptrIndicator').classList.remove('visible');
+                        this.refreshCurrentPage();
+                        isPulling = false;
+                    }
+                    touchStartY = 0;
+                });
+            },
+
+            navigate(url) {
+                if (url === window.location.pathname) return;
+                history.pushState(null, null, url);
+                this.handleRoute();
+            },
+
+            async handleRoute() {
+                const path = window.location.pathname;
+                const route = this.routes[path] || this.routes['/404'];
+                
+                if (route.auth && !this.user) {
+                    this.navigate('/login');
+                    return;
+                }
+
+                document.title = `${route.title} - OdooMaster`;
+                this.updateActiveLinks(path);
+                this.showPageLoading();
+                
+                try {
+                    const content = await this.loadPage(route.component);
+                    const container = document.getElementById('page-container');
+                    const currentContent = container.querySelector('.page-content');
+                    
+                    if (currentContent) {
+                        currentContent.classList.add('page-out');
+                        await this.wait(200);
+                    }
+                    
+                    container.innerHTML = `<div class="page-content">${content}</div>`;
+                    
+                    // Execute inline scripts
+                    container.querySelectorAll('script').forEach(script => {
+                        const newScript = document.createElement('script');
+                        newScript.textContent = script.textContent;
+                        script.parentNode.replaceChild(newScript, script);
+                    });
+                    
+                    window.scrollTo({ top: 0, behavior: 'instant' });
+                } catch (error) {
+                    console.error('Error loading page:', error);
+                    this.toast('خطا در بارگذاری صفحه', 'error');
+                }
+                
+                this.hidePageLoading();
+                this.currentPage = route.component;
+            },
+
+            async loadPage(component) {
+                if (this.cache.has(component)) return this.cache.get(component);
+
+                try {
+                    const response = await fetch(`/pages/${component}.html`);
+                    if (!response.ok) throw new Error('Page not found');
+                    const content = await response.text();
+                    this.cache.set(component, content);
+                    return content;
+                } catch (error) {
+                    console.error(`Failed to load page: ${component}`, error);
+                    return this.get404Content();
+                }
+            },
+
+            get404Content() {
+                return `
+                    <div style="text-align: center; padding: 150px 20px;">
+                        <div style="font-size: 100px; margin-bottom: 20px;">🔍</div>
+                        <h1 style="font-size: 48px; margin-bottom: 16px;">404</h1>
+                        <p style="color: var(--gray); margin-bottom: 32px; font-size: 18px;">صفحه مورد نظر یافت نشد</p>
+                        <a href="/" class="btn btn-primary" data-link>بازگشت به خانه</a>
+                    </div>
+                `;
+            },
+
+            updateActiveLinks(path) {
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('href') === path);
+                });
+                document.querySelectorAll('.bottom-nav-item').forEach(item => {
+                    item.classList.toggle('active', item.getAttribute('href') === path);
+                });
+            },
+
+            showPageLoading() {
+                document.getElementById('pageLoading').classList.add('active');
+            },
+
+            hidePageLoading() {
+                document.getElementById('pageLoading').classList.remove('active');
+            },
+
+            async loadNotificationCounts() {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+
+                try {
+                    const res = await fetch('/api/tickets', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        const unreadCount = data.tickets.filter(t => t.has_new_reply).length;
+                        this.updateBadges(unreadCount);
+                    }
+                } catch (e) {
+                    console.error('Failed to load notifications:', e);
+                }
+            },
+
+            updateBadges(count) {
+                ['supportBadgeDesktop', 'supportBadgeMobile'].forEach(id => {
+                    const badge = document.getElementById(id);
+                    if (badge) {
+                        if (count > 0) {
+                            badge.textContent = count;
+                            badge.classList.remove('hidden');
+                        } else {
+                            badge.classList.add('hidden');
+                        }
+                    }
+                });
+            },
+
+            refreshCurrentPage() {
+                if (this.currentPage) {
+                    this.cache.delete(this.currentPage);
+                    this.handleRoute();
+                }
+            },
+
+            toast(message, type = 'info', duration = 4000) {
+                const container = document.getElementById('toastContainer');
+                const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+                
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `
+                    <span class="toast-icon">${icons[type]}</span>
+                    <span class="toast-message">${message}</span>
+                    <button class="toast-close">&times;</button>
+                `;
+                
+                container.appendChild(toast);
+                toast.querySelector('.toast-close').addEventListener('click', () => toast.remove());
+                
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateX(100px)';
+                    setTimeout(() => toast.remove(), 300);
+                }, duration);
+            },
+
+            wait(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            },
+
+            registerServiceWorker() {
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register('/sw.js')
+                        .then(() => console.log('✅ Service Worker registered'))
+                        .catch(err => console.error('❌ SW failed:', err));
+                }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => App.init());
+    </script>
+</body>
+</html>
