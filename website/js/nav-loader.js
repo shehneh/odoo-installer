@@ -2,6 +2,15 @@
 // این فایل رو در همه صفحات include کنید
 
 // =====================================
+// Register Service Worker
+// =====================================
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('⚡ Service Worker registered'))
+        .catch(err => console.log('Service Worker registration failed:', err));
+}
+
+// =====================================
 // Global Auth State (مثل GitHub)
 // =====================================
 window.AUTH = {
@@ -115,5 +124,13 @@ window.getAuthToken = function() {
         document.addEventListener('DOMContentLoaded', loadNavigation);
     } else {
         loadNavigation();
+    }
+
+    // Load TurboNav for fast navigation
+    if (!window.TurboNav) {
+        const turboScript = document.createElement('script');
+        turboScript.src = '/js/turbo-nav.js';
+        turboScript.async = true;
+        document.head.appendChild(turboScript);
     }
 })();

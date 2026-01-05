@@ -3,32 +3,24 @@
 // Progressive Web App - Offline Support
 // ========================================
 
-const CACHE_NAME = 'odoomaster-v1';
-const STATIC_CACHE = 'odoomaster-static-v1';
-const DYNAMIC_CACHE = 'odoomaster-dynamic-v1';
-const API_CACHE = 'odoomaster-api-v1';
+const CACHE_NAME = 'odoomaster-v2';
+const STATIC_CACHE = 'odoomaster-static-v2';
+const DYNAMIC_CACHE = 'odoomaster-dynamic-v2';
 
 // Static assets to cache immediately
 const STATIC_ASSETS = [
     '/',
-    '/app.html',
-    '/manifest.json',
+    '/index.html',
+    '/css/main.css',
+    '/css/components.css',
+    '/css/animations.css',
     '/css/unified-nav.css',
-    '/js/tickets.js',
-    '/pages/home.html',
-    '/pages/features.html',
-    '/pages/downloads.html',
-    '/pages/support.html',
-    '/pages/dashboard.html',
-    '/pages/login.html',
-    '/pages/404.html'
-];
-
-// API routes to cache with network-first strategy
-const API_ROUTES = [
-    '/api/user-status',
-    '/api/tickets',
-    '/api/plans'
+    '/js/main.js',
+    '/js/nav-loader.js',
+    '/js/turbo-nav.js',
+    '/js/i18n.js',
+    '/favicon.svg',
+    '/components/nav-header.html'
 ];
 
 // Install event - cache static assets
@@ -61,8 +53,7 @@ self.addEventListener('activate', event => {
                 return Promise.all(
                     cacheNames
                         .filter(name => name !== STATIC_CACHE && 
-                                       name !== DYNAMIC_CACHE && 
-                                       name !== API_CACHE)
+                                       name !== DYNAMIC_CACHE)
                         .map(name => {
                             console.log('🗑️ Deleting old cache:', name);
                             return caches.delete(name);
@@ -136,7 +127,7 @@ async function networkFirstStrategy(request) {
         const networkResponse = await fetch(request);
         
         if (networkResponse.ok) {
-            const cache = await caches.open(API_CACHE);
+            const cache = await caches.open(DYNAMIC_CACHE);
             cache.put(request, networkResponse.clone());
         }
         
@@ -188,11 +179,11 @@ function isStaticAsset(pathname) {
 
 // Get offline fallback page
 async function getOfflineFallback(request) {
-    // For page requests, try to serve the app shell
+    // For page requests, try to serve the cached index
     if (request.mode === 'navigate') {
-        const cachedApp = await caches.match('/app.html');
-        if (cachedApp) {
-            return cachedApp;
+        const cachedIndex = await caches.match('/index.html');
+        if (cachedIndex) {
+            return cachedIndex;
         }
     }
     
