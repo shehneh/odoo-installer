@@ -267,6 +267,11 @@ def delete_odoo_database(url, db_name):
 # SPA ROUTES - All frontend routes go through app.html
 SPA_ROUTES = ['/', '/features', '/downloads', '/support', '/dashboard', '/login', '/register', '/onboarding', '/settings', '/profile', '/docs', '/faq', '/contact', '/about', '/privacy', '/terms', '/forgot-password']
 
+@app.route('/favicon.ico')
+def favicon():
+    """Redirect favicon.ico to favicon.svg"""
+    return send_from_directory('website', 'favicon.svg', mimetype='image/svg+xml')
+
 @app.route('/')
 def spa_index():
     """Main SPA entry point"""
