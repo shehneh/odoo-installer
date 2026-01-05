@@ -1072,8 +1072,10 @@ def google_login():
     if not redirect_uri:
         redirect_uri = request.url_root.rstrip('/') + '/callback/google'
     
-    # Google OAuth configuration
-    GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '585648476029-bo40kh24la1k4b3bu62rhmhrjncbpiu9.apps.googleusercontent.com')
+    # Google OAuth configuration (use environment variables)
+    GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '')
+    if not GOOGLE_CLIENT_ID:
+        return "خطا: GOOGLE_CLIENT_ID تنظیم نشده است", 500
     
     google = OAuth2Session(
         GOOGLE_CLIENT_ID,
@@ -1110,9 +1112,12 @@ def google_callback():
         if not redirect_uri:
             redirect_uri = request.url_root.rstrip('/') + '/callback/google'
         
-        # Google OAuth configuration
-        GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '585648476029-bo40kh24la1k4b3bu62rhmhrjncbpiu9.apps.googleusercontent.com')
-        GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', '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')
+        # Google OAuth configuration (use environment variables)
+        GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '')
+        GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', '')
+        
+        if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
+            return "خطا: تنظیمات Google OAuth ناقص است", 500
         
         google = OAuth2Session(
             GOOGLE_CLIENT_ID,

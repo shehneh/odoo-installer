@@ -169,13 +169,13 @@ ADMIN_EMAILS = [
 ]
 
 # SMS configuration (Kavenegar)
-KAVENEGAR_API_KEY = os.environ.get('KAVENEGAR_API_KEY', '4F696144434E4A595339686F6B3773467A62516277745A666566785A67756E5167564D67596D2B757368513D')
+KAVENEGAR_API_KEY = os.environ.get('KAVENEGAR_API_KEY', '')
 KAVENEGAR_TEMPLATE = os.environ.get('KAVENEGAR_TEMPLATE', 'verify')  # نام template در کاوه‌نگار
 KAVENEGAR_SENDER = os.environ.get('KAVENEGAR_SENDER', '2000660110')  # شماره فرستنده
 
-# Google OAuth Configuration
-GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '585648476029-bo40kh24la1k4b3bu62rhmhrjncbpiu9.apps.googleusercontent.com')
-GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', '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')
+# Google OAuth Configuration (MUST be set via environment variables)
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '')
+GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', '')
 # Auto-detect redirect URI from request or use environment variable
 GOOGLE_REDIRECT_URI = os.environ.get('GOOGLE_REDIRECT_URI', 'http://localhost:5001/callback/google')
 
