@@ -2,12 +2,16 @@
 // این فایل رو در همه صفحات include کنید
 
 // =====================================
-// Register Service Worker
+// Service Worker DISABLED - was causing cache issues
 // =====================================
+// Unregister any existing service workers to fix caching issues
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
-        .then(reg => console.log('⚡ Service Worker registered'))
-        .catch(err => console.log('Service Worker registration failed:', err));
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+            registration.unregister();
+            console.log('🗑️ Service Worker unregistered');
+        }
+    });
 }
 
 // =====================================
@@ -82,8 +86,15 @@ window.getAuthToken = function() {
 (function() {
     // Load Navigation Component
     function loadNavigation() {
+        // Make sure body exists
+        if (!document.body) {
+            console.log('⏳ Waiting for body...');
+            setTimeout(loadNavigation, 10);
+            return;
+        }
+        
         console.log('🔄 Loading navigation...');
-        fetch('/components/nav-header.html')
+        fetch('/components/nav-header.html', { cache: 'no-store' })
             .then(response => {
                 console.log('✅ Navigation HTML fetched');
                 return response.text();
@@ -119,18 +130,29 @@ window.getAuthToken = function() {
     // Check auth on page load
     window.AUTH.check();
 
-    // Auto-load on DOM ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', loadNavigation);
-    } else {
-        loadNavigation();
+    // Auto-load navigation - ensure DOM is ready
+    function initNav() {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadNavigation);
+        } else if (document.body) {
+            loadNavigation();
+        } else {
+            // Body not ready yet, wait a bit
+            setTimeout(loadNavigation, 10);
+        }
     }
+    
+    initNav();
 
-    // Load TurboNav for fast navigation
+    // TurboNav disabled - was causing page rendering issues
+    // Pages now load normally with full page refresh
+    // To re-enable, uncomment below:
+    /*
     if (!window.TurboNav) {
         const turboScript = document.createElement('script');
         turboScript.src = '/js/turbo-nav.js';
         turboScript.async = true;
         document.head.appendChild(turboScript);
     }
+    */
 })();

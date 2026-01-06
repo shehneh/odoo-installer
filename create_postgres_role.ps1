@@ -22,9 +22,9 @@ L 'Starting create_postgres_role.ps1'
 # Locate odoo.conf in a portable way: check a few candidate locations relative to the project,
 # then fall back to a recursive search under the project root.
 $confCandidates = @(
-    Join-Path $Base 'odoo19\config\odoo.conf',
-    Join-Path $Base '..\odoo19\config\odoo.conf',
-    Join-Path $Base '..\..\odoo19\config\odoo.conf'
+    (Join-Path $Base 'odoo19' | Join-Path -ChildPath 'config' | Join-Path -ChildPath 'odoo.conf'),
+    (Join-Path (Split-Path $Base -Parent) 'odoo19' | Join-Path -ChildPath 'config' | Join-Path -ChildPath 'odoo.conf'),
+    (Join-Path (Split-Path (Split-Path $Base -Parent) -Parent) 'odoo19' | Join-Path -ChildPath 'config' | Join-Path -ChildPath 'odoo.conf')
 )
 $confPath = $null
 foreach ($c in $confCandidates){ if (Test-Path $c){ $confPath = (Resolve-Path $c).Path; break } }

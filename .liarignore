@@ -1,0 +1,56 @@
+# Files to exclude from Liara deployment
+
+# Local development files
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Large files and directories
+/data/
+/downloads/
+/dist/
+/release/
+/offline/
+/offline_packages/
+/soft/
+odoo19_odoo/
+OpenUpgrade*/
+odoo/
+/build/
+
+# Sensitive files
+.env
+*.db
+*.sqlite
+*.sqlite3
+license_private_key.pem
+.user_auth_secret
+config.py
+
+# Test and temp files
+*.log
+*.tmp
+nuitka-crash-report.xml
+fetch_setup.log
+
+# OS files
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Node modules
+node_modules/
+
+# Git
+.git/
+.gitignore
+
+# Documentation (optional)
+*.md
+!README.md
+
+# Odoo source (if exists)
+odoo 19/

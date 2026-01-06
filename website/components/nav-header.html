@@ -663,7 +663,7 @@
             <span class="compass-item-icon">🏠</span>
             <span>خانه</span>
         </a>
-        <a href="/dashboard.html" class="compass-item">
+        <a href="/dashboard-unified.html" class="compass-item">
             <span class="compass-item-icon">📊</span>
             <span>داشبورد</span>
         </a>
@@ -751,34 +751,10 @@ async function checkUserStatus() {
                             </div>
                         </div>
                         <div class="user-dropdown-divider"></div>
-                        <a href="/profile.html" class="user-dropdown-item">
-                            <i class="fas fa-user"></i>
-                            <span>حساب کاربری</span>
-                        </a>
-                        <a href="/dashboard.html" class="user-dropdown-item">
+                        <a href="/dashboard-unified.html" class="user-dropdown-item">
                             <i class="fas fa-chart-line"></i>
                             <span>داشبورد</span>
                         </a>
-                        <a href="/licenses.html" class="user-dropdown-item">
-                            <i class="fas fa-key"></i>
-                            <span>لایسنس‌ها</span>
-                        </a>
-                        <div class="user-dropdown-divider"></div>
-                        <a href="#" onclick="if(typeof I18N !== 'undefined') { I18N.toggle(); } else { alert('i18n not loaded'); } return false;" class="user-dropdown-item">
-                            <i class="fas fa-language"></i>
-                            <span>تغییر زبان</span>
-                        </a>
-                        ${result.user.is_admin ? `
-                        <div class="user-dropdown-divider"></div>
-                        <a href="/dashboard-unified.html" class="user-dropdown-item">
-                            <i class="fas fa-cog"></i>
-                            <span>پنل مدیریت</span>
-                        </a>
-                        <a href="/dashboard-unified.html#users" class="user-dropdown-item" onclick="localStorage.setItem('dashboardSection','users')">
-                            <i class="fas fa-users"></i>
-                            <span>مدیریت کاربران</span>
-                        </a>
-                        ` : ''}
                         <div class="user-dropdown-divider"></div>
                         <a href="#" onclick="logout(); return false;" class="user-dropdown-item logout-item">
                             <i class="fas fa-sign-out-alt"></i>
@@ -811,16 +787,23 @@ async function checkUserStatus() {
 // Logout function
 async function logout() {
     try {
-        const response = await fetch('/api/logout', {
+        // Clear cookies
+        document.cookie = 'user_email=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        document.cookie = 'user_name=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        document.cookie = 'auth_method=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        
+        // Call logout API
+        await fetch('/api/logout', {
             method: 'POST',
             credentials: 'same-origin'
         });
         
-        if (response.ok) {
-            window.location.href = '/';
-        }
+        // Redirect to home
+        window.location.href = '/';
     } catch (error) {
         console.error('Logout error:', error);
+        // Still redirect even on error
+        window.location.href = '/';
     }
 }
 

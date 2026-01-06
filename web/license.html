@@ -256,6 +256,16 @@
 </head>
 <body>
   <div class="license-container">
+    <!-- Server Status Warning (shown when server is not running) -->
+    <div id="server-warning" style="display:none; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 2px solid #f59e0b; border-radius: 12px; padding: 16px; margin-bottom: 20px; text-align: center;">
+      <div style="font-size: 32px; margin-bottom: 8px;">⚠️</div>
+      <div style="color: #92400e; font-weight: 700; font-size: 15px; margin-bottom: 8px;">سرور نصب‌کننده اجرا نشده!</div>
+      <div style="color: #a16207; font-size: 13px; line-height: 1.8;">
+        لطفاً برنامه نصب‌کننده <strong>(OdooInstaller.exe)</strong> را اجرا کنید<br>
+        یا فایل <code style="background: white; padding: 2px 6px; border-radius: 4px;">ui_server.py</code> را با Python اجرا کنید
+      </div>
+    </div>
+    
     <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom: 18px;">
       <a href="index.html" style="text-decoration:none;color:#667eea;font-weight:600;">🏠 صفحه اصلی</a>
       <a href="#" id="purchase-link" onclick="goToPurchase()" style="text-decoration:none;color:#667eea;font-weight:600;">🛒 خرید / تمدید</a>
@@ -340,6 +350,60 @@
       • یا از بخش آپلود بالا فایل را انتخاب کنید<br>
       • اگر لایسنس ندارید، از منوی بالا «خرید» را انتخاب کنید
     </div>
+
+    <!-- Troubleshooting Section -->
+    <details style="margin-top: 20px;">
+      <summary style="cursor: pointer; color: #dc2626; font-weight: 600; padding: 12px; background: rgba(220, 38, 38, 0.1); border-radius: 12px; list-style: none; display: flex; align-items: center; gap: 8px;">
+        <span>🔧</span>
+        <span>عیب‌یابی مشکلات رایج</span>
+      </summary>
+      <div style="padding: 16px; background: #fef2f2; border-radius: 0 0 12px 12px; margin-top: -4px; font-size: 13px; line-height: 2;">
+        
+        <div style="margin-bottom: 16px; padding: 12px; background: white; border-radius: 8px; border-right: 4px solid #ef4444;">
+          <strong style="color: #dc2626;">❌ خطای «NetworkError» یا «Failed to fetch»</strong><br>
+          <span style="color: #666;">سرور نصب‌کننده اجرا نشده است.</span><br>
+          <strong>راه‌حل:</strong> برنامه نصب‌کننده (OdooInstaller.exe) را اجرا کنید یا در ترمینال بنویسید:<br>
+          <code style="background: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-family: monospace;">python ui_server.py</code>
+        </div>
+
+        <div style="margin-bottom: 16px; padding: 12px; background: white; border-radius: 8px; border-right: 4px solid #f59e0b;">
+          <strong style="color: #d97706;">⚠️ خطای «شناسه سخت‌افزاری نامعتبر»</strong><br>
+          <span style="color: #666;">لایسنس برای دستگاه دیگری صادر شده.</span><br>
+          <strong>راه‌حل:</strong> شناسه سخت‌افزاری بالا را کپی کنید و هنگام خرید یا دانلود لایسنس جدید از آن استفاده کنید.
+        </div>
+
+        <div style="margin-bottom: 16px; padding: 12px; background: white; border-radius: 8px; border-right: 4px solid #f59e0b;">
+          <strong style="color: #d97706;">⚠️ خطای «لایسنس منقضی شده»</strong><br>
+          <span style="color: #666;">مدت اعتبار لایسنس به پایان رسیده.</span><br>
+          <strong>راه‌حل:</strong> از منوی «خرید / تمدید» لایسنس را تمدید کنید.
+        </div>
+
+        <div style="margin-bottom: 16px; padding: 12px; background: white; border-radius: 8px; border-right: 4px solid #3b82f6;">
+          <strong style="color: #2563eb;">ℹ️ خطای «فایل لایسنس یافت نشد»</strong><br>
+          <span style="color: #666;">فایل license.oml در پوشه نصاب وجود ندارد.</span><br>
+          <strong>راه‌حل:</strong> فایل را از بخش آپلود بالا انتخاب کنید یا در پوشه نصاب کپی کنید.
+        </div>
+
+        <div style="margin-bottom: 16px; padding: 12px; background: white; border-radius: 8px; border-right: 4px solid #3b82f6;">
+          <strong style="color: #2563eb;">ℹ️ خطای «امضای نامعتبر»</strong><br>
+          <span style="color: #666;">فایل لایسنس خراب یا دستکاری شده.</span><br>
+          <strong>راه‌حل:</strong> فایل license.oml را دوباره از سایت دانلود کنید.
+        </div>
+
+        <div style="margin-bottom: 16px; padding: 12px; background: white; border-radius: 8px; border-right: 4px solid #10b981;">
+          <strong style="color: #059669;">✓ مشکل فایروال یا آنتی‌ویروس</strong><br>
+          <span style="color: #666;">برنامه‌های امنیتی ممکن است اتصال را مسدود کنند.</span><br>
+          <strong>راه‌حل:</strong> پورت 8080 را در فایروال باز کنید یا موقتاً آنتی‌ویروس را غیرفعال کنید.
+        </div>
+
+        <div style="padding: 12px; background: white; border-radius: 8px; border-right: 4px solid #8b5cf6;">
+          <strong style="color: #7c3aed;">💡 نیاز به کمک بیشتر؟</strong><br>
+          <span style="color: #666;">با پشتیبانی تماس بگیرید:</span><br>
+          • ایمیل: <a href="mailto:support@odoomaster.ir" style="color: #667eea;">support@odoomaster.ir</a><br>
+          • تلگرام: <a href="https://t.me/odoomaster_support" target="_blank" style="color: #667eea;">@odoomaster_support</a>
+        </div>
+      </div>
+    </details>
   </div>
 
   <script>
@@ -396,9 +460,18 @@
           invalidPanel.style.display = 'none';
           uploadSection.setAttribute('open', '');
         }
+        // Hide server warning on successful connection
+        document.getElementById('server-warning').style.display = 'none';
       } catch (error) {
         document.getElementById('hardware-id').textContent = 'خطا در دریافت شناسه';
-        showMessage('error', 'خطا در اتصال به سرور');
+        // Check if it's a network error (server not running)
+        if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch') || error.name === 'TypeError') {
+          // Show the prominent server warning
+          document.getElementById('server-warning').style.display = 'block';
+          showMessage('error', '⚠️ سرور نصب‌کننده در حال اجرا نیست! برای عیب‌یابی به بخش پایین صفحه مراجعه کنید.');
+        } else {
+          showMessage('error', 'خطا در اتصال به سرور: ' + error.message);
+        }
       }
     }
 
@@ -523,7 +596,12 @@
           spinner.style.display = 'none';
         }
       } catch (error) {
-        showMessage('error', 'خطا در ارتباط با سرور: ' + error.message);
+        // Check if it's a network error (server not running)
+        let errorMsg = 'خطا در ارتباط با سرور: ' + error.message;
+        if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch') || error.name === 'TypeError') {
+          errorMsg = '⚠️ سرور نصب‌کننده در حال اجرا نیست! لطفاً برنامه نصب‌کننده را اجرا کنید یا فایل ui_server.py را اجرا کنید.';
+        }
+        showMessage('error', errorMsg);
         btn.disabled = false;
         btnText.textContent = '✓ فعال‌سازی';
         spinner.style.display = 'none';

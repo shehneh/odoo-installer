@@ -2,11 +2,14 @@
   "platform": "flask",
   "port": 5001,
   "app": "odoomaster",
-  "run": "gunicorn --bind 0.0.0.0:5001 --workers 2 api_server:app",
+  "run": "gunicorn --bind 0.0.0.0:5001 --workers 2 --timeout 120 api_server:app",
   "disks": [
     {
       "name": "master-data",
       "mountTo": "/app/data"
     }
-  ]
+  ],
+  "build": {
+    "location": "iran"
+  }
 }

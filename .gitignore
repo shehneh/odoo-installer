@@ -6,6 +6,10 @@
 
 # --- Sensitive config files (passwords) ---
 config.py
+.env
+*.db
+*.sqlite
+*.sqlite3
 
 # BUT keep installer ZIPs for website downloads
 !private_downloads/installers/*.zip

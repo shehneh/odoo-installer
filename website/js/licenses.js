@@ -79,7 +79,9 @@ function renderLicenses(licenses) {
 
             const isActive = lic.status === 'active';
             const isExpired = lic.expires_at && new Date(lic.expires_at) < new Date();
-            const isTrial = (lic.plan || '').toLowerCase() === 'trial';
+            const isTrial = (lic.plan_id || '').toLowerCase() === 'trial';
+            const licenseKey = lic.license_key || lic.key || '';
+            const hardwareId = lic.hardware_id || '';
             
             let statusClass = 'color: var(--secondary)';
             let statusText = t('licenses.active', 'Active');
@@ -94,15 +96,14 @@ function renderLicenses(licenses) {
                 statusText = t('licenses.trial', 'Trial');
             }
 
-            const hardwareIds = lic.hardware_ids || [];
             let hardwareHtml = '';
-            if (hardwareIds.length > 0) {
+            if (hardwareId) {
                 hardwareHtml = `
                     <div style="margin-top: 12px; padding: 10px; background: var(--dark); border-radius: 8px;">
                         <div style="color: var(--gray-light); font-size: 0.85rem; margin-bottom: 6px;">
-                            <i class="fas fa-microchip"></i> ${t('licenses.activeDevices', 'Active Devices')} (${hardwareIds.length}/${lic.max_activations || 1}):
+                            <i class="fas fa-microchip"></i> ${t('licenses.hardwareId', 'Hardware ID')}:
                         </div>
-                        ${hardwareIds.map(h => `<code style="display: block; color: var(--secondary); font-size: 0.8rem; margin: 4px 0;">${h}</code>`).join('')}
+                        <code style="display: block; color: var(--secondary); font-size: 0.8rem; margin: 4px 0;">${hardwareId}</code>
                     </div>
                 `;
             }
@@ -116,7 +117,7 @@ function renderLicenses(licenses) {
                         </div>
                         <div style="color: var(--gray-light); font-size: 0.9rem; margin-bottom: 8px;">
                             <i class="fas fa-key" style="width: 20px;"></i>
-                            ${t('licenses.key', 'Key')}: <code style="color: var(--primary);">${lic.key}</code>
+                            ${t('licenses.key', 'Key')}: <code style="color: var(--primary);">${licenseKey}</code>
                         </div>
                         <div style="color: var(--gray-light); font-size: 0.9rem; margin-bottom: 8px;">
                             <i class="fas fa-calendar" style="width: 20px;"></i>
@@ -137,7 +138,7 @@ function renderLicenses(licenses) {
                             <i class="fas fa-copy"></i> ${t('licenses.copyKey', 'Copy Key')}
                         </button>
                         ${!isTrial && isActive && !isExpired ? `
-                            <a href="payment.html?renew=${lic.key}" class="btn btn-ghost" style="text-decoration: none;">
+                            <a href="payment.html?renew=${licenseKey}" class="btn btn-ghost" style="text-decoration: none;">
                                 <i class="fas fa-sync"></i> ${t('licenses.renew', 'Renew')}
                             </a>
                         ` : ''}
@@ -148,13 +149,9 @@ function renderLicenses(licenses) {
             // Download button handler
             const downloadBtn = card.querySelector('.download-btn');
             downloadBtn?.addEventListener('click', async () => {
-                // Use existing hardware ID if available, otherwise ask
-                const existingHwid = (lic.hardware_ids && lic.hardware_ids.length > 0) ? lic.hardware_ids[0] : '';
-                const hwid = prompt(t('licenses.enterHwid', 'Enter your hardware ID:'), existingHwid);
-                if (hwid === null) return; // Cancelled
-                
-                if (!hwid.trim()) {
-                    UI?.showToast?.(t('licenses.hwidRequired', 'Hardware ID is required'), 'error');
+                // Use the hardware ID that was saved with the license
+                if (!hardwareId) {
+                    UI?.showToast?.(t('licenses.noHardwareId', 'No hardware ID associated with this license'), 'error');
                     return;
                 }
                 
@@ -162,7 +159,7 @@ function renderLicenses(licenses) {
                 downloadBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${t('licenses.generating', 'Generating...')}`;
                 
                 try {
-                    await API.downloadLicenseFile(lic.key, hwid.trim());
+                    await API.downloadLicenseFile(licenseKey, hardwareId);
                     UI?.showToast?.(t('licenses.downloadSuccess', 'License file downloaded'), 'success');
                 } catch (e) {
                     UI?.showToast?.(e?.message || t('licenses.downloadError', 'Error downloading license file'), 'error');
@@ -176,7 +173,7 @@ function renderLicenses(licenses) {
             const copyBtn = card.querySelector('.copy-btn');
             copyBtn?.addEventListener('click', async () => {
                 try {
-                    await navigator.clipboard.writeText(lic.key);
+                    await navigator.clipboard.writeText(licenseKey);
                     UI?.showToast?.(t('licenses.keyCopied', 'License key copied'), 'success');
                 } catch {
                     UI?.showToast?.(t('licenses.copyFailed', 'Copy failed'), 'error');

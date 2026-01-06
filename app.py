@@ -345,6 +345,25 @@ def init_customers_db():
         )
     ''')
     
+    # User licenses table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS user_licenses (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            license_key TEXT UNIQUE NOT NULL,
+            plan_id TEXT NOT NULL,
+            plan_name TEXT,
+            hardware_id TEXT,
+            status TEXT DEFAULT 'active',
+            price INTEGER,
+            duration_months INTEGER,
+            activated_at TIMESTAMP,
+            expires_at TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES website_users(id)
+        )
+    ''')
+    
     conn.commit()
     conn.close()
 
@@ -2640,6 +2659,7 @@ def api_verify_phone():
 
 
 @app.route('/api/user-status', methods=['GET'])
+@app.route('/api/auth/me', methods=['GET'])
 def api_user_status():
     """Get current user status"""
     try:
@@ -2668,6 +2688,35 @@ def api_user_status():
         # Check if user is admin
         is_admin = email.lower() in [e.lower() for e in ADMIN_EMAILS]
         
+        # Get user's licenses
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT id, license_key, plan_id, plan_name, hardware_id, status, 
+                   price, duration_months, activated_at, expires_at, created_at
+            FROM user_licenses WHERE user_id = ?
+            ORDER BY created_at DESC
+        ''', (user_id,))
+        license_rows = cursor.fetchall()
+        conn.close()
+        
+        licenses = []
+        for row in license_rows:
+            licenses.append({
+                'id': row['id'],
+                'license_key': row['license_key'],
+                'plan_id': row['plan_id'],
+                'plan_name': row['plan_name'],
+                'hardware_id': row['hardware_id'],
+                'status': row['status'],
+                'price': row['price'],
+                'duration_months': row['duration_months'],
+                'activated_at': row['activated_at'],
+                'expires_at': row['expires_at'],
+                'created_at': row['created_at']
+            })
+        
         return jsonify({
             'success': True,
             'logged_in': True,
@@ -2676,13 +2725,14 @@ def api_user_status():
                 'name': full_name,
                 'email': email,
                 'phone': phone,
-                'auth_method': current_auth_method,  # روش فعلی لاگین از session
+                'auth_method': current_auth_method,
                 'profile_picture': profile_picture,
                 'email_verified': bool(email_verified),
                 'phone_verified': bool(phone_verified),
                 'status': status,
                 'is_admin': is_admin
-            }
+            },
+            'licenses': licenses
         })
         
     except Exception as e:
@@ -3655,6 +3705,208 @@ def download_lite_online_zip():
         print(f"Error serving ZIP: {e}")
         return jsonify({'error': 'Failed to serve ZIP file', 'detail': str(e)}), 500
 
+
+# ============================================
+# Purchase API
+# ============================================
+
+@app.route('/api/purchase', methods=['POST'])
+def purchase_plan():
+    """خرید پلن"""
+    try:
+        data = request.get_json()
+        plan_id = data.get('plan_id')
+        hardware_id = data.get('hardware_id')
+        customer_name = data.get('customer_name')
+        customer_email = data.get('customer_email')
+        customer_phone = data.get('customer_phone')
+        
+        # Check if user is logged in
+        user_id = session.get('user_id')
+        if not user_id:
+            user_email = request.cookies.get('user_email')
+            if user_email:
+                conn = sqlite3.connect(CUSTOMERS_DB)
+                cursor = conn.cursor()
+                cursor.execute('SELECT id FROM customers WHERE admin_email = ?', (user_email,))
+                result = cursor.fetchone()
+                conn.close()
+                if result:
+                    user_id = result[0]
+        
+        if not user_id:
+            return jsonify({'success': False, 'error': 'لطفاً ابتدا وارد شوید'}), 401
+        
+        # Validate required fields
+        if not plan_id:
+            return jsonify({'success': False, 'error': 'پلن انتخاب نشده است'}), 400
+        
+        if not hardware_id:
+            return jsonify({'success': False, 'error': 'شناسه سخت‌افزاری الزامی است'}), 400
+        
+        if not customer_name:
+            return jsonify({'success': False, 'error': 'نام و نام خانوادگی الزامی است'}), 400
+        
+        if not customer_email:
+            return jsonify({'success': False, 'error': 'ایمیل الزامی است'}), 400
+        
+        if not customer_phone:
+            return jsonify({'success': False, 'error': 'شماره تماس الزامی است'}), 400
+        
+        # Get plan details from plans table (using plan_id TEXT field, not id INTEGER)
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM plans WHERE plan_id = ?', (plan_id,))
+        plan = cursor.fetchone()
+        conn.close()
+        
+        if not plan:
+            return jsonify({'success': False, 'error': 'پلن یافت نشد'}), 404
+        
+        # Generate unique license key
+        import uuid
+        import hashlib
+        from datetime import datetime, timedelta
+        
+        unique_str = f"{user_id}-{plan_id}-{hardware_id}-{datetime.now().isoformat()}"
+        license_key = hashlib.sha256(unique_str.encode()).hexdigest()[:32].upper()
+        license_key = f"LIC-{license_key[:8]}-{license_key[8:16]}-{license_key[16:24]}-{license_key[24:32]}"
+        
+        # Calculate expiry date
+        duration_months = plan['duration_months']
+        expires_at = datetime.now() + timedelta(days=duration_months * 30)
+        
+        # Save license to database
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO user_licenses 
+            (user_id, license_key, plan_id, plan_name, hardware_id, status, price, duration_months, activated_at, expires_at)
+            VALUES (?, ?, ?, ?, ?, 'active', ?, ?, CURRENT_TIMESTAMP, ?)
+        ''', (user_id, license_key, plan_id, plan['name_fa'], hardware_id, plan['price'], duration_months, expires_at.isoformat()))
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'message': 'خرید با موفقیت انجام شد',
+            'license_key': license_key,
+            'expires_at': expires_at.isoformat(),
+            'plan_name': plan['name_fa']
+        })
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/licenses/<license_key>/file', methods=['POST'])
+def api_generate_license_file(license_key):
+    """Generate signed license file for download"""
+    import json
+    import hashlib
+    import base64
+    from datetime import datetime
+    
+    try:
+        # Get user from session
+        if 'user_id' not in session:
+            return jsonify({'success': False, 'error': 'لطفاً ابتدا وارد شوید'}), 401
+        
+        user_id = session['user_id']
+        
+        # Get license from database
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT ul.*, wu.email, wu.full_name
+            FROM user_licenses ul
+            JOIN website_users wu ON ul.user_id = wu.id
+            WHERE ul.license_key = ? AND ul.user_id = ?
+        ''', (license_key, user_id))
+        license_row = cursor.fetchone()
+        conn.close()
+        
+        if not license_row:
+            return jsonify({'success': False, 'error': 'لایسنس یافت نشد'}), 404
+        
+        # Get hardware_id from request body or from license
+        data = request.get_json() or {}
+        hardware_id = data.get('hardware_id') or license_row['hardware_id']
+        
+        if not hardware_id:
+            return jsonify({'success': False, 'error': 'شناسه سخت‌افزاری یافت نشد'}), 400
+        
+        # Create v2 license file content (compatible with offline installer)
+        # Build payload (without signature)
+        payload = {
+            'v': 2,
+            'license_key': license_row['license_key'],
+            'license_id': license_row['license_key'],  # For blacklist support
+            'hardware_id': hardware_id,
+            'user_email': license_row['email'],
+            'user_name': license_row['full_name'],
+            'plan_id': license_row['plan_id'],
+            'plan_name': license_row['plan_name'],
+            'status': license_row['status'],
+            'activated_at': license_row['activated_at'],
+            'expires_at': license_row['expires_at'],
+            'issued_at': datetime.now().isoformat()
+        }
+        
+        # Generate RSA-PSS signature using private key
+        try:
+            from cryptography.hazmat.primitives import hashes
+            from cryptography.hazmat.primitives.asymmetric import padding
+            from cryptography.hazmat.primitives.serialization import load_pem_private_key
+            
+            # Load private key from env var or file
+            private_key_pem = os.environ.get('LICENSE_PRIVATE_KEY_PEM', '').strip()
+            if private_key_pem:
+                # From environment variable (replace escaped newlines)
+                private_key_pem = private_key_pem.replace('\\n', '\n')
+                private_key = load_pem_private_key(private_key_pem.encode('utf-8'), password=None)
+            else:
+                # From file (for local development)
+                private_key_path = os.path.join(os.path.dirname(__file__), 'license_private_key.pem')
+                with open(private_key_path, 'rb') as f:
+                    private_key = load_pem_private_key(f.read(), password=None)
+            
+            # Canonical JSON for signing
+            message = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')
+            
+            # Sign with RSA-PSS SHA256
+            import base64
+            signature = private_key.sign(
+                message,
+                padding.PSS(mgf=padding.MGF1(hashes.SHA256()), salt_length=padding.PSS.MAX_LENGTH),
+                hashes.SHA256()
+            )
+            signature_b64 = base64.b64encode(signature).decode('utf-8')
+            
+            # Add signature to payload
+            license_file = dict(payload)
+            license_file['sig'] = signature_b64
+            
+        except Exception as sign_error:
+            import traceback
+            traceback.print_exc()
+            return jsonify({'success': False, 'error': f'خطا در امضای لایسنس: {str(sign_error)}'}), 500
+        
+        return jsonify({
+            'success': True,
+            'license_file': license_file
+        })
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 # General route for serving static files (CSS, JS, HTML)
 @app.route('/<path:filename>')
 def serve_static(filename):
@@ -3668,8 +3920,8 @@ def serve_static(filename):
 init_customers_db()
 
 if __name__ == "__main__":
-    # Get port from environment variable (for Liara/Heroku) or default to 5001
-    port = int(os.environ.get('PORT', 5001))
+    # Get port from environment variable or default to 5002 (offline version uses different port)
+    port = int(os.environ.get('PORT', 5002))
     
     # Set UTF-8 encoding for console output
     import sys

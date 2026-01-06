@@ -2214,7 +2214,7 @@
         let editingPlanId = null;
         let allPlansData = [];
 
-        function openPlanModal(planId = null) {
+        async function openPlanModal(planId = null) {
             editingPlanId = planId;
             const modal = document.getElementById('planModal');
             const title = document.getElementById('planModalTitle');
@@ -2222,7 +2222,7 @@
             if (planId) {
                 // Edit mode
                 title.textContent = 'ویرایش پلن';
-                loadPlanData(planId);
+                await loadPlanData(planId);
             } else {
                 // Create mode
                 title.textContent = 'افزودن پلن جدید';
@@ -2232,7 +2232,7 @@
             
             modal.style.display = 'block';
             
-            // Setup auto-translation after modal is visible
+            // Setup auto-translation after modal is visible and data is loaded
             setTimeout(setupAutoTranslation, 100);
         }
 
@@ -2243,17 +2243,18 @@
 
         // Persian to English translation dictionary
         const persianToEnglishDict = {
-            // Plan names
+            // Plan names with suffixes
+            'ساعتی': 'Hourly',
+            'روزانه': 'Daily',
+            'هفتگی': 'Weekly',
             'ماهانه': 'Monthly',
             'سه‌ماهه': 'Quarterly',
             'سه ماهه': 'Quarterly',
-            'سالانه': 'Yearly',
-            'شش‌ماهه': 'Semi-Annually',
-            'شش ماهه': 'Semi-Annually',
             'دوماهه': 'Bi-Monthly',
             'دو ماهه': 'Bi-Monthly',
-            'هفتگی': 'Weekly',
-            'روزانه': 'Daily',
+            'شش‌ماهه': 'Semi-Annually',
+            'شش ماهه': 'Semi-Annually',
+            'سالانه': 'Yearly',
             'رایگان': 'Free',
             'پایه': 'Basic',
             'استاندارد': 'Standard',
@@ -2266,8 +2267,41 @@
             'نقره‌ای': 'Silver',
             'برنزی': 'Bronze',
             
-            // Duration displays
+            // Duration displays with number prefix
+            'یک ساعته': 'One Hour',
+            'دو ساعته': 'Two Hours',
+            'سه ساعته': 'Three Hours',
+            'چهار ساعته': 'Four Hours',
+            'پنج ساعته': 'Five Hours',
+            'شش ساعته': 'Six Hours',
+            'دوازده ساعته': 'Twelve Hours',
+            'یک روزه': 'One Day',
+            'دو روزه': 'Two Days',
+            'سه روزه': 'Three Days',
+            'یک هفته‌ای': 'One Week',
+            'یک هفته ای': 'One Week',
+            'دو هفته‌ای': 'Two Weeks',
+            'دو هفته ای': 'Two Weeks',
+            'یک ماهه': 'One Month',
+            'دو ماهه': 'Two Months',
+            'سه ماهه': 'Three Months',
+            'شش ماهه': 'Six Months',
+            'یکساله': 'One Year',
+            'یک ساله': 'One Year',
+            'دو ساله': 'Two Years',
+            'سه ساله': 'Three Years',
+            
+            // Duration displays without number
+            'یک ساعت': 'One Hour',
+            'دو ساعت': 'Two Hours',
+            'سه ساعت': 'Three Hours',
+            'چهار ساعت': 'Four Hours',
+            'پنج ساعت': 'Five Hours',
+            'شش ساعت': 'Six Hours',
+            'دوازده ساعت': 'Twelve Hours',
             'یک روز': 'One Day',
+            'دو روز': 'Two Days',
+            'سه روز': 'Three Days',
             'یک هفته': 'One Week',
             'دو هفته': 'Two Weeks',
             'یک ماه': 'One Month',
@@ -2278,11 +2312,12 @@
             'دو سال': 'Two Years',
             'سه سال': 'Three Years',
             
-            // Common words
-            'ماه': 'Month',
-            'سال': 'Year',
+            // Common words (should be last as they are shortest)
+            'ساعت': 'Hour',
+            'روز': 'Day',
             'هفته': 'Week',
-            'روز': 'Day'
+            'ماه': 'Month',
+            'سال': 'Year'
         };
 
         // Auto-translate function
@@ -2296,10 +2331,11 @@
                 return persianToEnglishDict[text];
             }
             
-            // Check if text contains any known words
-            for (const [persian, english] of Object.entries(persianToEnglishDict)) {
+            // Check if text contains any known words - sort by length DESC to match longest first
+            const sortedKeys = Object.keys(persianToEnglishDict).sort((a, b) => b.length - a.length);
+            for (const persian of sortedKeys) {
                 if (text.includes(persian)) {
-                    return text.replace(persian, english);
+                    return text.replace(persian, persianToEnglishDict[persian]);
                 }
             }
             
@@ -2313,14 +2349,18 @@
             const nameFaInput = document.getElementById('planNameFa');
             const nameEnInput = document.getElementById('planNameEn');
             
-            nameFaInput.addEventListener('input', function() {
+            // Remove old listeners
+            const nameFaClone = nameFaInput.cloneNode(true);
+            nameFaInput.parentNode.replaceChild(nameFaClone, nameFaInput);
+            
+            nameFaClone.addEventListener('input', function() {
                 const translated = autoTranslate(this.value);
-                if (translated && !nameEnInput.value) {
+                if (translated) {
                     nameEnInput.value = translated;
                 }
             });
             
-            nameFaInput.addEventListener('blur', function() {
+            nameFaClone.addEventListener('blur', function() {
                 const translated = autoTranslate(this.value);
                 if (translated) {
                     nameEnInput.value = translated;
@@ -2331,14 +2371,18 @@
             const durationFaInput = document.getElementById('planDurationFa');
             const durationEnInput = document.getElementById('planDurationEn');
             
-            durationFaInput.addEventListener('input', function() {
+            // Remove old listeners
+            const durationFaClone = durationFaInput.cloneNode(true);
+            durationFaInput.parentNode.replaceChild(durationFaClone, durationFaInput);
+            
+            durationFaClone.addEventListener('input', function() {
                 const translated = autoTranslate(this.value);
-                if (translated && !durationEnInput.value) {
+                if (translated) {
                     durationEnInput.value = translated;
                 }
             });
             
-            durationFaInput.addEventListener('blur', function() {
+            durationFaClone.addEventListener('blur', function() {
                 const translated = autoTranslate(this.value);
                 if (translated) {
                     durationEnInput.value = translated;
@@ -2378,7 +2422,12 @@
                         document.getElementById('planOrder').value = plan.display_order;
                         document.getElementById('planPopular').checked = plan.is_popular;
                         document.getElementById('planActive').checked = plan.is_active;
-                        document.getElementById('planFeatures').value = plan.features.join('\n');
+                        
+                        // Handle features - convert from string to array if needed
+                        const features = typeof plan.features === 'string' 
+                            ? plan.features.split('|') 
+                            : (plan.features || []);
+                        document.getElementById('planFeatures').value = features.join('\n');
                     }
                 }
             } catch (error) {
@@ -2405,9 +2454,9 @@
                 duration_display_en: document.getElementById('planDurationEn').value.trim(),
                 discount_percent: parseInt(document.getElementById('planDiscount').value) || 0,
                 display_order: parseInt(document.getElementById('planOrder').value) || 0,
-                is_popular: document.getElementById('planPopular').checked,
-                is_active: document.getElementById('planActive').checked,
-                features: document.getElementById('planFeatures').value.split('\n').filter(f => f.trim())
+                is_popular: document.getElementById('planPopular').checked ? 1 : 0,
+                is_active: document.getElementById('planActive').checked ? 1 : 0,
+                features: document.getElementById('planFeatures').value.split('\n').filter(f => f.trim()).join('|')
             };
 
             try {

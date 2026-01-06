@@ -249,7 +249,9 @@ function renderPlans(plans) {
         else if (durationDays <= 180) durationText = 'شش ماهه';
         else if (durationDays <= 365) durationText = 'یکساله';
 
-        const features = p.features || [];
+        const features = typeof p.features === 'string' 
+            ? p.features.split('|').filter(f => f.trim()) 
+            : (p.features || []);
         let featuresHtml = '';
         features.forEach(f => {
             featuresHtml += `<li><i class="fas fa-check"></i> ${f}</li>`;
@@ -430,6 +432,7 @@ if (typeof API !== 'undefined') {
             customer_phone: options.customer_phone || ''
         };
         
+        // baseUrl already includes '/api', so use relative endpoint
         const response = await this.request('/purchase', {
             method: 'POST',
             body: JSON.stringify(body)

@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/animations.css">
     <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/unified-nav.css?v=4">
+    <link rel="stylesheet" href="css/unified-nav.css?v=8">
     <style>
         .demo-container {
             min-height: 100vh;
@@ -224,45 +224,12 @@
             animation: spin 1s linear infinite;
         }
     </style>
+    <script src="js/nav-loader.js"></script>
 </head>
 <body>
-    <div id="particles-js"></div>
+    <div id="mainNav"></div>
     
-    <!-- Navigation -->
-    <nav class="navbar glass">
-        <div class="container">
-            <a href="index.html" class="logo">
-                <div class="logo-icon">
-                    <i class="fas fa-cube"></i>
-                </div>
-                <span>Odoo<strong>Master</strong></span>
-            </a>
-            <ul class="nav-links">
-                <li><a href="index.html#features" class="nav-link">ویژگی‌ها</a></li>
-                <li><a href="index.html#pricing" class="nav-link">قیمت‌گذاری</a></li>
-                <li><a href="demo.html" class="nav-link active">دمو</a></li>
-                <li><a href="support.html" class="nav-link">پشتیبانی</a></li>
-            </ul>
-            <div class="nav-actions">
-                <button class="theme-toggle" title="تغییر تم">
-                    <i class="fas fa-moon"></i>
-                </button>
-                <a href="login.html" class="btn btn-ghost">
-                    <i class="fas fa-sign-in-alt"></i>
-                    ورود
-                </a>
-                <a href="register.html" class="btn btn-primary btn-glow">
-                    <i class="fas fa-rocket"></i>
-                    شروع رایگان
-                </a>
-            </div>
-            <button class="mobile-menu-btn" id="mobileMenuBtn">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-        </div>
-    </nav>
+    <div id="particles-js"></div>
 
     <div class="demo-container">
         <div class="container">
@@ -599,6 +566,5 @@
             });
         });
     </script>
-    <script src="js/nav-loader.js"></script>
 </body>
 </html>

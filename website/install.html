@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="css/unified-nav.css?v=4">
+  <link rel="stylesheet" href="css/unified-nav.css?v=8">
   <style>
     :root {
       --primary: #667eea;
@@ -661,8 +661,10 @@
       .status-wrapper { top: 80px; }
     }
   </style>
+  <script src="js/nav-loader.js"></script>
 </head>
 <body>
+  <div id="mainNav"></div>
   <div class="toast-container" id="toast-container"></div>
 
   <div class="container">
@@ -866,10 +868,8 @@
     </footer>
   </div>
 
-  <script src="js/nav-loader.js"></script>
-
   <script>
-    const LOCAL_SERVER = 'http://127.0.0.1:5001';
+    const LOCAL_SERVER = 'http://127.0.0.1:5000';
     let isConnected = false;
     let refreshInterval = null;
 

@@ -4,7 +4,7 @@ OdooMaster Backend API Server
 سرور API برای مدیریت دموها، تیکت‌ها و کاربران
 
 Requirements:
-    pip install flask flask-cors
+    pip install flask flask-cors python-dotenv
 
 Usage:
     python api_server.py
@@ -24,6 +24,10 @@ import string
 from pathlib import Path
 import sqlite3
 
+# Load environment variables from .env file
+from dotenv import load_dotenv
+load_dotenv()
+
 import xmlrpc.client
 
 app = Flask(
@@ -33,6 +37,34 @@ app = Flask(
 )
 CORS(app)  # Enable CORS for all routes
 app.secret_key = os.environ.get('SECRET_KEY', 'odoomaster-super-secret-key-2025')
+
+# Disable browser caching for development
+@app.after_request
+def add_header(response):
+    """Add headers to disable caching for HTML, JS, and CSS files"""
+    if 'text/html' in response.content_type or \
+       'application/javascript' in response.content_type or \
+       'text/css' in response.content_type:
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        # Remove ETag to prevent 304 responses
+        response.headers.pop('ETag', None)
+        response.headers.pop('Last-Modified', None)
+    return response
+
+# Debug endpoint - registered early
+@app.route('/api/debug-routes', methods=['GET'])
+def debug_routes():
+    """Show all registered routes"""
+    routes = []
+    for rule in app.url_map.iter_rules():
+        routes.append({
+            'endpoint': rule.endpoint,
+            'methods': list(rule.methods - {'OPTIONS', 'HEAD'}),
+            'rule': str(rule)
+        })
+    return jsonify({'routes': sorted(routes, key=lambda x: x['rule'])})
 
 # ============================================
 # Multi-tenant SaaS configuration (Liara)
@@ -44,6 +76,12 @@ ODOO_MASTER_PASSWORD = os.environ.get('ODOO_MASTER_PASSWORD', 'admin')
 # Local SQLite database for customer management
 CUSTOMERS_DB = 'customers.db'
 WEBSITE_DB = 'website_users.db'  # Database for website users and tickets
+
+# Admin emails list (users with full admin access)
+ADMIN_EMAILS = [
+    'shehneh.m@gmail.com',
+    'admin@odoomaster.com',
+]
 
 
 def init_customers_db():
@@ -287,7 +325,165 @@ def site_installer():
 def site_static(path):
     return send_from_directory('website', path)
 
-@app.route('/api/demo/list', methods=['GET'])
+# ============================================
+# Admin User Management APIs
+# ============================================
+
+@app.route('/api/admin/users', methods=['GET'])
+def api_admin_users():
+    """Get list of all site users (admin only)"""
+    try:
+        # Check if user is logged in via session or cookie
+        user_id = session.get('user_id')
+        if not user_id:
+            user_email = request.cookies.get('user_email')
+            if user_email:
+                conn = sqlite3.connect(WEBSITE_DB)
+                cursor = conn.cursor()
+                cursor.execute('SELECT id FROM website_users WHERE email = ?', (user_email,))
+                result = cursor.fetchone()
+                conn.close()
+                if result:
+                    user_id = result[0]
+        
+        if not user_id:
+            return jsonify({'success': False, 'error': 'لطفاً ابتدا وارد شوید'}), 401
+        
+        # Get current user's email to check admin status
+        conn = sqlite3.connect(WEBSITE_DB)
+        cursor = conn.cursor()
+        cursor.execute('SELECT email FROM website_users WHERE id = ?', (user_id,))
+        result = cursor.fetchone()
+        
+        if not result:
+            conn.close()
+            return jsonify({'success': False, 'error': 'کاربر یافت نشد'}), 404
+        
+        user_email = result[0]
+        is_admin = user_email.lower() in [e.lower() for e in ADMIN_EMAILS]
+        
+        if not is_admin:
+            conn.close()
+            return jsonify({'success': False, 'error': 'دسترسی مجاز نیست'}), 403
+        
+        # Get all users from website_users table
+        cursor.execute('''
+            SELECT id, full_name, email, phone, auth_method, 
+                   email_verified, status, created_at, last_login, is_admin
+            FROM website_users
+            ORDER BY created_at DESC
+        ''')
+        users_data = cursor.fetchall()
+        conn.close()
+        
+        users = []
+        for user in users_data:
+            user_id_row, full_name, email, phone, auth_method, \
+                email_verified, status, created_at, last_login, db_is_admin = user
+            
+            users.append({
+                'id': user_id_row,
+                'name': full_name or '',
+                'email': email or '',
+                'phone': phone or '',
+                'entry_type': auth_method or 'email',
+                'verified': bool(email_verified),
+                'status': status or 'active',
+                'join_date': created_at,
+                'last_login': last_login,
+                'is_admin': bool(db_is_admin)
+            })
+        
+        return jsonify({
+            'success': True,
+            'users': users,
+            'total': len(users)
+        })
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/auth/me', methods=['GET'])
+def api_auth_me():
+    """Get current user info with licenses and stats"""
+    try:
+        # Check if user is logged in via session or cookie
+        user_id = session.get('user_id')
+        if not user_id:
+            user_email = request.cookies.get('user_email')
+            if user_email:
+                conn = sqlite3.connect(WEBSITE_DB)
+                cursor = conn.cursor()
+                cursor.execute('SELECT id FROM website_users WHERE email = ?', (user_email,))
+                result = cursor.fetchone()
+                conn.close()
+                if result:
+                    user_id = result[0]
+        
+        if not user_id:
+            return jsonify({'success': False, 'error': 'لطفاً ابتدا وارد شوید'}), 401
+        
+        # Get user info
+        conn = sqlite3.connect(WEBSITE_DB)
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT id, full_name, email, phone, auth_method, 
+                   email_verified, status, created_at, last_login, is_admin
+            FROM website_users 
+            WHERE id = ?
+        ''', (user_id,))
+        user_data = cursor.fetchone()
+        conn.close()
+        
+        if not user_data:
+            return jsonify({'success': False, 'error': 'کاربر یافت نشد'}), 404
+        
+        user_id, full_name, email, phone, auth_method, \
+            email_verified, status, created_at, last_login, is_admin = user_data
+        
+        user = {
+            'id': user_id,
+            'name': full_name or '',
+            'email': email or '',
+            'phone': phone or '',
+            'auth_method': auth_method or 'email',
+            'email_verified': bool(email_verified),
+            'status': status or 'active',
+            'created_at': created_at,
+            'last_login': last_login,
+            'is_admin': bool(is_admin)
+        }
+        
+        # Get user licenses (empty for now - can be implemented later)
+        licenses = []
+        
+        # Calculate stats
+        stats = {
+            'active_licenses': 0,
+            'total_demos': 0,
+            'active_demos': 0,
+            'total_tickets': 0
+        }
+        
+        return jsonify({
+            'success': True,
+            'user': user,
+            'licenses': licenses,
+            'stats': stats
+        })
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+# ============================================
+# Demo Management APIs
+# ============================================
+
+
 def list_demos():
     """لیست تمام دموهای کاربر"""
     demos = load_json(DEMOS_FILE, [])
@@ -472,6 +668,22 @@ def get_tickets():
     """Get user's tickets or all tickets for admin"""
     try:
         user_id = session.get('user_id')
+        
+        # If no user_id in session, try to get from cookies
+        if not user_id:
+            user_email = request.cookies.get('user_email')
+            if user_email:
+                # Get user_id from database
+                conn = sqlite3.connect(WEBSITE_DB)
+                cursor = conn.cursor()
+                cursor.execute('SELECT id FROM website_users WHERE email = ?', (user_email,))
+                user_row = cursor.fetchone()
+                conn.close()
+                
+                if user_row:
+                    user_id = user_row[0]
+                    session['user_id'] = user_id  # Save to session for next time
+        
         if not user_id:
             return jsonify({
                 'success': False,
@@ -490,7 +702,7 @@ def get_tickets():
         # Get tickets
         if is_admin:
             cursor.execute('''
-                SELECT t.*, u.name as user_name, u.email as user_email,
+                SELECT t.*, u.full_name as user_name, u.email as user_email,
                     (SELECT COUNT(*) FROM ticket_messages WHERE ticket_id = t.id) as message_count
                 FROM tickets t
                 LEFT JOIN website_users u ON t.user_id = u.id
@@ -526,6 +738,22 @@ def create_ticket():
     """Create new ticket"""
     try:
         user_id = session.get('user_id')
+        
+        # If no user_id in session, try to get from cookies
+        if not user_id:
+            user_email = request.cookies.get('user_email')
+            if user_email:
+                # Get user_id from database
+                conn = sqlite3.connect(WEBSITE_DB)
+                cursor = conn.cursor()
+                cursor.execute('SELECT id FROM website_users WHERE email = ?', (user_email,))
+                user_row = cursor.fetchone()
+                conn.close()
+                
+                if user_row:
+                    user_id = user_row[0]
+                    session['user_id'] = user_id  # Save to session for next time
+        
         if not user_id:
             return jsonify({
                 'success': False,
@@ -604,7 +832,7 @@ def get_ticket_detail(ticket_id):
         
         # Get ticket
         cursor.execute('''
-            SELECT t.*, u.name as user_name, u.email as user_email
+            SELECT t.*, u.full_name as user_name, u.email as user_email
             FROM tickets t
             LEFT JOIN website_users u ON t.user_id = u.id
             WHERE t.id = ?
@@ -630,7 +858,7 @@ def get_ticket_detail(ticket_id):
         
         # Get messages
         cursor.execute('''
-            SELECT m.*, u.name as sender_name, u.email as sender_email
+            SELECT m.*, u.full_name as sender_name, u.email as sender_email
             FROM ticket_messages m
             LEFT JOIN website_users u ON m.user_id = u.id
             WHERE m.ticket_id = ?
@@ -1148,7 +1376,30 @@ def google_callback():
         existing = cursor.fetchone()
         conn.close()
         
-        # Set cookies for session
+        # Get or create user_id from website_users table
+        conn = sqlite3.connect(WEBSITE_DB)
+        cursor = conn.cursor()
+        cursor.execute('SELECT id FROM website_users WHERE email = ?', (email.lower(),))
+        user_row = cursor.fetchone()
+        
+        if user_row:
+            user_id = user_row[0]
+        else:
+            # Create new user in website_users
+            cursor.execute('''
+                INSERT INTO website_users (full_name, email, password_hash, auth_method, status, email_verified)
+                VALUES (?, ?, '', 'google', 'active', 1)
+            ''', (name, email.lower()))
+            conn.commit()
+            user_id = cursor.lastrowid
+        
+        conn.close()
+        
+        # Set session and cookies
+        session['user_id'] = user_id
+        session['user_email'] = email.lower()
+        session['user_name'] = name
+        
         redirect_url = session.get('redirect_after_login', '/onboarding.html')
         response = make_response(redirect(redirect_url))
         response.set_cookie('user_email', email.lower(), max_age=30*24*60*60)
@@ -1231,13 +1482,24 @@ def api_install_modules():
         }), 500
 
 
+@app.route('/api/logout', methods=['POST'])
 @app.route('/api/auth/logout', methods=['POST'])
 def auth_logout():
     """خروج کاربر"""
-    return jsonify({
+    session.clear()
+    
+    # Create response and clear all auth cookies
+    response = jsonify({
         'success': True,
         'message': 'خروج موفقیت آمیز'
     })
+    
+    # Clear cookies
+    response.set_cookie('user_email', '', expires=0, path='/')
+    response.set_cookie('user_name', '', expires=0, path='/')
+    response.set_cookie('auth_method', '', expires=0, path='/')
+    
+    return response
 
 
 @app.route('/api/auth/me', methods=['GET'])
@@ -1315,6 +1577,9 @@ def get_user_status():
         cursor = conn.cursor()
         
         if session_email:
+            # Check if user is admin
+            is_admin = session_email.lower() in [e.lower() for e in ADMIN_EMAILS]
+            
             cursor.execute(
                 'SELECT admin_name, admin_email, phone, company_name FROM customers WHERE admin_email = ? LIMIT 1',
                 (session_email,)
@@ -1331,7 +1596,8 @@ def get_user_status():
                         'email': user_data[1],
                         'phone': user_data[2] or '',
                         'company': user_data[3],
-                        'auth_method': auth_method
+                        'auth_method': auth_method,
+                        'is_admin': is_admin
                     }
                 })
             else:
@@ -1345,7 +1611,8 @@ def get_user_status():
                         'email': session_email,
                         'phone': '',
                         'company': None,
-                        'auth_method': auth_method
+                        'auth_method': auth_method,
+                        'is_admin': is_admin
                     }
                 })
         
@@ -1756,16 +2023,61 @@ def create_tenant():
 
 @app.route('/api/list-customers', methods=['GET'])
 def list_customers():
-    """List all customers"""
+    """List customers - filtered by user_id for regular users, all for admins"""
     try:
+        # Check if user is logged in via session or cookie
+        user_id = session.get('user_id')
+        if not user_id:
+            user_email = request.cookies.get('user_email')
+            if user_email:
+                conn = sqlite3.connect(WEBSITE_DB)
+                cursor = conn.cursor()
+                cursor.execute('SELECT id FROM website_users WHERE email = ?', (user_email,))
+                result = cursor.fetchone()
+                conn.close()
+                if result:
+                    user_id = result[0]
+        
+        if not user_id:
+            return jsonify({'success': False, 'error': 'لطفاً ابتدا وارد شوید'}), 401
+        
+        # Get user info to check if admin
+        conn = sqlite3.connect(WEBSITE_DB)
+        cursor = conn.cursor()
+        cursor.execute('SELECT email FROM website_users WHERE id = ?', (user_id,))
+        user_result = cursor.fetchone()
+        conn.close()
+        
+        if not user_result:
+            return jsonify({'success': False, 'error': 'کاربر یافت نشد'}), 404
+        
+        user_email = user_result[0]
+        is_admin = user_email.lower() in [e.lower() for e in ADMIN_EMAILS]
+        
+        # Query customers based on user role
         conn = sqlite3.connect(CUSTOMERS_DB)
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
-        cursor.execute('SELECT * FROM customers ORDER BY created_at DESC')
+        
+        if is_admin:
+            # Admin sees all databases
+            cursor.execute('SELECT * FROM customers ORDER BY created_at DESC')
+        else:
+            # Regular user sees only their own databases
+            cursor.execute('SELECT * FROM customers WHERE user_id = ? ORDER BY created_at DESC', (user_id,))
+        
         customers = [dict(row) for row in cursor.fetchall()]
         conn.close()
-        return jsonify({'success': True, 'count': len(customers), 'customers': customers})
+        
+        return jsonify({
+            'success': True, 
+            'count': len(customers), 
+            'customers': customers,
+            'is_admin': is_admin
+        })
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return jsonify({'success': False, 'message': str(e)}), 500
 
 
@@ -1813,6 +2125,89 @@ def delete_customer_by_email():
         return jsonify({'success': False, 'message': str(e)}), 500
 
 
+# ============================================
+# Purchase API (MUST be before catch-all route)
+# ============================================
+
+@app.route('/api/test-version', methods=['GET'])
+def test_version():
+    """تست نسخه - DEBUG ONLY"""
+    return jsonify({
+        'version': 'v2.0-with-purchase',
+        'has_purchase_endpoint': True,
+        'timestamp': datetime.now().isoformat()
+    })
+
+@app.route('/api/purchase', methods=['POST'])
+def purchase_plan():
+    """خرید پلن"""
+    try:
+        data = request.get_json()
+        plan_id = data.get('plan_id')
+        hardware_id = data.get('hardware_id')
+        customer_name = data.get('customer_name')
+        customer_email = data.get('customer_email')
+        customer_phone = data.get('customer_phone')
+        
+        # Check if user is logged in
+        user_id = session.get('user_id')
+        if not user_id:
+            user_email = request.cookies.get('user_email')
+            if user_email:
+                conn = sqlite3.connect(WEBSITE_DB)
+                cursor = conn.cursor()
+                cursor.execute('SELECT id FROM website_users WHERE email = ?', (user_email,))
+                result = cursor.fetchone()
+                conn.close()
+                if result:
+                    user_id = result[0]
+        
+        if not user_id:
+            return jsonify({'success': False, 'error': 'لطفاً ابتدا وارد شوید'}), 401
+        
+        # Validate required fields
+        if not plan_id:
+            return jsonify({'success': False, 'error': 'پلن انتخاب نشده است'}), 400
+        
+        if not hardware_id:
+            return jsonify({'success': False, 'error': 'شناسه سخت‌افزاری الزامی است'}), 400
+        
+        if not customer_name:
+            return jsonify({'success': False, 'error': 'نام و نام خانوادگی الزامی است'}), 400
+        
+        if not customer_email:
+            return jsonify({'success': False, 'error': 'ایمیل الزامی است'}), 400
+        
+        if not customer_phone:
+            return jsonify({'success': False, 'error': 'شماره تماس الزامی است'}), 400
+        
+        # Get plan details
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM plans WHERE id = ?', (plan_id,))
+        plan = cursor.fetchone()
+        conn.close()
+        
+        if not plan:
+            return jsonify({'success': False, 'error': 'پلن یافت نشد'}), 404
+        
+        # TODO: Create license, generate key, save to database
+        # For now, return success with payment gateway info
+        
+        return jsonify({
+            'success': True,
+            'message': 'درخواست خرید با موفقیت ثبت شد',
+            'redirect': '/payment-gateway',
+            'order_id': f'ORDER-{user_id}-{plan_id}',
+            'amount': plan[3] if len(plan) > 3 else 0  # price_monthly
+        })
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 # Serve static files - only if not API route
 @app.route('/<path:filename>')
 def serve_static(filename):
@@ -1827,6 +2222,188 @@ def serve_static(filename):
     except:
         # If file not found, try index.html
         return send_from_directory(app.static_folder, 'index.html')
+
+
+# ============================================
+# PLANS MANAGEMENT APIs
+# ============================================
+
+@app.route('/plans', methods=['GET'])
+@app.route('/api/plans', methods=['GET'])
+def get_public_plans():
+    """Get all active plans for public purchase page"""
+    try:
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT * FROM plans 
+            WHERE is_active = 1
+            ORDER BY display_order ASC, id ASC
+        ''')
+        
+        plans = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'plans': plans
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'خطا در دریافت پلن‌ها: {str(e)}'
+        }), 500
+
+
+@app.route('/api/admin/plans', methods=['GET'])
+def get_plans():
+    """Get all plans"""
+    try:
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT * FROM plans 
+            ORDER BY display_order ASC, id ASC
+        ''')
+        
+        plans = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'plans': plans
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'خطا در دریافت پلن‌ها: {str(e)}'
+        }), 500
+
+
+@app.route('/api/admin/plans', methods=['POST'])
+def create_plan():
+    """Create new plan"""
+    try:
+        data = request.get_json()
+        
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            INSERT INTO plans (
+                plan_id, name_fa, name_en, price, duration_months,
+                duration_display_fa, duration_display_en, discount_percent,
+                features, is_popular, is_active, display_order
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            data.get('plan_id'),
+            data.get('name_fa'),
+            data.get('name_en'),
+            data.get('price'),
+            data.get('duration_months'),
+            data.get('duration_display_fa'),
+            data.get('duration_display_en'),
+            data.get('discount_percent', 0),
+            data.get('features', ''),
+            data.get('is_popular', 0),
+            data.get('is_active', 1),
+            data.get('display_order', 0)
+        ))
+        
+        conn.commit()
+        plan_id = cursor.lastrowid
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'message': 'پلن با موفقیت ایجاد شد',
+            'plan_id': plan_id
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'خطا در ایجاد پلن: {str(e)}'
+        }), 500
+
+
+@app.route('/api/admin/plans/<int:plan_id>', methods=['PUT'])
+def update_plan(plan_id):
+    """Update plan"""
+    try:
+        data = request.get_json()
+        
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            UPDATE plans SET
+                name_fa = ?,
+                name_en = ?,
+                price = ?,
+                duration_months = ?,
+                duration_display_fa = ?,
+                duration_display_en = ?,
+                discount_percent = ?,
+                features = ?,
+                is_popular = ?,
+                is_active = ?,
+                display_order = ?,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        ''', (
+            data.get('name_fa'),
+            data.get('name_en'),
+            data.get('price'),
+            data.get('duration_months'),
+            data.get('duration_display_fa'),
+            data.get('duration_display_en'),
+            data.get('discount_percent', 0),
+            data.get('features', ''),
+            data.get('is_popular', 0),
+            data.get('is_active', 1),
+            data.get('display_order', 0),
+            plan_id
+        ))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'message': 'پلن با موفقیت به‌روزرسانی شد'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'خطا در به‌روزرسانی پلن: {str(e)}'
+        }), 500
+
+
+@app.route('/api/admin/plans/<int:plan_id>', methods=['DELETE'])
+def delete_plan(plan_id):
+    """Delete plan"""
+    try:
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        
+        cursor.execute('DELETE FROM plans WHERE id = ?', (plan_id,))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'message': 'پلن با موفقیت حذف شد'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'خطا در حذف پلن: {str(e)}'
+        }), 500
 
 
 @app.route('/')

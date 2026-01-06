@@ -1821,14 +1821,15 @@ async function runFullInstall() {
   const versionText = odooVersion ? `Odoo ${odooVersion}` : 'Odoo';
   
   // === SMART INSTALLATION STEPS ===
+  // Increased maxWaitTime for online downloads (Git, wkhtmltopdf, nodejs)
   const PRIORITY_STEPS = [
-    { id: 'python', label: 'Python', cmd: 'install_python_offline', weight: 18, maxWaitTime: 300000, minCheckInterval: 3000, critical: true },
-    { id: 'vc_redist', label: 'VC++ Redistributable', cmd: 'install_vc_redist_offline', weight: 8, maxWaitTime: 120000, minCheckInterval: 2000, critical: false },
-    { id: 'postgres', label: 'PostgreSQL', cmd: 'install_postgresql_offline', weight: 20, maxWaitTime: 360000, minCheckInterval: 4000, critical: true },
-    { id: 'wkhtmltopdf', label: 'wkhtmltopdf', cmd: 'install_wkhtmltopdf_offline', weight: 12, maxWaitTime: 180000, minCheckInterval: 3000, critical: false },
-    { id: 'nodejs', label: 'Node.js', cmd: 'install_nodejs_offline', weight: 8, maxWaitTime: 180000, minCheckInterval: 3000, critical: false },
-    { id: 'git', label: 'Git', cmd: 'install_git_offline', weight: 8, maxWaitTime: 180000, minCheckInterval: 3000, critical: false },
-    { id: 'pip_wheels', label: 'پکیج‌های Python', cmd: 'install_pip_wheels', weight: 16, maxWaitTime: 300000, minCheckInterval: 3000, critical: false },
+    { id: 'python', label: 'Python', cmd: 'install_python_offline', weight: 18, maxWaitTime: 420000, minCheckInterval: 3000, critical: true },
+    { id: 'vc_redist', label: 'VC++ Redistributable', cmd: 'install_vc_redist_offline', weight: 8, maxWaitTime: 180000, minCheckInterval: 2000, critical: false },
+    { id: 'postgres', label: 'PostgreSQL', cmd: 'install_postgresql_offline', weight: 20, maxWaitTime: 480000, minCheckInterval: 4000, critical: true },
+    { id: 'wkhtmltopdf', label: 'wkhtmltopdf', cmd: 'install_wkhtmltopdf_offline', weight: 12, maxWaitTime: 360000, minCheckInterval: 3000, critical: false },
+    { id: 'nodejs', label: 'Node.js', cmd: 'install_nodejs_offline', weight: 8, maxWaitTime: 360000, minCheckInterval: 3000, critical: false },
+    { id: 'git', label: 'Git', cmd: 'install_git_offline', weight: 8, maxWaitTime: 420000, minCheckInterval: 3000, critical: false },
+    { id: 'pip_wheels', label: 'پکیج‌های Python', cmd: 'install_pip_wheels', weight: 16, maxWaitTime: 420000, minCheckInterval: 3000, critical: false },
     { id: 'pg_role', label: 'کاربر دیتابیس', cmd: 'create_pg_role', weight: 10, maxWaitTime: 60000, minCheckInterval: 2000, critical: false },
   ];
   

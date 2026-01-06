@@ -1,53 +1,40 @@
 // ========================================
-// ODOOMASTER SERVICE WORKER
-// Progressive Web App - Offline Support
+// ODOOMASTER SERVICE WORKER - DISABLED
+// This service worker is intentionally disabled
+// to prevent caching issues during development
 // ========================================
 
-const CACHE_NAME = 'odoomaster-v2';
-const STATIC_CACHE = 'odoomaster-static-v2';
-const DYNAMIC_CACHE = 'odoomaster-dynamic-v2';
-
-// Static assets to cache immediately
-const STATIC_ASSETS = [
-    '/',
-    '/index.html',
-    '/css/main.css',
-    '/css/components.css',
-    '/css/animations.css',
-    '/css/unified-nav.css',
-    '/js/main.js',
-    '/js/nav-loader.js',
-    '/js/turbo-nav.js',
-    '/js/i18n.js',
-    '/favicon.svg',
-    '/components/nav-header.html'
-];
-
-// Install event - cache static assets
+// Immediately uninstall this service worker
 self.addEventListener('install', event => {
-    console.log('🔧 Service Worker: Installing...');
+    console.log('🗑️ Service Worker: Uninstalling...');
+    self.skipWaiting();
+});
+
+self.addEventListener('activate', event => {
+    console.log('🧹 Service Worker: Cleaning up caches...');
     
     event.waitUntil(
-        caches.open(STATIC_CACHE)
-            .then(cache => {
-                console.log('📦 Caching static assets...');
-                return cache.addAll(STATIC_ASSETS);
-            })
-            .then(() => {
-                console.log('✅ Static assets cached');
-                return self.skipWaiting();
-            })
-            .catch(error => {
-                console.error('❌ Cache error:', error);
-            })
+        caches.keys().then(cacheNames => {
+            return Promise.all(
+                cacheNames.map(cache => {
+                    console.log('🗑️ Deleting cache:', cache);
+                    return caches.delete(cache);
+                })
+            );
+        }).then(() => {
+            console.log('✅ All caches cleared');
+            // Unregister self
+            return self.registration.unregister();
+        }).then(() => {
+            console.log('✅ Service Worker unregistered');
+        })
     );
 });
 
-// Activate event - clean up old caches
-self.addEventListener('activate', event => {
-    console.log('🚀 Service Worker: Activating...');
-    
-    event.waitUntil(
+// Pass through all fetch requests (no caching)
+self.addEventListener('fetch', event => {
+    event.respondWith(fetch(event.request));
+});
         caches.keys()
             .then(cacheNames => {
                 return Promise.all(

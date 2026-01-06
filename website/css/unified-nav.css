@@ -11,6 +11,20 @@
     --nav-item-active: rgba(113, 75, 103, 0.4);
 }
 
+/* Navigation Skeleton - Shows immediately to prevent flash */
+#mainNav:empty,
+#navHeader:empty {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--nav-height);
+    background: var(--nav-bg);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--nav-border);
+    z-index: 9999;
+}
+
 /* Main Navigation */
 .unified-nav {
     position: fixed;
