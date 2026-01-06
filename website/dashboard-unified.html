@@ -1439,7 +1439,7 @@
                 
                 <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
                     <button type="button" class="btn" onclick="closePlanModal()">انصراف</button>
-                    <button type="submit" class="btn btn-primary">💾 ذخیره</button>
+                    <button id="planSaveBtn" type="submit" class="btn btn-primary">💾 ذخیره</button>
                 </div>
             </form>
         </div>
@@ -2127,30 +2127,42 @@
         
         // Convert value + unit to months
         function convertToMonths(value, unit) {
+            // Return months as a float so we can convert back to best unit later
             switch(unit) {
                 case 'hour':
-                    return Math.ceil(value / 720); // ~720 hours per month
+                    // hours -> months (approx): hours / (24 * 30)
+                    return Number(value) / (24 * 30);
                 case 'day':
-                    return Math.ceil(value / 30); // ~30 days per month
+                    // days -> months
+                    return Number(value) / 30;
                 case 'month':
-                    return value;
+                    return Number(value);
                 case 'year':
-                    return value * 12;
+                    return Number(value) * 12;
                 default:
-                    return value;
+                    return Number(value);
             }
         }
         
         // Convert months back to best unit
         function monthsToUnit(months) {
-            if (months % 12 === 0) {
+            // months may be fractional
+            if (!months || isNaN(months)) months = 0;
+            // Prefer years when whole multiple of 12
+            if (months >= 12 && Math.abs(months % 12) < 0.0001) {
                 return { value: months / 12, unit: 'year' };
-            } else if (months >= 1) {
-                return { value: months, unit: 'month' };
-            } else {
-                // Less than a month, convert to days
-                return { value: months * 30, unit: 'day' };
             }
+            // If at least 1 month, use months
+            if (months >= 1) {
+                return { value: Math.round(months), unit: 'month' };
+            }
+            // Less than a month: check if fits days or hours
+            const days = months * 30;
+            if (days >= 1) {
+                return { value: Math.round(days), unit: 'day' };
+            }
+            const hours = days * 24;
+            return { value: Math.round(hours), unit: 'hour' };
         }
         
         // Format duration for display
@@ -2478,9 +2490,22 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    alert(result.message);
-                    closePlanModal();
-                    loadPlans();
+                    const saveBtn = document.getElementById('planSaveBtn');
+                    const origHtml = saveBtn.innerHTML;
+                    saveBtn.disabled = true;
+                    saveBtn.classList.remove('btn-primary');
+                    saveBtn.classList.add('btn-success');
+                    saveBtn.innerHTML = 'ذخیره شد ✓';
+
+                    setTimeout(() => {
+                        closePlanModal();
+                        loadPlans();
+                        // restore button
+                        saveBtn.disabled = false;
+                        saveBtn.classList.remove('btn-success');
+                        saveBtn.classList.add('btn-primary');
+                        saveBtn.innerHTML = origHtml;
+                    }, 700);
                 } else {
                     alert('خطا: ' + result.error);
                 }
