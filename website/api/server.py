@@ -1030,6 +1030,36 @@ def load_plans():
     save_json(PLANS_FILE, default_plans)
     return default_plans
 
+
+def _plan_to_frontend(plan: dict) -> dict:
+    """Convert internal plan dict to frontend shape expected by dashboard-unified.html"""
+    # duration in months (rounded down)
+    duration_days = int(plan.get('duration_days', 0) or 0)
+    duration_months = duration_days // 30 if duration_days > 0 else 0
+
+    features = plan.get('features') or []
+    if isinstance(features, list):
+        features_str = '\n'.join(features)
+    else:
+        features_str = features or ''
+
+    return {
+        'plan_id': plan.get('id'),
+        'id': plan.get('id'),
+        'name_fa': plan.get('name'),
+        'name_en': plan.get('name_en'),
+        'price': plan.get('price', 0),
+        'duration_months': duration_months,
+        'duration_display_fa': plan.get('duration_display_fa', ''),
+        'duration_display_en': plan.get('duration_display_en', ''),
+        'discount_percent': plan.get('discount_percent', 0),
+        'display_order': plan.get('sort_order', 0),
+        'is_popular': 1 if plan.get('popular') else 0,
+        'is_active': 1 if plan.get('active') else 0,
+        'features': features_str,
+        'features_list': plan.get('features') or []
+    }
+
 @app.route('/api/plans', methods=['GET'])
 def get_plans():
     """Get available plans (public)"""
@@ -1037,7 +1067,8 @@ def get_plans():
     # Return only active plans, sorted by sort_order
     plans_list = [p for p in plans_dict.values() if p.get('active', True)]
     plans_list.sort(key=lambda x: x.get('sort_order', 999))
-    return jsonify({'plans': plans_list})
+    frontend = [_plan_to_frontend(p) for p in plans_list]
+    return jsonify({'success': True, 'plans': frontend})
 
 
 @app.route('/api/admin/plans', methods=['GET'])
@@ -1050,7 +1081,8 @@ def admin_get_plans():
     plans_dict = load_plans()
     plans_list = list(plans_dict.values())
     plans_list.sort(key=lambda x: x.get('sort_order', 999))
-    return jsonify({'plans': plans_list})
+    frontend = [_plan_to_frontend(p) for p in plans_list]
+    return jsonify({'success': True, 'plans': frontend})
 
 
 @app.route('/api/admin/plans', methods=['POST'])
@@ -1061,39 +1093,59 @@ def admin_create_plan():
         return jsonify({'error': 'دسترسی مجاز نیست'}), 403
     
     data = request.json or {}
-    plan_id = (data.get('id') or '').strip().lower()
-    
+
+    # Accept alternate frontend keys: 'plan_id', 'id'
+    plan_id = (data.get('id') or data.get('plan_id') or '').strip().lower()
+
     if not plan_id:
         return jsonify({'error': 'شناسه پلن الزامی است'}), 400
-    
+
     if not re.match(r'^[a-z0-9_-]+$', plan_id):
         return jsonify({'error': 'شناسه پلن فقط می‌تواند شامل حروف انگلیسی، اعداد، خط تیره و زیرخط باشد'}), 400
-    
+
     plans = load_plans()
     if plan_id in plans:
         return jsonify({'error': 'این شناسه قبلاً استفاده شده است'}), 400
-    
-    # Build new plan
+
+    # Normalize input
+    name = data.get('name') or data.get('name_fa') or ''
+    name_en = data.get('name_en') or ''
+    price = int(data.get('price', 0) or 0)
+    price_yearly = int(data.get('price_yearly', 0) or 0)
+    features = data.get('features') or []
+    max_activations = int(data.get('max_activations', 1) or 1)
+    support_level = data.get('support_level') or 'email'
+
+    if 'duration_days' in data:
+        duration_days = int(data.get('duration_days') or 0)
+    else:
+        duration_months = int(data.get('duration_months', 0) or 0)
+        duration_days = duration_months * 30 if duration_months > 0 else int(data.get('duration_days', 30) or 30)
+
+    popular = bool(data.get('popular') or data.get('is_popular') or False)
+    active = bool(data.get('active') or data.get('is_active') or True)
+    sort_order = int(data.get('sort_order', data.get('display_order', len(plans) + 1) or (len(plans) + 1)))
+
     new_plan = {
         'id': plan_id,
-        'name': data.get('name', ''),
-        'name_en': data.get('name_en', ''),
-        'price': int(data.get('price', 0)),
-        'price_yearly': int(data.get('price_yearly', 0)),
-        'features': data.get('features', []),
-        'features_en': data.get('features_en', []),
-        'max_activations': int(data.get('max_activations', 1)),
-        'support_level': data.get('support_level', 'email'),
-        'duration_days': int(data.get('duration_days', 30)),
-        'popular': bool(data.get('popular', False)),
-        'active': bool(data.get('active', True)),
-        'sort_order': int(data.get('sort_order', len(plans) + 1))
+        'name': name,
+        'name_en': name_en,
+        'price': price,
+        'price_yearly': price_yearly,
+        'features': features,
+        'features_en': data.get('features_en') or [],
+        'max_activations': max_activations,
+        'support_level': support_level,
+        'duration_days': duration_days,
+        'popular': popular,
+        'active': active,
+        'sort_order': sort_order
     }
-    
+
     plans[plan_id] = new_plan
     save_json(PLANS_FILE, plans)
-    
-    return jsonify({'success': True, 'plan': new_plan})
+
+    return jsonify({'success': True, 'plan': _plan_to_frontend(new_plan), 'message': 'پلن ذخیره شد'})
 
 
 @app.route('/api/admin/plans/<plan_id>', methods=['PUT'])
@@ -1111,35 +1163,55 @@ def admin_update_plan(plan_id):
     plan = plans[plan_id]
     
     # Update fields
-    if 'name' in data:
-        plan['name'] = data['name']
+    # Accept frontend alternate keys and normalize
+    if 'name' in data or 'name_fa' in data:
+        plan['name'] = data.get('name') or data.get('name_fa') or plan.get('name', '')
     if 'name_en' in data:
-        plan['name_en'] = data['name_en']
+        plan['name_en'] = data.get('name_en') or plan.get('name_en', '')
     if 'price' in data:
-        plan['price'] = int(data['price'])
+        plan['price'] = int(data.get('price') or 0)
     if 'price_yearly' in data:
-        plan['price_yearly'] = int(data['price_yearly'])
+        plan['price_yearly'] = int(data.get('price_yearly') or 0)
     if 'features' in data:
-        plan['features'] = data['features']
+        f = data.get('features')
+        if isinstance(f, str):
+            # frontend sends features as 'line1|line2' or newline-separated
+            if '|' in f:
+                plan['features'] = [s for s in f.split('|') if s.strip()]
+            else:
+                plan['features'] = [s for s in f.split('\n') if s.strip()]
+        else:
+            plan['features'] = f
     if 'features_en' in data:
-        plan['features_en'] = data['features_en']
+        plan['features_en'] = data.get('features_en')
     if 'max_activations' in data:
-        plan['max_activations'] = int(data['max_activations'])
+        plan['max_activations'] = int(data.get('max_activations') or 1)
     if 'support_level' in data:
-        plan['support_level'] = data['support_level']
+        plan['support_level'] = data.get('support_level')
+
+    # Duration: accept duration_days or duration_months from frontend
     if 'duration_days' in data:
-        plan['duration_days'] = int(data['duration_days'])
-    if 'popular' in data:
-        plan['popular'] = bool(data['popular'])
-    if 'active' in data:
-        plan['active'] = bool(data['active'])
-    if 'sort_order' in data:
-        plan['sort_order'] = int(data['sort_order'])
+        plan['duration_days'] = int(data.get('duration_days') or 0)
+    elif 'duration_months' in data:
+        try:
+            plan['duration_days'] = int(int(data.get('duration_months') or 0) * 30)
+        except Exception:
+            plan['duration_days'] = plan.get('duration_days', 0)
+
+    # popular / active may come as is_popular / is_active (1/0)
+    if 'popular' in data or 'is_popular' in data:
+        plan['popular'] = bool(int(data.get('popular') or data.get('is_popular') or 0))
+    if 'active' in data or 'is_active' in data:
+        plan['active'] = bool(int(data.get('active') or data.get('is_active') or 0))
+
+    # sort/display order
+    if 'sort_order' in data or 'display_order' in data:
+        plan['sort_order'] = int(data.get('sort_order', data.get('display_order', plan.get('sort_order', 0)) or 0))
     
     plans[plan_id] = plan
     save_json(PLANS_FILE, plans)
-    
-    return jsonify({'success': True, 'plan': plan})
+
+    return jsonify({'success': True, 'plan': _plan_to_frontend(plan)})
 
 
 @app.route('/api/admin/plans/<plan_id>', methods=['DELETE'])
