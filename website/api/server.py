@@ -1162,12 +1162,25 @@ def admin_update_plan(plan_id):
     data = request.json or {}
     plan = plans[plan_id]
     
+    #َ Allow changing plan id (rename)
+    new_plan_id = data.get('plan_id') 
+    if new_plan_id and new_plan_id != plan_id:
+        # Check if new id already exists
+        if new_plan_id in plans:
+            return jsonify({'error': 'این شناسه پلن قبلاً استفاده شده است'}), 400
+        # Update plan id
+        plan['id'] = new_plan_id
+        plans[new_plan_id] = plan
+        del plans[plan_id]
+        plan_id = new_plan_id # Update reference
+
+
     # Update fields
     # Accept frontend alternate keys and normalize
     if 'name' in data or 'name_fa' in data:
         plan['name'] = data.get('name') or data.get('name_fa') or plan.get('name', '')
     if 'name_en' in data:
-        plan['name_en'] = data.get('name_en') or plan.get('name_en', '')
+        plan['name_en'] = data.get('name_en', '')
     if 'price' in data:
         plan['price'] = int(data.get('price') or 0)
     if 'price_yearly' in data:
