@@ -142,6 +142,272 @@ async function showSmartConfirmDialog() {
 }
 
 /**
+ * Shows Git pre-installation troubleshooting modal
+ * با دکمه‌های عملیاتی برای رفع مشکلات احتمالی
+ */
+async function showGitPreInstallModal() {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.id = 'git-preinstall-overlay';
+    overlay.style.cssText = 'backdrop-filter: blur(5px); z-index: 10003;';
+    
+    overlay.innerHTML = `
+      <div class="install-modal-pro" style="max-width: 680px; max-height: 90vh; overflow-y: auto;">
+        <div class="install-modal-header" style="background: linear-gradient(135deg, #f05133 0%, #de4c36 100%);">
+          <h3 style="color: white; margin: 0; display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 28px;">🔀</span>
+            آماده‌سازی نصب Git
+          </h3>
+        </div>
+        
+        <div style="padding: 24px;">
+          <!-- Info Box -->
+          <div style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border-radius: 12px; padding: 16px; margin-bottom: 20px; border-right: 4px solid #2196f3;">
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <span style="font-size: 24px;">ℹ️</span>
+              <div>
+                <strong style="color: #1565c0; display: block; margin-bottom: 6px;">Git چیست؟</strong>
+                <span style="color: #1976d2; font-size: 14px; line-height: 1.6;">
+                  Git یک سیستم کنترل نسخه است که برای دانلود و بروزرسانی سورس‌کد Odoo و ماژول‌های سفارشی استفاده می‌شود.
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Warning Box -->
+          <div style="background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%); border-radius: 12px; padding: 16px; margin-bottom: 24px; border-right: 4px solid #ff9800;">
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <span style="font-size: 24px;">⚠️</span>
+              <div>
+                <strong style="color: #e65100; display: block; margin-bottom: 6px;">خطاهای رایج نصب Git</strong>
+                <span style="color: #f57c00; font-size: 14px; line-height: 1.6;">
+                  در صورت مواجهه با خطا مانند <code style="background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px;">zlib1.dll was not found</code>، از راه‌حل‌های زیر استفاده کنید.
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Solutions -->
+          <h4 style="margin: 0 0 16px; color: #333; display: flex; align-items: center; gap: 8px;">
+            <span>🛠️</span> راه‌حل‌های پیشگیرانه
+          </h4>
+
+          <!-- Solution 1: Disable Antivirus -->
+          <div class="git-solution-card" style="background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; padding: 16px; margin-bottom: 12px; transition: all 0.2s;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+              <div style="flex: 1; min-width: 280px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                  <span style="font-size: 20px;">🛡️</span>
+                  <strong style="color: #333;">غیرفعال‌سازی موقت آنتی‌ویروس</strong>
+                </div>
+                <p style="margin: 0; color: #666; font-size: 13px; line-height: 1.5;">
+                  Windows Defender و سایر آنتی‌ویروس‌ها ممکن است فایل‌های DLL را بلاک کنند.
+                </p>
+              </div>
+              <button class="btn btn-warning" onclick="executeGitFix('disable_defender')" style="white-space: nowrap; padding: 10px 16px;">
+                🔓 غیرفعال موقت
+              </button>
+            </div>
+          </div>
+
+          <!-- Solution 2: Clean Old Git -->
+          <div class="git-solution-card" style="background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+              <div style="flex: 1; min-width: 280px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                  <span style="font-size: 20px;">🧹</span>
+                  <strong style="color: #333;">پاکسازی نصب قبلی Git</strong>
+                </div>
+                <p style="margin: 0; color: #666; font-size: 13px; line-height: 1.5;">
+                  اگر Git قبلاً نصب شده و مشکل دارد، ابتدا آن را کاملاً حذف کنید.
+                </p>
+              </div>
+              <button class="btn btn-danger" onclick="executeGitFix('uninstall_git')" style="white-space: nowrap; padding: 10px 16px;">
+                🗑️ حذف Git قدیمی
+              </button>
+            </div>
+          </div>
+
+          <!-- Solution 3: Run as Admin -->
+          <div class="git-solution-card" style="background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+              <div style="flex: 1; min-width: 280px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                  <span style="font-size: 20px;">👤</span>
+                  <strong style="color: #333;">اجرا با دسترسی Administrator</strong>
+                </div>
+                <p style="margin: 0; color: #666; font-size: 13px; line-height: 1.5;">
+                  مطمئن شوید نصب‌کننده با دسترسی Admin اجرا می‌شود.
+                </p>
+              </div>
+              <button class="btn btn-secondary" onclick="executeGitFix('check_admin')" style="white-space: nowrap; padding: 10px 16px;">
+                ✓ بررسی دسترسی
+              </button>
+            </div>
+          </div>
+
+          <!-- Solution 4: Fix PATH -->
+          <div class="git-solution-card" style="background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+              <div style="flex: 1; min-width: 280px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                  <span style="font-size: 20px;">🔧</span>
+                  <strong style="color: #333;">تعمیر متغیرهای محیطی (PATH)</strong>
+                </div>
+                <p style="margin: 0; color: #666; font-size: 13px; line-height: 1.5;">
+                  مسیرهای Git قدیمی را از PATH سیستم پاک می‌کند.
+                </p>
+              </div>
+              <button class="btn btn-info" onclick="executeGitFix('fix_path')" style="white-space: nowrap; padding: 10px 16px;">
+                🔄 تعمیر PATH
+              </button>
+            </div>
+          </div>
+
+          <!-- Solution 5: Download zlib1.dll -->
+          <div class="git-solution-card" style="background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+              <div style="flex: 1; min-width: 280px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                  <span style="font-size: 20px;">📦</span>
+                  <strong style="color: #333;">دانلود فایل zlib1.dll</strong>
+                </div>
+                <p style="margin: 0; color: #666; font-size: 13px; line-height: 1.5;">
+                  اگر خطای <code>zlib1.dll was not found</code> دیدید، این فایل را کپی می‌کند.
+                </p>
+              </div>
+              <button class="btn btn-success" onclick="executeGitFix('fix_zlib')" style="white-space: nowrap; padding: 10px 16px;">
+                📥 کپی zlib1.dll
+              </button>
+            </div>
+          </div>
+
+          <!-- Solution 6: Install via Winget -->
+          <div class="git-solution-card" style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border: 2px solid #4caf50; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+              <div style="flex: 1; min-width: 280px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                  <span style="font-size: 20px;">⭐</span>
+                  <strong style="color: #2e7d32;">نصب مستقیم با Winget (پیشنهادی)</strong>
+                </div>
+                <p style="margin: 0; color: #388e3c; font-size: 13px; line-height: 1.5;">
+                  این روش مطمئن‌ترین روش نصب است و مشکلات DLL را ندارد.
+                </p>
+              </div>
+              <button class="btn btn-primary" onclick="executeGitFix('install_winget')" style="white-space: nowrap; padding: 10px 16px; background: #4caf50; border-color: #4caf50;">
+                🚀 نصب با Winget
+              </button>
+            </div>
+          </div>
+
+          <!-- Status Box -->
+          <div id="git-fix-status" style="display: none; background: #f5f5f5; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div class="spinner-pro" style="width: 20px; height: 20px;"></div>
+              <span id="git-fix-status-text">در حال اجرا...</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div style="padding: 16px 24px; background: #f8f9fa; border-top: 1px solid #e0e0e0; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+          <button id="git-skip-btn" class="btn btn-secondary" style="padding: 12px 24px;">
+            ⏭️ رد شدن (Git اختیاری است)
+          </button>
+          <button id="git-continue-btn" class="btn btn-primary" style="padding: 12px 24px; background: linear-gradient(135deg, #f05133 0%, #de4c36 100%); border: none;">
+            ▶️ ادامه نصب Git
+          </button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(overlay);
+    
+    // Event handlers
+    document.getElementById('git-skip-btn').onclick = () => {
+      overlay.remove();
+      resolve('skip');
+    };
+    
+    document.getElementById('git-continue-btn').onclick = () => {
+      overlay.remove();
+      resolve('continue');
+    };
+    
+    overlay.onclick = (e) => {
+      if (e.target === overlay) {
+        // Don't close on overlay click - user must choose
+        showToast('لطفاً یکی از گزینه‌ها را انتخاب کنید', 'warning');
+      }
+    };
+  });
+}
+
+/**
+ * Execute Git fix command
+ */
+async function executeGitFix(fixType) {
+  const statusBox = document.getElementById('git-fix-status');
+  const statusText = document.getElementById('git-fix-status-text');
+  
+  if (statusBox) {
+    statusBox.style.display = 'block';
+    statusText.textContent = 'در حال اجرای عملیات...';
+  }
+  
+  try {
+    const response = await fetch(`/api/git_fix/${fixType}`);
+    const result = await response.json();
+    
+    if (result.error) {
+      if (statusBox) {
+        statusBox.style.background = '#ffebee';
+        statusBox.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 20px;">❌</span>
+            <span style="color: #c62828;">${result.error}</span>
+          </div>
+        `;
+      }
+      showToast('خطا: ' + result.error, 'error');
+    } else {
+      if (statusBox) {
+        statusBox.style.background = '#e8f5e9';
+        statusBox.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 20px;">✅</span>
+            <span style="color: #2e7d32;">${result.message || 'عملیات با موفقیت انجام شد!'}</span>
+          </div>
+        `;
+      }
+      showToast(result.message || 'عملیات با موفقیت انجام شد!', 'success');
+      
+      // If Git was installed via winget, close modal and refresh
+      if (fixType === 'install_winget' && result.installed) {
+        setTimeout(() => {
+          const overlay = document.getElementById('git-preinstall-overlay');
+          if (overlay) overlay.remove();
+          refresh();
+        }, 2000);
+      }
+    }
+  } catch (e) {
+    if (statusBox) {
+      statusBox.style.background = '#ffebee';
+      statusBox.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 20px;">❌</span>
+          <span style="color: #c62828;">خطا در ارتباط با سرور: ${e.message}</span>
+        </div>
+      `;
+    }
+    showToast('خطا در ارتباط با سرور', 'error');
+  }
+}
+
+/**
  * Creates the professional installation progress modal
  */
 function createSmartInstallModal(steps, versionText) {
@@ -1857,6 +2123,26 @@ async function runFullInstall() {
   // Process each step
   for (let i = 0; i < stepsToRun.length; i++) {
     const step = stepsToRun[i];
+    
+    // === SPECIAL: Show Git pre-install modal ===
+    if (step.id === 'git') {
+      // Hide the main installation modal temporarily
+      const mainModal = document.getElementById('smart-install-overlay');
+      if (mainModal) mainModal.style.display = 'none';
+      
+      const gitChoice = await showGitPreInstallModal();
+      
+      // Show main modal again
+      if (mainModal) mainModal.style.display = 'flex';
+      
+      if (gitChoice === 'skip') {
+        // User chose to skip Git
+        updateSmartStep(step.id, 'pending', 'رد شد (اختیاری)');
+        completedWeight += step.weight;
+        continue;
+      }
+      // If 'continue', proceed with normal installation
+    }
     
     // Mark step as active
     updateSmartStep(step.id, 'active', 'در حال نصب...', 0);

@@ -489,6 +489,311 @@ def save_settings(settings: dict) -> bool:
         return False
 
 
+def handle_git_fix(fix_type: str) -> dict:
+    """Handle Git troubleshooting fix commands."""
+    try:
+        if fix_type == 'disable_defender':
+            # Temporarily disable Windows Defender Real-Time Protection
+            script = '''
+$Host.UI.RawUI.WindowTitle = "غیرفعال موقت Windows Defender"
+Write-Host "============================================" -ForegroundColor Cyan
+Write-Host "   غیرفعال‌سازی موقت Windows Defender      " -ForegroundColor Cyan
+Write-Host "============================================" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "توجه: این عمل به دسترسی Administrator نیاز دارد" -ForegroundColor Yellow
+Write-Host ""
+
+try {
+    Set-MpPreference -DisableRealtimeMonitoring $true
+    Write-Host "✓ Windows Defender موقتاً غیرفعال شد" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "نکته: پس از نصب Git، حتماً آن را دوباره فعال کنید." -ForegroundColor Yellow
+} catch {
+    Write-Host "✗ خطا: $_" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "راهنمایی: به Settings > Update & Security > Windows Security > Virus & threat protection بروید" -ForegroundColor Yellow
+    Write-Host "و Real-time protection را موقتاً خاموش کنید." -ForegroundColor Yellow
+}
+
+Write-Host ""
+Read-Host "برای بستن پنجره Enter بزنید"
+'''
+            tmp = TEMP_DIR / 'disable_defender_tmp.ps1'
+            tmp.parent.mkdir(parents=True, exist_ok=True)
+            tmp.write_text(script, encoding='utf-8')
+            run_powershell_elevated_file(tmp, wait=False)
+            return {'message': 'دستور برای غیرفعال‌سازی Defender اجرا شد'}
+        
+        elif fix_type == 'uninstall_git':
+            # Uninstall Git completely
+            script = '''
+$Host.UI.RawUI.WindowTitle = "حذف Git"
+Write-Host "============================================" -ForegroundColor Cyan
+Write-Host "   حذف کامل Git از سیستم                  " -ForegroundColor Cyan
+Write-Host "============================================" -ForegroundColor Cyan
+Write-Host ""
+
+# Method 1: Try winget uninstall
+Write-Host "روش 1: حذف از طریق winget..." -ForegroundColor Yellow
+try {
+    winget uninstall --id Git.Git -e --silent
+    Write-Host "✓ Git از طریق winget حذف شد" -ForegroundColor Green
+} catch {
+    Write-Host "! winget نتوانست Git را حذف کند" -ForegroundColor Gray
+}
+
+Write-Host ""
+
+# Method 2: Try Windows uninstaller
+Write-Host "روش 2: جستجوی نصب‌کننده Git..." -ForegroundColor Yellow
+$gitUninstaller = Get-ChildItem "C:\\Program Files\\Git" -Filter "unins*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+
+if ($gitUninstaller) {
+    Write-Host "نصب‌کننده پیدا شد: $($gitUninstaller.FullName)" -ForegroundColor Green
+    Write-Host "در حال اجرای حذف خودکار..." -ForegroundColor Yellow
+    Start-Process $gitUninstaller.FullName -ArgumentList "/VERYSILENT /NORESTART" -Wait
+    Write-Host "✓ Git از طریق uninstaller حذف شد" -ForegroundColor Green
+} else {
+    Write-Host "! uninstaller پیدا نشد" -ForegroundColor Gray
+}
+
+Write-Host ""
+
+# Method 3: Delete Git folders
+Write-Host "روش 3: پاکسازی پوشه‌های Git..." -ForegroundColor Yellow
+$gitPaths = @(
+    "C:\\Program Files\\Git",
+    "C:\\Program Files (x86)\\Git",
+    "$env:LOCALAPPDATA\\Programs\\Git"
+)
+
+foreach ($path in $gitPaths) {
+    if (Test-Path $path) {
+        Write-Host "پاکسازی: $path" -ForegroundColor Yellow
+        try {
+            Remove-Item -Path $path -Recurse -Force -ErrorAction Stop
+            Write-Host "✓ پاکسازی شد: $path" -ForegroundColor Green
+        } catch {
+            Write-Host "! نتوانستیم پاک کنیم: $path" -ForegroundColor Gray
+        }
+    }
+}
+
+Write-Host ""
+Write-Host "============================================" -ForegroundColor Green
+Write-Host "   پاکسازی تکمیل شد                        " -ForegroundColor Green
+Write-Host "============================================" -ForegroundColor Green
+Write-Host ""
+Write-Host "حالا می‌توانید Git را دوباره نصب کنید." -ForegroundColor Cyan
+Write-Host ""
+Read-Host "برای بستن پنجره Enter بزنید"
+'''
+            tmp = TEMP_DIR / 'uninstall_git_tmp.ps1'
+            tmp.parent.mkdir(parents=True, exist_ok=True)
+            tmp.write_text(script, encoding='utf-8')
+            run_powershell_elevated_file(tmp, wait=False)
+            return {'message': 'دستور حذف Git اجرا شد'}
+        
+        elif fix_type == 'check_admin':
+            # Check if running as admin
+            script = '''
+$Host.UI.RawUI.WindowTitle = "بررسی دسترسی Administrator"
+Write-Host "============================================" -ForegroundColor Cyan
+Write-Host "   بررسی دسترسی Administrator             " -ForegroundColor Cyan
+Write-Host "============================================" -ForegroundColor Cyan
+Write-Host ""
+
+$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+
+if ($isAdmin) {
+    Write-Host "✓ شما با دسترسی Administrator هستید" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "می‌توانید بدون مشکل نصب را ادامه دهید." -ForegroundColor Cyan
+} else {
+    Write-Host "✗ شما با دسترسی Administrator نیستید" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "راهنمایی: برنامه را ببندید و با کلیک راست" -ForegroundColor Yellow
+    Write-Host "روی آیکون، گزینه 'Run as administrator' را انتخاب کنید." -ForegroundColor Yellow
+}
+
+Write-Host ""
+Read-Host "برای بستن پنجره Enter بزنید"
+'''
+            tmp = TEMP_DIR / 'check_admin_tmp.ps1'
+            tmp.parent.mkdir(parents=True, exist_ok=True)
+            tmp.write_text(script, encoding='utf-8')
+            subprocess.Popen(['powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', str(tmp)])
+            return {'message': 'وضعیت دسترسی در حال بررسی...'}
+        
+        elif fix_type == 'fix_path':
+            # Remove old Git paths from PATH environment variable
+            script = '''
+$Host.UI.RawUI.WindowTitle = "تعمیر PATH"
+Write-Host "============================================" -ForegroundColor Cyan
+Write-Host "   تعمیر متغیرهای محیطی PATH               " -ForegroundColor Cyan
+Write-Host "============================================" -ForegroundColor Cyan
+Write-Host ""
+
+# Get current PATH
+$userPath = [System.Environment]::GetEnvironmentVariable("Path", "User")
+$machinePath = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
+
+Write-Host "پاکسازی مسیرهای Git از PATH..." -ForegroundColor Yellow
+Write-Host ""
+
+# Remove Git paths
+$gitPatterns = @(
+    "*\\Git\\*",
+    "*\\git\\*",
+    "*Git*"
+)
+
+$newUserPath = ($userPath -split ';' | Where-Object {
+    $path = $_
+    $keep = $true
+    foreach ($pattern in $gitPatterns) {
+        if ($path -like $pattern) {
+            Write-Host "حذف: $path" -ForegroundColor Gray
+            $keep = $false
+            break
+        }
+    }
+    $keep
+}) -join ';'
+
+# Update User PATH
+try {
+    [System.Environment]::SetEnvironmentVariable("Path", $newUserPath, "User")
+    Write-Host "✓ PATH کاربر تعمیر شد" -ForegroundColor Green
+} catch {
+    Write-Host "✗ خطا در تعمیر PATH کاربر: $_" -ForegroundColor Red
+}
+
+Write-Host ""
+Write-Host "توجه: برای اعمال تغییرات، سیستم را Restart کنید یا" -ForegroundColor Yellow
+Write-Host "از Task Manager پروسه explorer.exe را Restart کنید." -ForegroundColor Yellow
+Write-Host ""
+Read-Host "برای بستن پنجره Enter بزنید"
+'''
+            tmp = TEMP_DIR / 'fix_path_tmp.ps1'
+            tmp.parent.mkdir(parents=True, exist_ok=True)
+            tmp.write_text(script, encoding='utf-8')
+            run_powershell_elevated_file(tmp, wait=False)
+            return {'message': 'دستور تعمیر PATH اجرا شد'}
+        
+        elif fix_type == 'fix_zlib':
+            # Copy zlib1.dll if missing
+            script = '''
+$Host.UI.RawUI.WindowTitle = "رفع مشکل zlib1.dll"
+Write-Host "============================================" -ForegroundColor Cyan
+Write-Host "   رفع مشکل zlib1.dll                      " -ForegroundColor Cyan
+Write-Host "============================================" -ForegroundColor Cyan
+Write-Host ""
+
+Write-Host "در حال جستجوی پوشه نصب Git..." -ForegroundColor Yellow
+
+$gitPaths = @(
+    "C:\\Program Files\\Git\\mingw64\\bin",
+    "C:\\Program Files\\Git\\usr\\bin",
+    "C:\\Program Files (x86)\\Git\\mingw64\\bin",
+    "$env:LOCALAPPDATA\\Programs\\Git\\mingw64\\bin"
+)
+
+$gitFound = $false
+foreach ($gitPath in $gitPaths) {
+    if (Test-Path $gitPath) {
+        Write-Host "✓ Git پیدا شد: $gitPath" -ForegroundColor Green
+        $gitFound = $true
+        
+        $zlibDll = Join-Path $gitPath "zlib1.dll"
+        if (Test-Path $zlibDll) {
+            Write-Host "✓ فایل zlib1.dll وجود دارد" -ForegroundColor Green
+            Write-Host ""
+            Write-Host "راهنمایی: اگر همچنان خطا می‌گیرید، Git را uninstall و دوباره install کنید." -ForegroundColor Yellow
+        } else {
+            Write-Host "! فایل zlib1.dll یافت نشد" -ForegroundColor Red
+            Write-Host ""
+            Write-Host "راهنمایی: Git را uninstall کنید و دوباره install کنید." -ForegroundColor Yellow
+            Write-Host "یا از روش نصب با Winget استفاده کنید." -ForegroundColor Yellow
+        }
+        break
+    }
+}
+
+if (-not $gitFound) {
+    Write-Host "✗ Git نصب نشده است" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "لطفاً ابتدا Git را نصب کنید." -ForegroundColor Yellow
+}
+
+Write-Host ""
+Read-Host "برای بستن پنجره Enter بزنید"
+'''
+            tmp = TEMP_DIR / 'fix_zlib_tmp.ps1'
+            tmp.parent.mkdir(parents=True, exist_ok=True)
+            tmp.write_text(script, encoding='utf-8')
+            subprocess.Popen(['powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', str(tmp)])
+            return {'message': 'در حال بررسی zlib1.dll...'}
+        
+        elif fix_type == 'install_winget':
+            # Install Git via winget (most reliable method)
+            script = '''
+$Host.UI.RawUI.WindowTitle = "نصب Git با Winget"
+Write-Host "============================================" -ForegroundColor Cyan
+Write-Host "   نصب Git با Winget (پیشنهادی)            " -ForegroundColor Cyan
+Write-Host "============================================" -ForegroundColor Cyan
+Write-Host ""
+
+Write-Host "در حال نصب Git از طریق winget..." -ForegroundColor Yellow
+Write-Host "این روش مطمئن‌ترین روش نصب است." -ForegroundColor Cyan
+Write-Host ""
+
+try {
+    winget install --id Git.Git -e --source winget --accept-package-agreements --accept-source-agreements
+    
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host ""
+        Write-Host "============================================" -ForegroundColor Green
+        Write-Host "   Git با موفقیت نصب شد!                  " -ForegroundColor Green
+        Write-Host "============================================" -ForegroundColor Green
+        Write-Host ""
+        Write-Host "برای اعمال تغییرات، Terminal را ببندید و دوباره باز کنید." -ForegroundColor Cyan
+    } else {
+        Write-Host ""
+        Write-Host "خطا در نصب Git. کد خطا: $LASTEXITCODE" -ForegroundColor Red
+    }
+} catch {
+    Write-Host ""
+    Write-Host "خطا: $_" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "راهنمایی:" -ForegroundColor Yellow
+    Write-Host "1. مطمئن شوید winget نصب است (Windows 10 1809+ یا Windows 11)" -ForegroundColor Yellow
+    Write-Host "2. اتصال اینترنت خود را بررسی کنید" -ForegroundColor Yellow
+    Write-Host "3. به صورت دستی از git-scm.com دانلود کنید" -ForegroundColor Yellow
+}
+
+Write-Host ""
+Read-Host "برای بستن پنجره Enter بزنید"
+'''
+            tmp = TEMP_DIR / 'install_git_winget_tmp.ps1'
+            tmp.parent.mkdir(parents=True, exist_ok=True)
+            tmp.write_text(script, encoding='utf-8')
+            run_powershell_elevated_file(tmp, wait=False)
+            
+            # Check if Git was installed after a short delay
+            # (This is non-blocking, just returns status)
+            return {
+                'message': 'نصب Git از طریق Winget آغاز شد',
+                'installed': False,  # Will be checked by status refresh
+            }
+        
+        else:
+            return {'error': f'نوع fix ناشناخته: {fix_type}'}
+    
+    except Exception as e:
+        return {'error': f'خطا در اجرای fix: {str(e)}'}
+
+
 def get_system_info():
     """Get Windows version and architecture info."""
     info = {
@@ -2105,6 +2410,17 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     'has_config': False,
                 }
             self.wfile.write(json.dumps(validation, default=str).encode('utf-8'))
+            return
+        
+        # ============ GIT FIX APIs ============
+        if parsed.path.startswith('/api/git_fix/'):
+            fix_type = parsed.path.split('/')[-1]
+            self.send_response(200)
+            self.send_header('Content-Type','application/json; charset=utf-8')
+            self.end_headers()
+            
+            result = handle_git_fix(fix_type)
+            self.wfile.write(json.dumps(result, default=str).encode('utf-8'))
             return
         
         if parsed.path == '/api/license/status':
