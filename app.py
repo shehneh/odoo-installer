@@ -1210,33 +1210,29 @@ def migrate_customers():
             return jsonify({'success': False, 'message': 'لطفاً ابتدا وارد شوید'}), 401
         
         # Check if admin
-        conn = sqlite3.connect(USERS_DB)
+        conn = sqlite3.connect(CUSTOMERS_DB)
         cursor = conn.cursor()
         cursor.execute('SELECT email FROM website_users WHERE id = ?', (user_id,))
         user_result = cursor.fetchone()
-        conn.close()
         
         if not user_result:
+            conn.close()
             return jsonify({'success': False, 'message': 'کاربر یافت نشد'}), 404
         
         user_email = user_result[0]
         if user_email.lower() not in [e.lower() for e in ADMIN_EMAILS]:
+            conn.close()
             return jsonify({'success': False, 'message': 'فقط ادمین‌ها می‌توانند این عملیات را انجام دهند'}), 403
         
         # Get all customers without user_id
-        conn = sqlite3.connect(CUSTOMERS_DB)
-        cursor = conn.cursor()
         cursor.execute('SELECT id, admin_email FROM customers WHERE user_id IS NULL')
         customers_without_user = cursor.fetchall()
         
         updated_count = 0
         for customer_id, admin_email in customers_without_user:
             # Find matching user by email
-            conn_users = sqlite3.connect(USERS_DB)
-            cursor_users = conn_users.cursor()
-            cursor_users.execute('SELECT id FROM website_users WHERE email = ?', (admin_email,))
-            user_match = cursor_users.fetchone()
-            conn_users.close()
+            cursor.execute('SELECT id FROM website_users WHERE email = ?', (admin_email,))
+            user_match = cursor.fetchone()
             
             if user_match:
                 # Update customer with user_id
