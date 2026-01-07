@@ -1598,6 +1598,311 @@ def admin_delete_databases():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
+# Store pending delete SMS codes (phone -> {code, databases, expires})
+pending_delete_codes = {}
+
+@app.route('/api/admin/backup-database', methods=['POST'])
+def admin_backup_database():
+    """Create backup of a database before deletion (admin only)"""
+    try:
+        print("=" * 60)
+        print("📦 BACKUP DATABASE REQUEST RECEIVED")
+        print("=" * 60)
+        
+        # Check if user is admin
+        if 'user_id' not in session:
+            return jsonify({'success': False, 'error': 'لطفاً ابتدا وارد شوید'}), 401
+        
+        user_id = session['user_id']
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        cursor.execute('SELECT email FROM website_users WHERE id = ?', (user_id,))
+        result = cursor.fetchone()
+        conn.close()
+        
+        if not result:
+            return jsonify({'success': False, 'error': 'کاربر یافت نشد'}), 404
+        
+        user_email = result[0]
+        is_admin = user_email.lower() in [e.lower() for e in ADMIN_EMAILS]
+        
+        if not is_admin:
+            return jsonify({'success': False, 'error': 'فقط ادمین‌ها اجازه بکاپ‌گیری دارند'}), 403
+        
+        data = request.get_json()
+        database = data.get('database')
+        
+        if not database:
+            return jsonify({'success': False, 'error': 'نام دیتابیس الزامی است'}), 400
+        
+        print(f"📦 Creating backup for: {database}")
+        
+        # Create backup using Odoo XML-RPC
+        try:
+            import base64
+            import os
+            from datetime import datetime
+            
+            CORRECT_MASTER_PASSWORD = 'OdooMaster2025!'
+            
+            set_socket_timeout(300)  # 5 minute timeout for backup
+            db = xmlrpc.client.ServerProxy(f'{ODOO_URL}/xmlrpc/2/db', allow_none=True)
+            
+            # Get database backup (base64 encoded)
+            backup_data = db.dump(CORRECT_MASTER_PASSWORD, database, 'zip')
+            
+            # Create backups directory
+            backup_dir = os.path.join(os.path.dirname(__file__), 'database_backups')
+            os.makedirs(backup_dir, exist_ok=True)
+            
+            # Save backup file
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            backup_filename = f"{database}_{timestamp}.zip"
+            backup_path = os.path.join(backup_dir, backup_filename)
+            
+            with open(backup_path, 'wb') as f:
+                f.write(base64.b64decode(backup_data))
+            
+            file_size = os.path.getsize(backup_path)
+            print(f"✅ Backup created: {backup_filename} ({file_size} bytes)")
+            
+            return jsonify({
+                'success': True,
+                'backup_file': backup_filename,
+                'file_size': file_size,
+                'message': f'بکاپ {database} با موفقیت ایجاد شد'
+            })
+            
+        except Exception as backup_error:
+            print(f"❌ Backup error: {backup_error}")
+            return jsonify({
+                'success': False,
+                'error': f'خطا در بکاپ‌گیری: {str(backup_error)}'
+            }), 500
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/admin/send-delete-sms', methods=['POST'])
+def admin_send_delete_sms():
+    """Send SMS verification code for database deletion (admin only)"""
+    try:
+        print("=" * 60)
+        print("📱 SEND DELETE SMS REQUEST RECEIVED")
+        print("=" * 60)
+        
+        # Check if user is admin
+        if 'user_id' not in session:
+            return jsonify({'success': False, 'error': 'لطفاً ابتدا وارد شوید'}), 401
+        
+        user_id = session['user_id']
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        cursor.execute('SELECT email FROM website_users WHERE id = ?', (user_id,))
+        result = cursor.fetchone()
+        conn.close()
+        
+        if not result:
+            return jsonify({'success': False, 'error': 'کاربر یافت نشد'}), 404
+        
+        user_email = result[0]
+        is_admin = user_email.lower() in [e.lower() for e in ADMIN_EMAILS]
+        
+        if not is_admin:
+            return jsonify({'success': False, 'error': 'فقط ادمین‌ها اجازه حذف دیتابیس دارند'}), 403
+        
+        data = request.get_json()
+        phone = data.get('phone')
+        databases = data.get('databases', [])
+        
+        if not phone:
+            return jsonify({'success': False, 'error': 'شماره موبایل الزامی است'}), 400
+        
+        if not databases:
+            return jsonify({'success': False, 'error': 'لیست دیتابیس‌ها خالی است'}), 400
+        
+        # Generate 6-digit code
+        code = generate_sms_code()
+        
+        print(f"📱 Sending delete confirmation SMS to: {phone}")
+        print(f"🔐 Code: {code}")
+        print(f"🗄️ Databases: {databases}")
+        
+        # Store code with expiration (2 minutes)
+        from datetime import datetime, timedelta
+        pending_delete_codes[phone] = {
+            'code': code,
+            'databases': databases,
+            'expires': datetime.now() + timedelta(minutes=2)
+        }
+        
+        # Send SMS
+        message = f"⚠️ کد حذف دیتابیس OdooMaster: {code}\nاین کد تا ۲ دقیقه معتبر است."
+        
+        try:
+            if KAVENEGAR_API_KEY:
+                url = f"https://api.kavenegar.com/v1/{KAVENEGAR_API_KEY}/sms/send.json"
+                params = {
+                    'receptor': phone,
+                    'message': message,
+                    'sender': KAVENEGAR_SENDER
+                }
+                response = requests.post(url, data=params)
+                result = response.json()
+                
+                if result.get('return', {}).get('status') == 200:
+                    print("✅ SMS sent successfully!")
+                    return jsonify({
+                        'success': True,
+                        'message': 'کد تأیید به موبایل شما ارسال شد'
+                    })
+                else:
+                    error_msg = result.get('return', {}).get('message', 'Unknown error')
+                    print(f"❌ SMS error: {error_msg}")
+                    return jsonify({
+                        'success': False,
+                        'error': f'خطا در ارسال پیامک: {error_msg}'
+                    }), 500
+            else:
+                # For development - just return success (code is in console)
+                print("⚠️ No Kavenegar API key - code printed to console only")
+                return jsonify({
+                    'success': True,
+                    'message': 'کد تأیید به موبایل شما ارسال شد (حالت توسعه)'
+                })
+                
+        except Exception as sms_error:
+            print(f"❌ SMS send error: {sms_error}")
+            return jsonify({
+                'success': False,
+                'error': f'خطا در ارسال پیامک: {str(sms_error)}'
+            }), 500
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/admin/delete-databases-with-sms', methods=['POST'])
+def admin_delete_databases_with_sms():
+    """Delete databases after SMS verification (admin only)"""
+    try:
+        print("=" * 60)
+        print("🗑️ DELETE DATABASES WITH SMS VERIFICATION")
+        print("=" * 60)
+        
+        # Check if user is admin
+        if 'user_id' not in session:
+            return jsonify({'success': False, 'error': 'لطفاً ابتدا وارد شوید'}), 401
+        
+        user_id = session['user_id']
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        cursor.execute('SELECT email FROM website_users WHERE id = ?', (user_id,))
+        result = cursor.fetchone()
+        conn.close()
+        
+        if not result:
+            return jsonify({'success': False, 'error': 'کاربر یافت نشد'}), 404
+        
+        user_email = result[0]
+        is_admin = user_email.lower() in [e.lower() for e in ADMIN_EMAILS]
+        
+        if not is_admin:
+            return jsonify({'success': False, 'error': 'فقط ادمین‌ها اجازه حذف دیتابیس دارند'}), 403
+        
+        data = request.get_json()
+        phone = data.get('phone')
+        sms_code = data.get('sms_code')
+        databases = data.get('databases', [])
+        backups = data.get('backups', [])
+        
+        if not phone or not sms_code:
+            return jsonify({'success': False, 'error': 'شماره موبایل و کد تأیید الزامی است'}), 400
+        
+        if not databases:
+            return jsonify({'success': False, 'error': 'لیست دیتابیس‌ها خالی است'}), 400
+        
+        # Verify SMS code
+        from datetime import datetime
+        pending = pending_delete_codes.get(phone)
+        
+        if not pending:
+            return jsonify({'success': False, 'error': 'کد تأیید یافت نشد. لطفاً کد جدید درخواست کنید.'}), 400
+        
+        if datetime.now() > pending['expires']:
+            del pending_delete_codes[phone]
+            return jsonify({'success': False, 'error': 'کد تأیید منقضی شده است. لطفاً کد جدید درخواست کنید.'}), 400
+        
+        if pending['code'] != sms_code:
+            return jsonify({'success': False, 'error': 'کد تأیید اشتباه است!'}), 400
+        
+        # Code is correct - proceed with deletion
+        print("✅ SMS code verified!")
+        del pending_delete_codes[phone]
+        
+        CORRECT_MASTER_PASSWORD = 'OdooMaster2025!'
+        
+        # Delete databases from Odoo
+        set_socket_timeout(30)
+        db = xmlrpc.client.ServerProxy(f'{ODOO_URL}/xmlrpc/2/db', allow_none=True)
+        
+        deleted_count = 0
+        failed_databases = []
+        
+        for database in databases:
+            try:
+                print(f"   Deleting: {database}...")
+                db.drop(CORRECT_MASTER_PASSWORD, database)
+                deleted_count += 1
+                print(f"   ✅ Deleted from Odoo: {database}")
+                
+                # Also delete from SQLite
+                conn = sqlite3.connect(CUSTOMERS_DB)
+                cursor = conn.cursor()
+                cursor.execute('DELETE FROM customers WHERE database_name = ?', (database,))
+                conn.commit()
+                conn.close()
+                print(f"   ✅ Deleted from SQLite: {database}")
+                
+            except Exception as e:
+                error_msg = str(e)
+                print(f"   ❌ Failed to delete {database}: {error_msg}")
+                failed_databases.append(f"{database}: {error_msg}")
+        
+        # Log the deletion with backup info
+        print(f"📦 Backups created: {len([b for b in backups if b.get('file') != 'BACKUP_FAILED'])}")
+        
+        message = f'✅ {deleted_count} دیتابیس با تأیید پیامکی حذف شد'
+        if failed_databases:
+            message += f'\n\n❌ {len(failed_databases)} دیتابیس حذف نشد:\n' + '\n'.join(failed_databases)
+        
+        print("=" * 60)
+        print(f"✅ DELETION WITH SMS VERIFICATION COMPLETE")
+        print(f"   Deleted: {deleted_count}")
+        print(f"   Failed: {len(failed_databases)}")
+        print("=" * 60)
+        
+        return jsonify({
+            'success': True,
+            'deleted_count': deleted_count,
+            'failed_count': len(failed_databases),
+            'message': message
+        })
+        
+    except Exception as e:
+        import traceback
+        print("=" * 60)
+        print("❌ EXCEPTION IN DELETE WITH SMS API:")
+        traceback.print_exc()
+        print("=" * 60)
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 @app.route('/api/create-demo-data', methods=['POST', 'OPTIONS'])
 def api_create_demo_data():
     """Create demo data (users, products, customers, suppliers) in an Odoo database"""
