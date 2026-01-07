@@ -1254,6 +1254,61 @@ def migrate_customers():
         return jsonify({'success': False, 'message': str(e)}), 500
 
 
+@app.route('/api/debug-customer-link', methods=['GET'])
+def debug_customer_link():
+    """Debug endpoint to check customer-user linking"""
+    try:
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({'success': False, 'logged_in': False, 'message': 'کاربر لاگین نیست'})
+        
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        # Get user info
+        cursor.execute('SELECT id, email, full_name FROM website_users WHERE id = ?', (user_id,))
+        user = cursor.fetchone()
+        
+        if not user:
+            conn.close()
+            return jsonify({'success': False, 'message': 'کاربر یافت نشد', 'user_id': user_id})
+        
+        user_email = user['email']
+        
+        # Get all customers for this user
+        cursor.execute('''
+            SELECT id, company_name, admin_email, database_name, user_id, created_at 
+            FROM customers 
+            WHERE user_id = ? OR admin_email = ?
+        ''', (user_id, user_email))
+        customers = [dict(row) for row in cursor.fetchall()]
+        
+        # Get all customers without user_id
+        cursor.execute('SELECT id, company_name, admin_email, database_name FROM customers WHERE user_id IS NULL')
+        orphan_customers = [dict(row) for row in cursor.fetchall()]
+        
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'logged_in': True,
+            'user': {
+                'id': user['id'],
+                'email': user['email'],
+                'full_name': user['full_name']
+            },
+            'my_databases': customers,
+            'my_databases_count': len(customers),
+            'orphan_databases': orphan_customers,
+            'orphan_count': len(orphan_customers)
+        })
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
 @app.route('/api/verify-database', methods=['POST'])
 def verify_database():
     """Verify if database actually exists in Odoo"""
