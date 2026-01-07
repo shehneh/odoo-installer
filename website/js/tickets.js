@@ -36,6 +36,24 @@ const categoryIcons = {
     'feature': '✨'
 };
 
+// Get last message preview (truncated)
+function getLastMessagePreview(ticket) {
+    if (!ticket.last_message) {
+        return { text: ticket.subject, isAdmin: false };
+    }
+    
+    // Truncate to ~50 chars
+    let text = ticket.last_message;
+    if (text.length > 60) {
+        text = text.substring(0, 57) + '...';
+    }
+    
+    return {
+        text: text,
+        isAdmin: ticket.last_message_is_admin === 1
+    };
+}
+
 // Check if ticket has unread messages
 function hasUnreadMessages(ticket) {
     const lastSeen = lastSeenTickets[ticket.id] || 0;
@@ -177,6 +195,7 @@ function displayMyTickets(tickets) {
 
     html += tickets.map(ticket => {
         const isUnread = hasUnreadMessages(ticket);
+        const lastMsg = getLastMessagePreview(ticket);
         return `
             <div class="ticket-card ${isUnread ? 'unread' : ''}" onclick="openTicketDetail(${ticket.id})">
                 <div class="ticket-card-inner">
@@ -189,6 +208,10 @@ function displayMyTickets(tickets) {
                                 ${ticket.ticket_number}
                             </span>
                             <div class="ticket-subject">${ticket.subject}</div>
+                            <div class="ticket-last-message" style="font-size: 12px; color: #64748b; margin-top: 6px; display: flex; align-items: center; gap: 6px;">
+                                <span style="color: ${lastMsg.isAdmin ? '#7c3aed' : '#059669'}; font-weight: 500;">${lastMsg.isAdmin ? '🛡️ پشتیبانی:' : '💬 شما:'}</span>
+                                <span style="color: #64748b;">${lastMsg.text}</span>
+                            </div>
                         </div>
                         <span class="ticket-status ${ticket.status}">${statusNames[ticket.status]}</span>
                     </div>
@@ -309,6 +332,7 @@ function displayAdminTickets(tickets) {
 
     html += tickets.map(ticket => {
         const isUnread = hasUnreadMessages(ticket);
+        const lastMsg = getLastMessagePreview(ticket);
         return `
             <div class="ticket-card ${isUnread ? 'unread' : ''}" onclick="openTicketDetail(${ticket.id})">
                 <div class="ticket-card-inner">
@@ -328,6 +352,10 @@ function displayAdminTickets(tickets) {
                                 </svg>
                                 ${ticket.user_name || 'کاربر'} 
                                 <span style="color: #94a3b8;">(${ticket.user_email || '-'})</span>
+                            </div>
+                            <div class="ticket-last-message" style="font-size: 12px; color: #64748b; margin-top: 6px; padding: 8px 12px; background: ${lastMsg.isAdmin ? '#f3e8ff' : '#ecfdf5'}; border-radius: 8px; border-right: 3px solid ${lastMsg.isAdmin ? '#7c3aed' : '#059669'};">
+                                <span style="color: ${lastMsg.isAdmin ? '#7c3aed' : '#059669'}; font-weight: 600;">${lastMsg.isAdmin ? '🛡️ پشتیبانی:' : '👤 کاربر:'}</span>
+                                <span style="color: #475569; margin-right: 6px;">${lastMsg.text}</span>
                             </div>
                         </div>
                         <span class="ticket-status ${ticket.status}">${statusNames[ticket.status]}</span>

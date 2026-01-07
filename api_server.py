@@ -699,19 +699,41 @@ def get_tickets():
         user_row = cursor.fetchone()
         is_admin = user_row['is_admin'] if user_row else False
         
-        # Get tickets
+        # Get tickets with last message (for both admin and user)
+        # Sorting for admin: Priority (urgent > high > medium > low), then status (open > in_progress > waiting > closed), then updated_at DESC
         if is_admin:
             cursor.execute('''
                 SELECT t.*, u.full_name as user_name, u.email as user_email,
-                    (SELECT COUNT(*) FROM ticket_messages WHERE ticket_id = t.id) as message_count
+                    (SELECT COUNT(*) FROM ticket_messages WHERE ticket_id = t.id) as message_count,
+                    (SELECT message FROM ticket_messages WHERE ticket_id = t.id ORDER BY created_at DESC LIMIT 1) as last_message,
+                    (SELECT is_admin FROM ticket_messages WHERE ticket_id = t.id ORDER BY created_at DESC LIMIT 1) as last_message_is_admin,
+                    (SELECT created_at FROM ticket_messages WHERE ticket_id = t.id ORDER BY created_at DESC LIMIT 1) as last_message_at
                 FROM tickets t
                 LEFT JOIN website_users u ON t.user_id = u.id
-                ORDER BY t.updated_at DESC
+                ORDER BY 
+                    CASE t.status 
+                        WHEN 'open' THEN 1 
+                        WHEN 'in_progress' THEN 2 
+                        WHEN 'waiting' THEN 3 
+                        WHEN 'closed' THEN 4 
+                        ELSE 5 
+                    END ASC,
+                    CASE t.priority 
+                        WHEN 'urgent' THEN 1 
+                        WHEN 'high' THEN 2 
+                        WHEN 'medium' THEN 3 
+                        WHEN 'low' THEN 4 
+                        ELSE 5 
+                    END ASC,
+                    t.updated_at DESC
             ''')
         else:
             cursor.execute('''
                 SELECT t.*,
-                    (SELECT COUNT(*) FROM ticket_messages WHERE ticket_id = t.id) as message_count
+                    (SELECT COUNT(*) FROM ticket_messages WHERE ticket_id = t.id) as message_count,
+                    (SELECT message FROM ticket_messages WHERE ticket_id = t.id ORDER BY created_at DESC LIMIT 1) as last_message,
+                    (SELECT is_admin FROM ticket_messages WHERE ticket_id = t.id ORDER BY created_at DESC LIMIT 1) as last_message_is_admin,
+                    (SELECT created_at FROM ticket_messages WHERE ticket_id = t.id ORDER BY created_at DESC LIMIT 1) as last_message_at
                 FROM tickets t
                 WHERE t.user_id = ?
                 ORDER BY t.updated_at DESC
