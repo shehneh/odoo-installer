@@ -101,10 +101,20 @@ def init_customers_db():
             status TEXT DEFAULT 'active',
             plan TEXT DEFAULT 'starter',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            last_login TIMESTAMP
+            last_login TIMESTAMP,
+            user_id INTEGER,
+            FOREIGN KEY (user_id) REFERENCES website_users (id)
         )
         '''
     )
+    
+    # Add user_id column if it doesn't exist (for existing databases)
+    try:
+        cursor.execute('ALTER TABLE customers ADD COLUMN user_id INTEGER')
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass  # Column already exists
+    
     conn.commit()
     conn.close()
 
@@ -169,17 +179,17 @@ def create_odoo_tenant_database(
         return False, str(e)
 
 
-def save_customer(company_name, admin_email, admin_name, phone, database_name, admin_password):
+def save_customer(company_name, admin_email, admin_name, phone, database_name, admin_password, user_id=None):
     """Save customer information to local database"""
     try:
         conn = sqlite3.connect(CUSTOMERS_DB)
         cursor = conn.cursor()
         cursor.execute(
             '''
-            INSERT INTO customers (company_name, admin_email, admin_name, phone, database_name, admin_password)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO customers (company_name, admin_email, admin_name, phone, database_name, admin_password, user_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             ''',
-            (company_name, admin_email, admin_name, phone, database_name, admin_password),
+            (company_name, admin_email, admin_name, phone, database_name, admin_password, user_id),
         )
         conn.commit()
         conn.close()
@@ -1927,6 +1937,21 @@ def create_tenant():
         if not company_name or not admin_email:
             return jsonify({'success': False, 'message': 'نام شرکت و ایمیل الزامی است'}), 400
 
+        # Get user_id from session or by email lookup
+        user_id = session.get('user_id')
+        if not user_id:
+            # Try to find user by email in website_users table
+            try:
+                conn_users = sqlite3.connect(USERS_DB)
+                cursor_users = conn_users.cursor()
+                cursor_users.execute('SELECT id FROM website_users WHERE email = ?', (admin_email,))
+                user_result = cursor_users.fetchone()
+                conn_users.close()
+                if user_result:
+                    user_id = user_result[0]
+            except Exception as e:
+                print(f"Warning: Could not lookup user_id: {e}")
+
         # Check if customer already exists in our database
         conn = sqlite3.connect(CUSTOMERS_DB)
         cursor = conn.cursor()
@@ -2016,7 +2041,7 @@ def create_tenant():
                 print(f"⚠️ Module installation had issues: {modules_msg}")
                 modules_installed_msg = f" ⚠ نصب ماژول‌ها: {modules_msg}"
 
-        save_customer(company_name, admin_email, admin_name, phone, db_name, admin_password)
+        save_customer(company_name, admin_email, admin_name, phone, db_name, admin_password, user_id)
 
         response_data = {
             'success': True,
