@@ -1318,7 +1318,8 @@ def google_login():
     # Store state in session
     from flask import session
     session['oauth_state'] = state
-    session['redirect_after_login'] = request.args.get('redirect', '/onboarding.html')
+    # Support both 'return_to' and 'redirect' parameter names
+    session['redirect_after_login'] = request.args.get('return_to') or request.args.get('redirect', '/onboarding.html')
     
     return redirect(authorization_url)
 

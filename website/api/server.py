@@ -4,7 +4,7 @@ OdooMaster Website API Server
 Backend for user authentication, licenses, and downloads
 """
 
-from flask import Flask, request, jsonify, send_file, session, send_from_directory, abort, Response
+from flask import Flask, request, jsonify, send_file, session, send_from_directory, abort, Response, redirect, make_response
 from flask_cors import CORS
 from functools import wraps
 import base64
@@ -264,19 +264,34 @@ def extract_bearer_token() -> str:
 def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        token = extract_bearer_token()
-        if not token:
-            return jsonify({'error': 'توکن احراز هویت یافت نشد'}), 401
-        
-        users = load_json(USERS_FILE)
         user = None
-        for u in users.values():
-            if (u.get('token') or '').strip() == token:
-                user = u
-                break
+        users = load_json(USERS_FILE)
+        
+        # روش ۱: بررسی session
+        user_id = session.get('user_id')
+        if user_id and str(user_id) in users:
+            user = users[str(user_id)]
+        
+        # روش ۲: بررسی auth_token cookie
+        if not user:
+            auth_token = request.cookies.get('auth_token')
+            if auth_token:
+                for u in users.values():
+                    if (u.get('token') or '').strip() == auth_token:
+                        user = u
+                        break
+        
+        # روش ۳: بررسی Authorization header
+        if not user:
+            token = extract_bearer_token()
+            if token:
+                for u in users.values():
+                    if (u.get('token') or '').strip() == token:
+                        user = u
+                        break
         
         if not user:
-            return jsonify({'error': 'توکن نامعتبر است'}), 401
+            return jsonify({'error': 'توکن احراز هویت یافت نشد'}), 401
         
         request.current_user = user
         return f(*args, **kwargs)
@@ -287,19 +302,34 @@ def admin_required(f):
     """Decorator to require admin privileges."""
     @wraps(f)
     def decorated(*args, **kwargs):
-        token = extract_bearer_token()
-        if not token:
-            return jsonify({'error': 'توکن احراز هویت یافت نشد'}), 401
-        
-        users = load_json(USERS_FILE)
         user = None
-        for u in users.values():
-            if (u.get('token') or '').strip() == token:
-                user = u
-                break
+        users = load_json(USERS_FILE)
+        
+        # روش ۱: بررسی session
+        user_id = session.get('user_id')
+        if user_id and str(user_id) in users:
+            user = users[str(user_id)]
+        
+        # روش ۲: بررسی auth_token cookie
+        if not user:
+            auth_token = request.cookies.get('auth_token')
+            if auth_token:
+                for u in users.values():
+                    if (u.get('token') or '').strip() == auth_token:
+                        user = u
+                        break
+        
+        # روش ۳: بررسی Authorization header
+        if not user:
+            token = extract_bearer_token()
+            if token:
+                for u in users.values():
+                    if (u.get('token') or '').strip() == token:
+                        user = u
+                        break
         
         if not user:
-            return jsonify({'error': 'توکن نامعتبر است'}), 401
+            return jsonify({'error': 'توکن احراز هویت یافت نشد'}), 401
         
         if not user.get('is_admin'):
             return jsonify({'error': 'دسترسی مدیریتی ندارید'}), 403
@@ -558,6 +588,198 @@ def logout():
         save_json(USERS_FILE, users)
     
     return jsonify({'success': True, 'message': 'خروج موفقیت‌آمیز'})
+
+
+@app.route('/auth/google')
+def google_login():
+    """Redirect to Google OAuth login"""
+    try:
+        from requests_oauthlib import OAuth2Session
+    except ImportError:
+        return '''
+        <html><body style="font-family: Arial; text-align: center; padding: 50px;">
+        <h2>خطا: ماژول OAuth نصب نیست</h2>
+        <p>لطفاً دستور زیر را اجرا کنید:</p>
+        <code style="background: #f0f0f0; padding: 10px; display: inline-block;">
+        pip install requests-oauthlib
+        </code>
+        <br><br>
+        <a href="/user-login.html">بازگشت به صفحه ورود</a>
+        </body></html>
+        '''
+    
+    # Dynamic redirect URI
+    redirect_uri = os.environ.get('GOOGLE_REDIRECT_URI')
+    if not redirect_uri:
+        redirect_uri = request.url_root.rstrip('/') + '/callback/google'
+    
+    # Google OAuth configuration (use environment variables)
+    GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '')
+    if not GOOGLE_CLIENT_ID:
+        return "خطا: GOOGLE_CLIENT_ID تنظیم نشده است", 500
+    
+    google = OAuth2Session(
+        GOOGLE_CLIENT_ID,
+        redirect_uri=redirect_uri,
+        scope=['openid', 'email', 'profile']
+    )
+    
+    authorization_url, state = google.authorization_url(
+        'https://accounts.google.com/o/oauth2/auth',
+        access_type='offline',
+        prompt='select_account'
+    )
+    
+    # Store state in session
+    session['oauth_state'] = state
+    session['redirect_after_login'] = request.args.get('return_to', '/onboarding.html')
+    
+    return redirect(authorization_url)
+
+
+@app.route('/callback/google')
+def google_callback():
+    """Handle Google OAuth callback"""
+    try:
+        from requests_oauthlib import OAuth2Session
+    except ImportError:
+        return "خطا: requests-oauthlib نصب نیست", 500
+    
+    try:
+        # Dynamic redirect URI
+        redirect_uri = os.environ.get('GOOGLE_REDIRECT_URI')
+        if not redirect_uri:
+            redirect_uri = request.url_root.rstrip('/') + '/callback/google'
+        
+        # Google OAuth configuration (use environment variables)
+        GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '')
+        GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', '')
+        
+        if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
+            return "خطا: تنظیمات Google OAuth ناقص است", 500
+        
+        google = OAuth2Session(
+            GOOGLE_CLIENT_ID,
+            redirect_uri=redirect_uri,
+            state=session.get('oauth_state')
+        )
+        
+        # Get token
+        token = google.fetch_token(
+            'https://oauth2.googleapis.com/token',
+            client_secret=GOOGLE_CLIENT_SECRET,
+            authorization_response=request.url
+        )
+        
+        # Get user info
+        resp = google.get('https://www.googleapis.com/oauth2/v3/userinfo')
+        user_info = resp.json()
+        
+        email = user_info.get('email', '')
+        name = user_info.get('name', '')
+        picture = user_info.get('picture', '')
+        
+        if not email:
+            return redirect('/user-login.html?error=no_email')
+        
+        # Check/create user in users.json
+        users = load_json(USERS_FILE)
+        user = None
+        user_id = None
+        
+        # Find existing user by email
+        for uid, u in users.items():
+            if u.get('email', '').lower() == email.lower():
+                user = u
+                user_id = uid
+                break
+        
+        if not user:
+            # Create new user
+            user_id = str(max([int(k) for k in users.keys()] + [0]) + 1)
+            user = {
+                'id': int(user_id),
+                'name': name,
+                'email': email.lower(),
+                'password': '',  # No password for Google users
+                'auth_method': 'google',
+                'token': secrets.token_hex(32),
+                'is_admin': False,
+                'created_at': datetime.now().isoformat()
+            }
+            users[user_id] = user
+            save_json(USERS_FILE, users)
+        
+        # Set session and cookies
+        session['user_id'] = user.get('id')
+        session['user_email'] = email.lower()
+        session['user_name'] = name
+        
+        redirect_url = session.get('redirect_after_login', '/onboarding.html')
+        response = make_response(redirect(redirect_url))
+        response.set_cookie('user_email', email.lower(), max_age=30*24*60*60)
+        response.set_cookie('user_name', name, max_age=30*24*60*60)
+        response.set_cookie('auth_token', user.get('token', ''), max_age=30*24*60*60)
+        response.set_cookie('auth_method', 'google', max_age=30*24*60*60)
+        
+        return response
+        
+    except Exception as e:
+        print(f"Error in Google callback: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return redirect(f'/user-login.html?error=oauth_failed')
+
+
+@app.route('/api/user-status', methods=['GET'])
+def get_user_status():
+    """Get current user status from session/cookie or token.
+    
+    This endpoint is used by frontend to check if user is logged in.
+    It checks: 1. session cookie, 2. auth_token cookie, 3. Authorization header
+    """
+    user = None
+    users = load_json(USERS_FILE)
+    
+    # 1. Check session (Flask session cookie)
+    user_id = session.get('user_id')
+    if user_id:
+        for u in users.values():
+            if u.get('id') == user_id:
+                user = u
+                break
+    
+    # 2. Check auth_token cookie
+    if not user:
+        auth_token = request.cookies.get('auth_token')
+        if auth_token:
+            for u in users.values():
+                if (u.get('token') or '').strip() == auth_token.strip():
+                    user = u
+                    break
+    
+    # 3. Check Authorization header
+    if not user:
+        token = extract_bearer_token()
+        if token:
+            for u in users.values():
+                if (u.get('token') or '').strip() == token:
+                    user = u
+                    break
+    
+    if not user:
+        return jsonify({'logged_in': False}), 401
+    
+    return jsonify({
+        'logged_in': True,
+        'user': {
+            'id': user.get('id'),
+            'name': user.get('name'),
+            'email': user.get('email'),
+            'is_admin': bool(user.get('is_admin'))
+        }
+    })
+
 
 @app.route('/api/auth/me', methods=['GET'])
 @login_required
@@ -1033,9 +1255,9 @@ def load_plans():
 
 def _plan_to_frontend(plan: dict) -> dict:
     """Convert internal plan dict to frontend shape expected by dashboard-unified.html"""
-    # duration in months (rounded down)
-    duration_days = int(plan.get('duration_days', 0) or 0)
-    duration_months = duration_days // 30 if duration_days > 0 else 0
+    # duration in months - keep fractional for hours/days
+    duration_days = float(plan.get('duration_days', 0) or 0)
+    duration_months = duration_days / 30 if duration_days > 0 else 0
 
     features = plan.get('features') or []
     if isinstance(features, list):
@@ -1162,8 +1384,13 @@ def admin_update_plan(plan_id):
     data = request.json or {}
     plan = plans[plan_id]
     
+    # DEBUG: Log incoming data
+    print(f"[DEBUG] admin_update_plan called for plan_id={plan_id}")
+    print(f"[DEBUG] Received data: {data}")
+    
     #َ Allow changing plan id (rename)
     new_plan_id = data.get('plan_id') 
+    print(f"[DEBUG] new_plan_id from data: {new_plan_id}")
     if new_plan_id and new_plan_id != plan_id:
         # Check if new id already exists
         if new_plan_id in plans:
@@ -1204,12 +1431,24 @@ def admin_update_plan(plan_id):
 
     # Duration: accept duration_days or duration_months from frontend
     if 'duration_days' in data:
-        plan['duration_days'] = int(data.get('duration_days') or 0)
+        plan['duration_days'] = float(data.get('duration_days') or 0)
     elif 'duration_months' in data:
         try:
-            plan['duration_days'] = int(int(data.get('duration_months') or 0) * 30)
+            # Use float to preserve fractional months (hours/days)
+            months = float(data.get('duration_months') or 0)
+            plan['duration_days'] = months * 30  # Keep as float for precision
         except Exception:
             plan['duration_days'] = plan.get('duration_days', 0)
+    
+    # Duration display texts
+    if 'duration_display_fa' in data:
+        plan['duration_display_fa'] = data.get('duration_display_fa', '')
+    if 'duration_display_en' in data:
+        plan['duration_display_en'] = data.get('duration_display_en', '')
+    
+    # Discount percent
+    if 'discount_percent' in data:
+        plan['discount_percent'] = int(data.get('discount_percent') or 0)
 
     # popular / active may come as is_popular / is_active (1/0)
     if 'popular' in data or 'is_popular' in data:
