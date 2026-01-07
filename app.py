@@ -1178,8 +1178,12 @@ def list_customers():
             # Admin sees all databases
             cursor.execute('SELECT * FROM customers ORDER BY created_at DESC')
         else:
-            # Regular user sees only their own databases
-            cursor.execute('SELECT * FROM customers WHERE user_id = ? ORDER BY created_at DESC', (user_id,))
+            # Regular user sees only their own databases (by user_id or admin_email as fallback)
+            cursor.execute('''
+                SELECT * FROM customers 
+                WHERE user_id = ? OR admin_email = ? 
+                ORDER BY created_at DESC
+            ''', (user_id, user_email))
         
         customers = [dict(row) for row in cursor.fetchall()]
         conn.close()
