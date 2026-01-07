@@ -1254,6 +1254,70 @@ def migrate_customers():
         return jsonify({'success': False, 'message': str(e)}), 500
 
 
+@app.route('/api/add-existing-database', methods=['POST'])
+def add_existing_database():
+    """Admin endpoint to add an existing Odoo database to customers table"""
+    try:
+        # Only admins can run this
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({'success': False, 'message': 'لطفاً ابتدا وارد شوید'}), 401
+        
+        # Check if admin
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        cursor.execute('SELECT email FROM website_users WHERE id = ?', (user_id,))
+        user_result = cursor.fetchone()
+        
+        if not user_result:
+            conn.close()
+            return jsonify({'success': False, 'message': 'کاربر یافت نشد'}), 404
+        
+        user_email = user_result[0]
+        if user_email.lower() not in [e.lower() for e in ADMIN_EMAILS]:
+            conn.close()
+            return jsonify({'success': False, 'message': 'فقط ادمین‌ها می‌توانند این عملیات را انجام دهند'}), 403
+        
+        data = request.get_json()
+        database_name = data.get('database_name')
+        company_name = data.get('company_name', '')
+        admin_email = data.get('admin_email', '')
+        admin_name = data.get('admin_name', 'Admin')
+        admin_password = data.get('admin_password', 'unknown')
+        phone = data.get('phone', '')
+        target_user_id = data.get('user_id')
+        
+        if not database_name:
+            conn.close()
+            return jsonify({'success': False, 'message': 'database_name الزامی است'}), 400
+        
+        # Check if database already exists in table
+        cursor.execute('SELECT id FROM customers WHERE database_name = ?', (database_name,))
+        if cursor.fetchone():
+            conn.close()
+            return jsonify({'success': False, 'message': 'این دیتابیس قبلاً ثبت شده است'}), 400
+        
+        # Insert new record
+        cursor.execute('''
+            INSERT INTO customers (database_name, company_name, admin_email, admin_name, admin_password, phone, user_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (database_name, company_name, admin_email, admin_name, admin_password, phone, target_user_id))
+        conn.commit()
+        new_id = cursor.lastrowid
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'message': 'دیتابیس با موفقیت اضافه شد',
+            'customer_id': new_id
+        })
+            
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
 @app.route('/api/update-customer-user', methods=['POST'])
 def update_customer_user():
     """Admin endpoint to reassign a customer/database to a different user"""
