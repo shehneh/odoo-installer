@@ -223,9 +223,19 @@ def init_customers_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             last_login TIMESTAMP,
             installed_modules TEXT,
-            demo_users TEXT
+            demo_users TEXT,
+            user_id INTEGER,
+            FOREIGN KEY (user_id) REFERENCES website_users (id)
         )
     ''')
+    
+    # Add user_id column if it doesn't exist (for existing databases)
+    try:
+        cursor.execute('ALTER TABLE customers ADD COLUMN user_id INTEGER')
+        conn.commit()
+        print("✓ Added user_id column to customers table")
+    except sqlite3.OperationalError:
+        pass  # Column already exists
     
     # Demo users table
     cursor.execute('''
