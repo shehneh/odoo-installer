@@ -1196,6 +1196,64 @@ def list_customers():
         return jsonify({'success': False, 'message': str(e)}), 500
 
 
+@app.route('/api/migrate-customers', methods=['POST'])
+def migrate_customers():
+    """Link existing customers to users based on admin_email matching"""
+    try:
+        # Only admins can run this
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({'success': False, 'message': 'لطفاً ابتدا وارد شوید'}), 401
+        
+        # Check if admin
+        conn = sqlite3.connect(USERS_DB)
+        cursor = conn.cursor()
+        cursor.execute('SELECT email FROM website_users WHERE id = ?', (user_id,))
+        user_result = cursor.fetchone()
+        conn.close()
+        
+        if not user_result:
+            return jsonify({'success': False, 'message': 'کاربر یافت نشد'}), 404
+        
+        user_email = user_result[0]
+        if user_email.lower() not in [e.lower() for e in ADMIN_EMAILS]:
+            return jsonify({'success': False, 'message': 'فقط ادمین‌ها می‌توانند این عملیات را انجام دهند'}), 403
+        
+        # Get all customers without user_id
+        conn = sqlite3.connect(CUSTOMERS_DB)
+        cursor = conn.cursor()
+        cursor.execute('SELECT id, admin_email FROM customers WHERE user_id IS NULL')
+        customers_without_user = cursor.fetchall()
+        
+        updated_count = 0
+        for customer_id, admin_email in customers_without_user:
+            # Find matching user by email
+            conn_users = sqlite3.connect(USERS_DB)
+            cursor_users = conn_users.cursor()
+            cursor_users.execute('SELECT id FROM website_users WHERE email = ?', (admin_email,))
+            user_match = cursor_users.fetchone()
+            conn_users.close()
+            
+            if user_match:
+                # Update customer with user_id
+                cursor.execute('UPDATE customers SET user_id = ? WHERE id = ?', (user_match[0], customer_id))
+                updated_count += 1
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'message': f'{updated_count} دیتابیس به کاربران متصل شد',
+            'updated_count': updated_count,
+            'total_without_user': len(customers_without_user)
+        })
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
 @app.route('/api/verify-database', methods=['POST'])
 def verify_database():
     """Verify if database actually exists in Odoo"""
