@@ -2208,9 +2208,9 @@
                         <td><span class="badge ${plan.is_active ? 'active' : 'inactive'}">${plan.is_active ? 'فعال' : 'غیرفعال'}</span></td>
                         <td>${plan.display_order}</td>
                         <td style="display: flex; gap: 5px;">
-                            <button class="btn-icon primary" onclick="editPlan(${plan.id})" title="ویرایش">✏️</button>
-                            <button class="btn-icon ${plan.is_active ? 'danger' : 'success'}" onclick="togglePlanActive(${plan.id}, ${plan.is_active})" title="${plan.is_active ? 'غیرفعال کردن' : 'فعال کردن'}">${plan.is_active ? '🚫' : '✅'}</button>
-                            <button class="btn-icon danger" onclick="deletePlan(${plan.id})" title="حذف">🗑️</button>
+                            <button class="btn-icon primary" onclick="editPlan('${plan.id}')" title="ویرایش">✏️</button>
+                            <button class="btn-icon ${plan.is_active ? 'danger' : 'success'}" onclick="togglePlanActive('${plan.id}', ${plan.is_active})" title="${plan.is_active ? 'غیرفعال کردن' : 'فعال کردن'}">${plan.is_active ? '🚫' : '✅'}</button>
+                            <button class="btn-icon danger" onclick="deletePlan('${plan.id}')" title="حذف">🗑️</button>
                         </td>
                     </tr>
                 `).join('');
@@ -2415,7 +2415,9 @@
                 
                 if (data.success) {
                     allPlansData = data.plans;
-                    const plan = allPlansData.find(p => p.id === planId);
+                    // Convert planId to number for comparison since API returns numeric id
+                    const numericPlanId = parseInt(planId);
+                    const plan = allPlansData.find(p => p.id === numericPlanId);
                     
                     if (plan) {
                         document.getElementById('planId').value = plan.plan_id;
@@ -2480,6 +2482,11 @@
                     url = '/api/admin/plans';
                     method = 'POST';
                 }
+                
+                // DEBUG: Log what we're sending
+                console.log('[DEBUG] savePlan - editingPlanId:', editingPlanId);
+                console.log('[DEBUG] savePlan - planData:', JSON.stringify(planData, null, 2));
+                console.log('[DEBUG] savePlan - URL:', url, 'Method:', method);
 
                 const response = await fetch(url, {
                     method: method,
