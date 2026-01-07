@@ -542,6 +542,9 @@ def create_odoo_database(db_name, admin_email, admin_password, company_name, lan
     import time
     
     try:
+        # Set longer timeout for database creation (can take 2-3 minutes)
+        set_socket_timeout(300)  # 5 minutes timeout
+        
         # Connect to Odoo database service via XML-RPC
         db = xmlrpc.client.ServerProxy(f'{ODOO_URL}/xmlrpc/2/db', allow_none=True)
         
