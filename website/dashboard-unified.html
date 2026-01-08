@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>پنل کاربری - OdooMaster</title>
     <link rel="stylesheet" href="/css/unified-nav.css?v=8">
+    <!-- Select2 for searchable dropdowns -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js" crossorigin="anonymous"></script>
     <style>
         * {
             margin: 0;
@@ -196,6 +200,85 @@
             font-size: 14px;
             opacity: 0.9;
             margin-bottom: 8px;
+        }
+
+        /* Alert Banner for Email Warning */
+        .alert-banner {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .alert-banner .alert-icon {
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+        
+        .alert-banner .alert-content {
+            flex: 1;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .alert-banner .alert-content a {
+            color: white;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+        
+        .alert-banner .alert-content a:hover {
+            text-decoration: none;
+        }
+        
+        .alert-banner .alert-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        
+        .alert-banner .alert-close:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        /* Google Verify Button */
+        .btn-google-verify {
+            background: white;
+            border: 1px solid #ddd;
+            color: #333;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-google-verify:hover {
+            background: #f5f5f5;
+            border-color: #ccc;
+        }
+        
+        #emailVerifyButtons {
+            display: flex;
         }
 
         .stat-card .number {
@@ -393,7 +476,7 @@
         /* Modal Styles */
         .modal {
             position: fixed;
-            z-index: 1000;
+            z-index: 999999 !important;
             left: 0;
             top: 0;
             width: 100%;
@@ -452,7 +535,7 @@
             padding: 0 6px;
             box-shadow: 0 2px 8px rgba(255, 65, 108, 0.4);
             animation: pulse-notification 2s infinite;
-            z-index: 10;
+            z-index: 999998;
         }
         
         .notification-badge.hidden {
@@ -1160,6 +1243,672 @@
             gap: 8px;
         }
 
+        /* Module Advisor Styles */
+        .module-advisor-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .advisor-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .advisor-header h2 {
+            font-size: 28px;
+            color: #24292f;
+            margin-bottom: 12px;
+        }
+
+        .advisor-subtitle {
+            font-size: 16px;
+            color: #57606a;
+        }
+
+        .advisor-progress {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .progress-bar-container {
+            height: 8px;
+            background: #e1e4e8;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .question-container {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            min-height: 400px;
+        }
+
+        .welcome-screen {
+            text-align: center;
+        }
+
+        .welcome-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .welcome-screen h3 {
+            font-size: 24px;
+            color: #24292f;
+            margin-bottom: 20px;
+        }
+
+        .welcome-screen p {
+            font-size: 16px;
+            color: #57606a;
+            line-height: 1.8;
+            margin-bottom: 16px;
+        }
+
+        .welcome-features {
+            list-style: none;
+            padding: 0;
+            margin: 24px 0;
+            text-align: right;
+        }
+
+        .welcome-features li {
+            font-size: 15px;
+            padding: 10px 0;
+            color: #24292f;
+        }
+
+        .btn-large {
+            padding: 14px 32px;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        .question-card {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question-title {
+            font-size: 20px;
+            color: #24292f;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .question-description {
+            font-size: 15px;
+            color: #57606a;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .answers-grid {
+            display: grid;
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .answer-option {
+            background: #f6f8fa;
+            border: 2px solid #d0d7de;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .answer-option:hover {
+            background: #eef2f7;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102,126,234,0.15);
+        }
+
+        .answer-option.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            color: white;
+        }
+
+        .answer-option-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .answer-option.selected .answer-option-title,
+        .answer-option.selected .answer-option-desc {
+            color: white;
+        }
+
+        .answer-option-desc {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .question-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .results-container {
+            animation: fadeIn 0.5s ease;
+        }
+
+        .results-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .results-header h3 {
+            font-size: 26px;
+            color: #24292f;
+            margin-bottom: 12px;
+        }
+
+        .results-subtitle {
+            font-size: 16px;
+            color: #57606a;
+        }
+
+        .results-categories {
+            display: grid;
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .category-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #e1e4e8;
+        }
+
+        .category-icon {
+            font-size: 32px;
+        }
+
+        .category-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #24292f;
+        }
+
+        .modules-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .module-card {
+            background: #f6f8fa;
+            border-radius: 10px;
+            padding: 18px;
+            border: 2px solid #e1e4e8;
+            transition: all 0.2s ease;
+        }
+
+        .module-card:hover {
+            border-color: #667eea;
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(102,126,234,0.1);
+        }
+
+        .module-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .module-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #24292f;
+            margin-bottom: 4px;
+        }
+
+        .module-technical {
+            font-size: 12px;
+            color: #666;
+            font-family: 'Courier New', monospace;
+            background: #e1e4e8;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .module-priority {
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .priority-essential {
+            background: #28a745;
+            color: white;
+        }
+
+        .priority-recommended {
+            background: #0366d6;
+            color: white;
+        }
+
+        .priority-optional {
+            background: #ffd700;
+            color: #333;
+        }
+
+        .module-description {
+            font-size: 14px;
+            color: #57606a;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .module-features {
+            list-style: none;
+            padding: 0;
+            margin: 12px 0;
+        }
+
+        .module-features li {
+            font-size: 13px;
+            color: #666;
+            padding: 4px 0;
+            padding-right: 20px;
+            position: relative;
+        }
+
+        .module-features li:before {
+            content: '✓';
+            position: absolute;
+            right: 0;
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .module-dependencies {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e1e4e8;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .results-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        /* Role Cards Styles */
+        .roles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .role-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border-right: 5px solid #667eea;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .role-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+
+        .role-card-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .role-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .role-info h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #24292f;
+            margin-bottom: 4px;
+        }
+
+        .role-info .role-db {
+            font-size: 13px;
+            color: #57606a;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .role-info .role-db .db-icon {
+            opacity: 0.7;
+        }
+
+        .role-card-body {
+            margin-bottom: 16px;
+        }
+
+        .role-detail {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+            color: #4a5568;
+        }
+
+        .role-detail:last-child {
+            border-bottom: none;
+        }
+
+        .role-detail .detail-icon {
+            width: 24px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .role-card-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .role-card-actions .btn {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-login-role {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-login-role:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-copy-credentials {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-copy-credentials:hover {
+            background: #e2e8f0;
+        }
+
+        .role-status-badge {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .role-status-active {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .role-status-inactive {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        /* Add Role Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999999 !important;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .modal-header h3 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #24292f;
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: #f1f5f9;
+            color: #64748b;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .role-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .role-option {
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .role-option:hover {
+            border-color: #667eea;
+            background: #f8fafc;
+        }
+
+        .role-option.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        }
+
+        .role-option .role-option-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .role-option .role-option-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+        }
+        
+        /* Select2 RTL Customization */
+        .select2-container {
+            width: 100% !important;
+            z-index: 999999 !important;
+        }
+        
+        .select2-container--default .select2-selection--single {
+            height: 42px !important;
+            border: 2px solid #e2e8f0 !important;
+            border-radius: 8px !important;
+            background: white !important;
+        }
+        
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 38px !important;
+            padding-right: 12px !important;
+            padding-left: 32px !important;
+            color: #334155 !important;
+            text-align: right !important;
+        }
+        
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 38px !important;
+            left: 8px !important;
+            right: auto !important;
+        }
+        
+        .select2-dropdown {
+            border: 2px solid #e2e8f0 !important;
+            border-radius: 8px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+            z-index: 999999 !important;
+        }
+        
+        .select2-search--dropdown {
+            padding: 8px !important;
+            direction: rtl !important;
+        }
+        
+        .select2-search--dropdown .select2-search__field {
+            border: 2px solid #e2e8f0 !important;
+            border-radius: 6px !important;
+            padding: 8px 12px !important;
+            font-family: inherit !important;
+            direction: rtl !important;
+            text-align: right !important;
+        }
+        
+        .select2-search--dropdown .select2-search__field:focus {
+            border-color: #667eea !important;
+            outline: none !important;
+        }
+        
+        .select2-results__option {
+            padding: 10px 12px !important;
+            direction: rtl !important;
+            text-align: right !important;
+            font-family: inherit !important;
+        }
+        
+        .select2-results__option--highlighted {
+            background: #667eea !important;
+            color: white !important;
+        }
+        
+        .select2-container--default .select2-selection--single:focus,
+        .select2-container--default.select2-container--open .select2-selection--single {
+            border-color: #667eea !important;
+            outline: none !important;
+        }
+        
+        /* Ensure Select2 dropdown container stays on top */
+        .select2-container--open {
+            z-index: 999999 !important;
+        }
+        
+        .select2-results {
+            z-index: 999999 !important;
+        }
+
         /* Responsive */
 
         @media (max-width: 768px) {
@@ -1169,6 +1918,30 @@
             
             .sidebar {
                 width: 100%;
+            }
+
+            .question-container {
+                padding: 24px;
+            }
+
+            .advisor-header h2 {
+                font-size: 22px;
+            }
+
+            .results-actions {
+                flex-direction: column;
+            }
+
+            .results-actions button {
+                width: 100%;
+            }
+
+            .roles-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .role-selector {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
@@ -1201,6 +1974,20 @@
                         <span class="icon">🗄️</span>
                         <span>دیتابیس‌ها</span>
                         <span class="badge" id="dbCount">0</span>
+                    </a>
+                    <a class="nav-item" data-section="my-roles">
+                        <span class="icon">👔</span>
+                        <span>نقش‌های من</span>
+                        <span class="badge" id="myRolesCount">0</span>
+                    </a>
+                    <a class="nav-item" data-section="module-advisor">
+                        <span class="icon">🧠</span>
+                        <span>انتخاب هوشمند ماژول</span>
+                    </a>
+                    <a class="nav-item" data-section="todo">
+                        <span class="icon">📋</span>
+                        <span>لیست کارها</span>
+                        <span class="badge" id="todoActiveBadge">0</span>
                     </a>
                     <a class="nav-item" data-section="licenses">
                         <span class="icon">🔑</span>
@@ -1238,6 +2025,11 @@
                         <span class="icon">🏢</span>
                         <span>مشتریان (Tenants)</span>
                     </a>
+                    <a class="nav-item" data-section="all-roles">
+                        <span class="icon">👔</span>
+                        <span>مدیریت نقش‌ها</span>
+                        <span class="badge" id="allRolesCount">0</span>
+                    </a>
                     <a class="nav-item" data-section="all-licenses">
                         <span class="icon">📋</span>
                         <span>همه لایسنس‌ها</span>
@@ -1262,6 +2054,17 @@
 
         <!-- Main Content -->
         <main class="main-content">
+            <!-- Email Warning Alert (for phone-only users) -->
+            <div id="emailWarningAlert" class="alert-banner" style="display: none;">
+                <div class="alert-icon">⚠️</div>
+                <div class="alert-content">
+                    <strong>توجه:</strong> حساب شما فقط با شماره موبایل ثبت شده است. 
+                    برای مشاهده دیتابیس‌های قبلی و اتصال حساب‌های قدیمی، لطفاً 
+                    <a href="#profile" onclick="showSection('profile')">ایمیل خود را در پروفایل وارد کنید</a>.
+                </div>
+                <button class="alert-close" onclick="dismissEmailWarning()">✕</button>
+            </div>
+            
             <!-- Overview Section -->
             <section class="content-section active" id="section-overview">
                 <div class="content-header">
@@ -1304,12 +2107,31 @@
                     </div>
                     <div class="form-group">
                         <label>ایمیل</label>
-                        <input type="email" id="profileEmail" placeholder="email@example.com" readonly>
-                        <div class="form-hint">ایمیل قابل تغییر نیست</div>
+                        <div id="emailInputSection">
+                            <input type="email" id="profileEmail" placeholder="email@example.com">
+                            <div class="form-hint" id="emailHint"></div>
+                            <div id="emailVerifyButtons" style="display: none; margin-top: 10px; gap: 10px; flex-wrap: wrap;">
+                                <button type="button" class="btn btn-google-verify" onclick="verifyEmailWithGoogle()" style="font-size: 13px; width: 100%;">
+                                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style="width: 18px; height: 18px; vertical-align: middle; margin-left: 6px;">
+                                    تایید ایمیل با گوگل
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Email Code Verification -->
+                        <div id="emailCodeSection" style="display: none; margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                            <p style="margin-bottom: 10px; font-size: 14px;">کد تایید به <strong id="sentToEmail"></strong> ارسال شد</p>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <input type="text" id="emailVerifyCode" placeholder="کد 6 رقمی" maxlength="6" style="width: 120px; text-align: center; font-size: 18px; letter-spacing: 4px;">
+                                <button type="button" class="btn btn-primary" onclick="confirmEmailCode()">تایید کد</button>
+                                <button type="button" class="btn btn-secondary" onclick="cancelEmailVerification()">انصراف</button>
+                            </div>
+                            <div id="emailCodeTimer" style="margin-top: 8px; font-size: 13px; color: #666;"></div>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>شماره تلفن</label>
-                        <input type="tel" id="profilePhone" placeholder="09123456789">
+                        <input type="tel" id="profilePhone" placeholder="09123456789" readonly>
+                        <div class="form-hint">شماره موبایل تایید شده قابل تغییر نیست</div>
                     </div>
                     <div class="form-group">
                         <label>نام شرکت</label>
@@ -1331,6 +2153,97 @@
                 </div>
             </section>
 
+            <!-- My Roles Section -->
+            <section class="content-section" id="section-my-roles">
+                <h2>👔 نقش‌های من در سیستم‌ها</h2>
+                <p class="section-subtitle" style="color: #7f8c8d; margin-bottom: 20px;">
+                    نقش‌هایی که مدیران دیتابیس‌ها برای شما تعریف کرده‌اند
+                </p>
+                
+                <div id="myRolesList" class="roles-grid">
+                    <div class="empty-state">
+                        <div class="icon">👔</div>
+                        <p>هنوز نقشی برای شما تعریف نشده است</p>
+                        <p style="font-size: 13px; color: #95a5a6; margin-top: 8px;">
+                            وقتی مدیر یک شرکت برای شما دسترسی تعریف کند، اینجا نمایش داده می‌شود
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Module Advisor Section -->
+            <section class="content-section" id="section-module-advisor">
+                <div class="module-advisor-container">
+                    <div class="advisor-header">
+                        <h2>🧠 مشاور هوشمند انتخاب ماژول Odoo</h2>
+                        <p class="advisor-subtitle">با پاسخ به چند سوال ساده، ماژول‌های مناسب کسب‌وکار خود را کشف کنید</p>
+                        <p class="advisor-subtitle">توجه: این بخش فقط «پیشنهاد ماژول» می‌دهد و به‌صورت خودکار روی هیچ دیتابیسی نصب انجام نمی‌دهد.</p>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="advisor-progress">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="advisorProgressBar"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span id="currentQuestion">0</span> از <span id="totalQuestions">0</span> سوال
+                        </div>
+                    </div>
+
+                    <!-- Question Container -->
+                    <div class="question-container" id="questionContainer">
+                        <div class="welcome-screen">
+                            <div class="welcome-icon">🎯</div>
+                            <h3>سیستم پیشنهاد هوشمند ماژول</h3>
+                            <p>Odoo دارای بیش از 800 ماژول رسمی و هزاران ماژول شخص‌ثالث است. انتخاب ماژول‌های مناسب می‌تواند چالش‌برانگیز باشد.</p>
+                            <p>این سیستم با پرسیدن سوالات هدفمند، به شما کمک می‌کند تا:</p>
+                            <ul class="welcome-features">
+                                <li>✅ ماژول‌های مورد نیاز واقعی خود را شناسایی کنید</li>
+                                <li>✅ از نصب ماژول‌های غیرضروری جلوگیری کنید</li>
+                                <li>✅ توضیحات کامل فارسی هر ماژول را ببینید</li>
+                                <li>✅ بهترین ترتیب نصب را دریافت کنید</li>
+                            </ul>
+                            <button class="btn btn-primary btn-large" onclick="startModuleAdvisor()">🚀 شروع کنید</button>
+                        </div>
+                    </div>
+
+                    <!-- Results Container -->
+                    <div class="results-container" id="resultsContainer" style="display: none;">
+                        <div class="results-header">
+                            <h3>✨ ماژول‌های پیشنهادی برای شما</h3>
+                            <p class="results-subtitle">بر اساس پاسخ‌های شما، این ماژول‌ها برای کسب‌وکارتان مناسب هستند</p>
+                        </div>
+                        
+                        <div class="results-categories" id="resultsCategories"></div>
+                        
+                        <!-- Install Section -->
+                        <div class="install-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 24px; margin: 24px 0; color: white;">
+                            <h4 style="margin: 0 0 12px 0; font-size: 18px;">🚀 نصب خودکار ماژول‌ها</h4>
+                            <p style="margin: 0 0 16px 0; opacity: 0.95; font-size: 14px;">با انتخاب دیتابیس، می‌توانید ماژول‌های پیشنهادی را مستقیماً نصب کنید</p>
+                            
+                            <div style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+                                <div style="flex: 1; min-width: 200px;">
+                                    <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px;">انتخاب دیتابیس:</label>
+                                    <select id="installDbSelect" class="form-control" style="background: white; color: #24292f; border: none; padding: 10px; border-radius: 6px; width: 100%;">
+                                        <option value="">در حال بارگذاری...</option>
+                                    </select>
+                                </div>
+                                <button id="installModulesBtn" class="btn" style="background: white; color: #667eea; font-weight: 700; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; white-space: nowrap;" onclick="installModules()" disabled>
+                                    ⚡ نصب ماژول‌ها
+                                </button>
+                            </div>
+                            <p id="installStatus" style="margin: 12px 0 0 0; font-size: 13px; opacity: 0.9;"></p>
+                        </div>
+                        
+                        <div class="results-actions">
+                            <button class="btn btn-primary" onclick="exportModuleList()">📥 دانلود لیست ماژول‌ها</button>
+                            <button class="btn btn-secondary" onclick="editAnswers()">📝 ویرایش پاسخ‌نامه</button>
+                            <button class="btn btn-secondary" onclick="restartAdvisor()">🔄 شروع مجدد</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Licenses Section -->
             <section class="content-section" id="section-licenses">
                 <h2>🔑 لایسنس‌های شما</h2>
@@ -1339,6 +2252,92 @@
                         <div class="icon">🔐</div>
                         <p>هنوز لایسنسی خریداری نکرده‌اید</p>
                         <a href="/payment.html" class="btn btn-primary" style="margin-top: 16px;">🛒 خرید لایسنس</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Professional Todo List Section -->
+            <section class="content-section" id="section-todo">
+                <div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <div>
+                            <h2 style="margin-bottom: 5px;">📋 لیست کارها</h2>
+                            <p style="color: #57606a; font-size: 14px;">مدیریت وظایف روزانه شما</p>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <button class="btn btn-secondary" onclick="window.open('/TODO_README.md', '_blank')" title="راهنمای کامل">📖 راهنما</button>
+                            <span style="padding: 6px 12px; background: #f6f8fa; border-radius: 8px; font-size: 14px; font-weight: 600;">
+                                ✅ <span id="todoCompletedCount">0</span>/<span id="todoTotalCount">0</span>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Todo Progress -->
+                    <div style="margin-bottom: 24px;">
+                        <div style="height: 8px; background: #f6f8fa; border-radius: 10px; overflow: hidden; margin-bottom: 8px;">
+                            <div id="todoProgressFill" style="height: 100%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); border-radius: 10px; width: 0%; transition: width 0.3s ease;"></div>
+                        </div>
+                        <div id="todoProgressText" style="text-align: center; font-size: 14px; color: #57606a; font-weight: 500;">0% تکمیل شده</div>
+                    </div>
+
+                    <!-- Add New Todo Form -->
+                    <div style="margin-bottom: 24px;">
+                        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                            <input type="text" 
+                                   id="todoInput" 
+                                   placeholder="کار جدید اضافه کنید..."
+                                   maxlength="200"
+                                   style="flex: 1; padding: 12px 16px; border: 2px solid #d0d7de; border-radius: 8px; font-size: 14px;"
+                                   onkeypress="if(event.key === 'Enter') addTodo()">
+                            <button class="btn btn-primary" onclick="addTodo()" style="padding: 12px 24px;">
+                                ➕ افزودن
+                            </button>
+                        </div>
+                        <div style="display: flex; gap: 12px;">
+                            <select id="todoPriority" style="flex: 1; padding: 10px 14px; border: 1px solid #d0d7de; border-radius: 8px;">
+                                <option value="low">🟢 کم‌اهمیت</option>
+                                <option value="medium" selected>🟡 متوسط</option>
+                                <option value="high">🔴 مهم</option>
+                            </select>
+                            <select id="todoCategory" style="flex: 1; padding: 10px 14px; border: 1px solid #d0d7de; border-radius: 8px;">
+                                <option value="work">💼 کاری</option>
+                                <option value="personal">👤 شخصی</option>
+                                <option value="urgent">⚡ فوری</option>
+                                <option value="odoo">🔧 اودو</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Todo Filter Tabs -->
+                    <div style="display: flex; gap: 8px; margin-bottom: 20px; padding: 4px; background: #f6f8fa; border-radius: 8px;">
+                        <button class="todo-tab active" data-filter="all" onclick="filterTodos('all', this)" style="flex: 1; padding: 10px 16px; background: #0969da; border: none; color: white; font-size: 14px; font-weight: 500; border-radius: 6px; cursor: pointer; transition: all 0.3s ease;">
+                            📋 همه (<span id="countAll">0</span>)
+                        </button>
+                        <button class="todo-tab" data-filter="active" onclick="filterTodos('active', this)" style="flex: 1; padding: 10px 16px; background: transparent; border: none; color: #57606a; font-size: 14px; font-weight: 500; border-radius: 6px; cursor: pointer; transition: all 0.3s ease;">
+                            ⏰ فعال (<span id="countActive">0</span>)
+                        </button>
+                        <button class="todo-tab" data-filter="completed" onclick="filterTodos('completed', this)" style="flex: 1; padding: 10px 16px; background: transparent; border: none; color: #57606a; font-size: 14px; font-weight: 500; border-radius: 6px; cursor: pointer; transition: all 0.3s ease;">
+                            ✅ انجام‌شده (<span id="countCompleted">0</span>)
+                        </button>
+                    </div>
+
+                    <!-- Todo List -->
+                    <div id="todoList" style="min-height: 200px; max-height: 500px; overflow-y: auto; margin-bottom: 20px;">
+                        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; text-align: center;">
+                            <div style="font-size: 64px; color: #d0d7de; margin-bottom: 16px; opacity: 0.3;">📋</div>
+                            <p style="font-size: 18px; color: #57606a; margin-bottom: 8px;">هنوز کاری اضافه نکردید</p>
+                            <span style="font-size: 14px; color: #8b949e;">اولین کار خود را اضافه کنید 🚀</span>
+                        </div>
+                    </div>
+
+                    <!-- Todo Footer Actions -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 20px; border-top: 1px solid #d0d7de;">
+                        <button class="btn btn-secondary" onclick="clearCompletedTodos()" style="font-size: 14px;">
+                            🗑️ پاک کردن انجام‌شده‌ها
+                        </button>
+                        <button class="btn btn-secondary" onclick="sortTodos()" style="font-size: 14px;">
+                            📊 مرتب‌سازی
+                        </button>
                     </div>
                 </div>
             </section>
@@ -1472,16 +2471,37 @@
                         <li>❌ حذف هر دیتابیس = از بین رفتن تمام اطلاعات یک شرکت</li>
                         <li>❌ این عملیات کاملاً غیرقابل بازگشت است</li>
                         <li>✅ قبل از حذف، بکاپ اجباری گرفته می‌شود</li>
-                        <li>📱 برای تأیید حذف، کد پیامکی به موبایل شما ارسال می‌شود</li>
+                        <li>📱 برای تأیید حذف، کد پیامکی به موبایل ادمین ارسال می‌شود</li>
                     </ul>
                 </div>
 
-                <!-- Admin Phone for SMS -->
-                <div class="admin-phone-box">
-                    <label>📱 شماره موبایل برای دریافت کد تأیید حذف:</label>
-                    <input type="tel" id="adminPhoneNumber" placeholder="09123456789" 
-                           onchange="saveAdminPhone(this.value)">
-                    <div class="hint">کد تأیید حذف به این شماره پیامک می‌شود</div>
+                <!-- Admin Config from Liara -->
+                <div class="admin-phone-box" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                        <span style="font-size: 24px;">⚙️</span>
+                        <div>
+                            <div style="font-weight: 600; color: #fbbf24;">تنظیمات ادمین (از Liara)</div>
+                            <div style="font-size: 12px; color: #9ca3af;">این مقادیر از متغیرهای محیطی Liara خوانده می‌شوند</div>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div>
+                            <label style="color: #9ca3af; font-size: 12px;">📧 ایمیل ادمین (ADMIN_EMAIL)</label>
+                            <div id="adminEmailDisplay" style="color: white; font-weight: 600; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 6px; margin-top: 4px;">---</div>
+                        </div>
+                        <div>
+                            <label style="color: #9ca3af; font-size: 12px;">📱 موبایل ادمین (ADMIN_PHONE)</label>
+                            <div id="adminPhoneDisplay" style="color: white; font-weight: 600; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 6px; margin-top: 4px;">---</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px; padding: 10px; background: rgba(251, 191, 36, 0.1); border-radius: 8px; border-right: 3px solid #fbbf24;">
+                        <span style="color: #fbbf24;">💡</span>
+                        <span style="color: #d1d5db; font-size: 13px;">
+                            برای تغییر این مقادیر، به پنل Liara بروید و در بخش <strong>متغیرهای محیطی</strong> مقادیر 
+                            <code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">ADMIN_EMAIL</code> و 
+                            <code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">ADMIN_PHONE</code> را تنظیم کنید.
+                        </span>
+                    </div>
                 </div>
                 
                 <div class="stats-grid">
@@ -1528,6 +2548,57 @@
                             </tr>
                         </thead>
                         <tbody id="customersBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Admin: All Roles Section -->
+            <section class="content-section" id="section-all-roles">
+                <h2>👔 مدیریت نقش‌های کاربری</h2>
+                <p class="section-subtitle" style="color: #7f8c8d; margin-bottom: 20px;">
+                    نقش‌های تعریف شده برای کاربران در تمام دیتابیس‌ها
+                </p>
+                
+                <div class="stats-grid" style="margin-bottom: 24px;">
+                    <div class="stat-card">
+                        <h3>کل نقش‌ها</h3>
+                        <div class="number" id="totalRolesCount">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>نقش‌های فعال</h3>
+                        <div class="number" id="activeRolesCount">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>دیتابیس‌های دارای نقش</h3>
+                        <div class="number" id="dbsWithRolesCount">0</div>
+                    </div>
+                </div>
+                
+                <!-- Add New Role Button -->
+                <div style="margin-bottom: 16px; display: flex; gap: 10px; align-items: center;">
+                    <button class="btn btn-primary" onclick="openAddRoleModal()">
+                        ➕ افزودن نقش جدید
+                    </button>
+                    <button class="btn btn-secondary" onclick="loadAllRoles()">
+                        🔄 بروزرسانی لیست
+                    </button>
+                </div>
+                
+                <div id="allRolesTableContainer">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>نقش</th>
+                                <th>کاربر</th>
+                                <th>دیتابیس</th>
+                                <th>لاگین Odoo</th>
+                                <th>وضعیت</th>
+                                <th>تاریخ</th>
+                                <th>عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allRolesBody"></tbody>
                     </table>
                 </div>
             </section>
@@ -1626,6 +2697,97 @@
                 <button class="btn btn-primary">💾 ذخیره تنظیمات</button>
             </section>
         </main>
+    </div>
+
+    <!-- Add Role Modal -->
+    <div id="addRoleModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>➕ افزودن نقش جدید</h3>
+                <button class="modal-close" onclick="closeAddRoleModal()">×</button>
+            </div>
+            
+            <!-- راهنمای استفاده -->
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 20px; margin-bottom: 20px; color: white;">
+                <h4 style="margin: 0 0 12px 0; font-size: 16px;">📖 راهنمای تعریف نقش جدید</h4>
+                <div style="background: rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 16px; font-size: 14px; line-height: 1.8;">
+                    <p style="margin: 0 0 8px 0;"><strong>گام 1:</strong> دیتابیسی که می‌خواهید نقش را در آن تعریف کنید انتخاب کنید</p>
+                    <p style="margin: 0 0 8px 0;"><strong>گام 2:</strong> کاربری که قبلاً در آن دیتابیس ثبت نام کرده را انتخاب کنید</p>
+                    <p style="margin: 0 0 8px 0;"><strong>گام 3:</strong> نقش مورد نظر را انتخاب کنید (مدیر، کارشناس، بازاریاب و...)</p>
+                    <p style="margin: 0;"><strong>گام 4:</strong> اطلاعات ورود به Odoo را وارد کنید (ایمیل، رمز عبور و نام)</p>
+                </div>
+                <p style="margin: 12px 0 0 0; font-size: 13px; opacity: 0.9;">💡 نکته: در کمبوباکس‌ها می‌توانید با تایپ کردن، جستجو کنید</p>
+            </div>
+            
+            <form id="addRoleForm" onsubmit="submitAddRole(event)">
+                <!-- Step 1: Select Database -->
+                <div class="form-group">
+                    <label>🗄️ انتخاب دیتابیس *</label>
+                    <select id="roleDbSelect" required onchange="onRoleDbSelected()" class="select2-dropdown">
+                        <option value="">-- انتخاب کنید --</option>
+                    </select>
+                    <div class="form-hint">✨ نکته: می‌توانید نام دیتابیس را جستجو کنید</div>
+                    <div class="form-hint">🔹 گام اول: ابتدا دیتابیسی که می‌خواهید نقش را در آن تعریف کنید انتخاب کنید</div>
+                </div>
+                
+                <!-- Step 2: Select User -->
+                <div class="form-group">
+                    <label>👤 انتخاب کاربر (از کاربران ثبت‌شده در این دیتابیس) *</label>
+                    <select id="roleUserSelect" required class="select2-dropdown">
+                        <option value="">-- ابتدا دیتابیس را انتخاب کنید --</option>
+                    </select>
+                    <div class="form-hint">✨ نکته: پس از انتخاب دیتابیس، فقط کاربرانی که قبلاً در آن دیتابیس ثبت شده‌اند نمایش داده می‌شوند</div>
+                    <div class="form-hint">🔹 گام دوم: کاربری که می‌خواهید نقش جدید به او اختصاص دهید را انتخاب کنید</div>
+                </div>
+                
+                <!-- Step 3: Select Role -->
+                <div class="form-group">
+                    <label>👔 انتخاب نقش *</label>
+                    <div class="form-hint">🔹 گام سوم: نقش مورد نظر را از لیست زیر انتخاب کنید (مثل مدیر، کارشناس، بازاریاب و ...)</div>
+                    <div class="role-selector" id="roleSelectorGrid">
+                        <!-- Will be populated by JS -->
+                    </div>
+                    <input type="hidden" id="selectedRoleKey" required>
+                </div>
+                
+                <!-- Step 4: Odoo User Info -->
+                <div class="form-group">
+                    <label>📧 ایمیل ورود به Odoo *</label>
+                    <input type="email" id="roleOdooEmail" required placeholder="email@example.com">
+                    <div class="form-hint">🔹 گام چهارم: ایمیلی که کاربر با آن وارد Odoo خواهد شد (این ایمیل در سیستم Odoo ثبت می‌شود)</div>
+                </div>
+                
+                <div class="form-group">
+                    <label>🔑 رمز عبور Odoo *</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="roleOdooPassword" required placeholder="رمز عبور" style="flex: 1;">
+                        <button type="button" class="btn btn-secondary" onclick="generateRolePassword()">🎲 تولید</button>
+                    </div>
+                    <div class="form-hint">💡 نکته: می‌توانید از دکمه "تولید" برای ساخت رمز عبور قوی استفاده کنید</div>
+                </div>
+                
+                <div class="form-group">
+                    <label>👤 نام کاربر در Odoo *</label>
+                    <input type="text" id="roleOdooName" required placeholder="نام و نام خانوادگی">
+                    <div class="form-hint">نامی که در سیستم Odoo برای این کاربر نمایش داده می‌شود</div>
+                </div>
+                
+                <div class="form-group">
+                    <label>📝 یادداشت (اختیاری)</label>
+                    <textarea id="roleNotes" rows="2" placeholder="توضیحات اضافی..."></textarea>
+                    <div class="form-hint">هر توضیح اضافی که لازم است (اختیاری)</div>
+                </div>
+                
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">
+                        ✅ ایجاد نقش
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeAddRoleModal()">
+                        انصراف
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- Plan Modal -->
@@ -1918,6 +3080,9 @@
                 case 'plans':
                     await loadPlans();
                     break;
+                case 'module-advisor':
+                    initModuleAdvisorUI();
+                    break;
                 case 'tickets':
                     await loadMyTickets();
                     break;
@@ -1926,6 +3091,1097 @@
                     break;
             }
         }
+
+        // =============== MODULE ADVISOR ===============
+        let moduleAdvisorStarted = false;
+        let moduleAdvisorCurrentIndex = 0;
+        const moduleAdvisorAnswers = {};
+
+        const MODULE_CATALOG = {
+            crm: {
+                id: 'crm',
+                category: 'sales',
+                icon: '🤝',
+                displayNameFa: 'مدیریت ارتباط با مشتری (CRM)',
+                technicalName: 'crm',
+                priority: 'recommended',
+                descriptionFa: 'برای مدیریت سرنخ‌ها، فرصت‌های فروش، مراحل فروش و پیش‌بینی درآمد. اگر فروش شما چندمرحله‌ای است یا چند نفر روی فروش کار می‌کنند، CRM ستون اصلی سیستم شماست.',
+                features: ['قیف فروش (Pipeline) با مراحل قابل سفارشیسازی', 'ثبت فعالیتها و پیگیری تماس/جلسه', 'گزارشگیری از نرخ تبدیل و پیشبینی فروش'],
+                depends: []
+            },
+            sales: {
+                id: 'sales',
+                category: 'sales',
+                icon: '🧾',
+                displayNameFa: 'فروش (Sales)',
+                technicalName: 'sale_management',
+                priority: 'essential',
+                descriptionFa: 'مدیریت پیشفاکتور، سفارش فروش، قیمتگذاری، تخفیفها و جریان تایید سفارش. برای هر کسبوکاری که فروش دارد، این ماژول معمولاً پایه است.',
+                features: ['پیشفاکتور و سفارش فروش', 'قیمتلیست و قوانین قیمتگذاری', 'تایید سفارش و چاپ اسناد'],
+                depends: []
+            },
+            accounting: {
+                id: 'accounting',
+                category: 'finance',
+                icon: '💰',
+                displayNameFa: 'حسابداری (Accounting)',
+                technicalName: 'account',
+                priority: 'essential',
+                descriptionFa: 'ثبت اسناد مالی، فاکتورها، پرداختها و گزارشهای مالی و اتصال به فروش/خرید. برای کنترل مالی جدی، بدون حسابداری شفافیت ایجاد نمیشود.',
+                features: ['فاکتور فروش/خرید و پرداختها', 'گزارشهای پایه (دفتر کل، تراز)', 'اتصال خودکار به فروش/خرید/انبار'],
+                depends: []
+            },
+            purchase: {
+                id: 'purchase',
+                category: 'supply',
+                icon: '🛒',
+                displayNameFa: 'خرید (Purchase)',
+                technicalName: 'purchase',
+                priority: 'recommended',
+                descriptionFa: 'برای مدیریت تامینکنندگان، درخواست خرید، سفارش خرید، کنترل قیمت خرید و گردش تایید. وقتی تامین دارید، خرید کمک میکند هزینه و زمان تامین کنترل شود.',
+                features: ['درخواست خرید و سفارش خرید', 'مدیریت تامینکنندگان و قیمتها', 'گردش تایید و پیگیری وضعیت'],
+                depends: []
+            },
+            inventory: {
+                id: 'inventory',
+                category: 'supply',
+                icon: '📦',
+                displayNameFa: 'انبار (Inventory)',
+                technicalName: 'stock',
+                priority: 'essential',
+                descriptionFa: 'کنترل موجودی، ورود/خروج کالا، مکانهای انبار، سریال/لات و چندانبار. برای فروش کالایی یا تولید، انبار از ضروریترین ماژولهاست.',
+                features: ['رسید/حواله و مسیرهای انبار', 'چند انبار و چند مکان', 'سریال/لات و ردیابی'],
+                depends: []
+            },
+            pos: {
+                id: 'pos',
+                category: 'sales',
+                icon: '🏪',
+                displayNameFa: 'نقطه فروش (POS)',
+                technicalName: 'point_of_sale',
+                priority: 'recommended',
+                descriptionFa: 'برای فروش حضوری با صندوق/فیش، بارکدخوان و فروش سریع. اگر فروشگاه دارید، POS تجربه کاربری و کنترل فروش را بهتر میکند.',
+                features: ['فروش سریع', 'بارکد و فیش', 'اتصال به انبار و حسابداری'],
+                depends: []
+            },
+            website: {
+                id: 'website',
+                category: 'web',
+                icon: '🌐',
+                displayNameFa: 'وبسایت (Website)',
+                technicalName: 'website',
+                priority: 'recommended',
+                descriptionFa: 'سایتساز Odoo برای ساخت صفحات، معرفی خدمات/محصولات و فرمهای تماس. اگر حضور آنلاین میخواهید، وبسایت شروع خوبی است.',
+                features: ['ساخت صفحات بدون کدنویسی', 'فرم تماس و ثبت لید', 'مدیریت محتوا'],
+                depends: []
+            },
+            ecommerce: {
+                id: 'ecommerce',
+                category: 'web',
+                icon: '🛍️',
+                displayNameFa: 'فروشگاه اینترنتی (eCommerce)',
+                technicalName: 'website_sale',
+                priority: 'recommended',
+                descriptionFa: 'فروش آنلاین محصولات، سبد خرید و اتصال به سفارشات. اگر میخواهید سفارش آنلاین به فروش/انبار وصل شود، این ماژول مناسب است.',
+                features: ['سبد خرید و صفحات محصول', 'پرداخت آنلاین (بسته به درگاه)', 'اتصال به فروش/انبار'],
+                depends: ['website', 'sales']
+            },
+            project: {
+                id: 'project',
+                category: 'services',
+                icon: '🗂️',
+                displayNameFa: 'پروژهها (Project)',
+                technicalName: 'project',
+                priority: 'recommended',
+                descriptionFa: 'مدیریت پروژه، وظایف، کانبان و همکاری تیمی. برای شرکتهای خدماتی/پیمانکاری بسیار کاربردی است.',
+                features: ['کانبان وظایف و مراحل', 'تقسیم کار و مسئولیت', 'گزارش پیشرفت'],
+                depends: []
+            },
+            timesheets: {
+                id: 'timesheets',
+                category: 'services',
+                icon: '⏱️',
+                displayNameFa: 'تایمشیت (Timesheets)',
+                technicalName: 'hr_timesheet',
+                priority: 'optional',
+                descriptionFa: 'ثبت زمان صرفشده روی پروژه/وظایف برای محاسبه هزینه، کنترل بهرهوری یا صورتحساب خدمات بر اساس ساعت.',
+                features: ['ثبت زمان روی تسک/پروژه', 'گزارش بهرهوری', 'پایه محاسبه هزینه خدمات'],
+                depends: ['project']
+            },
+            helpdesk: {
+                id: 'helpdesk',
+                category: 'support',
+                icon: '🎫',
+                displayNameFa: 'پشتیبانی (Helpdesk)',
+                technicalName: 'helpdesk',
+                priority: 'recommended',
+                descriptionFa: 'سیستم تیکت برای پشتیبانی مشتریان، دستهبندی درخواستها و جلوگیری از گمشدن پیامها. برای پشتیبانی جدی توصیه میشود.',
+                features: ['تیکتها با وضعیت و اولویت', 'دستهبندی و تیمبندی', 'گزارش حجم درخواستها'],
+                depends: []
+            },
+            mrp: {
+                id: 'mrp',
+                category: 'manufacturing',
+                icon: '🏭',
+                displayNameFa: 'تولید (Manufacturing)',
+                technicalName: 'mrp',
+                priority: 'recommended',
+                descriptionFa: 'مدیریت BOM، دستور تولید، مصرف مواد و برنامهریزی تولید. اگر تولید/مونتاژ دارید، این ماژول کلیدی است.',
+                features: ['BOM و دستور تولید', 'مصرف مواد و محصول نهایی', 'برنامهریزی تولید'],
+                depends: ['inventory']
+            },
+            maintenance: {
+                id: 'maintenance',
+                category: 'manufacturing',
+                icon: '🛠️',
+                displayNameFa: 'نگهداری و تعمیرات (Maintenance)',
+                technicalName: 'maintenance',
+                priority: 'optional',
+                descriptionFa: 'ثبت درخواست تعمیرات و نگهداری پیشگیرانه (PM). مناسب کسبوکارهایی با تجهیزات مهم.',
+                features: ['درخواست تعمیرات', 'برنامه PM', 'ثبت تاریخچه و هزینه'],
+                depends: []
+            },
+            quality: {
+                id: 'quality',
+                category: 'manufacturing',
+                icon: '✅',
+                displayNameFa: 'کنترل کیفیت (Quality)',
+                technicalName: 'quality',
+                priority: 'optional',
+                descriptionFa: 'کنترل کیفیت در دریافت، تولید یا ارسال و ثبت عدمانطباق. برای صنایع حساس مفید است.',
+                features: ['کنترل کیفیت در مراحل مختلف', 'ثبت نتایج و عدمانطباق', 'گزارش کیفیت'],
+                depends: ['inventory']
+            },
+            hr: {
+                id: 'hr',
+                category: 'hr',
+                icon: '👥',
+                displayNameFa: 'کارکنان (Employees)',
+                technicalName: 'hr',
+                priority: 'optional',
+                descriptionFa: 'پروفایل کارکنان و پایه ماژولهای HR مثل مرخصی/هزینهها/استخدام.',
+                features: ['پروفایل کارکنان', 'چارت سازمانی', 'پایه ماژولهای HR'],
+                depends: []
+            },
+            recruitment: {
+                id: 'recruitment',
+                category: 'hr',
+                icon: '🧑💼',
+                displayNameFa: 'استخدام (Recruitment)',
+                technicalName: 'hr_recruitment',
+                priority: 'optional',
+                descriptionFa: 'مدیریت فرصتهای شغلی، رزومهها و مراحل مصاحبه.',
+                features: ['مدیریت رزومه و متقاضی', 'فرآیند مصاحبه', 'گزارش وضعیت جذب'],
+                depends: ['hr']
+            },
+            timeoff: {
+                id: 'timeoff',
+                category: 'hr',
+                icon: '🏖️',
+                displayNameFa: 'مرخصی (Time Off)',
+                technicalName: 'hr_holidays',
+                priority: 'optional',
+                descriptionFa: 'درخواست/تایید مرخصی، مانده مرخصی و تقویم حضور.',
+                features: ['درخواست و تایید مرخصی', 'تقویم تیمی', 'مانده مرخصی'],
+                depends: ['hr']
+            },
+            expenses: {
+                id: 'expenses',
+                category: 'hr',
+                icon: '🧾',
+                displayNameFa: 'هزینهها (Expenses)',
+                technicalName: 'hr_expense',
+                priority: 'optional',
+                descriptionFa: 'ثبت هزینههای ماموریت/پروژه و گردش تایید و اتصال به حسابداری.',
+                features: ['ثبت هزینه توسط پرسنل', 'گردش تایید', 'اتصال به حسابداری'],
+                depends: ['hr', 'accounting']
+            },
+            massMailing: {
+                id: 'massMailing',
+                category: 'marketing',
+                icon: '📣',
+                displayNameFa: 'ایمیل مارکتینگ (Mass Mailing)',
+                technicalName: 'mass_mailing',
+                priority: 'optional',
+                descriptionFa: 'ارسال خبرنامه و کمپین ایمیلی، لیست مخاطبان و گزارش نرخ باز شدن/کلیک.',
+                features: ['خبرنامه و کمپین', 'لیست مخاطبان', 'گزارش نرخ باز شدن/کلیک'],
+                depends: []
+            }
+        };
+
+        const MODULE_CATEGORIES = {
+            sales: { titleFa: 'فروش و مشتریان', icon: '🤝' },
+            finance: { titleFa: 'مالی و حسابداری', icon: '💰' },
+            supply: { titleFa: 'انبار و تامین', icon: '📦' },
+            web: { titleFa: 'وبسایت و آنلاین', icon: '🌐' },
+            services: { titleFa: 'خدمات و پروژه', icon: '🗂️' },
+            support: { titleFa: 'پشتیبانی', icon: '🎫' },
+            manufacturing: { titleFa: 'تولید', icon: '🏭' },
+            hr: { titleFa: 'منابع انسانی', icon: '👥' },
+            marketing: { titleFa: 'بازاریابی', icon: '📣' }
+        };
+
+        const ADVISOR_QUESTIONS = [
+            {
+                id: 'q_business_has_sales',
+                title: 'آیا کسبوکار شما «فروش» دارد؟',
+                description: 'اگر محصول یا خدمت میفروشید (حتی با فاکتور دستی)، پاسخ شما مسیر پیشنهاد ماژولها را دقیقتر میکند.',
+                when: () => true,
+                yes: { label: 'بله', desc: 'فروش محصول/خدمت داریم', effects: { sales: 4, crm: 2, accounting: 2 } },
+                no: { label: 'خیر', desc: 'فعلاً فروش نداریم / داخلی است', effects: { project: 2 } }
+            },
+            {
+                id: 'q_need_crm',
+                title: 'آیا فروش شما چندمرحلهای است و نیاز به پیگیری سرنخها دارید؟',
+                description: 'مثلاً: تماس → جلسه → پیشفاکتور → مذاکره → قرارداد. اگر پیگیریها دستی است، CRM کمک بزرگی است.',
+                when: (a) => a.q_business_has_sales === true,
+                yes: { label: 'بله', desc: 'قیف فروش و پیگیری میخواهیم', effects: { crm: 4 } },
+                no: { label: 'خیر', desc: 'فروش ساده و مستقیم است', effects: { crm: -1 } }
+            },
+            {
+                id: 'q_sell_products',
+                title: 'آیا «محصول فیزیکی» میفروشید و موجودی دارید؟',
+                description: 'اگر انبار، کالا، یا کنترل موجودی برای شما مهم است، انبار و خرید پیشنهاد میشود.',
+                when: (a) => a.q_business_has_sales === true,
+                yes: { label: 'بله', desc: 'کالای فیزیکی و موجودی داریم', effects: { inventory: 5, purchase: 2 } },
+                no: { label: 'خیر', desc: 'خدمات/دیجیتال/بدون موجودی', effects: { inventory: -2, purchase: -1 } }
+            },
+            {
+                id: 'q_multi_warehouse',
+                title: 'آیا چند انبار یا چند مکان (قفسه/شعبه) دارید؟',
+                description: 'اگر انتقال بین شعب، چند مکان انبار یا کنترل دقیق مکانها مهم است، انبار برای شما حیاتیتر میشود.',
+                when: (a) => a.q_sell_products === true,
+                yes: { label: 'بله', desc: 'چندانبار/چند مکان داریم', effects: { inventory: 2 } },
+                no: { label: 'خیر', desc: 'یک انبار ساده داریم', effects: { inventory: 0 } }
+            },
+            {
+                id: 'q_need_purchase',
+                title: 'آیا تامین از چند تامینکننده دارید و قیمت خرید/پیگیری سفارش خرید مهم است؟',
+                description: 'اگر خرید شما فقط «گاهی» است، شاید لازم نباشد. اما برای کنترل تامین، خرید خیلی کمک میکند.',
+                when: (a) => a.q_sell_products === true,
+                yes: { label: 'بله', desc: 'کنترل تامین و سفارش خرید میخواهیم', effects: { purchase: 4 } },
+                no: { label: 'خیر', desc: 'خرید ساده و محدود است', effects: { purchase: 0 } }
+            },
+            {
+                id: 'q_need_pos',
+                title: 'آیا فروش حضوری «صندوق/فیش» دارید؟ (POS)',
+                description: 'مثلاً فروشگاه یا شعبه حضوری با فروش سریع.',
+                when: (a) => a.q_business_has_sales === true,
+                yes: { label: 'بله', desc: 'فروش حضوری و فیش داریم', effects: { pos: 4, inventory: 1 } },
+                no: { label: 'خیر', desc: 'فروش حضوری نداریم', effects: { pos: -1 } }
+            },
+            {
+                id: 'q_need_website',
+                title: 'آیا «وبسایت رسمی» برای معرفی خدمات/محصولات میخواهید؟',
+                description: 'اگر صفحه معرفی، تماس با ما، فرم دریافت درخواست یا محتوای آموزشی نیاز دارید.',
+                when: () => true,
+                yes: { label: 'بله', desc: 'وبسایت میخواهیم', effects: { website: 3 } },
+                no: { label: 'خیر', desc: 'فعلاً نیاز نداریم', effects: { website: -1 } }
+            },
+            {
+                id: 'q_need_ecommerce',
+                title: 'آیا فروشگاه اینترنتی داخل Odoo میخواهید؟',
+                description: 'اگر میخواهید مشتری آنلاین سفارش ثبت کند و سفارش به فروش/انبار وصل شود.',
+                when: (a) => a.q_need_website === true,
+                yes: { label: 'بله', desc: 'فروش اینترنتی میخواهیم', effects: { ecommerce: 4, sales: 1 } },
+                no: { label: 'خیر', desc: 'فقط سایت معرفی کافیست', effects: { ecommerce: -1 } }
+            },
+            {
+                id: 'q_need_support',
+                title: 'آیا پشتیبانی مشتریان برای شما مهم است؟',
+                description: 'اگر پیامها/مشکلات مشتریان زیاد است و نیاز به تیکت و پیگیری دارید.',
+                when: () => true,
+                yes: { label: 'بله', desc: 'تیکت و پیگیری پشتیبانی میخواهیم', effects: { helpdesk: 4, crm: 1 } },
+                no: { label: 'خیر', desc: 'پشتیبانی خیلی کم است', effects: { helpdesk: -1 } }
+            },
+            {
+                id: 'q_need_projects',
+                title: 'آیا کار شما پروژهمحور است؟',
+                description: 'مثلاً پیمانکاری، خدمات نرمافزاری، پیادهسازی یا مشاوره.',
+                when: () => true,
+                yes: { label: 'بله', desc: 'پروژه و وظایف داریم', effects: { project: 4 } },
+                no: { label: 'خیر', desc: 'پروژهمحور نیستیم', effects: { project: -1 } }
+            },
+            {
+                id: 'q_need_timesheets',
+                title: 'آیا میخواهید زمان صرفشده روی کارها را ثبت کنید؟',
+                description: 'برای محاسبه هزینه واقعی، کنترل بهرهوری، یا فروش خدمات بر اساس ساعت.',
+                when: (a) => a.q_need_projects === true,
+                yes: { label: 'بله', desc: 'ثبت زمان مهم است', effects: { timesheets: 4 } },
+                no: { label: 'خیر', desc: 'نیاز نداریم', effects: { timesheets: -1 } }
+            },
+            {
+                id: 'q_need_manufacturing',
+                title: 'آیا «تولید/مونتاژ/بستهبندی» دارید؟',
+                description: 'اگر BOM، دستور تولید یا مصرف مواد دارید، ماژول تولید کمک میکند.',
+                when: () => true,
+                yes: { label: 'بله', desc: 'تولید/مونتاژ داریم', effects: { mrp: 5, inventory: 2, purchase: 1 } },
+                no: { label: 'خیر', desc: 'تولید نداریم', effects: { mrp: -2 } }
+            },
+            {
+                id: 'q_need_quality',
+                title: 'آیا کنترل کیفیت برای شما حیاتی است؟',
+                description: 'اگر استاندارد کیفیت دارید یا کیفیت در دریافت/تولید/ارسال باید ثبت شود.',
+                when: (a) => a.q_need_manufacturing === true,
+                yes: { label: 'بله', desc: 'کنترل کیفیت میخواهیم', effects: { quality: 4 } },
+                no: { label: 'خیر', desc: 'کنترل کیفیت رسمی نداریم', effects: { quality: -1 } }
+            },
+            {
+                id: 'q_need_maintenance',
+                title: 'آیا تجهیزات کلیدی دارید که خرابی آن هزینهزا است؟',
+                description: 'اگر برنامه PM و ثبت تعمیرات میخواهید.',
+                when: (a) => a.q_need_manufacturing === true,
+                yes: { label: 'بله', desc: 'نگهداری و تعمیرات نیاز داریم', effects: { maintenance: 4 } },
+                no: { label: 'خیر', desc: 'ضرورتی ندارد', effects: { maintenance: -1 } }
+            },
+            {
+                id: 'q_need_accounting',
+                title: 'آیا میخواهید مالی/حسابداری داخل Odoo باشد؟',
+                description: 'اگر میخواهید فاکتور/پرداخت/گزارش مالی یکپارچه با فروش/خرید داشته باشید.',
+                when: () => true,
+                yes: { label: 'بله', desc: 'حسابداری داخل Odoo میخواهیم', effects: { accounting: 5 } },
+                no: { label: 'خیر', desc: 'فعلاً با سیستم دیگر انجام میدهیم', effects: { accounting: -2 } }
+            },
+            {
+                id: 'q_need_hr',
+                title: 'آیا مدیریت کارکنان و فرآیندهای HR برای شما مهم است؟',
+                description: 'اگر اطلاعات پرسنلی، مرخصی، هزینهها یا استخدام را میخواهید یکپارچه کنید.',
+                when: () => true,
+                yes: { label: 'بله', desc: 'HR برای ما مهم است', effects: { hr: 3 } },
+                no: { label: 'خیر', desc: 'فعلاً نیاز نداریم', effects: { hr: -1 } }
+            },
+            {
+                id: 'q_need_timeoff',
+                title: 'آیا فرآیند مرخصی و تایید مدیر برای شما مهم است؟',
+                description: 'اگر مرخصیها باید ثبت شود و ماندهها دقیق باشد.',
+                when: (a) => a.q_need_hr === true,
+                yes: { label: 'بله', desc: 'مدیریت مرخصی میخواهیم', effects: { timeoff: 4 } },
+                no: { label: 'خیر', desc: 'مرخصیها دستی است', effects: { timeoff: -1 } }
+            },
+            {
+                id: 'q_need_expenses',
+                title: 'آیا پرسنل هزینههای ماموریت/پروژه ثبت میکنند؟',
+                description: 'برای مدیریت هزینهها و تایید/پرداخت یکپارچه.',
+                when: (a) => a.q_need_hr === true,
+                yes: { label: 'بله', desc: 'ثبت و تایید هزینهها لازم است', effects: { expenses: 4, accounting: 1 } },
+                no: { label: 'خیر', desc: 'نیاز نداریم', effects: { expenses: -1 } }
+            },
+            {
+                id: 'q_need_marketing',
+                title: 'آیا قصد دارید کمپینهای ایمیلی/خبرنامه داشته باشید؟',
+                description: 'برای اطلاعرسانی، بازاریابی و نگهداری مشتریان.',
+                when: () => true,
+                yes: { label: 'بله', desc: 'ایمیل مارکتینگ میخواهیم', effects: { massMailing: 3, crm: 1 } },
+                no: { label: 'خیر', desc: 'فعلاً نیاز نداریم', effects: { massMailing: -1 } }
+            }
+        ];
+
+        function initModuleAdvisorUI() {
+            const total = getVisibleQuestions().length;
+            const totalEl = document.getElementById('totalQuestions');
+            if (totalEl) totalEl.textContent = String(total);
+            const currentEl = document.getElementById('currentQuestion');
+            if (currentEl) currentEl.textContent = moduleAdvisorStarted ? String(Math.min(moduleAdvisorCurrentIndex + 1, total)) : '0';
+            const bar = document.getElementById('advisorProgressBar');
+            if (bar) bar.style.width = moduleAdvisorStarted && total ? `${Math.round(((moduleAdvisorCurrentIndex + 1) / total) * 100)}%` : '0%';
+        }
+
+        function startModuleAdvisor() {
+            moduleAdvisorStarted = true;
+            moduleAdvisorCurrentIndex = 0;
+            Object.keys(moduleAdvisorAnswers).forEach(k => delete moduleAdvisorAnswers[k]);
+            document.getElementById('resultsContainer').style.display = 'none';
+            document.getElementById('questionContainer').style.display = 'block';
+            renderAdvisorQuestion();
+        }
+
+        function getVisibleQuestions() {
+            return ADVISOR_QUESTIONS.filter(q => q.when(moduleAdvisorAnswers));
+        }
+
+        function renderAdvisorQuestion() {
+            const visible = getVisibleQuestions();
+            const total = visible.length;
+            const q = visible[moduleAdvisorCurrentIndex];
+
+            document.getElementById('totalQuestions').textContent = String(total);
+            document.getElementById('currentQuestion').textContent = String(Math.min(moduleAdvisorCurrentIndex + 1, total));
+            document.getElementById('advisorProgressBar').style.width = total ? `${Math.round(((moduleAdvisorCurrentIndex + 1) / total) * 100)}%` : '0%';
+
+            const container = document.getElementById('questionContainer');
+            if (!q) {
+                finishAdvisor();
+                return;
+            }
+
+            const answered = moduleAdvisorAnswers[q.id];
+            container.innerHTML = `
+                <div class="question-card">
+                    <div class="question-title">${q.title}</div>
+                    <div class="question-description">${q.description}</div>
+                    <div class="answers-grid">
+                        <div class="answer-option ${answered === true ? 'selected' : ''}" onclick="answerAdvisorQuestion('${q.id}', true)">
+                            <div class="answer-option-title">${q.yes.label}</div>
+                            <div class="answer-option-desc">${q.yes.desc}</div>
+                        </div>
+                        <div class="answer-option ${answered === false ? 'selected' : ''}" onclick="answerAdvisorQuestion('${q.id}', false)">
+                            <div class="answer-option-title">${q.no.label}</div>
+                            <div class="answer-option-desc">${q.no.desc}</div>
+                        </div>
+                    </div>
+                    <div class="question-navigation">
+                        <button class="btn btn-secondary" onclick="prevAdvisorQuestion()" ${moduleAdvisorCurrentIndex === 0 ? 'disabled' : ''}>⬅️ قبلی</button>
+                        <button class="btn btn-primary" onclick="nextAdvisorQuestion()" ${typeof answered === 'undefined' ? 'disabled' : ''}>بعدی ➡️</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function answerAdvisorQuestion(questionId, value) {
+            moduleAdvisorAnswers[questionId] = value;
+            const visible = getVisibleQuestions();
+            if (moduleAdvisorCurrentIndex >= visible.length) {
+                moduleAdvisorCurrentIndex = Math.max(0, visible.length - 1);
+            }
+            renderAdvisorQuestion();
+            
+            // Auto-advance to next question after a short delay for visual feedback
+            setTimeout(() => {
+                nextAdvisorQuestion();
+            }, 300);
+        }
+
+        function nextAdvisorQuestion() {
+            const visible = getVisibleQuestions();
+            const q = visible[moduleAdvisorCurrentIndex];
+            if (!q) return;
+            if (typeof moduleAdvisorAnswers[q.id] === 'undefined') return;
+            moduleAdvisorCurrentIndex += 1;
+            renderAdvisorQuestion();
+        }
+
+        function prevAdvisorQuestion() {
+            moduleAdvisorCurrentIndex = Math.max(0, moduleAdvisorCurrentIndex - 1);
+            renderAdvisorQuestion();
+        }
+
+        function computeModuleScores() {
+            const scores = {};
+            Object.values(MODULE_CATALOG).forEach(m => { scores[m.id] = 0; });
+
+            for (const q of ADVISOR_QUESTIONS) {
+                if (!q.when(moduleAdvisorAnswers)) continue;
+                const val = moduleAdvisorAnswers[q.id];
+                if (typeof val === 'undefined') continue;
+                const effects = val ? q.yes.effects : q.no.effects;
+                if (!effects) continue;
+                for (const [moduleId, delta] of Object.entries(effects)) {
+                    if (!scores.hasOwnProperty(moduleId)) continue;
+                    scores[moduleId] += Number(delta || 0);
+                }
+            }
+
+            // Ensure dependencies
+            for (const moduleId of Object.keys(scores)) {
+                const module = MODULE_CATALOG[moduleId];
+                if (!module) continue;
+                if (scores[moduleId] <= 0) continue;
+                for (const dep of module.depends || []) {
+                    if (MODULE_CATALOG[dep]) {
+                        scores[dep] = Math.max(scores[dep], 1);
+                    }
+                }
+            }
+
+            return scores;
+        }
+
+        function finishAdvisor() {
+            const scores = computeModuleScores();
+            const picked = Object.values(MODULE_CATALOG)
+                .map(m => ({ ...m, score: scores[m.id] || 0 }))
+                .filter(m => m.score > 0)
+                .sort((a, b) => b.score - a.score);
+
+            for (const m of picked) {
+                if (m.priority === 'essential') continue;
+                if (m.score >= 5) m.priority = 'essential';
+                else if (m.score >= 3) m.priority = 'recommended';
+                else m.priority = 'optional';
+            }
+
+            renderAdvisorResults(picked);
+        }
+
+        function renderAdvisorResults(modules) {
+            console.log('📊 Rendering advisor results:', modules.length, 'modules');
+            document.getElementById('questionContainer').style.display = 'none';
+            document.getElementById('resultsContainer').style.display = 'block';
+
+            // Store modules globally for install function
+            window.__advisorModules = modules;
+
+            const byCategory = {};
+            for (const m of modules) {
+                if (!byCategory[m.category]) byCategory[m.category] = [];
+                byCategory[m.category].push(m);
+            }
+
+            // Load databases for install dropdown
+            console.log('🔄 Loading databases for install dropdown...');
+            loadDatabasesForInstall();
+
+            const categoriesContainer = document.getElementById('resultsCategories');
+            if (!modules.length) {
+                categoriesContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">🤔</div>
+                        <p>بر اساس پاسخها، پیشنهاد مشخصی پیدا نشد.</p>
+                        <p style="margin-top: 8px; color: #666;">میتوانید دوباره شروع کنید و پاسخها را دقیقتر انتخاب کنید.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const orderedCats = Object.keys(byCategory);
+            categoriesContainer.innerHTML = orderedCats.map(catKey => {
+                const meta = MODULE_CATEGORIES[catKey] || { titleFa: catKey, icon: '📦' };
+                const list = byCategory[catKey].sort((a, b) => b.score - a.score);
+                return `
+                    <div class="category-card">
+                        <div class="category-header">
+                            <div class="category-icon">${meta.icon}</div>
+                            <div class="category-title">${meta.titleFa}</div>
+                        </div>
+                        <div class="modules-list">
+                            ${list.map(m => `
+                                <div class="module-card" data-module-id="${m.id}">
+                                    <div class="module-header">
+                                        <div>
+                                            <div class="module-name">${m.icon} ${m.displayNameFa}</div>
+                                            <div class="module-technical">${m.technicalName}</div>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <div class="module-priority ${m.priority === 'essential' ? 'priority-essential' : (m.priority === 'recommended' ? 'priority-recommended' : 'priority-optional')}">
+                                                ${m.priority === 'essential' ? 'ضروری' : (m.priority === 'recommended' ? 'پیشنهادی' : 'اختیاری')}
+                                            </div>
+                                            <button onclick="removeModule('${m.id}')" style="background: #dc3545; color: white; border: none; border-radius: 4px; width: 24px; height: 24px; cursor: pointer; font-size: 16px; line-height: 1; display: flex; align-items: center; justify-content: center;" title="حذف این ماژول">×</button>
+                                        </div>
+                                    </div>
+                                    <div class="module-description">${m.descriptionFa}</div>
+                                    <ul class="module-features">
+                                        ${(m.features || []).slice(0, 5).map(f => `<li>${f}</li>`).join('')}
+                                    </ul>
+                                    ${m.depends && m.depends.length ? `
+                                        <div class="module-dependencies">
+                                            <strong>وابستگیها:</strong> ${m.depends.map(d => MODULE_CATALOG[d]?.technicalName || d).join(', ')}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function exportModuleList() {
+            const scores = computeModuleScores();
+            const picked = Object.values(MODULE_CATALOG)
+                .map(m => ({ ...m, score: scores[m.id] || 0 }))
+                .filter(m => m.score > 0)
+                .sort((a, b) => b.score - a.score);
+
+            const lines = [];
+            lines.push('OdooMaster - لیست ماژولهای پیشنهادی');
+            lines.push(`تاریخ: ${new Date().toLocaleString('fa-IR')}`);
+            lines.push('');
+            lines.push('--- ماژولها ---');
+            for (const m of picked) {
+                lines.push(`- ${m.technicalName} | ${m.displayNameFa}`);
+            }
+            lines.push('');
+            lines.push('--- توضیح ---');
+            lines.push('این لیست بر اساس پاسخهای شما در داشبورد تولید شده است.');
+
+            const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'odoomaster_modules.txt';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        }
+
+        function removeModule(moduleId) {
+            if (!window.__removedModules) window.__removedModules = [];
+            if (!window.__removedModules.includes(moduleId)) {
+                window.__removedModules.push(moduleId);
+            }
+            
+            // Remove the module card from DOM with animation
+            const card = document.querySelector(`[data-module-id="${moduleId}"]`);
+            if (card) {
+                card.style.transition = 'opacity 0.3s, transform 0.3s';
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    card.remove();
+                    
+                    // Update stored modules list
+                    if (window.__advisorModules) {
+                        window.__advisorModules = window.__advisorModules.filter(m => m.id !== moduleId);
+                    }
+                    
+                    // Check if category is now empty
+                    const categoryCard = card.closest('.category-card');
+                    if (categoryCard) {
+                        const remainingModules = categoryCard.querySelectorAll('.module-card');
+                        if (remainingModules.length === 0) {
+                            categoryCard.remove();
+                        }
+                    }
+                    
+                    // Check if all modules removed
+                    const allModules = document.querySelectorAll('.module-card');
+                    if (allModules.length === 0) {
+                        document.getElementById('resultsCategories').innerHTML = `
+                            <div class="empty-state">
+                                <div class="icon">🤔</div>
+                                <p>همه ماژول‌ها حذف شدند</p>
+                                <p style="margin-top: 8px; color: #666;">می‌توانید پاسخ‌نامه را ویرایش کنید یا دوباره شروع کنید.</p>
+                            </div>
+                        `;
+                    }
+                }, 300);
+            }
+        }
+        
+        function editAnswers() {
+            // Go back to first question but keep existing answers
+            moduleAdvisorStarted = true;
+            moduleAdvisorCurrentIndex = 0;
+            document.getElementById('resultsContainer').style.display = 'none';
+            document.getElementById('questionContainer').style.display = 'block';
+            renderAdvisorQuestion();
+        }
+
+        function restartAdvisor() {
+            startModuleAdvisor();
+        }
+
+        // Load databases for install dropdown
+        async function loadDatabasesForInstall() {
+            console.log('🗄️ loadDatabasesForInstall called');
+            const selectEl = document.getElementById('installDbSelect');
+            const installBtn = document.getElementById('installModulesBtn');
+            
+            if (!selectEl) {
+                console.error('❌ installDbSelect element not found!');
+                return;
+            }
+            if (!installBtn) {
+                console.error('❌ installModulesBtn element not found!');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/list-customers');
+                const data = await response.json();
+                
+                if (!data.success) {
+                    selectEl.innerHTML = '<option value="">خطا در بارگذاری دیتابیس‌ها</option>';
+                    return;
+                }
+                
+                const databases = data.customers || [];
+                const isAdmin = data.is_admin || false;
+                
+                if (databases.length === 0) {
+                    selectEl.innerHTML = '<option value="">هنوز دیتابیسی ندارید</option>';
+                    return;
+                }
+                
+                // Clear and populate select
+                selectEl.innerHTML = '<option value="">-- انتخاب کنید --</option>';
+                databases.forEach(db => {
+                    const option = document.createElement('option');
+                    option.value = db.database_name;
+                    option.textContent = `${db.company_name} (${db.database_name})`;
+                    option.dataset.adminEmail = db.admin_email;
+                    option.dataset.adminPassword = db.admin_password || '';
+                    selectEl.appendChild(option);
+                });
+                
+                // For non-admin users: auto-select first and make readonly
+                if (!isAdmin && databases.length > 0) {
+                    selectEl.selectedIndex = 1; // Select first actual database (index 0 is placeholder)
+                    selectEl.disabled = true;
+                    selectEl.style.opacity = '0.8';
+                    selectEl.style.cursor = 'not-allowed';
+                    installBtn.disabled = false;
+                    // Check installed modules for this database
+                    checkInstalledModules(selectEl);
+                } else {
+                    // For admins: enable dropdown
+                    selectEl.disabled = false;
+                    selectEl.addEventListener('change', () => {
+                        installBtn.disabled = !selectEl.value;
+                        if (selectEl.value) {
+                            checkInstalledModules(selectEl);
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading databases:', error);
+                selectEl.innerHTML = '<option value="">خطا در بارگذاری</option>';
+            }
+        }
+        
+        // Check which modules are already installed in the selected database
+        async function checkInstalledModules(selectEl) {
+            const selectedOption = selectEl.options[selectEl.selectedIndex];
+            if (!selectedOption || !selectedOption.value) return;
+            
+            const dbName = selectedOption.value;
+            const adminEmail = selectedOption.dataset.adminEmail;
+            const adminPassword = selectedOption.dataset.adminPassword;
+            
+            const modules = (window.__advisorModules || []).map(m => m.technicalName);
+            if (modules.length === 0) return;
+            
+            const statusEl = document.getElementById('installStatus');
+            const installBtn = document.getElementById('installModulesBtn');
+            
+            statusEl.innerHTML = '🔍 در حال بررسی ماژول‌های نصب شده...';
+            statusEl.style.color = 'white';
+            
+            try {
+                const response = await fetch('/api/check-installed-modules', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        db_name: dbName,
+                        admin_email: adminEmail,
+                        admin_password: adminPassword,
+                        modules: modules
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    const moduleStatus = result.module_status || {};
+                    const installedModules = result.installed_modules || [];
+                    
+                    // Update module cards to show installed status
+                    let installedCount = 0;
+                    let notInstalledCount = 0;
+                    
+                    modules.forEach(moduleName => {
+                        const isInstalled = moduleStatus[moduleName] || false;
+                        if (isInstalled) installedCount++;
+                        else notInstalledCount++;
+                        
+                        // Find and update the module card
+                        const cards = document.querySelectorAll('.module-card');
+                        cards.forEach(card => {
+                            const techName = card.querySelector('small');
+                            if (techName && techName.textContent.includes(moduleName)) {
+                                // Add/update installed badge
+                                let badge = card.querySelector('.installed-badge');
+                                if (isInstalled) {
+                                    if (!badge) {
+                                        badge = document.createElement('span');
+                                        badge.className = 'installed-badge';
+                                        badge.style.cssText = 'position: absolute; top: 5px; left: 5px; background: #4caf50; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: bold;';
+                                        card.style.position = 'relative';
+                                        card.appendChild(badge);
+                                    }
+                                    badge.textContent = '✓ نصب شده';
+                                    card.style.opacity = '0.7';
+                                } else {
+                                    if (badge) badge.remove();
+                                    card.style.opacity = '1';
+                                }
+                            }
+                        });
+                    });
+                    
+                    // Update status message
+                    if (notInstalledCount === 0) {
+                        statusEl.innerHTML = '✅ همه ماژول‌ها قبلاً نصب شده‌اند!';
+                        statusEl.style.color = '#4caf50';
+                        installBtn.innerHTML = '✓ همه نصب شده';
+                        installBtn.style.background = '#4caf50';
+                        installBtn.disabled = true;
+                    } else if (installedCount > 0) {
+                        statusEl.innerHTML = `📊 <strong>${installedCount}</strong> نصب شده | <strong>${notInstalledCount}</strong> نیاز به نصب`;
+                        statusEl.style.color = 'white';
+                        installBtn.innerHTML = `⚡ نصب ${notInstalledCount} ماژول`;
+                        installBtn.disabled = false;
+                    } else {
+                        statusEl.innerHTML = `📦 آماده نصب ${notInstalledCount} ماژول`;
+                        statusEl.style.color = 'white';
+                        installBtn.innerHTML = '⚡ نصب ماژول‌ها';
+                        installBtn.disabled = false;
+                    }
+                    
+                    // Store module status for filtering during install
+                    window.__moduleStatus = moduleStatus;
+                    
+                } else {
+                    statusEl.innerHTML = '⚠️ خطا در بررسی: ' + (result.error || 'نامشخص');
+                    statusEl.style.color = '#ffeb3b';
+                }
+                
+            } catch (error) {
+                console.error('Error checking modules:', error);
+                statusEl.innerHTML = '⚠️ خطا در ارتباط با سرور';
+                statusEl.style.color = '#ffeb3b';
+            }
+        }
+
+        // Install modules on selected database with real-time monitoring
+        async function installModules() {
+            const selectEl = document.getElementById('installDbSelect');
+            const installBtn = document.getElementById('installModulesBtn');
+            const statusEl = document.getElementById('installStatus');
+            
+            const selectedOption = selectEl.options[selectEl.selectedIndex];
+            if (!selectedOption || !selectedOption.value) {
+                statusEl.textContent = '⚠️ لطفاً یک دیتابیس انتخاب کنید';
+                statusEl.style.color = '#ffeb3b';
+                return;
+            }
+            
+            const dbName = selectedOption.value;
+            const adminEmail = selectedOption.dataset.adminEmail;
+            const adminPassword = selectedOption.dataset.adminPassword;
+            
+            if (!adminEmail || !adminPassword) {
+                statusEl.textContent = '⚠️ اطلاعات دیتابیس ناقص است';
+                statusEl.style.color = '#ffeb3b';
+                return;
+            }
+            
+            // Get module technical names from stored results
+            let allModules = (window.__advisorModules || []).map(m => m.technicalName);
+            
+            // Filter out already installed modules
+            const moduleStatus = window.__moduleStatus || {};
+            const modulesToInstall = allModules.filter(m => !moduleStatus[m]);
+            
+            if (modulesToInstall.length === 0) {
+                statusEl.textContent = '✅ همه ماژول‌ها قبلاً نصب شده‌اند!';
+                statusEl.style.color = '#4caf50';
+                return;
+            }
+            
+            // Disable button and show loading
+            installBtn.disabled = true;
+            installBtn.innerHTML = '<span class="spinner"></span> در حال شروع...';
+            statusEl.innerHTML = `
+                <div style="margin-top: 8px;">
+                    <div id="installCurrentModule" style="margin-bottom: 8px;">⏳ در حال نصب ${modulesToInstall.length} ماژول جدید...</div>
+                    <div style="font-size: 12px; opacity: 0.8;">
+                        ⚠️ این فرآیند ممکن است <strong>چند دقیقه</strong> طول بکشد.
+                    </div>
+                    <div style="margin-top: 12px; background: rgba(255,255,255,0.2); border-radius: 8px; height: 8px; overflow: hidden;">
+                        <div id="installProgressBar" style="background: linear-gradient(90deg, #4caf50, #8bc34a); height: 100%; width: 0%; transition: width 0.5s;"></div>
+                    </div>
+                    <div id="installProgressText" style="margin-top: 6px; font-size: 11px; opacity: 0.9;">0%</div>
+                    <div id="installModuleList" style="margin-top: 10px; font-size: 11px; text-align: right; max-height: 100px; overflow-y: auto;"></div>
+                    <style>
+                        .spinner {
+                            display: inline-block;
+                            width: 14px;
+                            height: 14px;
+                            border: 2px solid #667eea;
+                            border-top-color: transparent;
+                            border-radius: 50%;
+                            animation: spin 1s linear infinite;
+                            vertical-align: middle;
+                            margin-left: 6px;
+                        }
+                        @keyframes spin {
+                            to { transform: rotate(360deg); }
+                        }
+                    </style>
+                </div>
+            `;
+            statusEl.style.color = 'white';
+            
+            try {
+                // Start installation (returns immediately with job_id)
+                const response = await fetch('/api/install-modules', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        db_name: dbName,
+                        admin_email: adminEmail,
+                        admin_password: adminPassword,
+                        modules: modulesToInstall
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.error || 'خطا در شروع نصب');
+                }
+                
+                // Check if new async API (with job_id) or old sync API
+                if (result.job_id) {
+                    // New async API with polling
+                    const jobId = result.job_id;
+                    console.log('Install job started:', jobId);
+                    
+                    // Poll for status updates
+                    const pollInterval = setInterval(async () => {
+                        try {
+                            const statusResponse = await fetch(`/api/install-status/${jobId}`);
+                            const statusData = await statusResponse.json();
+                            
+                            if (!statusData.success) {
+                                clearInterval(pollInterval);
+                                return;
+                            }
+                            
+                            // Update progress bar
+                            const bar = document.getElementById('installProgressBar');
+                            const progressText = document.getElementById('installProgressText');
+                            const currentModuleEl = document.getElementById('installCurrentModule');
+                            const moduleListEl = document.getElementById('installModuleList');
+                            
+                            if (bar) bar.style.width = statusData.progress + '%';
+                            if (progressText) progressText.textContent = statusData.progress + '%';
+                            if (currentModuleEl) currentModuleEl.innerHTML = `⚙️ ${statusData.message}`;
+                            
+                            // Update module list
+                            if (moduleListEl) {
+                                let listHtml = '';
+                                if (statusData.installed && statusData.installed.length > 0) {
+                                    listHtml += statusData.installed.map(m => `<span style="color: #4caf50;">✅ ${m}</span>`).join(' ');
+                                }
+                                if (statusData.failed && statusData.failed.length > 0) {
+                                    listHtml += ' ' + statusData.failed.map(m => `<span style="color: #ff5252;">❌ ${m}</span>`).join(' ');
+                                }
+                                if (statusData.skipped && statusData.skipped.length > 0) {
+                                    listHtml += ' ' + statusData.skipped.map(m => `<span style="color: #999;">⊗ ${m}</span>`).join(' ');
+                                }
+                                moduleListEl.innerHTML = listHtml;
+                            }
+                            
+                            // Update button text
+                            if (statusData.current_index && statusData.total) {
+                                installBtn.innerHTML = `<span class="spinner"></span> ${statusData.current_index}/${statusData.total}`;
+                            }
+                            
+                            // Check if completed
+                            if (statusData.status === 'completed' || statusData.status === 'failed') {
+                                clearInterval(pollInterval);
+                                showInstallComplete(statusEl, installBtn, statusData, dbName, adminEmail, adminPassword);
+                            }
+                            
+                        } catch (pollError) {
+                            console.error('Poll error:', pollError);
+                        }
+                    }, 2000); // Poll every 2 seconds
+                } else {
+                    // Old sync API - installation already completed
+                    console.log('Sync install completed:', result);
+                    const bar = document.getElementById('installProgressBar');
+                    if (bar) bar.style.width = '100%';
+                    
+                    showInstallComplete(statusEl, installBtn, {
+                        status: 'completed',
+                        message: result.details || 'ماژول‌ها نصب شدند'
+                    }, dbName, adminEmail, adminPassword);
+                }
+                
+            } catch (error) {
+                console.error('Error starting module installation:', error);
+                statusEl.innerHTML = `❌ ${error.message || 'خطا در ارتباط با سرور'}`;
+                statusEl.style.color = '#ff5252';
+                installBtn.innerHTML = '⚡ تلاش مجدد';
+                installBtn.disabled = false;
+            }
+        }
+        
+        // Helper function to show install completion UI
+        function showInstallComplete(statusEl, installBtn, statusData, dbName, adminEmail, adminPassword) {
+            const currentModuleEl = document.getElementById('installCurrentModule');
+            
+            if (statusData.status === 'completed') {
+                if (currentModuleEl) currentModuleEl.innerHTML = `✅ ${statusData.message}`;
+                statusEl.style.color = '#4caf50';
+                installBtn.innerHTML = '✓ نصب شد';
+                installBtn.style.background = '#4caf50';
+                
+                // Add "Enter Odoo" button after successful install
+                const enterBtn = document.createElement('button');
+                enterBtn.innerHTML = '🚀 ورود به Odoo و مشاهده تغییرات';
+                enterBtn.style.cssText = 'margin-top: 15px; padding: 12px 24px; background: linear-gradient(135deg, #11998e, #38ef7d); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; display: block; width: 100%; transition: transform 0.2s, box-shadow 0.2s;';
+                enterBtn.onmouseover = () => { enterBtn.style.transform = 'translateY(-2px)'; enterBtn.style.boxShadow = '0 5px 15px rgba(17,153,142,0.4)'; };
+                enterBtn.onmouseout = () => { enterBtn.style.transform = 'translateY(0)'; enterBtn.style.boxShadow = 'none'; };
+                enterBtn.onclick = () => {
+                    const odooLoginUrl = `https://odoo-online.liara.run/web/login?db=${encodeURIComponent(dbName)}`;
+                    window.open(odooLoginUrl, '_blank');
+                };
+                statusEl.appendChild(enterBtn);
+                
+                // Add "Fix Modules" button in case of Missing Action errors
+                const fixBtn = document.createElement('button');
+                fixBtn.innerHTML = '🔧 تعمیر ماژول‌ها (اگر خطای Missing Action دارید)';
+                fixBtn.style.cssText = 'margin-top: 8px; padding: 8px 16px; background: #ff9800; color: white; border: none; border-radius: 6px; font-size: 12px; cursor: pointer; display: block; width: 100%; opacity: 0.8;';
+                fixBtn.onclick = async () => {
+                    fixBtn.disabled = true;
+                    fixBtn.innerHTML = '⏳ در حال تعمیر...';
+                    try {
+                        const resp = await fetch('/api/fix-modules', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                db_name: dbName,
+                                admin_email: adminEmail,
+                                admin_password: adminPassword
+                            })
+                        });
+                        const result = await resp.json();
+                        if (result.success) {
+                            fixBtn.innerHTML = '✅ تعمیر شد! Odoo را refresh کنید';
+                            fixBtn.style.background = '#4caf50';
+                        } else {
+                            fixBtn.innerHTML = '❌ ' + (result.error || 'خطا');
+                            fixBtn.style.background = '#f44336';
+                        }
+                    } catch (e) {
+                        fixBtn.innerHTML = '❌ خطا در ارتباط';
+                        fixBtn.style.background = '#f44336';
+                    }
+                };
+                statusEl.appendChild(fixBtn);
+                
+                // Add credentials reminder
+                const credInfo = document.createElement('div');
+                credInfo.style.cssText = 'margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.15); border-radius: 6px; font-size: 12px;';
+                credInfo.innerHTML = `
+                    <div style="margin-bottom: 5px;">📧 <strong>ایمیل:</strong> ${adminEmail}</div>
+                    <div>🔑 <strong>رمز:</strong> <code style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 3px;">${adminPassword}</code></div>
+                `;
+                statusEl.appendChild(credInfo);
+            } else {
+                if (currentModuleEl) currentModuleEl.innerHTML = `❌ ${statusData.message}`;
+                statusEl.style.color = '#ff5252';
+                installBtn.innerHTML = '⚡ تلاش مجدد';
+                installBtn.disabled = false;
+            }
+        }
+
+        // =============== END MODULE ADVISOR ===============
 
         // Check user status and load data
         async function initDashboard() {
@@ -1940,20 +4196,60 @@
 
                 const user = result.user;
                 
+                // Store user ID globally for role management
+                window.__currentUserId = user.id;
+                
                 // Update user info
                 document.getElementById('userName').textContent = user.name || 'کاربر';
                 document.getElementById('userEmail').textContent = user.email || '';
                 document.getElementById('userAvatar').textContent = user.name ? user.name[0].toUpperCase() : '👤';
+                
+                // Show email warning if user has phone but no email
+                if (user.phone && !user.email) {
+                    document.getElementById('emailWarningAlert').style.display = 'flex';
+                }
                 
                 // Profile form
                 document.getElementById('profileName').value = user.name || '';
                 document.getElementById('profileEmail').value = user.email || '';
                 document.getElementById('profilePhone').value = user.phone || '';
                 document.getElementById('profileCompany').value = user.company || '';
+                
+                // Email field: readonly only if already set, editable if empty
+                const emailInput = document.getElementById('profileEmail');
+                const emailHint = document.getElementById('emailHint');
+                const emailVerifyButtons = document.getElementById('emailVerifyButtons');
+                
+                if (user.email) {
+                    emailInput.readOnly = true;
+                    emailHint.textContent = 'ایمیل تایید شده قابل تغییر نیست';
+                    emailVerifyButtons.style.display = 'none';
+                } else {
+                    emailInput.readOnly = false;
+                    emailHint.textContent = 'ایمیل خود را وارد کنید و روش تایید را انتخاب کنید';
+                    emailHint.style.color = '#ff9800';
+                    emailVerifyButtons.style.display = 'flex';
+                    
+                    // Show verify buttons when email is entered
+                    emailInput.addEventListener('input', function() {
+                        if (this.value && this.value.includes('@')) {
+                            emailVerifyButtons.style.display = 'flex';
+                        } else {
+                            emailVerifyButtons.style.display = 'none';
+                        }
+                    });
+                }
+                
+                // Phone field: always readonly if verified
+                const phoneInput = document.getElementById('profilePhone');
+                if (user.phone) {
+                    phoneInput.readOnly = true;
+                }
 
                 // Show admin section if admin
                 if (user.is_admin) {
                     document.getElementById('adminSection').style.display = 'block';
+                    loadAllRoles(); // Load all roles for admin view
                 }
 
                 // Load initial data
@@ -2175,21 +4471,30 @@
         let backupCompleted = false;
         let completedBackups = [];
 
-        // Save admin phone to localStorage
-        function saveAdminPhone(phone) {
-            localStorage.setItem('adminDeletePhone', phone);
-        }
-
-        // Load admin phone on page load
-        function loadAdminPhone() {
-            const saved = localStorage.getItem('adminDeletePhone');
-            if (saved) {
-                document.getElementById('adminPhoneNumber').value = saved;
+        // Load admin config from server (Liara env variables)
+        async function loadAdminConfig() {
+            try {
+                const response = await fetch('/api/admin/config');
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Display admin email and phone (masked)
+                    document.getElementById('adminEmailDisplay').textContent = data.admin_email || 'تنظیم نشده';
+                    document.getElementById('adminPhoneDisplay').textContent = data.admin_phone || 'تنظیم نشده';
+                    
+                    // Show SMS status
+                    const phoneDisplay = document.getElementById('adminPhoneDisplay');
+                    if (!data.sms_configured) {
+                        phoneDisplay.innerHTML += ' <span style="color: #fbbf24; font-size: 11px;">(SMS غیرفعال)</span>';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading admin config:', error);
             }
         }
 
         // Initiate delete process - shows SMS modal
-        function initiateDeleteDatabases() {
+        async function initiateDeleteDatabases() {
             const checkboxes = document.querySelectorAll('.db-checkbox:checked');
             
             if (checkboxes.length === 0) {
@@ -2197,16 +4502,28 @@
                 return;
             }
 
-            const adminPhone = document.getElementById('adminPhoneNumber').value.trim();
-            if (!adminPhone || !/^09\d{9}$/.test(adminPhone)) {
-                alert('❌ لطفاً شماره موبایل معتبر (مثل 09123456789) وارد کنید!');
-                document.getElementById('adminPhoneNumber').focus();
-                return;
+            // Get admin config from server (phone from Liara env)
+            try {
+                const configResponse = await fetch('/api/admin/config');
+                const configData = await configResponse.json();
+                
+                if (!configData.success) {
+                    alert('❌ خطا در دریافت تنظیمات ادمین');
+                    return;
+                }
+                
+                // Store admin phone (masked) for display
+                window.__adminPhoneMasked = configData.admin_phone;
+                window.__smsConfigured = configData.sms_configured;
+                
+            } catch (error) {
+                console.error('Error fetching admin config:', error);
             }
 
             pendingDeleteDatabases = Array.from(checkboxes).map(cb => ({
                 name: cb.value,
-                company: cb.dataset.company
+                company: cb.dataset.company,
+                id: cb.dataset.id
             }));
 
             // Show modal
@@ -2280,18 +4597,34 @@
                 statusEl.innerHTML = `📦 در حال بکاپ‌گیری: <strong>${db.company}</strong> (${i + 1}/${totalDbs})`;
                 
                 try {
-                    // Call backup API
+                    // Call backup API - now returns file for direct download
                     const response = await fetch('/api/admin/backup-database', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ database: db.name })
                     });
                     
-                    const result = await response.json();
-                    if (result.success) {
-                        completedBackups.push({ db: db.name, file: result.backup_file });
+                    if (response.ok && response.headers.get('content-type')?.includes('application/zip')) {
+                        // Direct download - create blob and trigger download
+                        const blob = await response.blob();
+                        const timestamp = new Date().toISOString().slice(0, 19).replace(/[-:T]/g, '');
+                        const filename = `${db.name}_${timestamp}.zip`;
+                        
+                        // Create download link
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(url);
+                        
+                        completedBackups.push({ db: db.name, file: filename, downloaded: true });
+                        console.log(`✅ Backup downloaded: ${filename}`);
                     } else {
-                        // If backup fails, we still continue but warn
+                        // Error response
+                        const result = await response.json();
                         console.warn(`Backup warning for ${db.name}:`, result.error);
                         completedBackups.push({ db: db.name, file: 'BACKUP_FAILED', error: result.error });
                     }
@@ -2323,16 +4656,19 @@
 
         // Send SMS verification code
         async function sendDeleteSmsCode() {
-            const adminPhone = document.getElementById('adminPhoneNumber').value.trim();
-            document.getElementById('smsPhoneDisplay').textContent = adminPhone;
+            // Display masked phone from Liara config
+            const phoneMasked = window.__adminPhoneMasked || '09**********';
+            document.getElementById('smsPhoneDisplay').textContent = phoneMasked;
 
             try {
-                const response = await fetch('/api/admin/send-delete-sms', {
+                const response = await fetch('/api/admin/send-delete-code', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
-                        phone: adminPhone,
-                        databases: pendingDeleteDatabases.map(db => db.name)
+                        databases: pendingDeleteDatabases.map(db => ({ 
+                            database_name: db.name, 
+                            id: db.id 
+                        }))
                     })
                 });
 
@@ -2341,6 +4677,17 @@
                     document.getElementById('smsSection').style.display = 'block';
                     document.getElementById('confirmDeleteBtn').style.display = 'inline-block';
                     document.getElementById('resendSmsBtn').style.display = 'inline-block';
+                    
+                    // Show test code if in test mode
+                    if (result.test_mode) {
+                        alert('⚠️ حالت تست: ' + result.message);
+                    }
+                    
+                    // Update phone display with actual masked phone
+                    if (result.phone_masked) {
+                        document.getElementById('smsPhoneDisplay').textContent = result.phone_masked;
+                    }
+                    
                     startSmsCountdown();
                     // Focus first input
                     document.querySelector('.sms-digit[data-index="0"]').focus();
@@ -2392,17 +4739,17 @@
                 return;
             }
 
-            const adminPhone = document.getElementById('adminPhoneNumber').value.trim();
-
             try {
-                // Verify code and delete
-                const response = await fetch('/api/admin/delete-databases-with-sms', {
+                // Verify code and delete using new API
+                const response = await fetch('/api/admin/verify-delete-code', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        phone: adminPhone,
-                        sms_code: enteredCode,
-                        databases: pendingDeleteDatabases.map(db => db.name),
+                        code: enteredCode,
+                        databases: pendingDeleteDatabases.map(db => ({
+                            database_name: db.name,
+                            id: db.id
+                        })),
                         backups: completedBackups
                     })
                 });
@@ -2411,7 +4758,16 @@
 
                 if (result.success) {
                     closeSmsModal();
-                    alert(`✅ ${result.deleted_count} دیتابیس با موفقیت حذف شد!\n\n📦 بکاپ‌ها ذخیره شده‌اند.\n\n${result.message}`);
+                    
+                    let message = `✅ ${result.deleted.length} دیتابیس با موفقیت حذف شد!`;
+                    if (result.failed && result.failed.length > 0) {
+                        message += `\n\n⚠️ ${result.failed.length} دیتابیس حذف نشد:\n`;
+                        result.failed.forEach(f => {
+                            message += `- ${f.db}: ${f.error}\n`;
+                        });
+                    }
+                    
+                    alert(message);
                     await loadCustomers();
                     deselectAllDatabases();
                 } else {
@@ -2603,7 +4959,61 @@
         // Profile form submit
         document.getElementById('profileForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            alert('✅ اطلاعات با موفقیت ذخیره شد');
+            
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            const originalBg = submitBtn.style.backgroundColor;
+            
+            // Change button to loading state
+            submitBtn.innerHTML = '⏳ در حال ذخیره...';
+            submitBtn.disabled = true;
+            
+            try {
+                const formData = {
+                    name: document.getElementById('profileName').value.trim(),
+                    company: document.getElementById('profileCompany').value.trim()
+                };
+                
+                const response = await fetch('/api/update-profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Success: change button to green
+                    submitBtn.innerHTML = '✓ ذخیره شد';
+                    submitBtn.style.backgroundColor = '#28a745';
+                    
+                    // Update user name in UI
+                    if (formData.name) {
+                        document.getElementById('userName').textContent = formData.name;
+                        document.getElementById('userAvatar').textContent = formData.name[0].toUpperCase();
+                    }
+                    
+                    // Revert button after 2 seconds
+                    setTimeout(() => {
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.style.backgroundColor = originalBg;
+                        submitBtn.disabled = false;
+                    }, 2000);
+                } else {
+                    throw new Error(result.error || 'خطا در ذخیره');
+                }
+            } catch (error) {
+                // Error: change button to red
+                submitBtn.innerHTML = '✕ خطا در ذخیره';
+                submitBtn.style.backgroundColor = '#dc3545';
+                
+                setTimeout(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.style.backgroundColor = originalBg;
+                    submitBtn.disabled = false;
+                }, 2000);
+            }
         });
 
         // Password form submit
@@ -2641,6 +5051,173 @@
             const navItem = document.querySelector(`.nav-item[data-section="${section}"]`);
             if (navItem) {
                 navItem.click();
+            }
+        }
+        
+        // Dismiss email warning
+        function dismissEmailWarning() {
+            document.getElementById('emailWarningAlert').style.display = 'none';
+        }
+        
+        // Alias for onclick
+        function showSection(section) {
+            switchToSection(section);
+        }
+        
+        // =============== EMAIL VERIFICATION ===============
+        
+        let emailVerifyTimer = null;
+        
+        // Verify email with code (send email)
+        async function verifyEmailWithCode() {
+            const email = document.getElementById('profileEmail').value.trim();
+            if (!email || !email.includes('@')) {
+                alert('لطفاً یک ایمیل معتبر وارد کنید');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/send-email-verification-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ email: email })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('emailInputSection').querySelector('input').readOnly = true;
+                    document.getElementById('emailVerifyButtons').style.display = 'none';
+                    document.getElementById('emailCodeSection').style.display = 'block';
+                    document.getElementById('sentToEmail').textContent = email;
+                    startEmailCodeTimer();
+                } else {
+                    alert(result.error || 'خطا در ارسال کد');
+                }
+            } catch (error) {
+                alert('خطا در ارتباط با سرور');
+            }
+        }
+        
+        // Start countdown timer for email code
+        function startEmailCodeTimer() {
+            let seconds = 120;
+            const timerEl = document.getElementById('emailCodeTimer');
+            
+            if (emailVerifyTimer) clearInterval(emailVerifyTimer);
+            
+            emailVerifyTimer = setInterval(() => {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                timerEl.textContent = `زمان باقی‌مانده: ${mins}:${secs.toString().padStart(2, '0')}`;
+                seconds--;
+                
+                if (seconds < 0) {
+                    clearInterval(emailVerifyTimer);
+                    timerEl.textContent = 'کد منقضی شد. دوباره امتحان کنید.';
+                    timerEl.style.color = '#dc3545';
+                }
+            }, 1000);
+        }
+        
+        // Confirm email verification code
+        async function confirmEmailCode() {
+            const code = document.getElementById('emailVerifyCode').value.trim();
+            const email = document.getElementById('profileEmail').value.trim();
+            
+            if (!code || code.length < 4) {
+                alert('لطفاً کد تایید را وارد کنید');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/verify-email-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ email: email, code: code })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('✅ ایمیل با موفقیت تایید شد!');
+                    if (emailVerifyTimer) clearInterval(emailVerifyTimer);
+                    // Reload to show updated profile
+                    window.location.reload();
+                } else {
+                    alert(result.error || 'کد نادرست است');
+                }
+            } catch (error) {
+                alert('خطا در ارتباط با سرور');
+            }
+        }
+        
+        // Cancel email verification
+        function cancelEmailVerification() {
+            if (emailVerifyTimer) clearInterval(emailVerifyTimer);
+            document.getElementById('emailCodeSection').style.display = 'none';
+            document.getElementById('emailVerifyButtons').style.display = 'flex';
+            document.getElementById('profileEmail').readOnly = false;
+            document.getElementById('emailVerifyCode').value = '';
+        }
+        
+        // Verify email with Google
+        async function verifyEmailWithGoogle() {
+            // Get email from input OR from current user data
+            let email = document.getElementById('profileEmail').value.trim();
+            
+            // If textbox is empty, get user's current email from API
+            if (!email) {
+                try {
+                    const response = await fetch('/api/user-status', {
+                        credentials: 'same-origin'
+                    });
+                    const data = await response.json();
+                    if (data.logged_in && data.email) {
+                        email = data.email;
+                    } else {
+                        alert('لطفاً ابتدا یک ایمیل وارد کنید');
+                        document.getElementById('profileEmail').focus();
+                        return;
+                    }
+                } catch (error) {
+                    alert('لطفاً ابتدا یک ایمیل وارد کنید');
+                    document.getElementById('profileEmail').focus();
+                    return;
+                }
+            }
+            
+            if (!email.includes('@')) {
+                alert('لطفاً یک ایمیل معتبر وارد کنید');
+                return;
+            }
+            
+            // Open Google auth in popup for email verification only
+            const width = 600;
+            const height = 700;
+            const left = (screen.width - width) / 2;
+            const top = (screen.height - height) / 2;
+            
+            const googleUrl = '/auth/google-verify-email?popup=1&email=' + encodeURIComponent(email);
+            const popup = window.open(
+                googleUrl, 
+                'google-verify-email', 
+                `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
+            );
+            
+            // Listen for success message from popup
+            window.addEventListener('message', function handler(event) {
+                if (event.data && event.data.type === 'google-email-verified') {
+                    window.removeEventListener('message', handler);
+                    alert('✅ ایمیل با موفقیت تایید شد!');
+                    window.location.reload();
+                }
+            });
+            
+            if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+                alert('لطفاً popup blocker را غیرفعال کنید');
             }
         }
 
@@ -3110,9 +5687,825 @@
 
         // =============== END PLANS MANAGEMENT ===============
 
+        // =============== ROLES MANAGEMENT ===============
+        
+        // Available roles cache
+        let availableRoles = [];
+        
+        // Load available roles from API
+        async function loadAvailableRoles() {
+            try {
+                const response = await fetch('/api/roles/available');
+                const data = await response.json();
+                if (data.success) {
+                    availableRoles = data.roles;
+                    renderRoleSelector();
+                }
+            } catch (error) {
+                console.error('Error loading available roles:', error);
+            }
+        }
+        
+        // Render role selector in modal
+        function renderRoleSelector() {
+            const grid = document.getElementById('roleSelectorGrid');
+            if (!grid) return;
+            
+            grid.innerHTML = availableRoles.map(role => `
+                <div class="role-option" data-role="${role.key}" onclick="selectRole('${role.key}')">
+                    <div class="role-option-icon">${role.icon}</div>
+                    <div class="role-option-name">${role.name_fa}</div>
+                </div>
+            `).join('');
+        }
+        
+        // Select role in modal
+        function selectRole(roleKey) {
+            // Remove selection from all
+            document.querySelectorAll('.role-option').forEach(el => el.classList.remove('selected'));
+            // Add selection to clicked one
+            const selected = document.querySelector(`.role-option[data-role="${roleKey}"]`);
+            if (selected) selected.classList.add('selected');
+            // Set hidden input
+            document.getElementById('selectedRoleKey').value = roleKey;
+        }
+        
+        // Generate random password for role
+        function generateRolePassword() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%';
+            let password = '';
+            for (let i = 0; i < 12; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('roleOdooPassword').value = password;
+        }
+        
+        // Open add role modal
+        async function openAddRoleModal() {
+            // Load roles if not loaded
+            if (availableRoles.length === 0) {
+                await loadAvailableRoles();
+            }
+            
+            // Populate database dropdown
+            const dbSelect = document.getElementById('roleDbSelect');
+            dbSelect.innerHTML = '<option value="">-- انتخاب کنید --</option>';
+            
+            try {
+                const response = await fetch('/api/list-customers');
+                const data = await response.json();
+                if (data.success && data.customers) {
+                    data.customers.forEach(db => {
+                        dbSelect.innerHTML += `<option value="${db.database_name}" 
+                            data-admin-email="${db.admin_email}" 
+                            data-admin-password="${db.admin_password}"
+                            data-company="${db.company_name}">${db.company_name} (${db.database_name})</option>`;
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading databases:', error);
+            }
+            
+            // Initialize Select2 for database dropdown
+            setTimeout(() => initializeSelect2ForElement(dbSelect), 100);
+            
+            // Show modal
+            document.getElementById('addRoleModal').classList.add('active');
+        }
+        
+        // Close add role modal
+        function closeAddRoleModal() {
+            document.getElementById('addRoleModal').classList.remove('active');
+            
+            // Destroy Select2 instances
+            if (typeof jQuery !== 'undefined') {
+                const dbSelect = document.getElementById('roleDbSelect');
+                const userSelect = document.getElementById('roleUserSelect');
+                
+                if (jQuery(dbSelect).data('select2')) {
+                    jQuery(dbSelect).select2('destroy');
+                }
+                if (jQuery(userSelect).data('select2')) {
+                    jQuery(userSelect).select2('destroy');
+                }
+            }
+            
+            // Reset form
+            document.getElementById('addRoleForm').reset();
+            document.querySelectorAll('.role-option').forEach(el => el.classList.remove('selected'));
+        }
+        
+        // When database is selected in modal
+        async function onRoleDbSelected() {
+            const dbSelect = document.getElementById('roleDbSelect');
+            const userSelect = document.getElementById('roleUserSelect');
+            
+            if (!dbSelect.value) {
+                userSelect.innerHTML = '<option value="">-- ابتدا دیتابیس را انتخاب کنید --</option>';
+                // Destroy and reinitialize Select2 for user select
+                if (typeof jQuery !== 'undefined' && jQuery(userSelect).data('select2')) {
+                    jQuery(userSelect).select2('destroy');
+                }
+                initializeSelect2ForElement(userSelect);
+                return;
+            }
+            
+            // Load users who have roles in this specific database
+            userSelect.innerHTML = '<option value="">در حال بارگذاری...</option>';
+            
+            // Destroy Select2 temporarily
+            if (typeof jQuery !== 'undefined' && jQuery(userSelect).data('select2')) {
+                jQuery(userSelect).select2('destroy');
+            }
+            
+            try {
+                // Get roles for this database to find associated users
+                const response = await fetch(`/api/roles/list?database=${encodeURIComponent(dbSelect.value)}`);
+                const data = await response.json();
+                
+                userSelect.innerHTML = '<option value="">-- انتخاب کنید --</option>';
+                
+                if (data.success && data.roles) {
+                    // Extract unique users from roles
+                    const uniqueUsers = new Map();
+                    data.roles.forEach(role => {
+                        if (role.user_id) {
+                            // Get user info from website_users via another API call if needed
+                            const userKey = role.user_id;
+                            if (!uniqueUsers.has(userKey)) {
+                                uniqueUsers.set(userKey, {
+                                    id: role.user_id,
+                                    name: role.db_owner_name || 'کاربر ' + role.user_id,
+                                    email: role.odoo_login || ''
+                                });
+                            }
+                        }
+                    });
+                    
+                    // If no users found in roles, fetch all website users
+                    if (uniqueUsers.size === 0) {
+                        const allUsersResponse = await fetch('/api/admin/users');
+                        const allUsersData = await allUsersResponse.json();
+                        
+                        if (allUsersData.success && allUsersData.users) {
+                            allUsersData.users.forEach(user => {
+                                uniqueUsers.set(user.id, {
+                                    id: user.id,
+                                    name: user.name || 'بدون نام',
+                                    email: user.email || user.phone || ''
+                                });
+                            });
+                            userSelect.innerHTML += '<option value="" disabled>⚠️ هیچ کاربری قبلاً در این دیتابیس ثبت نشده - نمایش همه کاربران:</option>';
+                        }
+                    }
+                    
+                    // Populate dropdown with unique users
+                    uniqueUsers.forEach(user => {
+                        const displayText = user.email ? `${user.name} (${user.email})` : user.name;
+                        userSelect.innerHTML += `<option value="${user.id}" 
+                            data-email="${user.email}"
+                            data-name="${user.name}">${displayText}</option>`;
+                    });
+                }
+                
+                // Reinitialize Select2
+                setTimeout(() => initializeSelect2ForElement(userSelect), 100);
+            } catch (error) {
+                console.error('Error loading users:', error);
+                userSelect.innerHTML = '<option value="">خطا در بارگذاری - نمایش همه کاربران</option>';
+                
+                // Fallback: load all users
+                try {
+                    const allUsersResponse = await fetch('/api/admin/users');
+                    const allUsersData = await allUsersResponse.json();
+                    
+                    if (allUsersData.success && allUsersData.users) {
+                        allUsersData.users.forEach(user => {
+                            userSelect.innerHTML += `<option value="${user.id}">${user.name || 'بدون نام'} (${user.email || user.phone || 'ناشناس'})</option>`;
+                        });
+                    }
+                } catch (fallbackError) {
+                    console.error('Fallback error:', fallbackError);
+                }
+                
+                // Reinitialize Select2 even on error
+                setTimeout(() => initializeSelect2ForElement(userSelect), 100);
+            }
+        }
+        
+        // Submit add role form
+        async function submitAddRole(event) {
+            event.preventDefault();
+            
+            const dbSelect = document.getElementById('roleDbSelect');
+            const userSelect = document.getElementById('roleUserSelect');
+            const selectedOption = dbSelect.options[dbSelect.selectedIndex];
+            const selectedUserOption = userSelect.options[userSelect.selectedIndex];
+            
+            const roleKey = document.getElementById('selectedRoleKey').value;
+            if (!roleKey) {
+                alert('لطفاً یک نقش انتخاب کنید');
+                return;
+            }
+            
+            const payload = {
+                user_id: parseInt(userSelect.value),
+                database_name: dbSelect.value,
+                role_key: roleKey,
+                admin_email: selectedOption.dataset.adminEmail,
+                admin_password: selectedOption.dataset.adminPassword,
+                new_user_email: document.getElementById('roleOdooEmail').value,
+                new_user_password: document.getElementById('roleOdooPassword').value,
+                new_user_name: document.getElementById('roleOdooName').value,
+                notes: document.getElementById('roleNotes').value,
+                created_by: window.__currentUserId || null
+            };
+            
+            // Show loading
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '⏳ در حال ایجاد...';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/roles/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('✅ ' + data.message);
+                    closeAddRoleModal();
+                    loadAllRoles();
+                    loadMyRoles();
+                } else {
+                    alert('❌ خطا: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error creating role:', error);
+                alert('❌ خطا در ایجاد نقش');
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+        
+        // Load all roles (admin view)
+        async function loadAllRoles() {
+            try {
+                const response = await fetch('/api/roles/list?all=true');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const roles = data.roles;
+                    
+                    // Update stats
+                    document.getElementById('totalRolesCount').textContent = roles.length;
+                    document.getElementById('activeRolesCount').textContent = roles.filter(r => r.is_active).length;
+                    document.getElementById('allRolesCount').textContent = roles.length;
+                    
+                    // Count unique databases
+                    const uniqueDbs = new Set(roles.map(r => r.database_name));
+                    document.getElementById('dbsWithRolesCount').textContent = uniqueDbs.size;
+                    
+                    // Render table
+                    const tbody = document.getElementById('allRolesBody');
+                    if (!tbody) return;
+                    
+                    if (roles.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 40px; color: #666;">
+                            هنوز هیچ نقشی تعریف نشده است
+                        </td></tr>`;
+                        return;
+                    }
+                    
+                    tbody.innerHTML = roles.map((role, idx) => `
+                        <tr>
+                            <td>${idx + 1}</td>
+                            <td>
+                                <span style="display: inline-flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 20px;">${role.icon}</span>
+                                    <span style="font-weight: 600;">${role.role_name_fa}</span>
+                                </span>
+                            </td>
+                            <td>${role.user_name || role.user_email || 'کاربر #' + role.user_id}</td>
+                            <td><code style="font-size: 11px;">${role.database_name}</code></td>
+                            <td>${role.odoo_login}</td>
+                            <td>
+                                <span class="status-badge ${role.is_active ? 'status-active' : 'status-inactive'}">
+                                    ${role.is_active ? 'فعال' : 'غیرفعال'}
+                                </span>
+                            </td>
+                            <td style="font-size: 12px;">${new Date(role.created_at).toLocaleDateString('fa-IR')}</td>
+                            <td>
+                                <div style="display: flex; gap: 6px;">
+                                    <button class="btn btn-sm btn-primary" onclick="loginWithRole(${role.id})" title="ورود">
+                                        🚀
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary" onclick="copyRoleCredentials(${role.id}, '${role.odoo_login}', '${role.database_name}')" title="کپی اطلاعات">
+                                        📋
+                                    </button>
+                                    <button class="btn btn-sm ${role.is_active ? 'btn-warning' : 'btn-success'}" onclick="toggleRoleStatus(${role.id}, ${role.is_active})" title="${role.is_active ? 'غیرفعال کردن' : 'فعال کردن'}">
+                                        ${role.is_active ? '⏸️' : '▶️'}
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading all roles:', error);
+            }
+        }
+        
+        // Load my roles (user view)
+        async function loadMyRoles() {
+            const userId = window.__currentUserId;
+            if (!userId) return;
+            
+            try {
+                const response = await fetch(`/api/roles/list?user_id=${userId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const roles = data.roles;
+                    
+                    // Update badge
+                    document.getElementById('myRolesCount').textContent = roles.length;
+                    
+                    const container = document.getElementById('myRolesList');
+                    if (!container) return;
+                    
+                    if (roles.length === 0) {
+                        container.innerHTML = `
+                            <div class="empty-state">
+                                <div class="icon">👔</div>
+                                <p>هنوز نقشی برای شما تعریف نشده است</p>
+                                <p style="font-size: 13px; color: #95a5a6; margin-top: 8px;">
+                                    وقتی مدیر یک شرکت برای شما دسترسی تعریف کند، اینجا نمایش داده می‌شود
+                                </p>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    container.innerHTML = roles.map(role => `
+                        <div class="role-card" style="border-right-color: ${role.color};">
+                            <span class="role-status-badge ${role.is_active ? 'role-status-active' : 'role-status-inactive'}">
+                                ${role.is_active ? 'فعال' : 'غیرفعال'}
+                            </span>
+                            
+                            <div class="role-card-header">
+                                <div class="role-icon" style="background: ${role.color};">
+                                    ${role.icon}
+                                </div>
+                                <div class="role-info">
+                                    <h3>${role.role_name_fa}</h3>
+                                    <div class="role-db">
+                                        <span class="db-icon">🗄️</span>
+                                        <span>${role.company_name || role.database_name}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="role-card-body">
+                                <div class="role-detail">
+                                    <span class="detail-icon">📧</span>
+                                    <span>${role.odoo_login}</span>
+                                </div>
+                                <div class="role-detail">
+                                    <span class="detail-icon">📝</span>
+                                    <span>${role.description || 'بدون توضیحات'}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="role-card-actions">
+                                <button class="btn btn-login-role" onclick="loginWithRole(${role.id})" ${!role.is_active ? 'disabled' : ''}>
+                                    🚀 ورود به سیستم
+                                </button>
+                                <button class="btn btn-copy-credentials" onclick="copyRoleCredentials(${role.id}, '${role.odoo_login}', '${role.database_name}')">
+                                    📋
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading my roles:', error);
+            }
+        }
+        
+        // Login with role
+        async function loginWithRole(roleId) {
+            try {
+                const response = await fetch(`/api/roles/login/${roleId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Open Odoo login page in new tab
+                    const loginUrl = data.login_url;
+                    window.open(loginUrl, '_blank');
+                    
+                    // Show credentials toast
+                    showToast(`
+                        <strong>اطلاعات ورود (${data.role_name}):</strong><br>
+                        ایمیل: ${data.login}<br>
+                        رمز: ${data.password}
+                    `, 'info', 10000);
+                } else {
+                    alert('❌ خطا: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error getting login info:', error);
+                alert('❌ خطا در دریافت اطلاعات ورود');
+            }
+        }
+        
+        // Copy role credentials
+        async function copyRoleCredentials(roleId, login, dbName) {
+            try {
+                const response = await fetch(`/api/roles/login/${roleId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const text = `دیتابیس: ${dbName}\nایمیل: ${data.login}\nرمز عبور: ${data.password}\nلینک: ${data.login_url}`;
+                    await navigator.clipboard.writeText(text);
+                    showToast('✅ اطلاعات ورود کپی شد!', 'success');
+                }
+            } catch (error) {
+                console.error('Error copying credentials:', error);
+            }
+        }
+        
+        // Toggle role status
+        async function toggleRoleStatus(roleId, currentStatus) {
+            const action = currentStatus ? 'غیرفعال' : 'فعال';
+            if (!confirm(`آیا می‌خواهید این نقش را ${action} کنید؟`)) return;
+            
+            try {
+                const response = await fetch(`/api/roles/update/${roleId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ is_active: !currentStatus })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast(`✅ نقش ${action} شد`, 'success');
+                    loadAllRoles();
+                } else {
+                    alert('❌ خطا: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error toggling role status:', error);
+            }
+        }
+        
+        // Show toast notification
+        function showToast(message, type = 'info', duration = 5000) {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = message;
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+                color: white;
+                padding: 16px 24px;
+                border-radius: 12px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+                z-index: 999997;
+                animation: slideUp 0.3s ease-out;
+                max-width: 400px;
+                line-height: 1.5;
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideDown 0.3s ease-out';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+        
+        // =============== END ROLES MANAGEMENT ===============
+        
+        // Initialize Select2 for a specific element
+        function initializeSelect2ForElement(element) {
+            if (!element) return;
+            
+            // Check if jQuery and Select2 are loaded
+            if (typeof jQuery === 'undefined' || typeof jQuery.fn.select2 === 'undefined') {
+                console.warn('jQuery or Select2 not loaded yet');
+                return;
+            }
+            
+            // Destroy existing Select2 instance if any
+            if (jQuery(element).data('select2')) {
+                jQuery(element).select2('destroy');
+            }
+            
+            // Initialize with RTL support and search
+            jQuery(element).select2({
+                dir: 'rtl',
+                language: 'fa',
+                placeholder: 'جستجو کنید...',
+                allowClear: true,
+                width: '100%',
+                dropdownParent: jQuery(element).parent()
+            });
+        }
+        
+        // Initialize all Select2 dropdowns
+        function initializeAllSelect2() {
+            if (typeof jQuery === 'undefined') {
+                console.warn('jQuery not loaded yet');
+                return;
+            }
+            jQuery('.select2-dropdown').each(function() {
+                initializeSelect2ForElement(this);
+            });
+        }
+
+        // =============== TODO LIST MANAGEMENT ===============
+        
+        let todos = [];
+        let currentTodoFilter = 'all';
+        
+        // Load todos from localStorage
+        function loadTodos() {
+            const saved = localStorage.getItem('odoomaster_todos');
+            if (saved) {
+                todos = JSON.parse(saved);
+            } else {
+                // Add sample todos if empty
+                todos = [
+                    {
+                        id: Date.now(),
+                        text: "📚 خواندن راهنمای استراتژیک Todo",
+                        completed: false,
+                        priority: "high",
+                        category: "personal",
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: Date.now() + 1,
+                        text: "🚀 تست Todo List و آشنایی با ویژگی‌ها",
+                        completed: false,
+                        priority: "medium",
+                        category: "work",
+                        createdAt: new Date().toISOString()
+                    }
+                ];
+                saveTodos();
+            }
+        }
+        
+        // Save todos to localStorage
+        function saveTodos() {
+            localStorage.setItem('odoomaster_todos', JSON.stringify(todos));
+        }
+        
+        // Add new todo
+        function addTodo() {
+            const input = document.getElementById('todoInput');
+            const text = input.value.trim();
+            
+            if (!text) {
+                showToast('لطفاً متن کار را وارد کنید', 'error');
+                return;
+            }
+            
+            const priority = document.getElementById('todoPriority').value;
+            const category = document.getElementById('todoCategory').value;
+            
+            const todo = {
+                id: Date.now(),
+                text: text,
+                completed: false,
+                priority: priority,
+                category: category,
+                createdAt: new Date().toISOString()
+            };
+            
+            todos.unshift(todo);
+            saveTodos();
+            renderTodos();
+            
+            input.value = '';
+            showToast('✅ کار جدید اضافه شد', 'success');
+        }
+        
+        // Toggle todo completion
+        function toggleTodo(id) {
+            const todo = todos.find(t => t.id === id);
+            if (todo) {
+                todo.completed = !todo.completed;
+                saveTodos();
+                renderTodos();
+                
+                if (todo.completed) {
+                    showToast('✅ کار انجام شد!', 'success');
+                }
+            }
+        }
+        
+        // Delete todo
+        function deleteTodo(id) {
+            if (confirm('آیا از حذف این کار مطمئن هستید؟')) {
+                todos = todos.filter(t => t.id !== id);
+                saveTodos();
+                renderTodos();
+                showToast('🗑️ کار حذف شد', 'info');
+            }
+        }
+        
+        // Filter todos
+        function filterTodos(filter, button) {
+            currentTodoFilter = filter;
+            
+            // Update tab styles
+            document.querySelectorAll('.todo-tab').forEach(tab => {
+                tab.style.background = 'transparent';
+                tab.style.color = '#57606a';
+            });
+            button.style.background = '#0969da';
+            button.style.color = 'white';
+            
+            renderTodos();
+        }
+        
+        // Get filtered todos
+        function getFilteredTodos() {
+            switch (currentTodoFilter) {
+                case 'active':
+                    return todos.filter(t => !t.completed);
+                case 'completed':
+                    return todos.filter(t => t.completed);
+                default:
+                    return todos;
+            }
+        }
+        
+        // Clear completed todos
+        function clearCompletedTodos() {
+            const completedCount = todos.filter(t => t.completed).length;
+            if (completedCount === 0) {
+                showToast('کار انجام‌شده‌ای وجود ندارد', 'info');
+                return;
+            }
+            
+            if (confirm(`${completedCount} کار انجام‌شده حذف شود؟`)) {
+                todos = todos.filter(t => !t.completed);
+                saveTodos();
+                renderTodos();
+                showToast('✅ کارهای انجام‌شده پاک شدند', 'success');
+            }
+        }
+        
+        // Sort todos
+        function sortTodos() {
+            const priorityOrder = { high: 0, medium: 1, low: 2 };
+            todos.sort((a, b) => {
+                if (a.completed !== b.completed) {
+                    return a.completed ? 1 : -1;
+                }
+                const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
+                if (priorityDiff !== 0) return priorityDiff;
+                return new Date(b.createdAt) - new Date(a.createdAt);
+            });
+            saveTodos();
+            renderTodos();
+            showToast('📊 کارها مرتب شدند', 'info');
+        }
+        
+        // Get time ago
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diff = now - new Date(date);
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+            
+            if (minutes < 1) return 'همین الان';
+            if (minutes < 60) return `${minutes} دقیقه پیش`;
+            if (hours < 24) return `${hours} ساعت پیش`;
+            if (days === 1) return 'دیروز';
+            if (days < 30) return `${days} روز پیش`;
+            return new Date(date).toLocaleDateString('fa-IR');
+        }
+        
+        // Render todos
+        function renderTodos() {
+            const todoList = document.getElementById('todoList');
+            const filteredTodos = getFilteredTodos();
+            
+            // Update counts
+            const total = todos.length;
+            const completed = todos.filter(t => t.completed).length;
+            const active = total - completed;
+            
+            document.getElementById('todoTotalCount').textContent = total;
+            document.getElementById('todoCompletedCount').textContent = completed;
+            document.getElementById('countAll').textContent = total;
+            document.getElementById('countActive').textContent = active;
+            document.getElementById('countCompleted').textContent = completed;
+            
+            // Update progress
+            const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
+            document.getElementById('todoProgressFill').style.width = progress + '%';
+            document.getElementById('todoProgressText').textContent = `${progress}% تکمیل شده`;
+            
+            // Render todos
+            if (filteredTodos.length === 0) {
+                const emptyMessage = currentTodoFilter === 'completed' ? 'کار انجام‌شده‌ای وجود ندارد' : 
+                                     currentTodoFilter === 'active' ? 'کار فعالی وجود ندارد' : 
+                                     'هنوز کاری اضافه نکردید';
+                todoList.innerHTML = `
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; text-align: center;">
+                        <div style="font-size: 64px; color: #d0d7de; margin-bottom: 16px; opacity: 0.3;">📋</div>
+                        <p style="font-size: 18px; color: #57606a; margin-bottom: 8px;">${emptyMessage}</p>
+                        ${currentTodoFilter === 'all' ? '<span style="font-size: 14px; color: #8b949e;">اولین کار خود را اضافه کنید 🚀</span>' : ''}
+                    </div>
+                `;
+            } else {
+                todoList.innerHTML = filteredTodos.map(todo => createTodoHTML(todo)).join('');
+            }
+        }
+        
+        // Create todo HTML
+        function createTodoHTML(todo) {
+            const priorityLabels = {
+                low: '🟢 کم‌اهمیت',
+                medium: '🟡 متوسط',
+                high: '🔴 مهم'
+            };
+            
+            const categoryLabels = {
+                work: '💼 کاری',
+                personal: '👤 شخصی',
+                urgent: '⚡ فوری',
+                odoo: '🔧 اودو'
+            };
+            
+            const timeAgo = getTimeAgo(todo.createdAt);
+            
+            return `
+                <div style="display: flex; align-items: center; gap: 12px; padding: 16px; background: white; border: 1px solid #d0d7de; border-radius: 8px; margin-bottom: 12px; transition: all 0.3s ease; ${todo.completed ? 'opacity: 0.6;' : ''}">
+                    <div onclick="toggleTodo(${todo.id})" style="width: 24px; height: 24px; border: 2px solid ${todo.completed ? '#10b981' : '#d0d7de'}; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: ${todo.completed ? '#10b981' : 'transparent'}; transition: all 0.3s ease;">
+                        ${todo.completed ? '<span style="color: white;">✓</span>' : ''}
+                    </div>
+                    <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
+                        <div style="font-size: 16px; color: #24292f; ${todo.completed ? 'text-decoration: line-through; color: #8b949e;' : ''}">${escapeHtml(todo.text)}</div>
+                        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                            <span style="padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; background: rgba(16, 185, 129, 0.1); color: #059669;">${priorityLabels[todo.priority]}</span>
+                            <span style="padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; background: rgba(99, 102, 241, 0.1); color: #6366f1;">${categoryLabels[todo.category]}</span>
+                            <span style="font-size: 12px; color: #8b949e;">${timeAgo}</span>
+                        </div>
+                    </div>
+                    <button onclick="deleteTodo(${todo.id})" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 6px; color: #8b949e; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#ef4444'; this.style.borderColor='#ef4444'; this.style.color='white';" onmouseout="this.style.background='#f6f8fa'; this.style.borderColor='#d0d7de'; this.style.color='#8b949e';">
+                        🗑️
+                    </button>
+                </div>
+            `;
+        }
+        
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Initialize todos when dashboard loads
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                loadTodos();
+                renderTodos();
+            });
+        } else {
+            loadTodos();
+            renderTodos();
+        }
+        
+        // =============== END TODO LIST MANAGEMENT ===============
+
         // Initialize
         initDashboard();
-        loadAdminPhone(); // Load saved admin phone for SMS verification
+        loadAdminConfig(); // Load admin config from Liara env variables
+        loadMyRoles(); // Load user's roles
+        
+        // Initialize Select2 after page load
+        if (typeof jQuery !== 'undefined') {
+            jQuery(document).ready(function() {
+                initializeAllSelect2();
+            });
+        }
         
         // Handle direct section access after dashboard loads
         setTimeout(handleDirectSection, 100);
