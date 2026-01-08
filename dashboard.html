@@ -473,6 +473,94 @@
                     </div>
                 </div>
 
+                <!-- Professional Todo List -->
+                <div class="card glass todo-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-tasks"></i> <span>لیست کارها</span></h3>
+                        <div class="todo-header-stats">
+                            <button class="btn btn-ghost btn-sm" onclick="window.open('TODO_README.md', '_blank')" title="راهنمای کامل">
+                                <i class="fas fa-book"></i>
+                            </button>
+                            <span class="todo-stat">
+                                <i class="fas fa-check-circle"></i>
+                                <span id="todoCompletedCount">0</span>/<span id="todoTotalCount">0</span>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Todo Progress -->
+                    <div class="todo-progress-container">
+                        <div class="todo-progress-bar">
+                            <div class="todo-progress-fill" id="todoProgressFill" style="width: 0%"></div>
+                        </div>
+                        <span class="todo-progress-text" id="todoProgressText">0% تکمیل شده</span>
+                    </div>
+
+                    <!-- Add New Todo Form -->
+                    <div class="todo-add-form">
+                        <div class="todo-input-group">
+                            <input type="text" 
+                                   id="todoInput" 
+                                   class="todo-input" 
+                                   placeholder="کار جدید اضافه کنید..."
+                                   maxlength="200">
+                            <button class="btn btn-primary btn-icon" id="addTodoBtn" title="افزودن">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div class="todo-options">
+                            <select id="todoPriority" class="todo-select">
+                                <option value="low">🟢 کم‌اهمیت</option>
+                                <option value="medium" selected>🟡 متوسط</option>
+                                <option value="high">🔴 مهم</option>
+                            </select>
+                            <select id="todoCategory" class="todo-select">
+                                <option value="work">💼 کاری</option>
+                                <option value="personal">👤 شخصی</option>
+                                <option value="urgent">⚡ فوری</option>
+                                <option value="odoo">🔧 اودو</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Todo Filter Tabs -->
+                    <div class="todo-filter-tabs">
+                        <button class="todo-tab active" data-filter="all">
+                            <i class="fas fa-list"></i>
+                            همه (<span id="countAll">0</span>)
+                        </button>
+                        <button class="todo-tab" data-filter="active">
+                            <i class="fas fa-clock"></i>
+                            فعال (<span id="countActive">0</span>)
+                        </button>
+                        <button class="todo-tab" data-filter="completed">
+                            <i class="fas fa-check-double"></i>
+                            انجام‌شده (<span id="countCompleted">0</span>)
+                        </button>
+                    </div>
+
+                    <!-- Todo List -->
+                    <div class="todo-list" id="todoList">
+                        <div class="todo-empty-state">
+                            <i class="fas fa-clipboard-list"></i>
+                            <p>هنوز کاری اضافه نکردید</p>
+                            <span>اولین کار خود را اضافه کنید 🚀</span>
+                        </div>
+                    </div>
+
+                    <!-- Todo Footer Actions -->
+                    <div class="todo-footer">
+                        <button class="btn btn-ghost btn-sm" id="clearCompletedBtn">
+                            <i class="fas fa-trash-alt"></i>
+                            <span>پاک کردن انجام‌شده‌ها</span>
+                        </button>
+                        <button class="btn btn-ghost btn-sm" id="sortTodosBtn">
+                            <i class="fas fa-sort"></i>
+                            <span>مرتب‌سازی</span>
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Recent Activity -->
                 <div class="card glass activity-card">
                     <div class="card-header">
@@ -1719,6 +1807,349 @@
                     openGuideModal();
                 }
             });
+
+            // ============================================
+            // Professional Todo List Manager
+            // ============================================
+            
+            const TodoManager = {
+                todos: [],
+                currentFilter: 'all',
+                
+                init() {
+                    this.loadTodos();
+                    this.addSampleTodosIfEmpty();
+                    this.bindEvents();
+                    this.render();
+                },
+                
+                addSampleTodosIfEmpty() {
+                    // اگر لیست خالی است، نمونه‌های پیشنهادی اضافه کن
+                    if (this.todos.length === 0) {
+                        const sampleTodos = [
+                            {
+                                id: Date.now(),
+                                text: "📚 خواندن راهنمای استراتژیک Todo (TODO_STRATEGY_GUIDE.md)",
+                                completed: false,
+                                priority: "high",
+                                category: "personal",
+                                createdAt: new Date().toISOString()
+                            },
+                            {
+                                id: Date.now() + 1,
+                                text: "🚀 نصب اودو و فعال‌سازی ماژول Project",
+                                completed: false,
+                                priority: "medium",
+                                category: "odoo",
+                                createdAt: new Date().toISOString()
+                            },
+                            {
+                                id: Date.now() + 2,
+                                text: "🌐 بررسی ماژول Website اودو برای یکپارچه‌سازی",
+                                completed: false,
+                                priority: "medium",
+                                category: "work",
+                                createdAt: new Date().toISOString()
+                            },
+                            {
+                                id: Date.now() + 3,
+                                text: "✅ تست کردن این Todo List و آشنایی با ویژگی‌ها",
+                                completed: false,
+                                priority: "low",
+                                category: "personal",
+                                createdAt: new Date().toISOString()
+                            }
+                        ];
+                        this.todos = sampleTodos;
+                        this.saveTodos();
+                    }
+                },
+                
+                loadTodos() {
+                    const saved = localStorage.getItem('odoomaster_todos');
+                    if (saved) {
+                        this.todos = JSON.parse(saved);
+                    }
+                },
+                
+                saveTodos() {
+                    localStorage.setItem('odoomaster_todos', JSON.stringify(this.todos));
+                },
+                
+                bindEvents() {
+                    // Add todo
+                    const addBtn = document.getElementById('addTodoBtn');
+                    const todoInput = document.getElementById('todoInput');
+                    
+                    addBtn?.addEventListener('click', () => this.addTodo());
+                    todoInput?.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') this.addTodo();
+                    });
+                    
+                    // Filter tabs
+                    document.querySelectorAll('.todo-tab').forEach(tab => {
+                        tab.addEventListener('click', (e) => {
+                            document.querySelectorAll('.todo-tab').forEach(t => t.classList.remove('active'));
+                            tab.classList.add('active');
+                            this.currentFilter = tab.dataset.filter;
+                            this.render();
+                        });
+                    });
+                    
+                    // Clear completed
+                    document.getElementById('clearCompletedBtn')?.addEventListener('click', () => {
+                        this.clearCompleted();
+                    });
+                    
+                    // Sort todos
+                    document.getElementById('sortTodosBtn')?.addEventListener('click', () => {
+                        this.sortTodos();
+                    });
+                },
+                
+                addTodo() {
+                    const input = document.getElementById('todoInput');
+                    const text = input.value.trim();
+                    
+                    if (!text) {
+                        this.showNotification('لطفاً متن کار را وارد کنید', 'warning');
+                        return;
+                    }
+                    
+                    const priority = document.getElementById('todoPriority').value;
+                    const category = document.getElementById('todoCategory').value;
+                    
+                    const todo = {
+                        id: Date.now(),
+                        text: text,
+                        completed: false,
+                        priority: priority,
+                        category: category,
+                        createdAt: new Date().toISOString()
+                    };
+                    
+                    this.todos.unshift(todo);
+                    this.saveTodos();
+                    this.render();
+                    
+                    input.value = '';
+                    this.showNotification('✅ کار جدید اضافه شد', 'success');
+                },
+                
+                toggleTodo(id) {
+                    const todo = this.todos.find(t => t.id === id);
+                    if (todo) {
+                        todo.completed = !todo.completed;
+                        this.saveTodos();
+                        this.render();
+                        
+                        if (todo.completed) {
+                            this.showNotification('✅ کار انجام شد!', 'success');
+                        }
+                    }
+                },
+                
+                deleteTodo(id) {
+                    if (confirm('آیا از حذف این کار مطمئن هستید؟')) {
+                        this.todos = this.todos.filter(t => t.id !== id);
+                        this.saveTodos();
+                        this.render();
+                        this.showNotification('🗑️ کار حذف شد', 'info');
+                    }
+                },
+                
+                clearCompleted() {
+                    const completedCount = this.todos.filter(t => t.completed).length;
+                    if (completedCount === 0) {
+                        this.showNotification('کار انجام‌شده‌ای وجود ندارد', 'info');
+                        return;
+                    }
+                    
+                    if (confirm(`${completedCount} کار انجام‌شده حذف شود؟`)) {
+                        this.todos = this.todos.filter(t => !t.completed);
+                        this.saveTodos();
+                        this.render();
+                        this.showNotification('✅ کارهای انجام‌شده پاک شدند', 'success');
+                    }
+                },
+                
+                sortTodos() {
+                    // Sort by priority (high > medium > low) and then by date
+                    const priorityOrder = { high: 0, medium: 1, low: 2 };
+                    this.todos.sort((a, b) => {
+                        if (a.completed !== b.completed) {
+                            return a.completed ? 1 : -1;
+                        }
+                        const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
+                        if (priorityDiff !== 0) return priorityDiff;
+                        return new Date(b.createdAt) - new Date(a.createdAt);
+                    });
+                    this.saveTodos();
+                    this.render();
+                    this.showNotification('📊 کارها مرتب شدند', 'info');
+                },
+                
+                getFilteredTodos() {
+                    switch (this.currentFilter) {
+                        case 'active':
+                            return this.todos.filter(t => !t.completed);
+                        case 'completed':
+                            return this.todos.filter(t => t.completed);
+                        default:
+                            return this.todos;
+                    }
+                },
+                
+                render() {
+                    const todoList = document.getElementById('todoList');
+                    const filteredTodos = this.getFilteredTodos();
+                    
+                    // Update counts
+                    const total = this.todos.length;
+                    const completed = this.todos.filter(t => t.completed).length;
+                    const active = total - completed;
+                    
+                    document.getElementById('todoTotalCount').textContent = total;
+                    document.getElementById('todoCompletedCount').textContent = completed;
+                    document.getElementById('countAll').textContent = total;
+                    document.getElementById('countActive').textContent = active;
+                    document.getElementById('countCompleted').textContent = completed;
+                    
+                    // Update progress
+                    const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
+                    document.getElementById('todoProgressFill').style.width = progress + '%';
+                    document.getElementById('todoProgressText').textContent = `${progress}% تکمیل شده`;
+                    
+                    // Render todos
+                    if (filteredTodos.length === 0) {
+                        todoList.innerHTML = `
+                            <div class="todo-empty-state">
+                                <i class="fas fa-clipboard-list"></i>
+                                <p>${this.currentFilter === 'completed' ? 'کار انجام‌شده‌ای وجود ندارد' : 
+                                     this.currentFilter === 'active' ? 'کار فعالی وجود ندارد' : 
+                                     'هنوز کاری اضافه نکردید'}</p>
+                                <span>${this.currentFilter === 'all' ? 'اولین کار خود را اضافه کنید 🚀' : ''}</span>
+                            </div>
+                        `;
+                    } else {
+                        todoList.innerHTML = filteredTodos.map(todo => this.createTodoHTML(todo)).join('');
+                        
+                        // Bind events for each todo
+                        filteredTodos.forEach(todo => {
+                            const checkbox = document.querySelector(`[data-todo-id="${todo.id}"] .todo-checkbox`);
+                            const deleteBtn = document.querySelector(`[data-todo-id="${todo.id}"] .todo-action-btn.delete`);
+                            
+                            checkbox?.addEventListener('click', () => this.toggleTodo(todo.id));
+                            deleteBtn?.addEventListener('click', () => this.deleteTodo(todo.id));
+                        });
+                    }
+                },
+                
+                createTodoHTML(todo) {
+                    const priorityLabels = {
+                        low: '🟢 کم‌اهمیت',
+                        medium: '🟡 متوسط',
+                        high: '🔴 مهم'
+                    };
+                    
+                    const categoryLabels = {
+                        work: '💼 کاری',
+                        personal: '👤 شخصی',
+                        urgent: '⚡ فوری',
+                        odoo: '🔧 اودو'
+                    };
+                    
+                    const date = new Date(todo.createdAt);
+                    const timeAgo = this.getTimeAgo(date);
+                    
+                    return `
+                        <div class="todo-item ${todo.completed ? 'completed' : ''}" data-todo-id="${todo.id}">
+                            <div class="todo-checkbox ${todo.completed ? 'checked' : ''}">
+                                ${todo.completed ? '<i class="fas fa-check"></i>' : ''}
+                            </div>
+                            <div class="todo-content">
+                                <div class="todo-text">${this.escapeHtml(todo.text)}</div>
+                                <div class="todo-meta">
+                                    <span class="todo-priority ${todo.priority}">${priorityLabels[todo.priority]}</span>
+                                    <span class="todo-category">${categoryLabels[todo.category]}</span>
+                                    <span class="todo-timestamp">${timeAgo}</span>
+                                </div>
+                            </div>
+                            <div class="todo-actions">
+                                <button class="todo-action-btn delete" title="حذف">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                },
+                
+                getTimeAgo(date) {
+                    const now = new Date();
+                    const diff = now - date;
+                    const minutes = Math.floor(diff / 60000);
+                    const hours = Math.floor(diff / 3600000);
+                    const days = Math.floor(diff / 86400000);
+                    
+                    if (minutes < 1) return 'همین الان';
+                    if (minutes < 60) return `${minutes} دقیقه پیش`;
+                    if (hours < 24) return `${hours} ساعت پیش`;
+                    if (days === 1) return 'دیروز';
+                    if (days < 30) return `${days} روز پیش`;
+                    return date.toLocaleDateString('fa-IR');
+                },
+                
+                escapeHtml(text) {
+                    const div = document.createElement('div');
+                    div.textContent = text;
+                    return div.innerHTML;
+                },
+                
+                showNotification(message, type = 'info') {
+                    // Create notification element
+                    const notif = document.createElement('div');
+                    notif.className = `todo-notification ${type}`;
+                    notif.textContent = message;
+                    notif.style.cssText = `
+                        position: fixed;
+                        top: 80px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        background: var(--glass-bg);
+                        border: 1px solid var(--glass-border);
+                        padding: 12px 24px;
+                        border-radius: 12px;
+                        backdrop-filter: blur(10px);
+                        z-index: 10000;
+                        animation: slideDown 0.3s ease;
+                        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+                    `;
+                    
+                    document.body.appendChild(notif);
+                    
+                    setTimeout(() => {
+                        notif.style.animation = 'slideUp 0.3s ease';
+                        setTimeout(() => notif.remove(), 300);
+                    }, 2500);
+                }
+            };
+            
+            // Initialize Todo Manager
+            TodoManager.init();
+            
+            // Add animations
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideDown {
+                    from { opacity: 0; transform: translate(-50%, -20px); }
+                    to { opacity: 1; transform: translate(-50%, 0); }
+                }
+                @keyframes slideUp {
+                    from { opacity: 1; transform: translate(-50%, 0); }
+                    to { opacity: 0; transform: translate(-50%, -20px); }
+                }
+            `;
+            document.head.appendChild(style);
         });
     </script>
     <script src="website/js/unified-nav.js"></script>
